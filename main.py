@@ -1,6 +1,35 @@
-import curses
+import os
+import json
 import copy
+import curses
 from datetime import datetime
+
+home_dir = os.path.expanduser("~")
+config_dir = os.path.join(home_dir, ".todoism")
+os.makedirs(config_dir, exist_ok=True)
+tasks_file_path = os.path.join(config_dir, "tasks.json")
+
+def load_tasks():
+    try:
+        with open(tasks_file_path, 'r') as file:
+            tasks = json.load(file)
+    except FileNotFoundError:
+        tasks = []
+    return tasks
+
+def add_new_task(task_description):
+    new_task = {
+        'task': task_description,
+        'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
+        'status': False,
+        'flagged': False
+    }
+    tasks = load_tasks()
+    tasks.append(new_task)
+    # save the newly added task
+    with open(tasks_file_path, 'w') as file:
+        json.dump(tasks, file, indent=2)
+    return tasks
 
 def execute_command(command, todo_list, done_list, current_row, show_hidden):
     if command.startswith("add "):
@@ -35,16 +64,17 @@ def main(stdscr):
     stdscr.bkgd(' ', curses.COLOR_BLACK | curses.A_NORMAL)
 
     # Define the initial todo list
-    todo_list = [{'task': "Make a todo list cli with an interactive panel",
-                  'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
-                  'status': False,
-                  'flagged': False
-                  }, 
-                 {'task': "Get prepare for retake exams",
-                  'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
-                  'status': False,
-                  'flagged': False
-                  }]
+    todo_list = load_tasks()
+    # todo_list = [{'task': "Make a todo list cli with an interactive panel",
+    #               'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
+    #               'status': False,
+    #               'flagged': False
+    #               }, 
+    #              {'task': "Get prepare for retake exams",
+    #               'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
+    #               'status': False,
+    #               'flagged': False
+    #               }]
     done_list = []
     current_row = 0
     show_hidden = False
@@ -83,7 +113,8 @@ def main(stdscr):
             stdscr.refresh()
             new_task = stdscr.getstr().decode('utf-8')
             if new_task:
-                todo_list.append({'task': ' ' + new_task, 'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'status': False, 'flagged': False})
+                todo_list = add_new_task(new_task)
+                # todo_list.append({'task': ' ' + new_task, 'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'status': False, 'flagged': False})
             curses.curs_set(0)
             curses.noecho()
         elif key == ord("d"):
