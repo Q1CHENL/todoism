@@ -31,6 +31,11 @@ def add_new_task(task_description):
         json.dump(tasks, file, indent=2)
     return tasks
 
+def save_tasks(tasks):
+    with open(tasks_file_path, 'w') as file:
+        json.dump(tasks, file, indent=2)
+    
+
 def execute_command(command, todo_list, done_list, current_row, show_hidden):
     if command.startswith("add "):
         new_task = command[4:]
@@ -135,7 +140,8 @@ def main(stdscr):
             stdscr.move(current_row, len(todo_list[current_row]['task']) + 6)
             while True:
                 edit_key = stdscr.getch()
-                if edit_key == 10:
+                if edit_key == 10: # newline
+                    save_tasks(todo_list)
                     break
                 elif edit_key == curses.KEY_BACKSPACE or edit_key == 127:
                     todo_list[current_row]['task'] = todo_list[current_row]['task'][:-1]
