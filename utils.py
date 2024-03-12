@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 import copy
 
+description_length = 75
 home_dir = os.path.expanduser("~")
 config_dir = os.path.join(home_dir, ".todoism")
 os.makedirs(config_dir, exist_ok=True)
@@ -22,7 +23,7 @@ def purge(tasks, done_list):
     return remained, done_list
     
 def print_task(stdscr, task, y):
-    stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {y + 1}. {task['task'] + (75-len(task['task'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
+    stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {y + 1}. {task['description'] + (75-len(task['description'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
 
 def print_task_highlighted(stdscr, task, y):
     stdscr.attron(curses.color_pair(1))
@@ -37,13 +38,16 @@ def load_tasks():
         tasks = []
     return tasks
 
-def add_new_task(task_description):
-    new_task = {
-        'task': task_description,
+def create_new_task(task_description):
+    return {
+        'description': task_description,
         'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
         'status': False,
         'flagged': False
     }
+
+def add_new_task(task_description):
+    new_task = create_new_task(task_description)
     tasks = load_tasks()
     tasks.append(new_task)
     # save the newly added task
@@ -60,7 +64,7 @@ def execute_command(command, todo_list, done_list, current_row, show_hidden):
     if command.startswith("add "):
         new_task = command[4:]
         if new_task:
-            todo_list.append({'task': new_task, 'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'status': False})
+            todo_list.append({'description': new_task, 'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'status': False})
     elif command.startswith("done "):
         index_to_delete = int(command[7:]) - 1
         if 0 <= index_to_delete < len(todo_list):
@@ -72,5 +76,9 @@ def execute_command(command, todo_list, done_list, current_row, show_hidden):
         todo_list, done_list = purge(todo_list, done_list)
         save_tasks(todo_list)
         current_row = 0
+    elif command == "sort":
+        pass
+    elif command == "group":
+        pass
             
     return todo_list, done_list, current_row, show_hidden

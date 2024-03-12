@@ -1,5 +1,3 @@
-import os
-import json
 import copy
 import curses
 from datetime import datetime
@@ -60,7 +58,34 @@ def main(stdscr):
             # Add a new task
             stdscr.addstr(len(todo_list), 3, f"{len(todo_list) + 1}.")
             stdscr.refresh()
-            new_task = stdscr.getstr().decode('utf-8')
+            # new_task = stdscr.getstr().decode('utf-8')
+            
+            new_task = ""
+            while True:
+                y, x = stdscr.getyx()
+                ch = stdscr.getch()
+                if ch == 32: # ESC to quit creating new task
+                    new_task = ""
+                    break
+                elif ch == 10: # Enter to complete
+                    break
+                elif ch == curses.KEY_LEFT:
+                    stdscr.move(y, 6 if x <= 6 else x - 1) # cursor remains still
+                elif ch == curses.KEY_RIGHT:
+                    stdscr.move(y, x + 1 if x < 6 + len(new_task) else 6 + len(new_task))
+                elif ch == curses.KEY_BACKSPACE or ch == 127:
+                    if x <= 6:
+                        stdscr.move(y, 6) # cursor remains still
+                        continue
+                    # -1 because i am deleting the char before the cursor
+                    new_task = new_task[:x-6-1] + new_task[x-6:]
+                    print_task(stdscr, create_new_task(new_task), y)
+                    stdscr.move(y, x-1)
+                elif 32 <= ch < 127:
+                    new_task = new_task[:x-6] + chr(ch) + new_task[x-6:]
+                    print_task(stdscr, create_new_task(new_task), y)
+                    stdscr.move(y, x + 1)        
+                                
             if new_task:
                 todo_list = add_new_task(new_task)
             curses.curs_set(0)
@@ -87,7 +112,7 @@ def main(stdscr):
         elif key == ord('e'):
             curses.echo()
             curses.curs_set(1)
-            stdscr.move(current_row, len(todo_list[current_row]['task']) + 6)
+            stdscr.move(current_row, len(todo_list[current_row]['description']) + 6)
             while True:
                 y, x = stdscr.getyx()
                 edit_key = stdscr.getch()
@@ -99,18 +124,18 @@ def main(stdscr):
                         stdscr.move(current_row, 6) # cursor remains still
                         continue
                     # -1 because i am deleting the char before the cursor
-                    todo_list[current_row]['task'] = todo_list[current_row]['task'][:x-6-1] + todo_list[current_row]['task'][x-6:]
+                    todo_list[current_row]['description'] = todo_list[current_row]['description'][:x-6-1] + todo_list[current_row]['description'][x-6:]
                     print_task_highlighted(stdscr, todo_list[current_row], current_row)
                     stdscr.move(current_row, x-1)
                 elif 32 <= edit_key < 127:
-                    todo_list[current_row]['task'] = todo_list[current_row]['task'][:x-6] + chr(edit_key) + todo_list[current_row]['task'][x-6:]
+                    todo_list[current_row]['description'] = todo_list[current_row]['description'][:x-6] + chr(edit_key) + todo_list[current_row]['description'][x-6:]
                     print_task_highlighted(stdscr, todo_list[current_row], current_row)
                     # stdscr.addch(edit_key)
                     stdscr.move(current_row, x + 1)        
                 elif edit_key == curses.KEY_LEFT:
                     stdscr.move(current_row, 6 if x <= 6 else x - 1) # cursor remains still
                 elif edit_key == curses.KEY_RIGHT:
-                    stdscr.move(current_row, x + 1 if x < 6 + len(todo_list[current_row]['task']) else 6 + len(todo_list[current_row]['task']))
+                    stdscr.move(current_row, x + 1 if x < 6 + len(todo_list[current_row]['description']) else 6 + len(todo_list[current_row]['description']))
                     
             curses.curs_set(0)
             curses.noecho()        
