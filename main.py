@@ -3,53 +3,7 @@ import json
 import copy
 import curses
 from datetime import datetime
-
-home_dir = os.path.expanduser("~")
-config_dir = os.path.join(home_dir, ".todoism")
-os.makedirs(config_dir, exist_ok=True)
-tasks_file_path = os.path.join(config_dir, "tasks.json")
-
-def load_tasks():
-    try:
-        with open(tasks_file_path, 'r') as file:
-            tasks = json.load(file)
-    except FileNotFoundError:
-        tasks = []
-    return tasks
-
-def add_new_task(task_description):
-    new_task = {
-        'task': task_description,
-        'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
-        'status': False,
-        'flagged': False
-    }
-    tasks = load_tasks()
-    tasks.append(new_task)
-    # save the newly added task
-    with open(tasks_file_path, 'w') as file:
-        json.dump(tasks, file, indent=2)
-    return tasks
-
-def save_tasks(tasks):
-    with open(tasks_file_path, 'w') as file:
-        json.dump(tasks, file, indent=2)
-    
-
-def execute_command(command, todo_list, done_list, current_row, show_hidden):
-    if command.startswith("add "):
-        new_task = command[4:]
-        if new_task:
-            todo_list.append({'task': new_task, 'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'status': False})
-    elif command.startswith("delete "):
-        index_to_delete = int(command[7:]) - 1
-        if 0 <= index_to_delete < len(todo_list):
-            done_list.append(copy.copy(todo_list[index_to_delete]))
-            todo_list[index_to_delete]['status'] = not todo_list[index_to_delete]['status']
-    elif command == "toggle_hidden":
-        show_hidden = not show_hidden
-
-    return todo_list, done_list, show_hidden
+from utils import *
 
 def main(stdscr):
     print(datetime.now())
@@ -70,16 +24,6 @@ def main(stdscr):
 
     # Define the initial todo list
     todo_list = load_tasks()
-    # todo_list = [{'task': "Make a todo list cli with an interactive panel",
-    #               'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
-    #               'status': False,
-    #               'flagged': False
-    #               }, 
-    #              {'task': "Get prepare for retake exams",
-    #               'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
-    #               'status': False,
-    #               'flagged': False
-    #               }]
     done_list = []
     current_row = 0
     show_hidden = False
@@ -91,10 +35,10 @@ def main(stdscr):
         for i, task in enumerate(todo_list):
             if i == current_row:
                 stdscr.attron(curses.color_pair(1))
-                stdscr.addstr(i, 0, f"{'✅' if task['status'] else '  '} {i + 1}. {task['task'] + (75-len(task['task'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}")
+                print_task(stdscr, task, i)
                 stdscr.attroff(curses.color_pair(1))
             else:
-                stdscr.addstr(i, 0, f"{'✅' if task['status'] else '  '} {i + 1}. {task['task'] + (75-len(task['task'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
+                print_task(stdscr, task, i)
         if show_hidden:
             stdscr.addstr(len(todo_list) + 1, 0, "Completed Tasks:")
             for i, task in enumerate(done_list):
@@ -114,12 +58,11 @@ def main(stdscr):
             curses.echo()
             curses.curs_set(1)
             # Add a new task
-            stdscr.addstr(len(todo_list), 0, f"{len(todo_list) + 1}.")
+            stdscr.addstr(len(todo_list), 3, f"{len(todo_list) + 1}.")
             stdscr.refresh()
             new_task = stdscr.getstr().decode('utf-8')
             if new_task:
                 todo_list = add_new_task(new_task)
-                # todo_list.append({'task': ' ' + new_task, 'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'status': False, 'flagged': False})
             curses.curs_set(0)
             curses.noecho()
         elif key == ord("d"):
@@ -134,23 +77,41 @@ def main(stdscr):
             show_hidden = not show_hidden
         elif key == ord('f'):
             todo_list[current_row]['flagged'] = not todo_list[current_row]['flagged'] 
+        elif key == curses.KEY_BACKSPACE or key == 127:
+            k = stdscr.getch() 
+            if k == curses.KEY_BACKSPACE or k == 127:
+                # delete the current task
+                todo_list = [t for i, t in enumerate(todo_list) if i is not current_row]
+                save_tasks(todo_list)
+                current_row = current_row - 1 if current_row > 0 else 0    
         elif key == ord('e'):
             curses.echo()
             curses.curs_set(1)
             stdscr.move(current_row, len(todo_list[current_row]['task']) + 6)
             while True:
+                y, x = stdscr.getyx()
                 edit_key = stdscr.getch()
-                if edit_key == 10: # newline
+                if edit_key == 10: #  newline
                     save_tasks(todo_list)
                     break
                 elif edit_key == curses.KEY_BACKSPACE or edit_key == 127:
-                    todo_list[current_row]['task'] = todo_list[current_row]['task'][:-1]
-                    stdscr.delch()
-                    stdscr.move(current_row, len(todo_list[current_row]['task']) + 6)
+                    if x <= 6:
+                        stdscr.move(current_row, 6) # cursor remains still
+                        continue
+                    # -1 because i am deleting the char before the cursor
+                    todo_list[current_row]['task'] = todo_list[current_row]['task'][:x-6-1] + todo_list[current_row]['task'][x-6:]
+                    print_task_highlighted(stdscr, todo_list[current_row], current_row)
+                    stdscr.move(current_row, x-1)
                 elif 32 <= edit_key < 127:
-                    todo_list[current_row]['task'] = todo_list[current_row]['task'] + chr(edit_key)
+                    todo_list[current_row]['task'] = todo_list[current_row]['task'][:x-6] + chr(edit_key) + todo_list[current_row]['task'][x-6:]
+                    print_task_highlighted(stdscr, todo_list[current_row], current_row)
                     # stdscr.addch(edit_key)
-                    stdscr.move(current_row, len(todo_list[current_row]['task']) + 6)        
+                    stdscr.move(current_row, x + 1)        
+                elif edit_key == curses.KEY_LEFT:
+                    stdscr.move(current_row, 6 if x <= 6 else x - 1) # cursor remains still
+                elif edit_key == curses.KEY_RIGHT:
+                    stdscr.move(current_row, x + 1 if x < 6 + len(todo_list[current_row]['task']) else 6 + len(todo_list[current_row]['task']))
+                    
             curses.curs_set(0)
             curses.noecho()        
             
@@ -162,7 +123,7 @@ def main(stdscr):
             command_line = stdscr.getstr().decode('utf-8')
             curses.curs_set(0)
             curses.noecho()
-            todo_list, done_list, show_hidden = execute_command(command_line, todo_list, done_list, current_row, show_hidden)
+            todo_list, done_list, current_row, show_hidden = execute_command(command_line, todo_list, done_list, current_row, show_hidden)
             command_line = ""  # Clear the command line after executing the command
         elif key == ord("q"):
             break
