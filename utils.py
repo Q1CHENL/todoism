@@ -27,7 +27,7 @@ def purge(tasks, done_list):
     return remained, done_list
     
 def print_task(stdscr, task, y):
-    stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {y + 1}. {task['description'] + (75-len(task['description'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
+    stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {y + 1}. {task['description'] + (75 - len(task['description'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
 
 def print_task_highlighted(stdscr, task, y):
     stdscr.attron(curses.color_pair(1))
@@ -97,11 +97,8 @@ def edit(stdscr, task_description, mode):
     while True:
         y, x = stdscr.getyx()
         ch = stdscr.getch()
-        if ch == 32: # quit creating new task
-            # task_description = ""
-            # break
-            pass
-        elif ch == 10: # Enter to complete
+        # todo quit adding new task
+        if ch == 10: # Enter to complete
             break
         elif ch == curses.KEY_LEFT:
             stdscr.move(y, indent if x <= indent else x - 1) # cursor remains still

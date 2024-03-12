@@ -73,7 +73,7 @@ def main(stdscr):
             curses.echo()
             curses.curs_set(1)
             # Add a new task
-            stdscr.addstr(len(todo_list), 3, f"{len(todo_list) + 1}.")
+            stdscr.addstr(len(todo_list), 3, f"{len(todo_list) + 1}. ")
             stdscr.refresh()
             new_task = edit(stdscr, "", add_mode)      
             if new_task:
