@@ -15,6 +15,7 @@ home_dir = os.path.expanduser("~")
 config_dir = os.path.join(home_dir, ".todoism")
 os.makedirs(config_dir, exist_ok=True)
 tasks_file_path = os.path.join(config_dir, "tasks.json")
+purged_file_path = os.path.join(config_dir, "purged.json")
 test_file_path = os.path.join(config_dir, "test.json")
 
 help_msg =  '''
@@ -32,17 +33,24 @@ def print_help(stdscr):
     stdscr.addstr((height // 2) - 4, (width // 2) + 50, help_msg)
     stdscr.refresh()
 
-def purge(tasks, done_list):
+def purge(tasks, purged_list):
     """
     purge completed tasks
     """
+    # todo reid
     remained = []
     for t in tasks:
         if t['status'] is False:
             remained.append(t)
         else:
-            done_list.append(t)
-    return remained, done_list
+            purged_list.append(t)
+    reid(remained)
+    save_tasks(purged_list, purged_file_path)
+    return remained, []
+
+def reid(tasks):
+    for i, t in enumerate(tasks):
+        t['id'] = i + 1
     
 # The core function to print task
 def print_task(stdscr, task, y):
@@ -102,51 +110,53 @@ def create_new_task(task_id, task_description=""):
         'flagged': False
     }
 
-def save_tasks(tasks):
-    with open(tasks_file_path, 'w') as file:
-        json.dump(tasks, file, indent=2)
+def save_tasks(tasks, path):
+    with open(path, 'w') as file:
+        json.dump(tasks, file, indent=4)
 
 def add_new_task(tasks, task_id, task_description):
     new_task = create_new_task(task_id, task_description)
-    # tasks = load_tasks()
     tasks.append(new_task)
-    save_tasks(tasks)
+    save_tasks(tasks, tasks_file_path)
     return tasks
     
-def execute_command(stdscr, command, todo_list, done_list, current_id):
+def execute_command(stdscr, command, task_list, done_list, purged_list, current_id):
     if command.startswith("add "):
         new_task = command[4:]
         if new_task:
-            todo_list.append({'description': new_task, 'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'status': False})
+            task_list.append({'description': new_task, 'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'status': False})
     elif command.startswith("done "):
         index_to_delete = int(command[7:]) - 1
-        if 0 <= index_to_delete < len(todo_list):
-            done_list.append(copy.copy(todo_list[index_to_delete]))
-            todo_list[index_to_delete]['status'] = not todo_list[index_to_delete]['status']
+        if 0 <= index_to_delete < len(task_list):
+            done_list.append(copy.copy(task_list[index_to_delete]))
+            task_list[index_to_delete]['status'] = not task_list[index_to_delete]['status']
     elif command == "purge":
-        todo_list, done_list = purge(todo_list, done_list)
-        save_tasks(todo_list)
-        current_id = 0
+        original_cnt = len(task_list)
+        task_list, done_list = purge(task_list, purged_list)
+        save_tasks(task_list, tasks_file_path)
+        # change current id if some tasks were purged
+        if len(task_list) < original_cnt:
+            current_id = 1  
     elif command.startswith("sort "):
         category = command[5:]
         if category == "f":
             flagged_tasks = []
             not_flagged = []
-            for t in todo_list:
+            for t in task_list:
                 if t['flagged'] is True:
                     flagged_tasks.append(t)
                 else:
                     not_flagged.append(t)
-            todo_list = flagged_tasks + not_flagged
+            task_list = flagged_tasks + not_flagged
         elif category == 'd':
             done_tasks = []
             not_done = []
-            for t in todo_list:
+            for t in task_list:
                 if t['status'] == True:
                     done_tasks.append(t)
                 else:
                     not_done.append(t)
-            todo_list = not_done + done_tasks
+            task_list = not_done + done_tasks
     elif command == "group":
         pass
     elif command == "help":
@@ -154,9 +164,7 @@ def execute_command(stdscr, command, todo_list, done_list, current_id):
         key = stdscr.getch()
         if key == ord('q'):
             stdscr.clear()
-    elif command == "stat":
-        pass
-    return todo_list, done_list, current_id
+    return task_list, done_list, current_id
 
 def edit(stdscr, task, mode):
     """
