@@ -4,15 +4,31 @@ import copy
 import curses
 from datetime import datetime
 
-edit_mode = 0
-add_mode  = 1
+add_mode  = 0
+edit_mode = 1
 
 indent = 6
 description_length = 75
+
 home_dir = os.path.expanduser("~")
 config_dir = os.path.join(home_dir, ".todoism")
 os.makedirs(config_dir, exist_ok=True)
 tasks_file_path = os.path.join(config_dir, "tasks.json")
+
+help_msg =  '''
+                            ┌─────────────────────────────────────────────┐
+                            │              a: create new task             │
+                            │              q: quit todoism                │
+                            │              e: edit task"                  │
+                            │                                             │
+                            ├─────────────────────────────────────────────┤
+                            └─────────────────────────────────────────────┘
+            '''
+
+def print_help(stdscr):
+    height, width = stdscr.getmaxyx()
+    stdscr.addstr((height // 2) - 4, (width // 2) + 50, help_msg)
+    stdscr.refresh()
 
 def purge(tasks, done_list):
     """
@@ -27,7 +43,7 @@ def purge(tasks, done_list):
     return remained, done_list
     
 def print_task(stdscr, task, y):
-    stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {y + 1}. {task['description'] + (75 - len(task['description'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
+    stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {y}. {task['description'] + (75 - len(task['description'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
 
 def print_task_highlighted(stdscr, task, y):
     stdscr.attron(curses.color_pair(1))
@@ -36,9 +52,31 @@ def print_task_highlighted(stdscr, task, y):
 
 def print_task_mode(stdscr, task_description, y, mode):
     if mode == edit_mode:
-        print_task_highlighted(stdscr, create_new_task(task_description), y)
+        print_task_highlighted(stdscr, create_new_task(task_description, y), y)
     else:
-        print_task(stdscr, create_new_task(task_description), y)                
+        print_task(stdscr, create_new_task(task_description, y), y)  
+        
+def print_tasks(stdscr, tasks, current_row):
+    for i, task in enumerate(tasks):
+        if i + 1 == current_row:
+            print_task_highlighted(stdscr, task, i+1) # +1 due to status bar
+        else:
+            print_task(stdscr, task, i+1)
+
+def print_status_bar(stdscr, done_cnt, task_cnt):
+    status_bar = {
+        'tasks': f'{' '*35}Progress: {done_cnt}/{task_cnt} {int((done_cnt/task_cnt)*100) if task_cnt > 0 else 0}%',
+        'date': datetime.now().strftime("%Y-%m-%d %H:%M") 
+    }
+    stdscr.addstr(0, 0, f"{status_bar['tasks']} | {status_bar['date']}")
+    stdscr.refresh()
+
+def done_count(tasks):
+    count = 0
+    for t in tasks:
+        if t['status'] is True:
+            count = count + 1
+    return count        
             
 def load_tasks():
     try:
@@ -48,26 +86,27 @@ def load_tasks():
         tasks = []
     return tasks
 
-def create_new_task(task_description):
+def create_new_task(task_description, task_id):
     return {
+        'id': task_id,
         'description': task_description,
         'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
         'status': False,
         'flagged': False
     }
 
-def add_new_task(task_description):
-    new_task = create_new_task(task_description)
+def save_tasks(tasks):
+    with open(tasks_file_path, 'w') as file:
+        json.dump(tasks, file, indent=2)
+
+def add_new_task(task_description, task_id):
+    new_task = create_new_task(task_description, task_id)
     tasks = load_tasks()
     tasks.append(new_task)
     save_tasks(tasks)
     return tasks
-
-def save_tasks(tasks):
-    with open(tasks_file_path, 'w') as file:
-        json.dump(tasks, file, indent=2)
     
-def execute_command(command, todo_list, done_list, current_row, show_hidden):
+def execute_command(stdscr, command, todo_list, done_list, current_row):
     if command.startswith("add "):
         new_task = command[4:]
         if new_task:
@@ -77,17 +116,40 @@ def execute_command(command, todo_list, done_list, current_row, show_hidden):
         if 0 <= index_to_delete < len(todo_list):
             done_list.append(copy.copy(todo_list[index_to_delete]))
             todo_list[index_to_delete]['status'] = not todo_list[index_to_delete]['status']
-    elif command == "toggle_hidden":
-        show_hidden = not show_hidden
     elif command == "purge":
         todo_list, done_list = purge(todo_list, done_list)
         save_tasks(todo_list)
         current_row = 0
-    elif command == "sort":
-        pass
+    elif command.startswith("sort "):
+        category = command[5:]
+        if category == "f":
+            flagged_tasks = []
+            not_flagged = []
+            for t in todo_list:
+                if t['flagged'] is True:
+                    flagged_tasks.append(t)
+                else:
+                    not_flagged.append(t)
+            todo_list = flagged_tasks + not_flagged
+        elif category == 'd':
+            done_tasks = []
+            not_done = []
+            for t in todo_list:
+                if t['status'] == True:
+                    done_tasks.append(t)
+                else:
+                    not_done.append(t)
+            todo_list = not_done + done_tasks
     elif command == "group":
         pass
-    return todo_list, done_list, current_row, show_hidden
+    elif command == "help":
+        print_help(stdscr)
+        key = stdscr.getch()
+        if key == ord('q'):
+            stdscr.clear()
+    elif command == "stat":
+        pass
+    return todo_list, done_list, current_row
 
 def edit(stdscr, task_description, mode):
     """
