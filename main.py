@@ -2,12 +2,13 @@ import sys
 import test
 import curses
 from utils import *
-
 # import structure
 # print and task are imported in utils
 # utils is imported in main
 
 def main(stdscr):
+    global task_highlighting_color
+
     test.dump_test()
     arg = ''
     if len(sys.argv) > 1:
@@ -19,12 +20,11 @@ def main(stdscr):
     stdscr.refresh()
     # Initialize color pairs
     curses.start_color()
-    # Selected task highlighting
-    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_BLUE)
     # progress colors
     curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK) # regular color pair
     # Set up the screen
     curses.curs_set(0)
     stdscr.clear()
@@ -35,6 +35,7 @@ def main(stdscr):
     task_list = load_tasks(arg)
     done_list = [] # a  part of task list
     purged_list = []
+
     # task_cnt starts from 0
     # current_id and task_id start from 1
     current_id = 1
@@ -47,6 +48,9 @@ def main(stdscr):
     
     while True:
         stdscr.clear()
+        # Selected task highlighting
+        curses.init_pair(1, curses.COLOR_BLACK, task_highlighting_color)
+
         print_status_bar(stdscr, done_cnt, task_cnt)
         print_tasks(stdscr, task_list, current_id, start, end)
         stdscr.refresh()
@@ -72,7 +76,6 @@ def main(stdscr):
             # Add a new task
             new_task_description = edit(stdscr, create_new_task(task_cnt + 1), add_mode)               
             if new_task_description:
-                # tasks = load_tasks(arg)
                 new_id = task_cnt + 1
                 task_list = add_new_task(task_list, new_id, new_task_description)
                 task_cnt = task_cnt + 1
@@ -117,7 +120,7 @@ def main(stdscr):
             command_line = stdscr.getstr().decode('utf-8')
             curses.curs_set(0)
             curses.noecho()
-            task_list, done_list, current_id = execute_command(stdscr, command_line, task_list, done_list, purged_list, current_id)
+            task_list, done_list, current_id, task_highlighting_color = execute_command(stdscr, command_line, task_list, done_list, purged_list, current_id)
             command_line = ""  # Clear the command line after executing the command
         elif key == curses.KEY_UP and current_id > 1:
             current_id -= 1

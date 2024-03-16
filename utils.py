@@ -7,6 +7,7 @@ from print import *
 
 indent = 6
 description_length = 75
+task_highlighting_color = curses.COLOR_BLUE
 
 def reid(tasks):
     for i, t in enumerate(tasks):
@@ -27,6 +28,7 @@ def purge(tasks, purged_list):
     return remained, []
     
 def execute_command(stdscr, command, task_list, done_list, purged_list, current_id):
+    global task_highlighting_color
     if command.startswith("add "):
         new_task = command[4:]
         if new_task:
@@ -65,12 +67,24 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
             task_list = not_done + done_tasks
     elif command == "group":
         pass
+    elif command.startswith("setcolor "):
+        color = command[9:]
+        if color == "red":
+            task_highlighting_color = curses.COLOR_RED
+        elif color == "blue":
+            task_highlighting_color = curses.COLOR_BLUE
+        elif color == "yellow":
+            task_highlighting_color = curses.COLOR_YELLOW
+        elif color == "green":
+            task_highlighting_color = curses.COLOR_GREEN
     elif command == "help":
         print_help(stdscr)
         key = stdscr.getch()
         if key == ord('q'):
             stdscr.clear()
-    return task_list, done_list, current_id
+    # have to return task_highlighting_color, otherwise not accessible in main --> weird
+    return task_list, done_list, current_id, task_highlighting_color
+
 
 def edit(stdscr, task, mode):
     """

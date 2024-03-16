@@ -63,7 +63,11 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     elif percentage_num >= 33:
         color_pair = 3
     else:
-        color_pair = 4
+        if task_cnt == 0:
+            color_pair = 5
+        else:
+            color_pair = 4
+            
     stdscr.attron(curses.color_pair(color_pair))    
     stdscr.addstr(0, 0, f"{status_bar['tasks']}")
     stdscr.attroff(curses.color_pair(color_pair))
