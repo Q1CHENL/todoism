@@ -9,6 +9,12 @@ indent = 6
 description_length = 75
 task_highlighting_color = curses.COLOR_BLUE
 
+def get_arg(argv):
+    if len(argv) > 1:
+        return argv[1]
+    else:
+        return ""
+
 def reid(tasks):
     for i, t in enumerate(tasks):
         t['id'] = i + 1

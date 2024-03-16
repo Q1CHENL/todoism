@@ -8,11 +8,11 @@ from utils import *
 
 def main(stdscr):
     global task_highlighting_color
-
-    test.dump_test()
-    arg = ''
-    if len(sys.argv) > 1:
-        arg = sys.argv[1]
+    
+    # todo invalid args
+    arg = get_arg(sys.argv)
+    if arg == '-t':
+        test.dump_test()
     stdscr.scrollok(True)
     # curses.resizeterm(27, 100)
     curses.curs_set(1)
