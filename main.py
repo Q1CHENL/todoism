@@ -3,6 +3,9 @@ import test
 import curses
 from utils import *
 
+# import structure
+# print and task are imported in utils
+# utils is imported in main
 
 def main(stdscr):
     test.dump_test()
