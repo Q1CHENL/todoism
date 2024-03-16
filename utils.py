@@ -22,8 +22,11 @@ help_msg =  '''
                             ┌─────────────────────────────────────────────┐
                             │              a: create new task             │
                             │              q: quit todoism                │
-                            │              e: edit task"                  │
+                            │              e: edit task                   │
                             │                                             │
+                            │              :<command> [args]              │
+                            │              commands:                      │
+                            │              help, sort [f] [d], purge      │
                             ├─────────────────────────────────────────────┤
                             └─────────────────────────────────────────────┘
             '''
@@ -37,7 +40,6 @@ def purge(tasks, purged_list):
     """
     purge completed tasks
     """
-    # todo reid
     remained = []
     for t in tasks:
         if t['status'] is False:
@@ -79,11 +81,22 @@ def print_tasks(stdscr, tasks, current_id, start, end):
                 print_task(stdscr, task, i + 1)
 
 def print_status_bar(stdscr, done_cnt, task_cnt):
+    percentage_num = int((done_cnt / task_cnt) * 100) if task_cnt > 0 else 0
     status_bar = {
-        'tasks': f'{' '*35}Progress: {done_cnt}/{task_cnt} {int((done_cnt/task_cnt)*100) if task_cnt > 0 else 0}%',
+        'tasks': f'{' '*35}Progress: {done_cnt}/{task_cnt} {percentage_num if task_cnt > 0 else 0}%',
         'date': datetime.now().strftime("%Y-%m-%d %H:%M") 
     }
-    stdscr.addstr(0, 0, f"{status_bar['tasks']} | {status_bar['date']}")
+    color_pair = 0
+    if percentage_num >= 67:
+        color_pair = 2
+    elif percentage_num >= 33:
+        color_pair = 3
+    else:
+        color_pair = 4
+    stdscr.attron(curses.color_pair(color_pair))    
+    stdscr.addstr(0, 0, f"{status_bar['tasks']}")
+    stdscr.attroff(curses.color_pair(color_pair))
+    stdscr.addstr(f" | {status_bar['date']}")
     stdscr.refresh()
 
 def done_count(tasks):
@@ -174,7 +187,6 @@ def edit(stdscr, task, mode):
     while True:
         y, x = stdscr.getyx()
         ch = stdscr.getch()
-        # todo quit adding new task
         if ch == 10: # Enter to complete
             break
         elif ch == curses.KEY_LEFT:
@@ -193,5 +205,8 @@ def edit(stdscr, task, mode):
             task['description'] = task['description'][:x - indent] + chr(ch) + task['description'][x - indent:]
             print_task_mode(stdscr, task, y, mode)
             stdscr.move(y, x + 1)        
+        elif ch == 27 and mode == add_mode: # todo: too slow
+            return ""
     return task['description']
-    
+    # todo sound
+    # selected color
