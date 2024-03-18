@@ -1,11 +1,11 @@
 import copy
 import curses
 from datetime import datetime
-from task import *
-from print import *
+from .task import *
+from .print import *
 
 
-indent = 6
+indent = 7
 description_length = 75
 task_highlighting_color = curses.COLOR_BLUE
 
@@ -62,6 +62,7 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
                 else:
                     not_flagged.append(t)
             task_list = flagged_tasks + not_flagged
+            reid(task_list)
         elif category == 'd':
             done_tasks = []
             not_done = []
@@ -71,6 +72,7 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
                 else:
                     not_done.append(t)
             task_list = not_done + done_tasks
+            reid(task_list)
     elif command == "group":
         pass
     elif command.startswith("setcolor "):
@@ -107,7 +109,7 @@ def edit(stdscr, task, mode):
         elif ch == curses.KEY_RIGHT:
             stdscr.move(y, x + 1 if x < indent + len(task['description']) else indent + len(task['description']))
         elif ch == curses.KEY_BACKSPACE or ch == 127: # delete
-            if x <= 6:
+            if x <= 7:
                 stdscr.move(y, indent) # cursor remains still
                 continue
             # -1 because i am deleting the char before the cursor
@@ -122,4 +124,3 @@ def edit(stdscr, task, mode):
             return ""
     return task['description']
     # todo sound
-    # selected color

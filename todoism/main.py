@@ -1,20 +1,15 @@
-import sys
-import test
 import curses
-from utils import *
-# import structure
+from .utils import *
+# import structure:
 # print and task are imported in utils
 # utils is imported in main
 
-def main(stdscr):
+def main():
     global task_highlighting_color
-    
-    # todo invalid args
-    arg = get_arg(sys.argv)
-    if arg == '-t':
-        test.dump_test()
+    stdscr = curses.initscr()
+    stdscr.keypad(True) # enable e.g arrow keys
+    # todo save settings like color in a json file
     stdscr.scrollok(True)
-    # curses.resizeterm(27, 100)
     curses.curs_set(1)
     stdscr.clear()
     stdscr.refresh()
@@ -32,7 +27,7 @@ def main(stdscr):
     stdscr.bkgd(' ', curses.COLOR_BLACK | curses.A_NORMAL)
 
     # Define the initial todo list
-    task_list = load_tasks(arg)
+    task_list = load_tasks()
     done_list = [] # a  part of task list
     purged_list = []
 
@@ -70,7 +65,7 @@ def main(stdscr):
             stdscr.erase()
             print_status_bar(stdscr, done_cnt, task_cnt)
             print_tasks(stdscr, task_list, current_id, start, end)
-            stdscr.addstr(window_height - 1 if task_cnt >= window_height - 1 else task_cnt + 1, 3, f"{task_cnt + 1}. ")
+            stdscr.addstr(window_height - 1 if task_cnt >= window_height - 1 else task_cnt + 1, 3, f"{task_cnt + 1}.{' ' if task_cnt + 1 >= 10 else ' ' * 2}")
             stdscr.refresh()
             
             # Add a new task
@@ -96,9 +91,13 @@ def main(stdscr):
                 save_tasks(task_list, tasks_file_path)
         elif key == ord('e'):
             curses.echo()
-            curses.curs_set(1)            
+            curses.curs_set(1)
             stdscr.move(current_id if current_id <= window_height - 1 else window_height - 1, len(task_list[current_id - 1]['description']) + indent)
             task_list[current_id - 1]['description'] = edit(stdscr, task_list[current_id - 1], edit_mode)
+            # delete the task if it was edited to empty
+            if task_list[current_id - 1]['description'] == "":
+                del task_list[current_id - 1]
+                reid(task_list)
             save_tasks(task_list, tasks_file_path)
             curses.curs_set(0)
             curses.noecho()        
@@ -148,5 +147,4 @@ def main(stdscr):
         done_cnt = done_count(task_list)
 
 if __name__ == "__main__":
-    # Initialize curses
-    curses.wrapper(main)
+    main()
