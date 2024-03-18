@@ -50,7 +50,10 @@ def main():
         print_tasks(stdscr, task_list, current_id, start, end)
         stdscr.refresh()
         window_height = stdscr.getmaxyx()[0]
-
+        
+        # for restoring previous view if add interrupted
+        old_start = start
+        old_end = end
         # Wait for user input
         key = stdscr.getch()
         # Handle user input
@@ -70,7 +73,7 @@ def main():
             
             # Add a new task
             new_task_description = edit(stdscr, create_new_task(task_cnt + 1), add_mode)               
-            if new_task_description:
+            if new_task_description is not "":
                 new_id = task_cnt + 1
                 task_list = add_new_task(task_list, new_id, new_task_description)
                 task_cnt = task_cnt + 1
@@ -78,6 +81,9 @@ def main():
                 if task_cnt == 1:
                     start = 1
                 current_id = new_id # new id
+            else:
+                start = old_start
+                end = old_end
             print_tasks(stdscr, task_list, current_id, start, end)
             stdscr.refresh()  
             curses.curs_set(0)
@@ -98,6 +104,7 @@ def main():
             if task_list[current_id - 1]['description'] == "":
                 del task_list[current_id - 1]
                 reid(task_list)
+                current_id = current_id - 1
             save_tasks(task_list, tasks_file_path)
             curses.curs_set(0)
             curses.noecho()        
