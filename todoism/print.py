@@ -6,23 +6,41 @@ add_mode  = 0
 edit_mode = 1
 
 help_msg =  '''
-                            ┌─────────────────────────────────────────────┐
-                            │              a: create new task             │
-                            │              q: quit todoism                │
-                            │              e: edit task                   │
-                            │                                             │
-                            │              :<command> [args]              │
-                            │              commands:                      │
-                            │              help, sort [f] [d], purge      │
-                            ├─────────────────────────────────────────────┤
-                            └─────────────────────────────────────────────┘
+                         ┌──────────────────────────────────────────────────┐
+                         │                                                  │
+                         │   short commands:                                │
+                         │   a - create new task                            │
+                         │   d - mark task as done                          │
+                         │   e - edit task                                  │
+                         │   f - mark task as flagged                       │
+                         │   q - quit this help message/todoism             │
+                         │                                                  │
+                         │   vim-like long commands:                        │            
+                         │   (:<command> [args])                            │
+                         │   :help - show this help message                 │
+                         │   :purge - purge all done tasks                  │
+                         │   :sort f - sort flagged tasks to top            │
+                         │   :sort d - sort done tasks to bottom            │
+                         │   :autosort f on|off                             │
+                         │   :autosort d on|off                             │
+                         │   :setcolor blue|red|yellow|green                │
+                         │    - change background color of current task     │
+                         │                                                  │
+                         │   other key bindings:                            │
+                         │   double Backspace - delete task                 │
+                         │   ESC - quit adding/editing task                 │
+                         │   Enter - finish adding/editing task             │
+                         │   Up/Down Arrow Keys - navigate through tasks    │
+                         │                                                  │
+                         └──────────────────────────────────────────────────┘
             '''
-
 
 def print_help(stdscr):
     height, width = stdscr.getmaxyx()
-    stdscr.addstr((height // 2) - 4, (width // 2) + 50, help_msg)
+    stdscr.addstr(0, 0, help_msg)
     stdscr.refresh()
+    # (width // 2) + 50
+    # (height // 2) - 4
 
 # The core function to print task
 def print_task(stdscr, task, y):
