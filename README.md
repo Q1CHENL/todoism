@@ -8,7 +8,7 @@ An interactive and intuitive todo CLI
 2. sound
 3. esc to quit exit() too slow
 4. save settings
-5. fix adding new task leading to empty screen
+5. deleting all tasks from top in current window leads to weird view
 
 ## Install and use
 

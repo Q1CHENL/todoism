@@ -63,8 +63,6 @@ def main():
             if task_cnt >= window_height - 1:
                 start = task_cnt - (end - start - 1)
                 end = task_cnt
-            else:
-                end = end + 1
             stdscr.erase()
             print_status_bar(stdscr, done_cnt, task_cnt)
             print_tasks(stdscr, task_list, current_id, start, end)
