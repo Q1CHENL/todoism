@@ -14,11 +14,12 @@ An interactive and intuitive todo CLI
 - custom theme
 - set color random
 - wrap a setup func for e.g paths
-- update time regularly
+- update time regularly: seperate thread
 - add mouse support
 - command print overwriting
 - can not fully display help when window too small
 - ctl + shift to select multiple tasks to delete
+- seperate thread to monitor window size change
 
 ## Install and use
 

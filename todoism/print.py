@@ -46,14 +46,14 @@ def print_task(stdscr, task, y):
     if y < max_y:
         stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {' ' if task['id'] < 10 else ''}{task['id']}. {task['description'] + (75 - len(task['description'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
 
-def print_task_highlighted(stdscr, task, y):
+def print_task_selected(stdscr, task, y):
     stdscr.attron(curses.color_pair(1))
     print_task(stdscr, task, y)
     stdscr.attroff(curses.color_pair(1))        
 
 def print_task_mode(stdscr, task, y, mode):
     if mode == edit_mode:
-        print_task_highlighted(stdscr, task, y)
+        print_task_selected(stdscr, task, y)
     else:
         print_task(stdscr, task, y)  
         
@@ -61,17 +61,17 @@ def print_tasks(stdscr, task_list, current_id, start, end):
     if start > 0:
         for i, task in enumerate(task_list[start - 1:end + 1]):
             if i + start == current_id: # handle task overflow: +start
-                print_task_highlighted(stdscr, task, i + 1) # +1 due to status bar
+                print_task_selected(stdscr, task, i + 1) # +1 due to status bar
             else:
                 print_task(stdscr, task, i + 1)
 
 def print_status_bar(stdscr, done_cnt, task_cnt):
+    """Example: Progress: 16/69 23% | 2024-03-27 01:53"""
     percentage_num = int((done_cnt / task_cnt) * 100) if task_cnt > 0 else 0
     status_bar = {
         'tasks': f'{' '*35}Progress: {done_cnt}/{task_cnt} {percentage_num if task_cnt > 0 else 0}%',
         'date': datetime.now().strftime("%Y-%m-%d %H:%M") 
     }
-    
     color_pair = 0
     if percentage_num >= 67:
         color_pair = 2
