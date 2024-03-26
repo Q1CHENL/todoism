@@ -13,12 +13,12 @@ An interactive and intuitive todo CLI
 7. <ref=<https://www.reddit.com/r/learnpython/comments/162kjgj/a_satisfying_solution_to_avoid_circular>
 8. command: done xx, goto xx
 9. command: date ymd, dmy
-10. color pairs
-11. sidebar: categories!!!
-12. invalid command
-13. custom theme
-14. set color random
-15. wrap a setup func for e.g paths
+10. sidebar: categories!!!
+11. invalid command
+12. custom theme
+13. set color random
+14. wrap a setup func for e.g paths
+15. update time regularly
 
 ## Install and use
 

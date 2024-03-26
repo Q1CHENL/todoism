@@ -31,7 +31,7 @@ def main(stdscr=None):
     purged_list = []
 
     current_id = 1
-    current_row = 1
+    current_row = 1 # range: [0, height-1]
     tutils.reid(task_list) # reid in case something went wrong in last session
     task_cnt = len(task_list) # done + undone
     done_cnt = tsk.done_count(task_list)
@@ -110,7 +110,7 @@ def main(stdscr=None):
             curses.echo()
             curses.curs_set(1)
             if task_cnt > 0:
-                stdscr.move(current_id if current_id <= window_height - 1 else window_height - 1, len(task_list[current_id - 1]['description']) + tutils.indent)
+                stdscr.move(current_row, len(task_list[current_id - 1]['description']) + tutils.indent)
                 task_list[current_id - 1]['description'] = tutils.edit(stdscr, task_list[current_id - 1], tprint.edit_mode)
                 # delete the task if it was edited to empty
                 if task_list[current_id - 1]['description'] == "":
@@ -139,7 +139,7 @@ def main(stdscr=None):
             command_line = stdscr.getstr().decode('utf-8')
             curses.curs_set(0)
             curses.noecho()
-            task_list, done_list, current_id, task_highlighting_color = tutils.execute_command(stdscr, command_line, task_list, done_list, purged_list, current_id)
+            task_list, done_list, current_id, current_row = tutils.execute_command(stdscr, command_line, task_list, done_list, purged_list, current_id, start, end, current_row)
             command_line = ""  # Clear the command line after executing the command
         elif key == curses.KEY_UP and current_id > 1:
             # current is top most task (id != 1)

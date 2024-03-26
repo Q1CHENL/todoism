@@ -2,6 +2,7 @@ import copy
 import json
 import curses
 from datetime import datetime
+import todoism.utils as tutils
 import todoism.task as tsk
 import todoism.print as tprint
 
@@ -45,18 +46,17 @@ def purge(tasks, purged_list):
     return remained, []
 
 
-def execute_command(stdscr, command, task_list, done_list, purged_list, current_id):
-    global task_highlighting_color
+def execute_command(stdscr, command, task_list, done_list, purged_list, current_id, start, end, current_row):
     if command.startswith("add "):
         new_task = command[4:]
         if new_task:
             task_list.append({'description': new_task, 'date': datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S"), 'status': False})
     elif command.startswith("done "):
-        index_to_delete = int(command[7:]) - 1
-        if 0 <= index_to_delete < len(task_list):
-            done_list.append(copy.copy(task_list[index_to_delete]))
-            task_list[index_to_delete]['status'] = not task_list[index_to_delete]['status']
+        index_to_done = int(command[5:]) - 1
+        if 0 <= index_to_done < len(task_list):
+            done_list.append(copy.copy(task_list[index_to_done]))
+            task_list[index_to_done]['status'] = not task_list[index_to_done]['status']
     elif command == "purge":
         original_cnt = len(task_list)
         task_list, done_list = purge(task_list, purged_list)
@@ -95,8 +95,41 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
         key = stdscr.getch()
         if key == ord('q'):
             stdscr.clear()
-    # have to return task_highlighting_color, otherwise not accessible in main --> weird
-    return task_list, done_list, current_id, task_highlighting_color
+    elif command.startswith("del"):
+        task_id = command[4:]
+        if task_id.isdigit():
+            num = len(task_list)
+            if int(task_id) <= num:
+                del task_list[int(task_id) - 1]
+                reid(task_list)
+                if current_id == num:
+                    current_id = current_id - 1
+    elif command.startswith("edit"):
+        tprint.print_status_bar(stdscr, len(done_list), len(task_list))
+        tprint.print_tasks(stdscr, task_list, current_id, start, end) 
+        task_id = command[5:]
+        if task_id.isdigit() and int(task_id) <= len(task_list):
+            edit_id = int(task_id)
+            tprint.print_status_bar(stdscr, len(done_list), len(task_list))
+            tprint.print_tasks(stdscr, task_list, edit_id, start, end) 
+            curses.echo()
+            curses.curs_set(1)
+            if len(task_list) and edit_id >= start and edit_id <= end > 0:
+                stdscr.move(edit_id - start + 1, len(task_list[edit_id - 1]['description']) + tutils.indent)
+                task_list[edit_id - 1]['description'] = tutils.edit(stdscr, task_list[edit_id - 1], tprint.edit_mode)
+                # delete the task if it was edited to empty
+                if task_list[edit_id - 1]['description'] == "":
+                    del task_list[edit_id - 1]
+                    tutils.reid(task_list)
+                    if edit_id > 1:
+                        edit_id = edit_id - 1
+                tsk.save_tasks(task_list, tsk.tasks_file_path)
+            curses.curs_set(0)
+            curses.noecho()      
+            current_id = edit_id
+            current_row = current_id - start + 1
+
+    return task_list, done_list, current_id, current_row
 
 
 def edit(stdscr, task, mode):
