@@ -34,11 +34,7 @@ def sort(task_list, key):
 
 
 def execute_command(stdscr, command, task_list, done_list, purged_list, current_id, start, end, current_row):
-    if command.startswith("add "):
-        new_task_description = command[4:]
-        if new_task_description:
-            tsk.add_new_task(task_list, current_id + 1, new_task_description)
-    elif command.startswith("done "):
+    if command.startswith("done "):
         index_to_done = int(command[5:]) - 1
         if 0 <= index_to_done < len(task_list):
             done_list.append(copy.copy(task_list[index_to_done]))

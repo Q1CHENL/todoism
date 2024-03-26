@@ -20,6 +20,7 @@ An interactive and intuitive todo CLI
 - can not fully display help when window too small
 - ctl + shift to select multiple tasks to delete
 - seperate thread to monitor window size change
+- group different kinds of tasks
 
 ## Install and use
 
@@ -46,7 +47,10 @@ An interactive and intuitive todo CLI
 │   :autosort d on|off                             │
 │   :setcolor blue|red|yellow|green                │
 │    - change background color of current task     │
-│                                                  │
+│   :del [task_id] - delete task                   │
+│   :edit [task_id] - edit task                    │
+│   :done [task_id] - mark task as done            │
+|                                                  │
 │   other key bindings:                            │
 │   double Backspace - delete task                 │
 │   ESC - quit adding/editing task                 │
