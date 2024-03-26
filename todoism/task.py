@@ -11,9 +11,9 @@ purged_file_path = os.path.join(config_dir, "purged.json")
 test_file_path = os.path.join(config_dir, "test.json")
 settings_path = os.path.join(config_dir, "settings.json")
 
-def done_count(tasks):
+def done_count(task_list):
     count = 0
-    for t in tasks:
+    for t in task_list:
         if t['status'] is True:
             count = count + 1
     return count        
@@ -21,10 +21,10 @@ def done_count(tasks):
 def load_tasks(arg=''):
     try:
         with open(test_file_path if arg == '-t' else tasks_file_path, 'r') as file:
-            tasks = json.load(file)
+            task_list = json.load(file)
     except FileNotFoundError:
-        tasks = []
-    return tasks
+        task_list = []
+    return task_list
 
 def create_new_task(task_id, task_description=""):
     return {
@@ -35,13 +35,15 @@ def create_new_task(task_id, task_description=""):
         'flagged': False
     }
 
-def save_tasks(tasks, path):
+def save_tasks(task_list, path):
     with open(path, 'w') as file:
-        json.dump(tasks, file, indent=4)
+        json.dump(task_list, file, indent=4)
 
-def add_new_task(tasks, task_id, task_description):
+def add_new_task(task_list, task_id, task_description):
+    """create, append and save a new task with id: task_id and description: task_description to task_list"""
     new_task = create_new_task(task_id, task_description)
-    tasks.append(new_task)
-    save_tasks(tasks, tasks_file_path)
-    return tasks
+    task_list.append(new_task)
+    save_tasks(task_list, tasks_file_path)
+    return task_list
+
     

@@ -1,7 +1,9 @@
 import curses
-import todoism.utils as tutils
+import todoism.utils as ut
 import todoism.task as tsk
-import todoism.print as tprint
+import todoism.print as pr
+import todoism.settings as st
+import todoism.command as cmd
 
 
 def main(stdscr):
@@ -28,11 +30,11 @@ def main(stdscr):
     done_list = [] # a  part of task list
     purged_list = []
 
-    current_id = 1
-    current_row = 1 # range: [0, height-1]
-    tutils.reid(task_list) # reid in case something went wrong in last session
+    ut.reid(task_list) # reid in case something went wrong in last session
     task_cnt = len(task_list) # done + undone
     done_cnt = tsk.done_count(task_list)
+    current_id = 1 if task_cnt > 0 else 0
+    current_row = 1 if task_cnt > 0 else 0 # range: [0, height-1]
     window_height = stdscr.getmaxyx()[0]    
     # print window of task id
     start = 1 if task_cnt > 0 else 0
@@ -45,11 +47,10 @@ def main(stdscr):
 
         stdscr.clear()
         # Selected task highlighting
-        color_selected = tutils.get_color_selected()
+        color_selected = st.get_color_selected()
         curses.init_pair(1, curses.COLOR_BLACK, color_selected)
-
-        tprint.print_status_bar(stdscr, done_cnt, task_cnt)
-        tprint.print_tasks(stdscr, task_list, current_id, start, end)
+        
+        pr.print_main_view(stdscr, done_cnt, task_cnt, task_list, current_id, start, end)
         stdscr.refresh()
         window_height = stdscr.getmaxyx()[0]
         
@@ -71,13 +72,13 @@ def main(stdscr):
                 else:
                     pass
             stdscr.erase()
-            tprint.print_status_bar(stdscr, done_cnt, task_cnt)
-            tprint.print_tasks(stdscr, task_list, current_id, start, end)
+            pr.print_status_bar(stdscr, done_cnt, task_cnt)
+            pr.print_tasks(stdscr, task_list, current_id, start, end)
             stdscr.addstr(window_height - 1 if task_cnt >= window_height - 1 else task_cnt + 1, 4 if task_cnt < 9 else 3, f"{task_cnt + 1}.{' '}")
             stdscr.refresh()
             
             # Add a new task
-            new_task_description = tutils.edit(stdscr, tsk.create_new_task(task_cnt + 1), tprint.add_mode)               
+            new_task_description = ut.edit(stdscr, tsk.create_new_task(task_cnt + 1), pr.add_mode)               
             if new_task_description != "":
                 new_id = task_cnt + 1
                 task_list = tsk.add_new_task(task_list, new_id, new_task_description)
@@ -85,7 +86,7 @@ def main(stdscr):
                 if task_cnt == 1:
                     start = 1
                 current_id = new_id # new id
-                if end == task_cnt:
+                if end == task_cnt - 1 and current_row < window_height - 1:
                     current_row = current_row + 1
                 else:
                     current_row = window_height - 1
@@ -93,7 +94,7 @@ def main(stdscr):
             else:
                 start = old_start
                 end = old_end
-            tprint.print_tasks(stdscr, task_list, current_id, start, end)
+            pr.print_tasks(stdscr, task_list, current_id, start, end)
             stdscr.refresh()  
             curses.curs_set(0)
             curses.noecho()
@@ -108,15 +109,17 @@ def main(stdscr):
             curses.echo()
             curses.curs_set(1)
             if task_cnt > 0:
-                stdscr.move(current_row, len(task_list[current_id - 1]['description']) + tutils.indent)
-                task_list[current_id - 1]['description'] = tutils.edit(stdscr, task_list[current_id - 1], tprint.edit_mode)
-                # delete the task if it was edited to empty
-                if task_list[current_id - 1]['description'] == "":
-                    del task_list[current_id - 1]
-                    tutils.reid(task_list)
-                    if current_id > 1:
-                        current_id = current_id - 1
-                tsk.save_tasks(task_list, tsk.tasks_file_path)
+                current_id, current_row, start, end = ut.edit_and_save(
+                                            stdscr, 
+                                            task_list, 
+                                            current_id, 
+                                            current_row, 
+                                            start, 
+                                            end, 
+                                            current_row,
+                                            len(task_list[current_id - 1]['description']) + ut.indent,
+                                            window_height
+                                            )
             curses.curs_set(0)
             curses.noecho()        
         elif key == ord('f'):
@@ -137,7 +140,7 @@ def main(stdscr):
             command_line = stdscr.getstr().decode('utf-8')
             curses.curs_set(0)
             curses.noecho()
-            task_list, done_list, current_id, current_row = tutils.execute_command(stdscr, command_line, task_list, done_list, purged_list, current_id, start, end, current_row)
+            task_list, done_list, current_id, current_row = cmd.execute_command(stdscr, command_line, task_list, done_list, purged_list, current_id, start, end, current_row)
             command_line = ""  # Clear the command line after executing the command
         elif key == curses.KEY_UP and current_id > 1:
             # current is top most task (id != 1)
@@ -165,25 +168,17 @@ def main(stdscr):
                     # perform deletion
                     del task_list[current_id - 1]
                     # reid
-                    tutils.reid(task_list)
+                    ut.reid(task_list)
                     # view change rules are similar to apple reminder
-                    if tutils.is_view_fully_packed(start, end, window_height - 1):
-                        if window_height - 1 == task_cnt:
-                            if current_id == end:
-                                current_row = current_row - 1
-                            end = end - 1
-                            if current_id > 1:
-                                current_id = current_id - 1
-                        elif task_cnt == end and task_cnt > window_height - 1:
-                            start = start - 1
-                            end = end - 1
-                            current_id = current_id - 1
-                    else:
-                        end = end - 1
-                        if current_id == task_cnt:
-                            current_row = current_row - 1
-                            current_id = current_id - 1
-             
+                    current_id, current_row, start, end = ut.post_deletion_update(
+                        current_id, 
+                        current_row, 
+                        start, 
+                        end, 
+                        task_cnt, 
+                        window_height
+                        )
+
                     # update task_cnt
                     task_cnt = task_cnt - 1                        
                 tsk.save_tasks(task_list, tsk.tasks_file_path)

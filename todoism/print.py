@@ -36,11 +36,8 @@ help_msg =  '''
             '''
 
 def print_help(stdscr):
-    height, width = stdscr.getmaxyx()
     stdscr.addstr(0, 0, help_msg)
     stdscr.refresh()
-    # (width // 2) + 50
-    # (height // 2) - 4
 
 # The core function to print task
 def print_task(stdscr, task, y):
@@ -60,9 +57,9 @@ def print_task_mode(stdscr, task, y, mode):
     else:
         print_task(stdscr, task, y)  
         
-def print_tasks(stdscr, tasks, current_id, start, end):
+def print_tasks(stdscr, task_list, current_id, start, end):
     if start > 0:
-        for i, task in enumerate(tasks[start - 1:end + 1]):
+        for i, task in enumerate(task_list[start - 1:end + 1]):
             if i + start == current_id: # handle task overflow: +start
                 print_task_highlighted(stdscr, task, i + 1) # +1 due to status bar
             else:
@@ -91,3 +88,7 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     stdscr.attroff(curses.color_pair(color_pair))
     stdscr.addstr(f" | {status_bar['date']}")
     stdscr.refresh()
+
+def print_main_view(stdscr, done_cnt, task_cnt, tasks, current_id, start, end):
+    print_status_bar(stdscr, done_cnt, task_cnt)
+    print_tasks(stdscr, tasks, current_id, start, end)
