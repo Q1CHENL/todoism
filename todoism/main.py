@@ -4,7 +4,7 @@ import todoism.task as tsk
 import todoism.print as tprint
 
 
-def main(_):
+def main(stdscr=None):
     global task_highlighting_color
     stdscr = curses.initscr()
     stdscr.keypad(True) # enable e.g arrow keys
