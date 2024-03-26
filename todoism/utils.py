@@ -153,8 +153,7 @@ def edit(stdscr, task, mode):
                 stdscr.move(y, indent)  # cursor remains still
                 continue
             # -1 because i am deleting the char before the cursor
-            task['description'] = task['description'][:x -
-                                                      indent - 1] + task['description'][x - indent:]
+            task['description'] = task['description'][:x - indent - 1] + task['description'][x - indent:]
             tprint.print_task_mode(stdscr, task, y, mode)
             stdscr.move(y, x - 1)
         elif 32 <= ch < 127:  # printable char
@@ -162,7 +161,7 @@ def edit(stdscr, task, mode):
                 chr(ch) + task['description'][x - indent:]
             tprint.print_task_mode(stdscr, task, y, mode)
             stdscr.move(y, x + 1)
-        elif ch == 27 and mode == tprint.add_mode:  # todo: too slow
+        elif ch == 27 and mode == tprint.add_mode:
             return ""
     return task['description']
 

@@ -4,9 +4,7 @@ import todoism.task as tsk
 import todoism.print as tprint
 
 
-def main(stdscr=None):
-    global task_highlighting_color
-    stdscr = curses.initscr()
+def main(stdscr):
     stdscr.keypad(True) # enable e.g arrow keys
     stdscr.scrollok(True)
     curses.curs_set(1)
@@ -189,7 +187,9 @@ def main(stdscr=None):
                     # update task_cnt
                     task_cnt = task_cnt - 1                        
                 tsk.save_tasks(task_list, tsk.tasks_file_path)
-                # current_id = current_id - 1 if current_id > 1 else 1    
+
+def run():
+    curses.wrapper(main)
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    run()
