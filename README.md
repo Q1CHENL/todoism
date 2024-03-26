@@ -19,7 +19,8 @@ An interactive and intuitive todo CLI
 
 ## Install and use
 
-`pip install todoism`
+- Install: `pip install todoism`
+- Run: `todoism` or `todo`
 
 ```
 ┌──────────────────────────────────────────────────┐
