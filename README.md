@@ -4,27 +4,24 @@ An interactive and intuitive todo CLI
 
 ## ToDo
 
-1. command autosort
-2. sound
-3. esc to quit exit() too slow
-4. save settings
-5. deleting all tasks from top in current window leads to weird view
-6. edit to empty == delete -> implement a delete for both edit-delete and 2x backspace
-7. <ref=<https://www.reddit.com/r/learnpython/comments/162kjgj/a_satisfying_solution_to_avoid_circular>
-8. command: done xx, goto xx
-9. command: date ymd, dmy
-10. sidebar: categories!!!
-11. invalid command
-12. custom theme
-13. set color random
-14. wrap a setup func for e.g paths
-15. update time regularly
+- command autosort
+- sound
+- esc to quit exit() too slow
+- command: done xx, goto xx
+- command: date ymd, dmy
+- **sidebar: categories**
+- invalid command
+- custom theme
+- set color random
+- wrap a setup func for e.g paths
+- update time regularly
+- add mouse support
 
 ## Install and use
 
 `pip install todoism`
 
-```py
+```
 ┌──────────────────────────────────────────────────┐
 │                                                  │
 │   short commands:                                │
