@@ -1,14 +1,13 @@
 import curses
-from .utils import *
-# import structure:
-# print and task are imported in utils
-# utils is imported in main
+import todoism.utils as tutils
+import todoism.task as tsk
+import todoism.print as tprint
 
-def main():
+
+def main(_):
     global task_highlighting_color
     stdscr = curses.initscr()
     stdscr.keypad(True) # enable e.g arrow keys
-    # todo save settings like color in a json file
     stdscr.scrollok(True)
     curses.curs_set(1)
     stdscr.clear()
@@ -27,27 +26,32 @@ def main():
     stdscr.bkgd(' ', curses.COLOR_BLACK | curses.A_NORMAL)
 
     # Define the initial todo list
-    task_list = load_tasks()
+    task_list = tsk.load_tasks()
     done_list = [] # a  part of task list
     purged_list = []
 
-    # task_cnt starts from 0
-    # current_id and task_id start from 1
     current_id = 1
+    current_row = 1
+    tutils.reid(task_list) # reid in case something went wrong in last session
     task_cnt = len(task_list) # done + undone
-    done_cnt = done_count(task_list)
+    done_cnt = tsk.done_count(task_list)
     window_height = stdscr.getmaxyx()[0]    
     # print window of task id
     start = 1 if task_cnt > 0 else 0
     end = task_cnt if task_cnt < window_height - 1 else window_height - 1
     
+        
     while True:
+        task_cnt = len(task_list)
+        done_cnt = tsk.done_count(task_list)
+
         stdscr.clear()
         # Selected task highlighting
-        curses.init_pair(1, curses.COLOR_BLACK, task_highlighting_color)
+        color_selected = tutils.get_color_selected()
+        curses.init_pair(1, curses.COLOR_BLACK, color_selected)
 
-        print_status_bar(stdscr, done_cnt, task_cnt)
-        print_tasks(stdscr, task_list, current_id, start, end)
+        tprint.print_status_bar(stdscr, done_cnt, task_cnt)
+        tprint.print_tasks(stdscr, task_list, current_id, start, end)
         stdscr.refresh()
         window_height = stdscr.getmaxyx()[0]
         
@@ -60,29 +64,38 @@ def main():
         if key == ord('a'):
             curses.echo()
             curses.curs_set(1)
+            # adjust start end for pre-print
+            # taskoverflow if a new one is added: 
             if task_cnt >= window_height - 1:
-                start = task_cnt - (end - start - 1)
-                end = task_cnt
+                if end <= task_cnt:
+                    start = task_cnt - (end - start - 1)
+                    end = task_cnt
+                else:
+                    pass
             stdscr.erase()
-            print_status_bar(stdscr, done_cnt, task_cnt)
-            print_tasks(stdscr, task_list, current_id, start, end)
-            stdscr.addstr(window_height - 1 if task_cnt >= window_height - 1 else task_cnt + 1, 3, f"{task_cnt + 1}.{' ' if task_cnt + 1 >= 10 else ' ' * 2}")
+            tprint.print_status_bar(stdscr, done_cnt, task_cnt)
+            tprint.print_tasks(stdscr, task_list, current_id, start, end)
+            stdscr.addstr(window_height - 1 if task_cnt >= window_height - 1 else task_cnt + 1, 4 if task_cnt < 9 else 3, f"{task_cnt + 1}.{' '}")
             stdscr.refresh()
             
             # Add a new task
-            new_task_description = edit(stdscr, create_new_task(task_cnt + 1), add_mode)               
-            if new_task_description is not "":
+            new_task_description = tutils.edit(stdscr, tsk.create_new_task(task_cnt + 1), tprint.add_mode)               
+            if new_task_description != "":
                 new_id = task_cnt + 1
-                task_list = add_new_task(task_list, new_id, new_task_description)
+                task_list = tsk.add_new_task(task_list, new_id, new_task_description)
                 task_cnt = task_cnt + 1
-                end = end + 1 # change end as well
                 if task_cnt == 1:
                     start = 1
                 current_id = new_id # new id
+                if end == task_cnt:
+                    current_row = current_row + 1
+                else:
+                    current_row = window_height - 1
+                end = end + 1 # change end as well
             else:
                 start = old_start
                 end = old_end
-            print_tasks(stdscr, task_list, current_id, start, end)
+            tprint.print_tasks(stdscr, task_list, current_id, start, end)
             stdscr.refresh()  
             curses.curs_set(0)
             curses.noecho()
@@ -92,18 +105,20 @@ def main():
                 done_list.append(task_list[current_id - 1])
                 task_list[current_id - 1]['status'] = not task_list[current_id - 1]['status']  
                 done_cnt = done_cnt + 1 if task_list[current_id - 1]['status'] is True else done_cnt - 1
-                save_tasks(task_list, tasks_file_path)
+                tsk.save_tasks(task_list, tsk.tasks_file_path)
         elif key == ord('e'):
             curses.echo()
             curses.curs_set(1)
-            stdscr.move(current_id if current_id <= window_height - 1 else window_height - 1, len(task_list[current_id - 1]['description']) + indent)
-            task_list[current_id - 1]['description'] = edit(stdscr, task_list[current_id - 1], edit_mode)
-            # delete the task if it was edited to empty
-            if task_list[current_id - 1]['description'] == "":
-                del task_list[current_id - 1]
-                reid(task_list)
-                current_id = current_id - 1
-            save_tasks(task_list, tasks_file_path)
+            if task_cnt > 0:
+                stdscr.move(current_id if current_id <= window_height - 1 else window_height - 1, len(task_list[current_id - 1]['description']) + tutils.indent)
+                task_list[current_id - 1]['description'] = tutils.edit(stdscr, task_list[current_id - 1], tprint.edit_mode)
+                # delete the task if it was edited to empty
+                if task_list[current_id - 1]['description'] == "":
+                    del task_list[current_id - 1]
+                    tutils.reid(task_list)
+                    if current_id > 1:
+                        current_id = current_id - 1
+                tsk.save_tasks(task_list, tsk.tasks_file_path)
             curses.curs_set(0)
             curses.noecho()        
         elif key == ord('f'):
@@ -124,32 +139,57 @@ def main():
             command_line = stdscr.getstr().decode('utf-8')
             curses.curs_set(0)
             curses.noecho()
-            task_list, done_list, current_id, task_highlighting_color = execute_command(stdscr, command_line, task_list, done_list, purged_list, current_id)
+            task_list, done_list, current_id, task_highlighting_color = tutils.execute_command(stdscr, command_line, task_list, done_list, purged_list, current_id)
             command_line = ""  # Clear the command line after executing the command
         elif key == curses.KEY_UP and current_id > 1:
-            current_id -= 1
-            if task_cnt > window_height - 1 and start > 1:
+            # current is top most task (id != 1)
+            if task_cnt >= window_height - 1 and start > 1 and current_row == 1:
                 start = start - 1
                 end = end - 1
+            else:
+                current_row = current_row - 1
+            current_id -= 1
         elif key == curses.KEY_DOWN and current_id < task_cnt:
             current_id += 1
-            if task_cnt > window_height - 1 and current_id > window_height - 1:
+            if task_cnt > window_height - 1 and current_row == window_height - 1:
                 start = start + 1
                 end = end + 1
+            else:
+                current_row = current_row + 1
         elif key == curses.KEY_BACKSPACE or key == 127:
             k = stdscr.getch() 
             if k == curses.KEY_BACKSPACE or k == 127:
+                # only perform deletion when task_cnt > 0
                 if task_cnt > 0:
-                    task_cnt = task_cnt - 1
+                    # update done_cnt                      
                     if task_list[current_id - 1]['status'] is True:
                         done_cnt = done_cnt - 1
+                    # perform deletion
                     del task_list[current_id - 1]
-                    for t in task_list[current_id - 1:]:
-                        t['id'] = t['id'] - 1                     
-                save_tasks(task_list, tasks_file_path)
-                current_id = current_id - 1 if current_id > 1 else 1    
-        task_cnt = len(task_list)
-        done_cnt = done_count(task_list)
+                    # reid
+                    tutils.reid(task_list)
+                    # view change rules are similar to apple reminder
+                    if tutils.is_view_fully_packed(start, end, window_height - 1):
+                        if window_height - 1 == task_cnt:
+                            if current_id == end:
+                                current_row = current_row - 1
+                            end = end - 1
+                            if current_id > 1:
+                                current_id = current_id - 1
+                        elif task_cnt == end and task_cnt > window_height - 1:
+                            start = start - 1
+                            end = end - 1
+                            current_id = current_id - 1
+                    else:
+                        end = end - 1
+                        if current_id == task_cnt:
+                            current_row = current_row - 1
+                            current_id = current_id - 1
+             
+                    # update task_cnt
+                    task_cnt = task_cnt - 1                        
+                tsk.save_tasks(task_list, tsk.tasks_file_path)
+                # current_id = current_id - 1 if current_id > 1 else 1    
 
 if __name__ == "__main__":
-    main()
+    curses.wrapper(main)

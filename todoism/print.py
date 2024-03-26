@@ -47,7 +47,7 @@ def print_task(stdscr, task, y):
     max_y = stdscr.getmaxyx()[0] 
     # handle task overflow
     if y < max_y:
-        stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {task['id']}.{' ' if task['id'] >= 10 else ' ' * 2}{task['description'] + (75 - len(task['description'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
+        stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {' ' if task['id'] < 10 else ''}{task['id']}. {task['description'] + (75 - len(task['description'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
 
 def print_task_highlighted(stdscr, task, y):
     stdscr.attron(curses.color_pair(1))

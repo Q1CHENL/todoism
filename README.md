@@ -9,6 +9,16 @@ An interactive and intuitive todo CLI
 3. esc to quit exit() too slow
 4. save settings
 5. deleting all tasks from top in current window leads to weird view
+6. edit to empty == delete -> implement a delete for both edit-delete and 2x backspace
+7. <ref=<https://www.reddit.com/r/learnpython/comments/162kjgj/a_satisfying_solution_to_avoid_circular>
+8. command: done xx, goto xx
+9. command: date ymd, dmy
+10. color pairs
+11. sidebar: categories!!!
+12. invalid command
+13. custom theme
+14. set color random
+15. wrap a setup func for e.g paths
 
 ## Install and use
 
