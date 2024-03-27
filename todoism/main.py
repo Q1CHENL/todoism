@@ -28,13 +28,13 @@ def main(stdscr):
 
     # Define the initial todo list
     task_list = tsk.load_tasks()
-    done_list = []  # a  part of task list
+    done_list = []  # a part of task list
     purged_list = []
 
     ut.reid(task_list)  # reid in case something went wrong in last session
     task_cnt = len(task_list)  # done + undone
     done_cnt = tsk.done_count(task_list)
-    current_id = 1 if task_cnt > 0 else 0
+    current_id = 1 if task_cnt > 0 else 0 # id of task selected
     current_row = 1 if task_cnt > 0 else 0  # range: [0, height-1]
     window_height = stdscr.getmaxyx()[0]
     # print window of task id
@@ -59,10 +59,14 @@ def main(stdscr):
             start,
             end
         )
+        if task_cnt == 0:
+            pr.print_status_bar(stdscr, done_cnt, task_cnt)
+            pr.print_empty(stdscr)
+            
         stdscr.refresh()
         window_height = stdscr.getmaxyx()[0]
 
-        # for restoring previous view if add interrupted
+        # for restoring previous view if add was interrupted
         old_start = start
         old_end = end
         # Wait for user input
@@ -77,8 +81,6 @@ def main(stdscr):
                 if end <= task_cnt:
                     start = task_cnt - (end - start - 1)
                     end = task_cnt
-                else:
-                    pass
             stdscr.erase()
             pr.print_status_bar(stdscr, done_cnt, task_cnt)
             pr.print_tasks(stdscr, task_list, current_id, start, end)

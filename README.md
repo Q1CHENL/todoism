@@ -26,6 +26,8 @@ An interactive and intuitive todo CLI
 - group different kinds of tasks
 - use repaint
 - simplify print args
+- history total done count in maybe settings
+- ~~message when task count == 1~~
 
 ## Install and use
 

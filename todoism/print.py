@@ -38,6 +38,13 @@ help_msg =  '''
                          └──────────────────────────────────────────────────┘
             '''
 
+empty_msg = '''
+                         ┌──────────────────────────────────────────────────────┐
+                         │       Hmm, it seems there are no active tasks.       │
+                         │ Take a break, or create some new ones to get busy :) │
+                         └──────────────────────────────────────────────────────┘
+            '''
+
 def print_help(stdscr):
     stdscr.addstr(0, 0, help_msg)
     stdscr.refresh()
@@ -48,6 +55,11 @@ def print_task(stdscr, task, y):
     # handle task overflow
     if y < max_y:
         stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {' ' if task['id'] < 10 else ''}{task['id']}. {task['description'] + (75 - len(task['description'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
+
+def print_empty(stdscr):
+    stdscr.addstr(1, 0, empty_msg)
+    stdscr.refresh()
+    
 
 def print_task_selected(stdscr, task, y):
     stdscr.attron(curses.color_pair(1))
