@@ -2,35 +2,6 @@
 
 An interactive and intuitive todo TUI
 
-## ToDo
-
-- **sidebar: categories**
-- update time regularly: seperate thread
-- command autosort
-- command: done xx, goto xx
-- set color random
-- done x,y,z
-- purge all
-- sound
-- emulate the popup menu when right click on task 
-- esc to quit exit() too slow
-- command: date ymd, dmy
-- invalid command
-- custom theme
-- wrap a setup func for e.g paths
-- add mouse support
-- command print overwriting
-- can not fully display help when window too small
-- ctl + shift to select multiple tasks to delete/done
-- seperate thread to monitor window size change
-- group different kinds of tasks
-- use repaint
-- simplify print args
-- history total done count in maybe settings
-- max task count: 99 and message for it
-- ~~message when task count == 1~~
-- delete printing status bar except for time update
-
 ## Install and use
 
 - Install: `pip install todoism`
@@ -68,6 +39,35 @@ An interactive and intuitive todo TUI
 │                                                  │
 └──────────────────────────────────────────────────┘
 ```
+
+## ToDo
+
+- **sidebar: categories**
+- update time regularly: seperate thread
+- command autosort
+- command: done xx, goto xx
+- set color random
+- done x,y,z
+- purge all
+- sound
+- emulate the popup menu when right click on task 
+- esc to quit exit() too slow
+- command: date ymd, dmy
+- invalid command
+- custom theme
+- wrap a setup func for e.g paths
+- add mouse support
+- command print overwriting
+- can not fully display help when window too small
+- ctl + shift to select multiple tasks to delete/done
+- seperate thread to monitor window size change
+- group different kinds of tasks
+- use repaint
+- simplify print args
+- history total done count in maybe settings
+- max task count: 99 and message for it
+- ~~message when task count == 1~~
+- delete printing status bar except for time update
 
 ## Screenshots
 
