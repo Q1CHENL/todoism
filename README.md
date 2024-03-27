@@ -68,3 +68,9 @@ An interactive and intuitive todo CLI
 │                                                  │
 └──────────────────────────────────────────────────┘
 ```
+
+## Screenshots
+
+![UI](./assets/empty.png)
+![UI](./assets/tasks.png)
+![UI](./assets/help.png)
