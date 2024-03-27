@@ -27,7 +27,9 @@ An interactive and intuitive todo CLI
 - use repaint
 - simplify print args
 - history total done count in maybe settings
+- max task count: 99 and message for it
 - ~~message when task count == 1~~
+- delete printing status bar except for time update
 
 ## Install and use
 

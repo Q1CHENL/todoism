@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name='todoism',
-    version='1.12',
+    version='1.14',
     packages=find_packages(exclude=['test']),
     package_dir={'todoism': 'todoism'},
     entry_points={
         'console_scripts': [
-            'todo=todoism.main:main',
-            'todoism=todoism.main:main',
+            'todo=todoism.main:run',
+            'todoism=todoism.main:run',
         ],
     },
     install_requires=[],
