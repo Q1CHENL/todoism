@@ -24,7 +24,7 @@ help_msg =  '''
                          │   :autosort f on|off                             │
                          │   :autosort d on|off                             │
                          │   :setcolor blue|red|yellow|green                │
-                         │    - change background color of current task     |
+                         │    - change background color of current task     │
                          │   :del [task_id] - delete task                   │
                          │   :edit [task_id] - edit task                    │
                          │   :done [task_id] - mark task as done            │
