@@ -62,7 +62,7 @@ def print_task_mode(stdscr, task, y, mode):
         
 def print_tasks(stdscr, task_list, current_id, start, end):
     if start > 0:
-        for i, task in enumerate(task_list[start - 1:end + 1]):
+        for i, task in enumerate(task_list[start - 1:end]):
             if i + start == current_id: # handle task overflow: +start
                 print_task_selected(stdscr, task, i + 1) # +1 due to status bar
             else:
@@ -95,3 +95,8 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
 def print_main_view(stdscr, done_cnt, task_cnt, tasks, current_id, start, end):
     print_status_bar(stdscr, done_cnt, task_cnt)
     print_tasks(stdscr, tasks, current_id, start, end)
+    
+def repaint(stdscr, done_cnt, task_cnt, task_list, current_id, start, end):
+    stdscr.erase()
+    print_main_view(stdscr, done_cnt, task_cnt, task_list, current_id, start, end)
+    stdscr.refresh()

@@ -35,10 +35,11 @@ def sort(task_list, key):
 
 def execute_command(stdscr, command, task_list, done_list, purged_list, current_id, start, end, current_row):
     if command.startswith("done "):
-        index_to_done = int(command[5:]) - 1
-        if 0 <= index_to_done < len(task_list):
-            done_list.append(copy.copy(task_list[index_to_done]))
-            task_list[index_to_done]['status'] = not task_list[index_to_done]['status']
+        if command[5:].isdigit():
+            index_to_done = int(command[5:]) - 1
+            if 0 <= index_to_done < len(task_list):
+                done_list.append(copy.copy(task_list[index_to_done]))
+                task_list[index_to_done]['status'] = not task_list[index_to_done]['status']
     elif command == "purge":
         original_cnt = len(task_list)
         task_list, done_list = purge(task_list, purged_list)
@@ -73,21 +74,28 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
                 if current_id == num:
                     current_id = current_id - 1
     elif command.startswith("edit"):
-        pr.print_status_bar(stdscr, len(done_list), len(task_list))
-        pr.print_tasks(stdscr, task_list, current_id, start, end) 
         task_id = command[5:]
         if task_id.isdigit() and int(task_id) <= len(task_list):
             window_height = stdscr.getmaxyx()[0]    
             edit_id = int(task_id)
-            pr.print_status_bar(stdscr, len(done_list), len(task_list))
-            pr.print_tasks(stdscr, task_list, edit_id, start, end) 
+            pr.repaint(stdscr, len(done_list), len(task_list), task_list, edit_id, start, end)
             curses.echo()
             curses.curs_set(1)
+            current_row = edit_id - start + 1
             if len(task_list) and edit_id >= start and edit_id <= end:
-                current_id, current_row, start, end = ut.edit_and_save(stdscr, task_list, edit_id, current_row, start, end, edit_id - start + 1, len(task_list[edit_id - 1]['description']) + ut.indent, window_height)
+                current_id, current_row, start, end = ut.edit_and_save(
+                                                            stdscr, 
+                                                            task_list, 
+                                                            edit_id,
+                                                            current_row,
+                                                            start,
+                                                            end,
+                                                            edit_id - start + 1,
+                                                            len(task_list[edit_id - 1]['description']) + ut.indent,
+                                                            window_height
+                                                            )
             curses.curs_set(0)
             curses.noecho()      
-            current_row = current_id - start + 1
 
-    return task_list, done_list, current_id, current_row
+    return task_list, done_list, current_id, current_row, start, end
 

@@ -5,22 +5,27 @@ An interactive and intuitive todo CLI
 ## ToDo
 
 - **sidebar: categories**
+- update time regularly: seperate thread
 - command autosort
-- sound
-- esc to quit exit() too slow
 - command: done xx, goto xx
+- set color random
+- done x,y,z
+- purge all
+- sound
+- emulate the popup menu when right click on task 
+- esc to quit exit() too slow
 - command: date ymd, dmy
 - invalid command
 - custom theme
-- set color random
 - wrap a setup func for e.g paths
-- update time regularly: seperate thread
 - add mouse support
 - command print overwriting
 - can not fully display help when window too small
-- ctl + shift to select multiple tasks to delete
+- ctl + shift to select multiple tasks to delete/done
 - seperate thread to monitor window size change
 - group different kinds of tasks
+- use repaint
+- simplify print args
 
 ## Install and use
 
