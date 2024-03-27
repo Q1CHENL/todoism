@@ -69,8 +69,6 @@ An interactive and intuitive todo TUI
 - ~~message when task count == 1~~
 - delete printing status bar except for time update
 
-## Screenshots
+## Demo
 
-![UI](./assets/empty.png)
-![UI](./assets/tasks.png)
-![UI](./assets/help.png)
+![UI](./assets/demo.gif)
