@@ -84,7 +84,7 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     """Example: Progress: 16/69 23% | 2024-03-27 01:53"""
     percentage_num = int((done_cnt / task_cnt) * 100) if task_cnt > 0 else 0
     status_bar = {
-        'tasks': f'{' '*35}Progress: {done_cnt}/{task_cnt} {percentage_num if task_cnt > 0 else 0}%',
+        'tasks': f"{' '*35}Progress: {done_cnt}/{task_cnt} {percentage_num if task_cnt > 0 else 0}%",
         'date': datetime.now().strftime("%Y-%m-%d %H:%M") 
     }
     color_pair = 0
