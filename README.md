@@ -35,7 +35,7 @@ An interactive and intuitive todo TUI
 │   :del [task_id] - delete task                   │
 │   :edit [task_id] - edit task                    │
 │   :done [task_id] - mark task as done            │
-|                                                  │
+│                                                  │
 │   other key bindings:                            │
 │   double Backspace - delete task                 │
 │   ESC - quit adding/editing task                 │
@@ -73,4 +73,5 @@ An interactive and intuitive todo TUI
 - max task count: 99 and message for it
 - ~~message when task count == 1~~
 - delete printing status bar except for time update
+- dynamic indent based on window size
 
