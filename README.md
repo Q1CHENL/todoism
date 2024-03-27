@@ -1,6 +1,6 @@
 # todoism
 
-An interactive and intuitive todo CLI
+An interactive and intuitive todo TUI
 
 ## ToDo
 
