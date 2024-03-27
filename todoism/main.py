@@ -152,7 +152,7 @@ def main(stdscr):
             if task_cnt >= window_height - 1:
                 stdscr.erase()
                 pr.print_main_view(stdscr, len(done_list), len(task_list), task_list, current_id, start, end - 1)
-            stdscr.addstr(curses.LINES - 1, 0, ":")
+            stdscr.addstr(window_height - 1, 0, ":")
             stdscr.refresh()
             command_line = stdscr.getstr().decode('utf-8')
             curses.curs_set(0)
