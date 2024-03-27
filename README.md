@@ -2,6 +2,11 @@
 
 An interactive and intuitive todo TUI
 
+## Demo
+
+![UI](./assets/demo.gif)
+
+
 ## Install and use
 
 - Install: `pip install todoism`
@@ -69,6 +74,3 @@ An interactive and intuitive todo TUI
 - ~~message when task count == 1~~
 - delete printing status bar except for time update
 
-## Demo
-
-![UI](./assets/demo.gif)
