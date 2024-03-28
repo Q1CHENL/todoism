@@ -75,3 +75,5 @@ An interactive and intuitive todo TUI
 - delete printing status bar except for time update
 - dynamic indent based on window size
 
+## Contribute
+Issues and PRs are welcome! todoism uses curses library as its main tech stack. Please refer to the library [docs](https://docs.python.org/3/library/curses.html#module-curses) and [how-to](https://docs.python.org/3/howto/curses.html) to get started.
