@@ -11,6 +11,7 @@ An interactive and intuitive todo TUI
 
 - Install: `pip install todoism`
 - Run: `todoism` or `todo`
+- Update: `pip install todoism --upgrade`
 
 ```
 ┌──────────────────────────────────────────────────┐
