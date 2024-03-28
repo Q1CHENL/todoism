@@ -49,13 +49,18 @@ def print_help(stdscr):
     stdscr.addstr(0, 0, help_msg)
     stdscr.refresh()
 
-# The core function to print task
+# The core function to print a single task
 def print_task(stdscr, task, y):
-    max_y = stdscr.getmaxyx()[0] 
-    # handle task overflow
+    max_y, max_x= stdscr.getmaxyx()
+    # 16: date length, 7: front indent, 3: flag
+    spaces = (max_x - 1 - 7 - 16 - len(task['description']) - 3) * ' '
+    description_with_spaces = task['description'] + spaces
+    status = '✅' if task['status'] else '  '
+    flag = '🚩' if task['flagged'] else ''
+    id_str = (' ' if task['id'] < 10 else '') + str(task['id'])
     if y < max_y:
-        stdscr.addstr(y, 0, f"{'✅' if task['status'] else '  '} {' ' if task['id'] < 10 else ''}{task['id']}. {task['description'] + (75 - len(task['description'])) * ' ' + task['date']} {'🚩' if task['flagged'] else ''}" )
-
+        stdscr.addstr(y, 0, f"{status} {id_str}. {description_with_spaces + task['date']} {flag}")
+        
 def print_empty(stdscr):
     stdscr.addstr(1, 0, empty_msg)
     stdscr.refresh()
@@ -77,14 +82,20 @@ def print_tasks(stdscr, task_list, current_id, start, end):
         for i, task in enumerate(task_list[start - 1:end]):
             if i + start == current_id: # handle task overflow: +start
                 print_task_selected(stdscr, task, i + 1) # +1 due to status bar
+                stdscr.refresh()
             else:
                 print_task(stdscr, task, i + 1)
+                stdscr.refresh()
+
 
 def print_status_bar(stdscr, done_cnt, task_cnt):
     """Example: Progress: 16/69 23% | 2024-03-27 01:53"""
+    
+    max_x= stdscr.getmaxyx()[1]
+    side_spaces = ((max_x - 38) // 2) * ' '
     percentage_num = int((done_cnt / task_cnt) * 100) if task_cnt > 0 else 0
     status_bar = {
-        'tasks': f"{' '*35}Progress: {done_cnt}/{task_cnt} {percentage_num if task_cnt > 0 else 0}%",
+        'tasks': f"Progress: {done_cnt}/{task_cnt} {percentage_num if task_cnt > 0 else 0}%",
         'date': datetime.now().strftime("%Y-%m-%d %H:%M") 
     }
     color_pair = 0
@@ -99,9 +110,9 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
             color_pair = 4
             
     stdscr.attron(curses.color_pair(color_pair))    
-    stdscr.addstr(0, 0, f"{status_bar['tasks']}")
+    stdscr.addstr(0, 0, f"{side_spaces}{status_bar['tasks']}")
     stdscr.attroff(curses.color_pair(color_pair))
-    stdscr.addstr(f" | {status_bar['date']}")
+    stdscr.addstr(f" | {status_bar['date']}{side_spaces}")
     stdscr.refresh()
 
 def print_main_view(stdscr, done_cnt, task_cnt, tasks, current_id, start, end):
