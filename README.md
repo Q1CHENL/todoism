@@ -45,16 +45,18 @@ An interactive and intuitive todo TUI
 └──────────────────────────────────────────────────┘
 ```
 
-## ToDo
+## ToDos
 
 - **sidebar: categories**
-- update time regularly: seperate thread
-- command autosort
+- update time regularly: seperate thread or
+- commandline interface for e.g adding tasks
 - command: done xx, goto xx
 - set color random
 - done x,y,z
+- Caps commands
+- make no-task message more helpful
 - purge all
-- sound
+- command autosort
 - emulate the popup menu when right click on task 
 - esc to quit exit() too slow
 - command: date ymd, dmy
@@ -65,7 +67,7 @@ An interactive and intuitive todo TUI
 - command print overwriting
 - can not fully display help when window too small
 - ctl + shift to select multiple tasks to delete/done
-- seperate thread to monitor window size change
+- ~~handle window size change~~
 - group different kinds of tasks
 - use repaint
 - simplify print args
@@ -73,7 +75,8 @@ An interactive and intuitive todo TUI
 - max task count: 99 and message for it
 - ~~message when task count == 1~~
 - delete printing status bar except for time update
-- dynamic indent based on window size
+- ~~dynamic indent based on window size~~
+- sound
 
 ## Contribute
 Issues and PRs are welcome! todoism uses curses library as its main tech stack. Please refer to the library [docs](https://docs.python.org/3/library/curses.html#module-curses) and [how-to](https://docs.python.org/3/howto/curses.html) to get started.
