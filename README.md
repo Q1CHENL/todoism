@@ -51,7 +51,7 @@ An interactive and intuitive todo TUI
 - **sidebar: categories**
 - update time regularly: seperate thread or
 - commandline interface for e.g adding tasks
-- command: done xx, goto xx
+- ~~command: done xx~~
 - set color random
 - done x,y,z
 - Caps commands
