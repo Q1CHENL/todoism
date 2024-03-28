@@ -98,11 +98,11 @@ def main(stdscr):
                 task_cnt = task_cnt + 1
                 if task_cnt == 1:
                     start = 1
-                current_id = new_id  # new id
-                if end == task_cnt - 1 and current_row < window_height - 1:
-                    current_row = current_row + 1
+                if task_cnt - 1 <= window_height - 1:
+                    current_row = task_cnt
                 else:
                     current_row = window_height - 1
+                current_id = new_id  # new id
                 end = end + 1  # change end as well
             else:
                 start = old_start

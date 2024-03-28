@@ -42,11 +42,19 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
                 task_list[index_to_done]['status'] = not task_list[index_to_done]['status']
     elif command == "purge":
         original_cnt = len(task_list)
+        displayed_task_cnt = end - start + 1
         task_list, done_list = purge(task_list, purged_list)
         tsk.save_tasks(task_list, tsk.tasks_file_path)
         # change current id to 1 if some tasks were purged
         if len(task_list) < original_cnt:
+            # temporary solution: back to top
             current_id = 1
+            current_row = 1
+            start = 1
+            if len(task_list) > displayed_task_cnt:
+                end = displayed_task_cnt
+            else:
+                end = len(task_list)
     elif command.startswith("sort "):
         category = command[5:]
         if category == "f":
