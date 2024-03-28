@@ -68,10 +68,11 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
     elif command.startswith("setcolor "):
         st.set_color_selected(command[9:])
     elif command == "help":
+        stdscr.erase()
         pr.print_msg(stdscr, pr.help_msg)
-        key = stdscr.getch()
-        if key == ord('q'):
-            stdscr.clear()
+        while stdscr.getch() != ord('q'):
+            continue
+        stdscr.clear()
     elif command.startswith("del"):
         task_id = command[4:]
         if task_id.isdigit():
