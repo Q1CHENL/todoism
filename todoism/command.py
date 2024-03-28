@@ -60,7 +60,7 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
     elif command.startswith("setcolor "):
         st.set_color_selected(command[9:])
     elif command == "help":
-        pr.print_help(stdscr)
+        pr.print_msg(stdscr, pr.help_msg)
         key = stdscr.getch()
         if key == ord('q'):
             stdscr.clear()

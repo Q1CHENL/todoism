@@ -6,47 +6,51 @@ add_mode  = 0
 edit_mode = 1
 
 help_msg =  '''
-                         ┌──────────────────────────────────────────────────┐
-                         │                                                  │
-                         │   short commands:                                │
-                         │   a - create new task                            │
-                         │   d - mark task as done                          │
-                         │   e - edit task                                  │
-                         │   f - mark task as flagged                       │
-                         │   q - quit this help message/todoism             │
-                         │                                                  │
-                         │   vim-like long commands:                        │            
-                         │   (:<command> [args])                            │
-                         │   :help - show this help message                 │
-                         │   :purge - purge all done tasks                  │
-                         │   :sort f - sort flagged tasks to top            │
-                         │   :sort d - sort done tasks to bottom            │
-                         │   :autosort f on|off                             │
-                         │   :autosort d on|off                             │
-                         │   :setcolor blue|red|yellow|green                │
-                         │    - change background color of current task     │
-                         │   :del [task_id] - delete task                   │
-                         │   :edit [task_id] - edit task                    │
-                         │   :done [task_id] - mark task as done            │
-                         │                                                  │
-                         │   other key bindings:                            │
-                         │   double Backspace - delete task                 │
-                         │   ESC - quit adding/editing task                 │
-                         │   Enter - finish adding/editing task             │
-                         │   Up/Down Arrow Keys - navigate through tasks    │
-                         │                                                  │
-                         └──────────────────────────────────────────────────┘
-            '''
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│   short commands:                                │
+│   a - create new task                            │
+│   d - mark task as done                          │
+│   e - edit task                                  │
+│   f - mark task as flagged                       │
+│   q - quit this help message/todoism             │
+│                                                  │
+│   vim-like long commands:                        │            
+│   (:<command> [args])                            │
+│   :help - show this help message                 │
+│   :purge - purge all done tasks                  │
+│   :sort f - sort flagged tasks to top            │
+│   :sort d - sort done tasks to bottom            │
+│   :autosort f on|off                             │
+│   :autosort d on|off                             │
+│   :setcolor blue|red|yellow|green                │
+│    - change background color of current task     │
+│   :del [task_id] - delete task                   │
+│   :edit [task_id] - edit task                    │
+│   :done [task_id] - mark task as done            │
+│                                                  │
+│   other key bindings:                            │
+│   double Backspace - delete task                 │
+│   ESC - quit adding/editing task                 │
+│   Enter - finish adding/editing task             │
+│   Up/Down Arrow Keys - navigate through tasks    │
+│                                                  │
+└──────────────────────────────────────────────────┘
+'''
 
-empty_msg = '''
-                         ┌──────────────────────────────────────────────────────┐
-                         │       Hmm, it seems there are no active tasks.       │
-                         │ Take a break, or create some new ones to get busy :) │
-                         └──────────────────────────────────────────────────────┘
-            '''
+empty_msg = f'''
+┌──────────────────────────────────────────────────────┐
+│       Hmm, it seems there are no active tasks.       │
+│ Take a break, or create some new ones to get busy :) │
+└──────────────────────────────────────────────────────┘
+'''
 
-def print_help(stdscr):
-    stdscr.addstr(0, 0, help_msg)
+def print_msg(stdscr, msg):
+    lines = msg.split('\n')
+    width = len(lines[1])
+    max_x = stdscr.getmaxyx()[1]
+    final_str = '\n'.join([' ' * ((max_x - width) // 2) + line for line in lines])
+    stdscr.addstr(1, 0, f"{final_str}")
     stdscr.refresh()
 
 # The core function to print a single task
@@ -61,11 +65,6 @@ def print_task(stdscr, task, y):
     if y < max_y:
         stdscr.addstr(y, 0, f"{status} {id_str}. {description_with_spaces + task['date']} {flag}")
         
-def print_empty(stdscr):
-    stdscr.addstr(1, 0, empty_msg)
-    stdscr.refresh()
-    
-
 def print_task_selected(stdscr, task, y):
     stdscr.attron(curses.color_pair(1))
     print_task(stdscr, task, y)
@@ -108,7 +107,6 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
             color_pair = 5
         else:
             color_pair = 4
-            
     stdscr.attron(curses.color_pair(color_pair))    
     stdscr.addstr(0, 0, f"{side_spaces}{status_bar['tasks']}")
     stdscr.attroff(curses.color_pair(color_pair))

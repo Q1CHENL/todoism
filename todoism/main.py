@@ -61,7 +61,7 @@ def main(stdscr):
         )
         if task_cnt == 0:
             pr.print_status_bar(stdscr, done_cnt, task_cnt)
-            pr.print_empty(stdscr)
+            pr.print_msg(stdscr, pr.empty_msg)
             
         stdscr.refresh()
         window_height = stdscr.getmaxyx()[0]
