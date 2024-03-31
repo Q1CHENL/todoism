@@ -82,6 +82,7 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
                 ut.reid(task_list)
                 if current_id == num:
                     current_id = current_id - 1
+                tsk.save_tasks(task_list, tsk.tasks_file_path)
     elif command.startswith("edit"):
         task_id = command[5:]
         if task_id.isdigit() and int(task_id) <= len(task_list):
