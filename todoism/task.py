@@ -1,5 +1,6 @@
 import os
 import json
+import todoism.utils as ut
 from datetime import datetime
 
 
@@ -56,5 +57,6 @@ def remove_task_cli(task_id):
     task_list = load_tasks()
     if task_id <= len(task_list):
         del task_list[task_id - 1]
+        ut.reid(task_list)
         save_tasks(task_list, tasks_file_path)   
         return True
