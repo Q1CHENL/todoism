@@ -53,6 +53,9 @@ def print_msg(stdscr, msg):
     stdscr.addstr(1, 0, f"{final_str}")
     stdscr.refresh()
 
+def print_version():
+    print("todoism version 1.20")
+
 # The core function to print a single task
 def print_task(stdscr, task, y):
     max_y, max_x= stdscr.getmaxyx()

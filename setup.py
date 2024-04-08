@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='todoism',
-    version='1.19',
+    version='1.20',
     packages=find_packages(exclude=['test']),
     package_dir={'todoism': 'todoism'},
     entry_points={

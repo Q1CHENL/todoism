@@ -221,6 +221,8 @@ def run():
     elif args.print_all:
         todos = tsk.load_tasks()
         pr.print_all_cli(todos)
+    elif args.version:
+        pr.print_version()
     else:
         curses.wrapper(main)
 

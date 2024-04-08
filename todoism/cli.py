@@ -7,6 +7,7 @@ def parse_args():
     parser.add_argument("-d", "--delete", metavar="ID", type=validate_id, help="delete todo by id")
     parser.add_argument("-p", "--print-all", action="store_true", help="print all todos")
     parser.add_argument("-f", "--flag", action="store_true", help="set task as flagged (used with '-a')")
+    parser.add_argument("-v", "--version", action="store_true", help="show todoism version")
     return parser.parse_args()
 
 def validate_id(arg):
