@@ -36,10 +36,10 @@ def main(stdscr):
     done_cnt = tsk.done_count(task_list)
     current_id = 1 if task_cnt > 0 else 0 # id of task selected
     current_row = 1 if task_cnt > 0 else 0  # range: [0, height-1]
-    window_height = stdscr.getmaxyx()[0]
+    max_capacity = stdscr.getmaxyx()[0] - 1
     # print window of task id
     start = 1 if task_cnt > 0 else 0
-    end = task_cnt if task_cnt < window_height - 1 else window_height - 1
+    end = task_cnt if task_cnt < max_capacity else max_capacity
 
     while True:
         task_cnt = len(task_list)
@@ -64,7 +64,7 @@ def main(stdscr):
             pr.print_msg(stdscr, pr.empty_msg)
             
         stdscr.refresh()
-        window_height = stdscr.getmaxyx()[0]
+        max_capacity = stdscr.getmaxyx()[0] - 1
 
         # for restoring previous view if add was interrupted
         old_start = start
@@ -77,15 +77,14 @@ def main(stdscr):
             curses.curs_set(1)
             # adjust start end for pre-print
             # taskoverflow if a new one is added:
-            if task_cnt >= window_height - 1:
+            if task_cnt >= max_capacity:
                 if end <= task_cnt:
                     start = task_cnt - (end - start - 1)
                     end = task_cnt
             stdscr.erase()
             pr.print_status_bar(stdscr, done_cnt, task_cnt)
             pr.print_tasks(stdscr, task_list, current_id, start, end)
-            stdscr.addstr(window_height - 1 if task_cnt >= window_height -
-                          1 else task_cnt + 1, 4 if task_cnt < 9 else 3, f"{task_cnt + 1}.{' '}")
+            stdscr.addstr(max_capacity if task_cnt >= max_capacity else task_cnt + 1, 4 if task_cnt < 9 else 3, f"{task_cnt + 1}.{' '}")
             stdscr.refresh()
 
             # Add a new task
@@ -98,10 +97,10 @@ def main(stdscr):
                 task_cnt = task_cnt + 1
                 if task_cnt == 1:
                     start = 1
-                if task_cnt - 1 <= window_height - 1:
+                if task_cnt - 1 <= max_capacity:
                     current_row = task_cnt
                 else:
-                    current_row = window_height - 1
+                    current_row = max_capacity
                 current_id = new_id  # new id
                 end = end + 1  # change end as well
             else:
@@ -123,16 +122,16 @@ def main(stdscr):
             curses.curs_set(1)
             if task_cnt > 0:
                 current_id, current_row, start, end = ut.edit_and_save(
-                    stdscr,
-                    task_list,
-                    current_id,
-                    current_row,
-                    start,
-                    end,
-                    current_row,
-                    len(task_list[current_id - 1]['description']) + ut.indent,
-                    window_height
-                )
+                                                            stdscr,
+                                                            task_list,
+                                                            current_id,
+                                                            current_row,
+                                                            start,
+                                                            end,
+                                                            current_row,
+                                                            len(task_list[current_id - 1]['description']) + ut.indent,
+                                                            max_capacity
+                                                            )
             curses.curs_set(0)
             curses.noecho()
         elif key == ord('f'):
@@ -149,29 +148,30 @@ def main(stdscr):
         elif key == ord(':'):
             curses.echo()
             curses.curs_set(1)
-            if task_cnt >= window_height - 1:
+            if task_cnt >= max_capacity:
                 stdscr.erase()
                 pr.print_main_view(stdscr, len(done_list), len(task_list), task_list, current_id, start, end - 1)
-            stdscr.addstr(window_height - 1, 0, ":")
+            stdscr.addstr(max_capacity, 0, ":")
             stdscr.refresh()
             command_line = stdscr.getstr().decode('utf-8')
             curses.curs_set(0)
             curses.noecho()
             task_list, done_list, current_id, current_row, start, end = cmd.execute_command(
-                stdscr,
-                command_line,
-                task_list,
-                done_list,
-                purged_list,
-                current_id,
-                start,
-                end,
-                current_row
-            )
+                                                                            stdscr,
+                                                                            command_line,
+                                                                            task_list,
+                                                                            done_list,
+                                                                            purged_list,
+                                                                            current_id,
+                                                                            start,
+                                                                            end,
+                                                                            current_row,
+                                                                            max_capacity
+                                                                            )
             command_line = ""  # Clear the command line after executing the command
         elif key == curses.KEY_UP and current_id > 1:
             # current is top most task (id != 1)
-            if task_cnt >= window_height - 1 and start > 1 and current_row == 1:
+            if task_cnt >= max_capacity and start > 1 and current_row == 1:
                 start = start - 1
                 end = end - 1
             else:
@@ -179,7 +179,7 @@ def main(stdscr):
             current_id -= 1
         elif key == curses.KEY_DOWN and current_id < task_cnt:
             current_id += 1
-            if task_cnt > window_height - 1 and current_row == window_height - 1:
+            if task_cnt > max_capacity and current_row == max_capacity:
                 start = start + 1
                 end = end + 1
             else:
@@ -203,7 +203,7 @@ def main(stdscr):
                         start,
                         end,
                         task_cnt,
-                        window_height
+                        max_capacity
                     )
 
                     # update task_cnt

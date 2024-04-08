@@ -6,7 +6,6 @@ An interactive and intuitive todo TUI
 
 ![UI](./assets/demo.gif)
 
-
 ## Install and use
 
 - Install: `pip install todoism`
@@ -49,11 +48,19 @@ An interactive and intuitive todo TUI
 ## ToDos
 
 - **sidebar: categories**
+- ~~apply post_deletion_update to command del~~
 - update time regularly: seperate thread or
 - commandline interface for e.g adding tasks
 - ~~command: done xx~~
 - set color random
+- maybe restore prev current id and row at command edit as well
+- properly display completed tasks
+- maybe make autosort flag and done default
+- grey background when adding new task using 'a'
+- make status bar prettier: wrap it as a block
 - done x,y,z
+- stroke-through effect
+- add chinese language support
 - Caps commands
 - make no-task message more helpful
 - purge all
@@ -80,4 +87,5 @@ An interactive and intuitive todo TUI
 - sound
 
 ## Contribute
+
 Issues and PRs are welcome! todoism uses curses library as its main tech stack. Please refer to the library [docs](https://docs.python.org/3/library/curses.html#module-curses) and [how-to](https://docs.python.org/3/howto/curses.html) to get started.
