@@ -215,7 +215,7 @@ def main(stdscr):
 def run():
     args = cli.parse_args()
     if args.add:
-        tsk.add_new_task_cli(args.add)
+        tsk.add_new_task_cli(args.add, args.flag)
     elif args.delete:
         tsk.remove_task_cli(args.delete)
     elif args.print_all:

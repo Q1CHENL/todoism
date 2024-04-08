@@ -1,11 +1,12 @@
-import argparse
 import re
+import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--add", metavar="TEXT", type=validate_text, help="add new todo")
+    parser.add_argument("-a", "--add", metavar="TEXT", type=validate_text, help="add new todo (inside single/double quotes)")
     parser.add_argument("-d", "--delete", metavar="ID", type=validate_id, help="delete todo by id")
     parser.add_argument("-p", "--print-all", action="store_true", help="print all todos")
+    parser.add_argument("-f", "--flag", action="store_true", help="set task as flagged (used with '-a')")
     return parser.parse_args()
 
 def validate_id(arg):
