@@ -50,7 +50,7 @@ An interactive and intuitive todo TUI
 - **sidebar: categories**
 - ~~apply post_deletion_update to command del~~
 - update time regularly: seperate thread or
-- commandline interface for e.g adding tasks
+- ~~commandline interface for e.g adding tasks~~
 - ~~command: done xx~~
 - set color random
 - maybe restore prev current id and row at command edit as well
