@@ -121,3 +121,20 @@ def repaint(stdscr, done_cnt, task_cnt, task_list, current_id, start, end):
     stdscr.erase()
     print_main_view(stdscr, done_cnt, task_cnt, task_list, current_id, start, end)
     stdscr.refresh()
+
+def print_all_cli(todos):
+    if len(todos) == 0:
+        print("no todos yet")
+        exit(0)
+    flagged_fmt = "\033[3m%s\033[0m" # italic
+    done_fmt = "\033[9m%s\033[0m" # crossline
+    todo_fmt = "#{id:02d} {description} ({date})"
+    text = ""
+    for todo in todos:
+        todo_line = todo_fmt.format(**todo)
+        if todo.get("status"):
+            todo_line = done_fmt % todo_line
+        if todo.get("flagged"):
+            todo_line = flagged_fmt % todo_line
+        text += todo_line + "\n"
+    print(text, end="")

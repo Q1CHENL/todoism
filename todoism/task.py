@@ -1,5 +1,6 @@
 import os
 import json
+import todoism.utils as ut
 from datetime import datetime
 
 
@@ -46,4 +47,16 @@ def add_new_task(task_list, task_id, task_description):
     save_tasks(task_list, tasks_file_path)
     return task_list
 
-    
+def add_new_task_cli(task_description):
+    task_list = load_tasks()
+    task_id = len(task_list) + 1
+    _ = add_new_task(task_list, task_id, task_description)[-1]
+    return task_id
+
+def remove_task_cli(task_id):
+    task_list = load_tasks()
+    if task_id <= len(task_list):
+        del task_list[task_id - 1]
+        ut.reid(task_list)
+        save_tasks(task_list, tasks_file_path)   
+        return True

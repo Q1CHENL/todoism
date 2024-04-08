@@ -4,6 +4,7 @@ import todoism.task as tsk
 import todoism.print as pr
 import todoism.settings as st
 import todoism.command as cmd
+import todoism.cli as cli
 
 
 def main(stdscr):
@@ -212,7 +213,16 @@ def main(stdscr):
 
 
 def run():
-    curses.wrapper(main)
+    args = cli.parse_args()
+    if args.add:
+        tsk.add_new_task_cli(args.add)
+    elif args.delete:
+        tsk.remove_task_cli(args.delete)
+    elif args.print_all:
+        todos = tsk.load_tasks()
+        pr.print_all_cli(todos)
+    else:
+        curses.wrapper(main)
 
 
 if __name__ == "__main__":
