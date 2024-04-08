@@ -33,13 +33,27 @@ def sort(task_list, key):
     return marked + not_marked
 
 
-def execute_command(stdscr, command, task_list, done_list, purged_list, current_id, start, end, current_row):
+def execute_command(
+        stdscr, 
+        command, 
+        task_list, 
+        done_list, 
+        purged_list,
+        current_id,
+        start,
+        end,
+        current_row,
+        max_capacity
+        ):
     if command.startswith("done "):
-        if command[5:].isdigit():
-            index_to_done = int(command[5:]) - 1
-            if 0 <= index_to_done < len(task_list):
-                done_list.append(copy.copy(task_list[index_to_done]))
-                task_list[index_to_done]['status'] = not task_list[index_to_done]['status']
+        tasks_sperated_by_comma = command[5:].split(' ')
+        if len(tasks_sperated_by_comma) == 1:
+            # todo loop through to check isdigit
+            if command[5:].isdigit():
+                index_to_done = int(command[5:]) - 1
+                if 0 <= index_to_done < len(task_list):
+                    done_list.append(copy.copy(task_list[index_to_done]))
+                    task_list[index_to_done]['status'] = not task_list[index_to_done]['status']
     elif command == "purge":
         original_cnt = len(task_list)
         displayed_task_cnt = end - start + 1
@@ -72,20 +86,47 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
         pr.print_msg(stdscr, pr.help_msg)
         while stdscr.getch() != ord('q'):
             continue
-        stdscr.clear()
     elif command.startswith("del"):
-        task_id = command[4:]
-        if task_id.isdigit():
-            num = len(task_list)
-            if int(task_id) <= num:
-                del task_list[int(task_id) - 1]
+        # In order to apply post_deletion_update, need to first change 
+        # current_id & current_row to the the one to be deleted
+        del_task_id = command[4:]
+        if del_task_id.isdigit():
+            # only deletion of task in current view is allowed
+            if start <= int(del_task_id) <= end:
+                old_current_id = current_id
+                # old_current_row = current_row
+                current_id = int(del_task_id)
+                current_row = current_id - start + 1
+                old_description = task_list[old_current_id - 1]['description']
+                del task_list[int(del_task_id) - 1]
                 ut.reid(task_list)
-                if current_id == num:
-                    current_id = current_id - 1
+                _, _, start, end = ut.post_deletion_update(
+                                                            current_id,
+                                                            current_row, 
+                                                            start, 
+                                                            end,
+                                                            len(task_list) + 1,
+                                                            max_capacity
+                                                            )
+                # restore to previous current_id and current_row
+                # These 2 remain unchaned unless the last task was deleted:
+                new_id_of_prev_current_task = get_id_by_description(task_list, old_description)
+                # if the prev current task was deleted: the selected task was deleted
+                if new_id_of_prev_current_task == -1:
+                    # if the first task was selected and deleted
+                    if old_current_id == 1:
+                        current_id = 1
+                    else:
+                        current_id = old_current_id - 1
+                else:
+                    current_id = new_id_of_prev_current_task
+                current_row = current_id - start + 1
+                tsk.save_tasks(task_list, tsk.tasks_file_path)
+                                        
     elif command.startswith("edit"):
         task_id = command[5:]
         if task_id.isdigit() and int(task_id) <= len(task_list):
-            window_height = stdscr.getmaxyx()[0]    
+            max_capacity = stdscr.getmaxyx()[0] - 1    
             edit_id = int(task_id)
             pr.repaint(stdscr, len(done_list), len(task_list), task_list, edit_id, start, end)
             curses.echo()
@@ -101,10 +142,22 @@ def execute_command(stdscr, command, task_list, done_list, purged_list, current_
                                                             end,
                                                             edit_id - start + 1,
                                                             len(task_list[edit_id - 1]['description']) + ut.indent,
-                                                            window_height
+                                                            max_capacity
                                                             )
             curses.curs_set(0)
             curses.noecho()      
 
     return task_list, done_list, current_id, current_row, start, end
 
+def get_id_by_description(task_list, description):
+    # current solution: save the content of the prev task first
+    # or just iterate through the whole list to match description
+    # then restore back to the new id corresponding to that content
+    
+    # todo: python dict should support reverse retrieving
+    for task in task_list:
+        if task['description'] == description:
+            return task['id']
+    return -1
+        
+    
