@@ -4,6 +4,7 @@ import todoism.task as tsk
 
 
 indent = 7
+max_task_count = 99
 
 def reid(task_list):
     """Reassign ids to every task in the list"""

@@ -59,7 +59,7 @@ An interactive and intuitive todo TUI
 - maybe make autosort flag and done default
 - grey background when adding new task using 'a'
 - make status bar prettier: wrap it as a block
-- done x,y,z
+- ~~done/flag x,y,z~~
 - stroke-through effect
 - add chinese language support
 - Caps commands

@@ -40,9 +40,16 @@ help_msg =  '''
 
 empty_msg = f'''
 ┌──────────────────────────────────────────────────────┐
-│       Hmm, it seems there are no active tasks.       │
+│       Hmm, it seems there are no active tasks        │
 │ Take a break, or create some new ones to get busy :) │
 └──────────────────────────────────────────────────────┘
+'''
+
+limit_msg = f'''
+┌────────────────────────────────────────┐
+│   You already have 99 tasks in hand.   │
+│  Maybe try to deal with them first :)  │
+└────────────────────────────────────────┘
 '''
 
 def print_msg(stdscr, msg):
@@ -74,6 +81,7 @@ def print_task_selected(stdscr, task, y):
     stdscr.attroff(curses.color_pair(1))        
 
 def print_task_mode(stdscr, task, y, mode):
+    """mode: add/edit"""
     if mode == edit_mode:
         print_task_selected(stdscr, task, y)
     else:
@@ -121,7 +129,8 @@ def print_main_view(stdscr, done_cnt, task_cnt, tasks, current_id, start, end):
     print_tasks(stdscr, tasks, current_id, start, end)
     
 def repaint(stdscr, done_cnt, task_cnt, task_list, current_id, start, end):
-    stdscr.erase()
+    """Clear the current view and repaint everything"""
+    stdscr.clear()
     print_main_view(stdscr, done_cnt, task_cnt, task_list, current_id, start, end)
     stdscr.refresh()
 

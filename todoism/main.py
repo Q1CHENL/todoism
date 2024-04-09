@@ -1,3 +1,4 @@
+import time
 import curses
 import todoism.utils as ut
 import todoism.task as tsk
@@ -45,13 +46,10 @@ def main(stdscr):
     while True:
         task_cnt = len(task_list)
         done_cnt = tsk.done_count(task_list)
-
-        stdscr.clear()
         # Selected task highlighting
         color_selected = st.get_color_selected()
         curses.init_pair(1, curses.COLOR_BLACK, color_selected)
-
-        pr.print_main_view(
+        pr.repaint(
             stdscr,
             done_cnt,
             task_cnt,
@@ -74,6 +72,11 @@ def main(stdscr):
         key = stdscr.getch()
         # Handle user input
         if key == ord('a'):
+            if task_cnt == ut.max_task_count:
+                pr.print_msg(stdscr, pr.limit_msg)
+                stdscr.refresh()
+                time.sleep(1.2)
+                continue
             curses.echo()
             curses.curs_set(1)
             # adjust start end for pre-print
@@ -150,8 +153,7 @@ def main(stdscr):
             curses.echo()
             curses.curs_set(1)
             if task_cnt >= max_capacity:
-                stdscr.erase()
-                pr.print_main_view(stdscr, len(done_list), len(task_list), task_list, current_id, start, end - 1)
+                pr.repaint(stdscr, len(done_list), len(task_list), task_list, current_id, start, end - 1)
             stdscr.addstr(max_capacity, 0, ":")
             stdscr.refresh()
             command_line = stdscr.getstr().decode('utf-8')
