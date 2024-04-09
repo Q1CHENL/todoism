@@ -52,7 +52,7 @@ An interactive and intuitive todo TUI
 - update time regularly: seperate thread or
 - ~~commandline interface for e.g adding tasks~~
 - ~~command: done xx~~
-- set color random
+- ~~set color random~~
 - ~~command flag~~
 - maybe restore prev current id and row at command edit as well
 - properly display completed tasks
@@ -64,7 +64,7 @@ An interactive and intuitive todo TUI
 - add chinese language support
 - Caps commands
 - make no-task message more helpful
-- purge all
+- ~~purge all~~
 - command autosort
 - emulate the popup menu when right click on task 
 - esc to quit exit() too slow

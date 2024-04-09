@@ -78,6 +78,9 @@ def execute_command(
                 end = displayed_task_cnt
             else:
                 end = len(task_list)
+    elif command == "purge all":
+        task_list = []
+        tsk.save_tasks(task_list, tsk.tasks_file_path)
     elif command.startswith("sort "):
         category = command[5:]
         if category == "f":
