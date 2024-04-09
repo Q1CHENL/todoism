@@ -48,21 +48,25 @@ def execute_command(
     if command.startswith("done "):
         tasks_sperated_by_comma = command[5:].split(' ')
         if len(tasks_sperated_by_comma) == 1:
-            # todo loop through to check isdigit
-            if command[5:].isdigit():
-                index_to_done = int(command[5:]) - 1
-                if 0 <= index_to_done < len(task_list):
-                    done_list.append(copy.copy(task_list[index_to_done]))
-                    task_list[index_to_done]['status'] = not task_list[index_to_done]['status']
-                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+            ids_to_done = tasks_sperated_by_comma[0].split(',')
+            if all(i.isdigit() for i in ids_to_done):
+                for id_to_done in ids_to_done:
+                    index_to_done = int(id_to_done) - 1
+                    if 0 <= index_to_done < len(task_list):
+                        done_list.append(copy.copy(task_list[index_to_done]))
+                        task_list[index_to_done]['status'] = not task_list[index_to_done]['status']
+                        tsk.save_tasks(task_list, tsk.tasks_file_path)
     elif command.startswith("flag "):
         tasks_sperated_by_comma = command[5:].split(' ')
         if len(tasks_sperated_by_comma) == 1:
-            if command[5:].isdigit():
-                index_to_flag = int(command[5:]) - 1
-                if 0 <= index_to_flag < len(task_list):
-                    task_list[index_to_flag]['flagged'] = not task_list[index_to_flag]['flagged'] 
-                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+            ids_to_flag = tasks_sperated_by_comma[0].split(',')
+            if all(i.isdigit() for i in ids_to_flag):
+                for id_to_flag in ids_to_flag:
+                    index_to_flag = int(id_to_flag) - 1
+                    if 0 <= index_to_flag < len(task_list):
+                        done_list.append(copy.copy(task_list[index_to_flag]))
+                        task_list[index_to_flag]['flagged'] = not task_list[index_to_flag]['flagged']
+                        tsk.save_tasks(task_list, tsk.tasks_file_path)
     elif command == "purge":
         original_cnt = len(task_list)
         displayed_task_cnt = end - start + 1
