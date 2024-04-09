@@ -14,6 +14,6 @@ setup(
     install_requires=[],
     author='Qichen Liu',
     author_email='liuqichne@email.com',
-    description='A simple but interactive and intuitive todo CLI',
+    description='A simple and easy-to-use todo TUI',
     url='https://github.com/Q1CHENL/todoism',
 )
