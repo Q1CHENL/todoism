@@ -54,6 +54,15 @@ def execute_command(
                 if 0 <= index_to_done < len(task_list):
                     done_list.append(copy.copy(task_list[index_to_done]))
                     task_list[index_to_done]['status'] = not task_list[index_to_done]['status']
+                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+    elif command.startswith("flag "):
+        tasks_sperated_by_comma = command[5:].split(' ')
+        if len(tasks_sperated_by_comma) == 1:
+            if command[5:].isdigit():
+                index_to_flag = int(command[5:]) - 1
+                if 0 <= index_to_flag < len(task_list):
+                    task_list[index_to_flag]['flagged'] = not task_list[index_to_flag]['flagged'] 
+                    tsk.save_tasks(task_list, tsk.tasks_file_path)
     elif command == "purge":
         original_cnt = len(task_list)
         displayed_task_cnt = end - start + 1

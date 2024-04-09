@@ -53,6 +53,7 @@ An interactive and intuitive todo TUI
 - ~~commandline interface for e.g adding tasks~~
 - ~~command: done xx~~
 - set color random
+- ~~command flag~~
 - maybe restore prev current id and row at command edit as well
 - properly display completed tasks
 - maybe make autosort flag and done default
