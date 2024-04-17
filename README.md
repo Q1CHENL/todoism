@@ -54,6 +54,7 @@ An interactive and intuitive todo TUI
 - ~~command: done xx~~
 - ~~set color random~~
 - ~~command flag~~
+- prevent view blinking when scroll fast
 - maybe restore prev current id and row at command edit as well
 - properly display completed tasks
 - maybe make autosort flag and done default
