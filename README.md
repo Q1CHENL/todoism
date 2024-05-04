@@ -1,6 +1,6 @@
 # todoism
 
-An interactive and intuitive todo TUI
+A simple and easy-to-use todo TUI
 
 ## Demo
 
