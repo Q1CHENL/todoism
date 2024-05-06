@@ -2,6 +2,7 @@ import json
 import curses
 import random
 import todoism.task as tsk
+import todoism.path as path
 
 color_set = {
     "blue": curses.COLOR_BLUE,
@@ -17,7 +18,7 @@ def set_color_selected(color: str):
     if color not in color_set and color != "random":
         return
     try:
-        with open(tsk.settings_path, "r+") as settings_file:
+        with open(path.settings_path, "r+") as settings_file:
             settings = json.load(settings_file)
             settings['selected_color'] = color
             settings_file.seek(0)  # move pointer back to beginning
@@ -29,7 +30,7 @@ def set_color_selected(color: str):
 
 def get_color_selected():
     try:
-        with open(tsk.settings_path, "r") as settings_file:
+        with open(path.settings_path, "r") as settings_file:
             settings = json.load(settings_file)
             color = settings['selected_color']
             if color == "random":
@@ -51,6 +52,6 @@ def setup_default_settings():
         "autosort_d": False,
         "selected_color": "blue"
     }
-    with open(tsk.settings_path, "w") as file:
+    with open(path.settings_path, "w") as file:
         json.dump(default_settings, file, indent=4)
     return default_settings

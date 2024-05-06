@@ -1,7 +1,8 @@
 import curses
 import todoism.print as pr
 import todoism.task as tsk
-
+import todoism.siderbar as sb
+import todoism.path as path
 
 indent = 7
 max_task_count = 99
@@ -49,15 +50,16 @@ def edit(stdscr, task, mode):
             return ""
     return task['description']
 
-def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
+def edit_and_save(stdscr, category_list, category_id, task_id, row, start, end, y, x, max_capacity):
+    task_list = category_list[category_id]['task_list']
     stdscr.move(y, x)
-    task_list[id - 1]['description'] = edit(stdscr, task_list[id - 1], pr.edit_mode)
-    if task_list[id - 1]['description'] == "":
-        del task_list[id - 1]
+    task_list[task_id - 1]['description'] = edit(stdscr, task_list[task_id - 1], pr.edit_mode)
+    if task_list[task_id - 1]['description'] == "":
+        del task_list[task_id - 1]
         reid(task_list)
-        id, row, start, end = post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
-    tsk.save_tasks(task_list, tsk.tasks_file_path)
-    return id, row, start, end
+        task_id, row, start, end = post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
+    sb.save_categories(category_list, path.tasks_file_path)
+    return task_id, row, start, end
 
 def post_deletion_update(current_id, current_row, start, end, prev_task_cnt, max_capacity):
     """

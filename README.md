@@ -49,16 +49,23 @@ An interactive and intuitive todo TUI
 
 - **sidebar: categories**
 - ~~apply post_deletion_update to command del~~
-- update time regularly: seperate thread or
 - ~~commandline interface for e.g adding tasks~~
 - ~~command: done xx~~
 - ~~set color random~~
 - ~~command flag~~
+- add new category even from 0
+- delete category
+- manage ids inside a category e.g switch new id
+- switch cate when press arrow keys
+
+- update time regularly: seperate thread or
 - prevent view blinking when scroll fast
 - maybe restore prev current id and row at command edit as well
 - properly display completed tasks
+- adjust status bar for new task panel
 - maybe make autosort flag and done default
 - grey background when adding new task using 'a'
+- max category and task cnt in settings
 - make status bar prettier: wrap it as a block
 - ~~done/flag x,y,z~~
 - stroke-through effect

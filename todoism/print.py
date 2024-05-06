@@ -134,6 +134,27 @@ def repaint(stdscr, done_cnt, task_cnt, task_list, current_id, start, end):
     print_main_view(stdscr, done_cnt, task_cnt, task_list, current_id, start, end)
     stdscr.refresh()
 
+def print_category(sidebar_win, category, y):
+    max_y, max_x= sidebar_win.getmaxyx()
+    if y < max_y:
+        sidebar_win.addstr(y, 0, f"{category['name']}")
+    
+def print_category_selected(siderbar_win, category, y):
+    siderbar_win.attron(curses.color_pair(1))
+    print_category(siderbar_win, category, y)
+    siderbar_win.attroff(curses.color_pair(1))        
+        
+def print_siderbar(sidebar_win, categories, current_category_id, start, end):
+    if start > 0:
+        for i, task in enumerate(categories[start - 1:end]):
+            if i + start == current_category_id: # handle task overflow: +start
+                print_category_selected(sidebar_win, task, i + 1) # +1 due to status bar
+                sidebar_win.refresh()
+            else:
+                print_category(sidebar_win, task, i + 1)
+                sidebar_win.refresh()
+        
+
 def print_all_cli(todos):
     if len(todos) == 0:
         print("no todos yet")

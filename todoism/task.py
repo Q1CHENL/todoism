@@ -1,16 +1,9 @@
-import os
 import json
 import todoism.utils as ut
+import todoism.siderbar as sb
+import todoism.path as path
 from datetime import datetime
 
-
-home_dir = os.path.expanduser("~")
-config_dir = os.path.join(home_dir, ".todoism")
-os.makedirs(config_dir, exist_ok=True)
-tasks_file_path = os.path.join(config_dir, "tasks.json")
-purged_file_path = os.path.join(config_dir, "purged.json")
-test_file_path = os.path.join(config_dir, "test.json")
-settings_path = os.path.join(config_dir, "settings.json")
 
 def done_count(task_list):
     count = 0
@@ -21,11 +14,19 @@ def done_count(task_list):
             
 def load_tasks(arg=''):
     try:
-        with open(test_file_path if arg == '-t' else tasks_file_path, 'r') as file:
+        with open(path.test_file_path if arg == '-t' else path.tasks_file_path, 'r') as file:
             task_list = json.load(file)
     except FileNotFoundError:
         task_list = []
     return task_list
+
+def load_categories_with_tasks():
+    try:
+        with open(path.tasks_file_path, 'r') as file:
+            category_list_with_tasks = json.load(file)
+    except FileNotFoundError:
+        category_list_with_tasks = []
+    return category_list_with_tasks
 
 def create_new_task(task_id, task_description="", flagged=False):
     return {
@@ -40,11 +41,12 @@ def save_tasks(task_list, path):
     with open(path, 'w') as file:
         json.dump(task_list, file, indent=4)
 
-def add_new_task(task_list, task_id, task_description, flagged=False):
+def add_new_task(category_list, category_id, new_task_id, task_description, flagged=False):
     """create, append and save a new task with id: task_id and description: task_description to task_list"""
-    new_task = create_new_task(task_id, task_description, flagged)
+    task_list = category_list[category_id]['task_list']
+    new_task = create_new_task(new_task_id, task_description, flagged)
     task_list.append(new_task)
-    save_tasks(task_list, tasks_file_path)
+    sb.save_categories(category_list, path.tasks_file_path)
     return task_list
 
 def add_new_task_cli(task_description, flagged=False):
@@ -58,5 +60,5 @@ def remove_task_cli(task_id):
     if task_id <= len(task_list):
         del task_list[task_id - 1]
         ut.reid(task_list)
-        save_tasks(task_list, tasks_file_path)   
+        save_tasks(task_list, path.tasks_file_path)   
         return True
