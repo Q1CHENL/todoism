@@ -29,9 +29,6 @@ def main(stdscr):
     # Assuming color pair 0 represents the default colors
     stdscr.bkgd(' ', curses.COLOR_BLACK | curses.A_NORMAL)
     
-    # focus: 1 for sidebar, 2 for task panel
-    
-    
     height_task_win, width_task_win = stdscr.getmaxyx()
     width_siderbar_win = width_task_win // 4
     
@@ -49,8 +46,10 @@ def main(stdscr):
     current_category_row = 1 if category_cnt > 0 else 0    
     task_list = category_list_with_tasks[current_category_id] if current_category_id > 0 else []
 
-    focus = 2 if category_cnt > 0 else 1
-    
+    # focus: 1 for sidebar, 2 for task panel
+    sidebar_panel = 1
+    task_panel = 2
+    focus = task_panel if category_cnt > 0 else sidebar_panel 
     
     done_list = []  # a part of task list
     purged_list = []
