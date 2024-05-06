@@ -54,6 +54,7 @@ A simple and easy-to-use todo TUI
 - ~~command: done xx~~
 - ~~set color random~~
 - ~~command flag~~
+- fix too long task causing error
 - prevent view blinking when scroll fast
 - reset key names of settings etc
 - maybe restore prev current id and row at command edit as well
