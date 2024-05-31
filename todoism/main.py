@@ -42,27 +42,37 @@ def main(stdscr):
     # print window of task id
     start = 1 if task_cnt > 0 else 0
     end = task_cnt if task_cnt < max_capacity else max_capacity
-
+    should_repaint = True
+    
     while True:
         task_cnt = len(task_list)
         done_cnt = tsk.done_count(task_list)
         # Selected task highlighting
-        color_selected = st.get_color_selected()
-        curses.init_pair(1, curses.COLOR_BLACK, color_selected)
-        pr.repaint(
-            stdscr,
-            done_cnt,
-            task_cnt,
-            task_list,
-            current_id,
-            start,
-            end
-        )
-        if task_cnt == 0:
-            pr.print_status_bar(stdscr, done_cnt, task_cnt)
-            pr.print_msg(stdscr, pr.empty_msg)
+        if should_repaint:
+            color_selected = st.get_color_selected()
+            curses.init_pair(1, curses.COLOR_BLACK, color_selected)
+            pr.repaint(
+                stdscr,
+                done_cnt,
+                task_cnt,
+                task_list,
+                current_id,
+                start,
+                end
+            )
             
-        stdscr.refresh()
+            # siderbar_win = curses.newwin(height_task_win, width_siderbar_win, 0, 0)
+            # siderbar_win.addstr("hello from sidebar\n");
+            # siderbar_win.refresh()
+    
+            if task_cnt == 0:
+                pr.print_status_bar(stdscr, done_cnt, task_cnt)
+                pr.print_msg(stdscr, pr.empty_msg)
+
+            stdscr.refresh()
+        else:
+            should_repaint = True
+            
         max_capacity = stdscr.getmaxyx()[0] - 1
 
         # for restoring previous view if add was interrupted
@@ -172,21 +182,26 @@ def main(stdscr):
                                                                             max_capacity
                                                                             )
             command_line = ""  # Clear the command line after executing the command
-        elif key == curses.KEY_UP and current_id > 1:
-            # current is top most task (id != 1)
-            if task_cnt >= max_capacity and start > 1 and current_row == 1:
-                start = start - 1
-                end = end - 1
-            else:
-                current_row = current_row - 1
-            current_id -= 1
-        elif key == curses.KEY_DOWN and current_id < task_cnt:
-            current_id += 1
-            if task_cnt > max_capacity and current_row == max_capacity:
-                start = start + 1
-                end = end + 1
-            else:
-                current_row = current_row + 1
+        elif key == curses.KEY_UP:
+            start, end, current_id, current_row, should_repaint = keyup_update(     
+                                                            start,
+                                                            end,
+                                                            current_id, 
+                                                            current_row,
+                                                            task_cnt,
+                                                            max_capacity,
+                                                            should_repaint
+                                                            )
+        elif key == curses.KEY_DOWN:
+            start, end, current_id, current_row, should_repaint = keydown_update(
+                                                            start,
+                                                            end,
+                                                            current_id, 
+                                                            current_row,
+                                                            task_cnt,
+                                                            max_capacity,
+                                                            should_repaint
+                                                            )
         elif key == curses.KEY_BACKSPACE or key == 127:
             k = stdscr.getch()
             if k == curses.KEY_BACKSPACE or k == 127:
@@ -213,6 +228,29 @@ def main(stdscr):
                     task_cnt = task_cnt - 1
                 tsk.save_tasks(task_list, tsk.tasks_file_path)
 
+
+def keydown_update(start, end, current_id, row, task_cnt, max_capacity, should_repaint):
+    if current_id == task_cnt:
+        return start, end, current_id, row, False
+    current_id += 1
+    if task_cnt > max_capacity and row == max_capacity:
+        start = start + 1
+        end = end + 1
+    else:
+        row = row + 1
+    return start, end, current_id, row, should_repaint
+                
+def keyup_update(start, end, current_id, row, task_cnt, max_capacity, should_repaint):
+    if current_id == 1:
+        return start, end, current_id, row, False
+    # current is top most task (id != 1)
+    if task_cnt >= max_capacity and start > 1 and row == 1:
+        start = start - 1
+        end = end - 1
+    else:
+        row = row - 1
+    current_id -= 1
+    return start, end, current_id, row, should_repaint
 
 def run():
     args = cli.parse_args()

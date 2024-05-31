@@ -95,8 +95,8 @@ def execute_command(
             ut.reid(task_list)
     elif command == "group":
         pass
-    elif command.startswith("setcolor "):
-        st.set_color_selected(command[9:])
+    elif command.startswith("color "):
+        st.set_color_selected(command[6:])
     elif command == "help":
         stdscr.erase()
         pr.print_msg(stdscr, pr.help_msg)
