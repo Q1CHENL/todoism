@@ -91,10 +91,12 @@ def print_tasks(stdscr, task_list, current_id, start, end):
     if start > 0:
         for i, task in enumerate(task_list[start - 1:end]):
             if i + start == current_id: # handle task overflow: +start
-                print_task_selected(stdscr, task, i + 1) # +1 due to status bar
+                # print_task_selected(stdscr, task, i + 1) # +1 due to status bar
+                print_task_selected(stdscr, task, i)
                 stdscr.refresh()
             else:
-                print_task(stdscr, task, i + 1)
+                # print_task(stdscr, task, i + 1)
+                print_task(stdscr, task, i)
                 stdscr.refresh()
 
 
@@ -106,7 +108,7 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     percentage_num = int((done_cnt / task_cnt) * 100) if task_cnt > 0 else 0
     status_bar = {
         'tasks': f"Progress: {done_cnt}/{task_cnt} {percentage_num if task_cnt > 0 else 0}%",
-        'date': datetime.now().strftime("%Y-%m-%d %H:%M") 
+        'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     color_pair = 0
     if percentage_num >= 67:
@@ -118,14 +120,16 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
             color_pair = 5
         else:
             color_pair = 4
-    stdscr.attron(curses.color_pair(color_pair))    
-    stdscr.addstr(0, 0, f"{side_spaces}{status_bar['tasks']}")
-    stdscr.attroff(curses.color_pair(color_pair))
-    stdscr.addstr(f" | {status_bar['date']}{side_spaces}")
+
+    tasks = f"{side_spaces}{status_bar['tasks']}"
+    sdate = f" | {status_bar['date']}{side_spaces}"
+    n = min(max_x - 1, len(tasks) + len(sdate))
+    stdscr.addnstr(0, 0, tasks, n - len(tasks), curses.color_pair(color_pair))
+    stdscr.addnstr(sdate, n - len(sdate))
     stdscr.refresh()
 
 def print_main_view(stdscr, done_cnt, task_cnt, tasks, current_id, start, end):
-    print_status_bar(stdscr, done_cnt, task_cnt)
+    # print_status_bar(stdscr, done_cnt, task_cnt)
     print_tasks(stdscr, tasks, current_id, start, end)
     
 def repaint(stdscr, done_cnt, task_cnt, task_list, current_id, start, end):

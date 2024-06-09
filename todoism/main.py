@@ -1,5 +1,7 @@
-import time
 import curses
+import time
+import threading
+
 import todoism.utils as ut
 import todoism.task as tsk
 import todoism.print as pr
@@ -24,7 +26,9 @@ def main(stdscr):
     curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK)
     # Set up the screen
     curses.curs_set(0)
-    stdscr.clear()
+    # stdscr.clear()
+    stdscr.refresh()
+
     # Assuming color pair 0 represents the default colors
     stdscr.bkgd(' ', curses.COLOR_BLACK | curses.A_NORMAL)
 
@@ -38,11 +42,25 @@ def main(stdscr):
     done_cnt = tsk.done_count(task_list)
     current_id = 1 if task_cnt > 0 else 0 # id of task selected
     current_row = 1 if task_cnt > 0 else 0  # range: [0, height-1]
-    max_capacity = stdscr.getmaxyx()[0] - 1
+    max_capacity, max_x = stdscr.getmaxyx()
+    max_capacity = max(0, max_capacity - 1)
     # print window of task id
     start = 1 if task_cnt > 0 else 0
     end = task_cnt if task_cnt < max_capacity else max_capacity
     should_repaint = True
+
+
+    sb_win = curses.newwin(1, max_x, 0, 0)
+    tasks_win = curses.newwin(max_capacity, max_x, 1, 0)
+
+    def sb_loop(win):
+        while True:
+            pr.print_status_bar(win, done_cnt, task_cnt)
+            time.sleep(1)
+
+    sb_thread = threading.Thread(target=sb_loop, daemon=True, args=(sb_win,))
+    sb_thread.start()
+
     
     while True:
         task_cnt = len(task_list)
@@ -52,7 +70,7 @@ def main(stdscr):
             color_selected = st.get_color_selected()
             curses.init_pair(1, curses.COLOR_BLACK, color_selected)
             pr.repaint(
-                stdscr,
+                tasks_win,
                 done_cnt,
                 task_cnt,
                 task_list,
@@ -66,7 +84,7 @@ def main(stdscr):
             # siderbar_win.refresh()
     
             if task_cnt == 0:
-                pr.print_status_bar(stdscr, done_cnt, task_cnt)
+                # pr.print_status_bar(stdscr, done_cnt, task_cnt)
                 pr.print_msg(stdscr, pr.empty_msg)
 
             stdscr.refresh()
@@ -96,8 +114,8 @@ def main(stdscr):
                     start = task_cnt - (end - start - 1)
                     end = task_cnt
             stdscr.erase()
-            pr.print_status_bar(stdscr, done_cnt, task_cnt)
-            pr.print_tasks(stdscr, task_list, current_id, start, end)
+            # pr.print_status_bar(stdscr, done_cnt, task_cnt)
+            pr.print_tasks(tasks_win, task_list, current_id, start, end)
             stdscr.addstr(max_capacity if task_cnt >= max_capacity else task_cnt + 1, 4 if task_cnt < 9 else 3, f"{task_cnt + 1}.{' '}")
             stdscr.refresh()
 
@@ -120,7 +138,7 @@ def main(stdscr):
             else:
                 start = old_start
                 end = old_end
-            pr.print_tasks(stdscr, task_list, current_id, start, end)
+            pr.print_tasks(tasks_win, task_list, current_id, start, end)
             stdscr.refresh()
             curses.curs_set(0)
             curses.noecho()
