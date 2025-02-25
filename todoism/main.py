@@ -22,6 +22,10 @@ def main(stdscr):
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
     # regular color pair
     curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    # Green for done symbol
+    curses.init_pair(6, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    # Orange (using yellow as closest match) for flag symbol
+    curses.init_pair(7, curses.COLOR_RED, curses.COLOR_BLACK)
     # Set up the screen
     curses.curs_set(0)
     stdscr.clear()
@@ -98,7 +102,11 @@ def main(stdscr):
             stdscr.erase()
             pr.print_status_bar(stdscr, done_cnt, task_cnt)
             pr.print_tasks(stdscr, task_list, current_id, start, end)
-            stdscr.addstr(max_capacity if task_cnt >= max_capacity else task_cnt + 1, 4 if task_cnt < 9 else 3, f"{task_cnt + 1}.{' '}")
+            # Add a new task with proper indentation
+            new_task_num = f"{task_cnt + 1:2d}"
+            stdscr.addstr(max_capacity if task_cnt >= max_capacity else task_cnt + 1, 0, f"{new_task_num} ")
+            # Move cursor to the correct position after task number
+            stdscr.move(max_capacity if task_cnt >= max_capacity else task_cnt + 1, ut.indent)
             stdscr.refresh()
 
             # Add a new task
@@ -167,6 +175,7 @@ def main(stdscr):
             stdscr.addstr(max_capacity, 0, ":")
             stdscr.refresh()
             command_line = stdscr.getstr().decode('utf-8')
+            # No error handling for decode failures with non-UTF-8 input
             curses.curs_set(0)
             curses.noecho()
             task_list, done_list, current_id, current_row, start, end = cmd.execute_command(
