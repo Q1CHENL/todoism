@@ -48,9 +48,24 @@ def main(stdscr):
     end = task_cnt if task_cnt < max_capacity else max_capacity
     should_repaint = True
     
+    # Set a timeout for getch() to make it non-blocking (500ms)
+    stdscr.timeout(500)
+    # Track when we last updated the time
+    last_time_update = time.time()
+    
+    
     while True:
         task_cnt = len(task_list)
         done_cnt = tsk.done_count(task_list)
+        
+        # Check if we need to update the time (every second)
+        current_time = time.time()
+        if current_time - last_time_update >= 1.0:
+            pr.print_status_bar(stdscr, done_cnt, task_cnt)
+            stdscr.refresh()
+            last_time_update = current_time
+            should_repaint = False
+            
         # Selected task highlighting
         if should_repaint:
             color_selected = st.get_color_selected()
@@ -84,6 +99,9 @@ def main(stdscr):
         old_end = end
         # Wait for user input
         key = stdscr.getch()
+        
+        if key == -1:
+            continue
         # Handle user input
         if key == ord('a'):
             if task_cnt == ut.max_task_count:
