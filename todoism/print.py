@@ -27,7 +27,8 @@ help_msg =  '''
 │    - change background color of current task     │
 │   :del [task_id] - delete task                   │
 │   :edit [task_id] - edit task                    │
-│   :done [task_id] - mark task as done            │
+│   :done [task_id] - mark task as done            |
+│   :st on|off - toggle strikethrough effect       │ 
 │                                                  │
 │   other key bindings:                            │
 │   double Backspace - delete task                 │
@@ -143,13 +144,29 @@ def _print_task_core(stdscr, task, y, is_selected, max_x=0):
         description = task['description'][:max_desc_space-3] + "..."
     else:
         description = task['description']
+        
+    import todoism.settings as settings
+    
+    # Apply strike-through for completed tasks
+    if task.get('status', False) and settings.get_strikethrough():
+        # Apply strike-through using Unicode combining characters
+        strikethrough_desc = ""
+        for char in description:
+            strikethrough_desc += (char + "\u0336")  # Combine each character with strike
+        description = strikethrough_desc
     
     # Calculate padding for date alignment
-    padding_length = max_x - base_length - len(description) - len(date_str) - 1
+    padding_length = max_x - base_length - (int(len(description)/2) if (settings.get_strikethrough() and task.get('status', False)) else len(description)) - len(date_str) - 1
     padding = " " * max(1, padding_length)
     
     # Print description and date
-    stdscr.addstr(y, 7, f"{description}{padding}{date_str}")
+    if task.get('status', False) and not is_selected:
+        # Use dim text (color pair 8) for completed tasks
+        stdscr.attron(curses.A_DIM)  # Dim attribute
+        stdscr.addstr(y, 7, f"{description}{padding}{date_str}")
+        stdscr.attroff(curses.A_DIM)
+    else:
+        stdscr.addstr(y, 7, f"{description}{padding}{date_str}")
     
     # Turn off styling
     if is_selected:

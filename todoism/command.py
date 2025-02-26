@@ -162,6 +162,15 @@ def execute_command(
                                                             )
             curses.curs_set(0)
             curses.noecho()      
+    elif command.startswith("st"):
+        option = command[3:]
+        if option == "on":
+            st.set_strikethrough(True)
+        elif option == "off":
+            st.set_strikethrough(False)
+        # Repaint the screen to show the change immediately
+        pr.repaint(stdscr, len(done_list), len(task_list), task_list, current_id, start, end)
+    
 
     return task_list, done_list, current_id, current_row, start, end
 
