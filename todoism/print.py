@@ -63,32 +63,72 @@ def print_msg(stdscr, msg):
 def print_version():
     print("todoism version 1.20")
 
-def print_task(stdscr, task, row, is_current, max_x):
-    """Print a task with status indicators"""
-    if max_x == 0:  # Get max_x if not provided
+def print_task_symbols(stdscr, task, y, status_x=3, flag_x=5, use_colors=True, is_selected=False):
+    """Print task status and flag symbols with appropriate colors
+    
+    Args:
+        stdscr: The curses window
+        task: The task data dictionary
+        y: The row position
+        status_x: X position for status symbol (default: 3)
+        flag_x: X position for flag symbol (default: 5)
+        use_colors: Whether to apply color formatting (default: True)
+        is_selected: Whether the task is selected (affects coloring) (default: False)
+    """
+    # Print status indicator
+    if task.get('status', False):
+        if use_colors and not is_selected:
+            stdscr.attron(curses.color_pair(6))  # Green
+            stdscr.addstr(y, status_x, "✓")
+            stdscr.attroff(curses.color_pair(6))
+        else:
+            stdscr.addstr(y, status_x, "✓")
+    else:
+        stdscr.addstr(y, status_x, " ")
+    
+    # Add space between status and flag
+    stdscr.addstr(y, status_x + 1, " ")
+    
+    # Print flag indicator
+    if task.get('flagged', False):
+        if use_colors and not is_selected:
+            stdscr.attron(curses.color_pair(7))  # Orange/Yellow
+            stdscr.addstr(y, flag_x, "⚑")
+            stdscr.attroff(curses.color_pair(7))
+        else:
+            stdscr.addstr(y, flag_x, "⚑")
+    else:
+        stdscr.addstr(y, flag_x, " ")
+    
+    # Add space after flag
+    stdscr.addstr(y, flag_x + 1, " ")
+
+def _print_task_core(stdscr, task, y, is_selected, max_x=0):
+    """Core function to print a task with appropriate formatting
+    
+    Args:
+        stdscr: The curses window
+        task: The task data dictionary
+        y: The row position
+        is_selected: Whether to use color highlighting (selection)
+        max_x: Terminal width (calculated if 0)
+    """
+    if max_x == 0:
         max_x = stdscr.getmaxyx()[1]
-        
-    stdscr.move(row, 0)
-    stdscr.clrtoeol()  # Clear only this line
+    
+    # Clear the line and position cursor
+    stdscr.move(y, 0)
+    stdscr.clrtoeol()
+    
+    # Apply appropriate styling
+    if is_selected:
+        stdscr.attron(curses.color_pair(1))
     
     # Print task ID
-    stdscr.addstr(row, 0, f"{task['id']:2d} ")
+    stdscr.addstr(y, 0, f"{task['id']:2d} ")
     
-    # Print status indicator with color
-    if task.get('status', False):
-        stdscr.attron(curses.color_pair(6))    
-        stdscr.addstr(row, 3, "✓")
-        stdscr.attroff(curses.color_pair(6))
-    else:
-        stdscr.addstr(row, 3, " ")
-    
-    # Print flag indicator with color
-    if task.get('flagged', False):
-        stdscr.attron(curses.color_pair(7))    
-        stdscr.addstr(row, 5, "⚑")
-        stdscr.attroff(curses.color_pair(7))
-    else:
-        stdscr.addstr(row, 5, " ")
+    # Print symbols (with colors appropriate for selected/non-selected)
+    print_task_symbols(stdscr, task, y, 3, 5, use_colors=True, is_selected=is_selected)
     
     # Calculate remaining space for description and date
     date_str = task['date']
@@ -108,17 +148,24 @@ def print_task(stdscr, task, row, is_current, max_x):
     padding_length = max_x - base_length - len(description) - len(date_str) - 1
     padding = " " * max(1, padding_length)
     
-    # Print description and date with proper highlighting if current
+    # Print description and date
+    stdscr.addstr(y, 7, f"{description}{padding}{date_str}")
+    
+    # Turn off styling
+    if is_selected:
+        stdscr.attroff(curses.color_pair(1))
+
+def print_task(stdscr, task, row, is_current, max_x):
+    """Print a task with status indicators"""
     if is_current:
-        stdscr.attron(curses.A_REVERSE)
-    stdscr.addstr(row, 7, f"{description}{padding}{date_str}")
-    if is_current:
-        stdscr.attroff(curses.A_REVERSE)
+        print_task_selected(stdscr, task, row)
+        return
+    
+    _print_task_core(stdscr, task, row, False, max_x)
 
 def print_task_selected(stdscr, task, y):
-    stdscr.attron(curses.color_pair(1))
-    print_task(stdscr, task, y, False, 0)
-    stdscr.attroff(curses.color_pair(1))        
+    """Print a selected task with appropriate highlighting"""
+    _print_task_core(stdscr, task, y, True)
 
 def print_task_mode(stdscr, task, y, mode):
     """mode: add/edit"""
@@ -204,19 +251,3 @@ def print_all_cli(todos):
             todo_line = flagged_fmt % todo_line
         text += todo_line + "\n"
     print(text, end="")
-
-def print_task_symbols(stdscr, task, y, x):
-    """Print task symbols (done and flag) with appropriate colors"""
-    if task['status']:
-        stdscr.attron(curses.color_pair(6))  # Green
-        stdscr.addstr(y, x, "✓")
-        stdscr.attroff(curses.color_pair(6))
-    else:
-        stdscr.addstr(y, x, " ")
-    
-    if task['flagged']:
-        stdscr.attron(curses.color_pair(7))  # Orange/Yellow
-        stdscr.addstr(y, x + 1, "⚑")
-        stdscr.attroff(curses.color_pair(7))
-    else:
-        stdscr.addstr(y, x + 1, " ")
