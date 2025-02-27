@@ -70,17 +70,29 @@ def main(stdscr):
             old_max_capacity = max_capacity
             max_capacity = new_max_capacity
             
-            # If window got larger, expand the view to show more tasks
-            if max_capacity > old_max_capacity and task_cnt > end:
-                # Calculate how many more tasks we can show
+            # If window got larger
+            if max_capacity > old_max_capacity:
+                # Calculate how many more tasks we can display
                 additional_capacity = max_capacity - old_max_capacity
                 
-                # Expand the end point, but don't go beyond total tasks
-                new_end = min(end + additional_capacity, task_cnt)
-                
-                # Only update if we can actually show more tasks
-                if new_end > end:
-                    end = new_end
+                # Check if we're viewing the end of the task list (common when scrolled down)
+                if end == task_cnt and task_cnt > max_capacity:
+                    # We're at the end of the list - keep the end fixed and adjust start
+                    # to show more tasks at the beginning
+                    end = task_cnt  # Keep showing the last task
+                    start = max(1, end - max_capacity + 1)  # Show as many as possible
+                    
+                    # Adjust row to maintain the selected task position
+                    if current_id >= start and current_id <= end:
+                        current_row = current_id - start + 1
+                else:
+                    # Standard case - just expand the end to show more tasks
+                    new_end = min(end + additional_capacity, task_cnt)
+                    
+                    # Only update if we can actually show more tasks
+                    if new_end > end:
+                        end = new_end
+                        
             # If window got smaller and can't display current range
             elif end - start + 1 > max_capacity:
                 # Try to keep current task in view by adjusting the range
