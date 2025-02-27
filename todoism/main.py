@@ -60,6 +60,54 @@ def main(stdscr):
         task_cnt = len(task_list)
         done_cnt = tsk.done_count(task_list)
         
+        # Get current window dimensions
+        new_max_y, max_x = stdscr.getmaxyx()
+        new_max_capacity = new_max_y - 1  # Account for status bar
+        
+        # Check if window height has changed and we need to adjust view
+        if new_max_capacity != max_capacity:
+            # Store old capacity before updating
+            old_max_capacity = max_capacity
+            max_capacity = new_max_capacity
+            
+            # If window got larger, expand the view to show more tasks
+            if max_capacity > old_max_capacity and task_cnt > end:
+                # Calculate how many more tasks we can show
+                additional_capacity = max_capacity - old_max_capacity
+                
+                # Expand the end point, but don't go beyond total tasks
+                new_end = min(end + additional_capacity, task_cnt)
+                
+                # Only update if we can actually show more tasks
+                if new_end > end:
+                    end = new_end
+            # If window got smaller and can't display current range
+            elif end - start + 1 > max_capacity:
+                # Try to keep current task in view by adjusting the range
+                if current_id >= start and current_id <= end:
+                    # Calculate middle position to keep current task visible
+                    middle_offset = max_capacity // 2
+                    
+                    if current_id <= middle_offset:
+                        # Current task is near beginning
+                        start = 1
+                        end = min(start + max_capacity - 1, task_cnt)
+                    elif current_id > task_cnt - middle_offset:
+                        # Current task is near end
+                        end = task_cnt
+                        start = max(1, end - max_capacity + 1)
+                    else:
+                        # Current task is in middle
+                        start = current_id - middle_offset
+                        end = start + max_capacity - 1
+                
+                # Ensure row position is correct
+                if current_id >= start and current_id <= end:
+                    current_row = current_id - start + 1
+            
+            # Force a repaint after window resize
+            should_repaint = True
+        
         # Check if we need to update the time (every second)
         current_time = time.time()
         if current_time - last_time_update >= 2.0:  # Increased to 2 seconds to reduce lag
