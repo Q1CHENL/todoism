@@ -117,7 +117,7 @@ def main(stdscr):
                     end = task_cnt
             stdscr.erase()
             pr.print_status_bar(stdscr, done_cnt, task_cnt)
-            pr.print_tasks(stdscr, task_list, current_id, start, end)
+            pr.print_tasks(stdscr, task_list, 0, start, end)
             # Add a new task with proper indentation
             new_task_num = f"{task_cnt + 1:2d}"
             stdscr.addstr(max_capacity if task_cnt >= max_capacity else task_cnt + 1, 0, f"{new_task_num} ")
