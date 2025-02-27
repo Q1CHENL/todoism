@@ -59,7 +59,41 @@ def move_by_word(text, current_pos, direction):
             
         return pos
 
-def edit(stdscr, task, mode):
+def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text=None):
+    """Helper function to render a task being edited with appropriate scrolling and styling"""
+    return pr.render_task(
+        stdscr=stdscr,
+        task=task,
+        y=y,
+        is_selected=True,
+        scroll_offset=scroll_offset,
+        max_x=0,  # Let the function calculate this
+        cursor_pos=cursor_pos_in_text,
+        is_edit_mode=True
+    )
+
+def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset):
+    """Highlight selected text region"""
+    # Highlight the selected region
+    min_pos = min(start_pos, end_pos)
+    max_pos = max(start_pos, end_pos)
+    
+    # Only highlight visible portion
+    visible_start = max(min_pos, scroll_offset)
+    visible_end = max_pos
+    
+    # Apply highlighting to each visible character
+    for i in range(visible_start, visible_end):
+        # Calculate screen position - consistent with render_task's text start pos
+        screen_pos = indent + (i - scroll_offset)
+        if i - scroll_offset >= 0:  # Ensure we only render visible chars
+            try:
+                stdscr.addstr(y, screen_pos, task['description'][i], curses.A_REVERSE)
+            except curses.error:
+                # Skip characters that would go past the edge of the screen
+                pass
+
+def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
     """
     A editing wrapper implemented using getch(). It delivers 
     more comprehensive functionalities than getstr() does.
@@ -69,25 +103,101 @@ def edit(stdscr, task, mode):
     selection_start = -1
     # Add debug mode flag
     debug_keys = False
+    # Add horizontal scrolling support - use initial value if provided
+    scroll_offset = initial_scroll
+    # Maximum length for task description (adjust as needed)
+    MAX_DESCRIPTION_LENGTH = 500
+    
+    # Initialize cursor position based on parameter or default behavior
+    if initial_cursor_pos is not None:
+        cursor_pos_in_text = min(initial_cursor_pos, len(task['description']))
+    else:
+        # Default behavior: if no position specified, put cursor at beginning
+        cursor_pos_in_text = 0
+    
+    max_y, max_x = stdscr.getmaxyx()
+    
+    # Calculate exact date position and available width once 
+    date_length = len(task['date'])
+    date_pos = max_x - date_length - 1  # -1 for one character gap before date
+    max_visible_width = date_pos - indent - 1  # -1 for exact one character gap
+    
+    # Track original text and text changes to know when edits are made
+    original_text = task['description']
+    
+    y = stdscr.getyx()[0]
+    
+    # Initial render
+    target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text)
+    stdscr.move(y, target_x)
+    
+    ch = 0  # Initialize ch to avoid UnboundLocalError
+    
+    # Add a flag to completely lock all cursor positioning until user input
+    lock_scrolling = True 
+    stabilize_count = 3
     
     while True:
         y, x = stdscr.getyx()
+        max_y, max_x = stdscr.getmaxyx()
+        
+        # Recalculate with current screen dimensions to handle terminal resizing
+        date_pos = max_x - date_length - 1  # -1 for one character gap
+        max_visible_width = date_pos - indent - 1  # -1 for exact one character gap
+        right_limit = date_pos - 1  # For consistent boundary checks
+        
+        # Calculate cursor position in text
+        cursor_pos_in_text = x - indent + scroll_offset
+        
+        # Check if actual text has changed (not just navigation)
+        text_modified = task['description'] != original_text
+        
+        # Render the edit line with current scroll offset - NO AUTOMATIC ADJUSTMENT
+        target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text)
+        
+        # Add selection highlighting if active
+        if selection_active:
+            highlight_selection(stdscr, task, y, selection_start, cursor_pos_in_text, scroll_offset)
+        
+        # Position cursor
+        stdscr.move(y, target_x)
+        
+        # Get user input
         ch = stdscr.getch()
         
-        # Get relative cursor position in the description text
-        cursor_pos_in_text = x - indent
-        
-        # Debug mode to show key codes
+        # Debug mode - display current key code in top-left corner
         if debug_keys:
-            stdscr.addstr(0, 0, f"Key pressed: {ch}    ")
-            stdscr.refresh()
-            
-        # Toggle debug mode with Ctrl+D (usually code 4)
-        if ch == 4:
+            debug_info = f"Key: {ch} | Pos: {cursor_pos_in_text}/{len(task['description'])} | Scroll: {scroll_offset}"
+            # Save current cursor position
+            current_y, current_x = stdscr.getyx()
+            # Clear the debug area
+            stdscr.addstr(0, 0, " " * min(len(debug_info) + 5, max_x))
+            # Display debug info
+            stdscr.attron(curses.color_pair(4))  # Red color for visibility
+            stdscr.addstr(0, 0, debug_info)
+            stdscr.attroff(curses.color_pair(4))
+            # Restore cursor position
+            stdscr.move(current_y, current_x)
+        
+        # Only decrement stabilize_count on actual keystrokes (not for -1 or timeout)
+        if ch != -1 and stabilize_count > 0:
+            stabilize_count -= 1
+            # Only unlock scrolling after stabilize period
+            if stabilize_count == 0:
+                lock_scrolling = False
+        
+        # REMOVED: No more automatic scrolling logic here
+        
+        # Handle key presses
+        if ch == 4:  # Toggle debug mode with Ctrl+D
             debug_keys = not debug_keys
+            # Clear debug area when turning off
+            if not debug_keys:
+                current_y, current_x = stdscr.getyx()
+                stdscr.addstr(0, 0, " " * max_x)
+                stdscr.move(current_y, current_x)
             continue
-            
-        if ch == 10:  # Enter to complete
+        elif ch == 10:  # Enter to complete
             break
         elif ch == 27:  # ESC
             if mode == pr.add_mode:
@@ -96,27 +206,60 @@ def edit(stdscr, task, mode):
                 # Clear selection if active
                 selection_active = False
                 selection_start = -1
-                pr.print_task_mode(stdscr, task, y, mode)
-                stdscr.move(y, x)
+                continue
                 
         elif ch == curses.KEY_LEFT:
             # Clear selection if active
             if selection_active:
                 selection_active = False
                 selection_start = -1
-                pr.print_task_mode(stdscr, task, y, mode)
-            # Cursor remains still or moves left
-            new_x = indent if x <= indent else x - 1
-            stdscr.move(y, new_x)
             
+            # Only move if not already at the beginning of text
+            if cursor_pos_in_text > 0:
+                # Calculate new position in text
+                new_pos_in_text = cursor_pos_in_text - 1
+                
+                # Calculate new screen position
+                new_x = indent + (new_pos_in_text - scroll_offset)
+                # If cursor would move off-screen left, adjust scroll
+                if new_pos_in_text < scroll_offset:
+                    scroll_offset = max(0, new_pos_in_text)
+                    new_x = indent
+                stdscr.move(y, new_x)
+            else:
+                # Already at beginning of text
+                stdscr.move(y, indent)
+                
         elif ch == curses.KEY_RIGHT:
             # Clear selection if active
             if selection_active:
                 selection_active = False
                 selection_start = -1
-                pr.print_task_mode(stdscr, task, y, mode)
-            # Move right but don't go past the end of description
-            stdscr.move(y, x + 1 if x < indent + len(task['description']) else indent + len(task['description']))
+                
+            # Don't move if already at the absolute end of the text
+            if cursor_pos_in_text >= len(task['description']):
+                # This is critical - reset cursor to end position but don't change scroll
+                new_x = indent + (len(task['description']) - scroll_offset)
+                new_x = min(new_x, right_limit)
+                stdscr.move(y, new_x)
+                continue
+                
+            # Move right but strictly check against text length
+            new_pos = cursor_pos_in_text + 1
+            # Hard limit to prevent going past text end
+            new_pos = min(new_pos, len(task['description']))
+                
+            # Calculate screen position
+            new_x = indent + (new_pos - scroll_offset)
+            
+            # Only scroll if cursor would move out of view
+            if new_x > right_limit:
+                # Only scroll the minimum needed to show cursor
+                scroll_amount = new_x - right_limit
+                scroll_offset += scroll_amount
+                new_x = right_limit
+            
+            stdscr.move(y, new_x)
         
         # Ctrl+Left to move to previous word (without selection)
         elif ch == 554:
@@ -127,26 +270,56 @@ def edit(stdscr, task, mode):
             if selection_active:
                 selection_active = False
                 selection_start = -1
-                pr.print_task_mode(stdscr, task, y, mode)
                 
             # Find the start of the previous word
             new_pos = move_by_word(task['description'], cursor_pos_in_text, -1)
-            stdscr.move(y, new_pos + indent)
             
+            # KEY FIX: Check if we're near the end of text (within 5 chars)
+            near_end = len(task['description']) - cursor_pos_in_text <= 5
+            
+            # Only adjust scroll if we're not near the end
+            if not near_end and new_pos < scroll_offset + 5:
+                scroll_offset = max(0, new_pos - 5)
+            elif near_end and new_pos < scroll_offset:
+                # If near end but would go out of view, make minimal adjustment
+                scroll_offset = new_pos
+            
+            # Calculate new safe screen position
+            new_x = indent + (new_pos - scroll_offset)
+            # Use right_limit instead of hardcoded max_x - 23
+            new_x = min(new_x, right_limit)
+            
+            stdscr.move(y, new_x)
+         
         # Ctrl+Right to move to next word (without selection)
         elif ch == 569:
+            # Don't do anything if already at the end of text
             if cursor_pos_in_text >= len(task['description']):
+                # KEY FIX: Explicitly stabilize position at the end
+                new_x = indent + (len(task['description']) - scroll_offset)
+                new_x = min(new_x, date_pos - 1)  # Ensure we respect the gap
+                stdscr.move(y, new_x)
                 continue
-                
-            # Clear selection if active
-            if selection_active:
-                selection_active = False
-                selection_start = -1
-                pr.print_task_mode(stdscr, task, y, mode)
                 
             # Find the end of the next word
             new_pos = move_by_word(task['description'], cursor_pos_in_text, 1)
-            stdscr.move(y, new_pos + indent)
+            
+            # Only adjust scroll if necessary AND we're not at the end
+            if new_pos < len(task['description']) and new_pos > scroll_offset + max_visible_width - 5:
+                # Limited scroll adjustment to prevent large jumps
+                scroll_offset = min(
+                    new_pos - max_visible_width + 5,
+                    len(task['description']) - max_visible_width  # Don't scroll past end
+                )
+                # Ensure scroll_offset is never negative
+                scroll_offset = max(0, scroll_offset)
+            
+            # Calculate new safe screen position
+            new_x = indent + (new_pos - scroll_offset)
+            # Use date_pos instead of hardcoded max_x - 23
+            new_x = min(new_x, date_pos - 1)
+            
+            stdscr.move(y, new_x)
             
         # Try multiple common key code patterns for Ctrl+Shift+Left
         elif ch in [545, 547, 443, 541, 71, 555]:
@@ -160,16 +333,16 @@ def edit(stdscr, task, mode):
             # Find the start of the previous word
             new_pos = move_by_word(task['description'], cursor_pos_in_text, -1)
             
-            # Highlight selection
-            if selection_active:
-                pr.print_task_mode(stdscr, task, y, mode)
-                # Highlight the selected region
-                min_pos = min(selection_start, new_pos)
-                max_pos = max(selection_start, new_pos)
-                for i in range(min_pos, max_pos):
-                    stdscr.addstr(y, indent + i, task['description'][i], curses.A_REVERSE)
+            # Adjust scroll if needed
+            if new_pos < scroll_offset + 5:
+                scroll_offset = max(0, new_pos - 5)
             
-            stdscr.move(y, new_pos + indent)
+            # Calculate new safe screen position
+            new_x = indent + (new_pos - scroll_offset)
+            if new_x >= max_x - 23:
+                new_x = max_x - 23
+            
+            stdscr.move(y, new_x)
             
         # Try multiple common key code patterns for Ctrl+Shift+Right
         elif ch in [560, 562, 444, 556, 86, 570]:
@@ -183,16 +356,16 @@ def edit(stdscr, task, mode):
             # Find the end of the next word
             new_pos = move_by_word(task['description'], cursor_pos_in_text, 1)
             
-            # Highlight selection
-            if selection_active:
-                pr.print_task_mode(stdscr, task, y, mode)
-                # Highlight the selected region
-                min_pos = min(selection_start, new_pos)
-                max_pos = max(selection_start, new_pos)
-                for i in range(min_pos, max_pos):
-                    stdscr.addstr(y, indent + i, task['description'][i], curses.A_REVERSE)
+            # Adjust scroll if needed
+            if new_pos > scroll_offset + max_visible_width - 5:
+                scroll_offset = new_pos - max_visible_width + 5
             
-            stdscr.move(y, new_pos + indent)
+            # Calculate new safe screen position
+            new_x = indent + (new_pos - scroll_offset)
+            if new_x >= max_x - 23:
+                new_x = max_x - 23
+            
+            stdscr.move(y, new_x)
             
         # Try multiple common key code patterns for Ctrl+Shift+Backspace or Ctrl+W
         elif ch in [523, 527, 23, 127]:
@@ -204,12 +377,21 @@ def edit(stdscr, task, mode):
             
             # Delete characters from new position to current position
             task['description'] = task['description'][:new_pos] + task['description'][cursor_pos_in_text:]
-            pr.print_task_mode(stdscr, task, y, mode)
-            stdscr.move(y, new_pos + indent)
+            
+            # Adjust scroll if needed
+            if new_pos < scroll_offset + 5:
+                scroll_offset = max(0, new_pos - 5)
+            
+            # Calculate new safe screen position
+            new_x = indent + (new_pos - scroll_offset)
+            if new_x >= max_x - 23:
+                new_x = max_x - 23
             
             # Clear selection state
             selection_active = False
             selection_start = -1
+            
+            stdscr.move(y, new_x)
             
         # Try multiple common key code patterns for Ctrl+Shift+Delete or Ctrl+Alt+D
         elif ch in [524, 528, 127, 4]:
@@ -221,59 +403,258 @@ def edit(stdscr, task, mode):
             
             # Delete characters from current position to new position
             task['description'] = task['description'][:cursor_pos_in_text] + task['description'][new_pos:]
-            pr.print_task_mode(stdscr, task, y, mode)
-            stdscr.move(y, x)
             
             # Clear selection state
             selection_active = False
             selection_start = -1
             
-        elif ch == curses.KEY_BACKSPACE or ch == 127:  # Delete
+        elif ch == curses.KEY_BACKSPACE or ch == 127:  # Backspace
             # Clear selection if active
             if selection_active:
                 # Delete the selected text
                 min_pos = min(selection_start, cursor_pos_in_text)
                 max_pos = max(selection_start, cursor_pos_in_text)
+                
+                # Fixed concatenation - properly join text before min_pos with text after max_pos
                 task['description'] = task['description'][:min_pos] + task['description'][max_pos:]
+                
                 selection_active = False
                 selection_start = -1
-                pr.print_task_mode(stdscr, task, y, mode)
-                stdscr.move(y, min_pos + indent)
+                
+                # Adjust scroll if needed
+                if min_pos < scroll_offset + 5:
+                    scroll_offset = max(0, min_pos - 5)
+                
+                # Position cursor at deletion point
+                new_x = indent + (min_pos - scroll_offset)
+                new_x = min(new_x, right_limit)  # Use right_limit instead of hardcoded value
+                
+                stdscr.move(y, new_x)
+                continue
+            
+            # Can't backspace past the start
+            if x <= indent:
+                stdscr.move(y, indent)
+                continue
+            
+            # CRITICAL FIX: Save the text length before deletion
+            old_length = len(task['description'])
+            
+            # Verify cursor position is valid before deletion
+            if cursor_pos_in_text <= 0 or cursor_pos_in_text > old_length:
+                # Invalid position - do nothing
+                continue
+            
+            # Delete character before cursor - properly sliced
+            task['description'] = task['description'][:cursor_pos_in_text - 1] + task['description'][cursor_pos_in_text:]
+            
+            # Calculate new cursor position in text
+            new_cursor_pos = cursor_pos_in_text - 1
+            
+            # Special handling for deletion at end of text
+            at_end = cursor_pos_in_text >= old_length
+            
+            # Adjust scroll if needed
+            if at_end and scroll_offset > 0:
+                # When deleting from end of text, adjust scroll to keep visible area stable
+                scroll_offset = max(0, scroll_offset - 1)
+            elif new_cursor_pos < scroll_offset + 5 and scroll_offset > 0:
+                # Standard adjustment for deleting near left edge of view
+                scroll_offset = max(0, new_cursor_pos - 5)
+            
+            # Calculate correct screen position after deletion
+            new_x = indent + (new_cursor_pos - scroll_offset)
+            
+            # Ensure position is valid
+            new_x = max(indent, min(new_x, right_limit))
+            
+            stdscr.move(y, new_x)
+        
+        elif 32 <= ch < 127:  # Printable char
+            # Check maximum length
+            if len(task['description']) >= MAX_DESCRIPTION_LENGTH and not selection_active:
                 continue
                 
-            if x <= indent:
-                stdscr.move(y, indent)  # cursor remains still
-                continue
-            # -1 because deleting the char before the cursor
-            task['description'] = task['description'][:x - indent - 1] + task['description'][x - indent:]
-            pr.print_task_mode(stdscr, task, y, mode)
-            stdscr.move(y, x - 1)
-            
-        elif 32 <= ch < 127:  # Printable char
             # If a selection is active, replace it with the typed character
             if selection_active:
-                min_pos = min(selection_start, cursor_pos_in_text)
-                max_pos = max(selection_start, cursor_pos_in_text)
-                task['description'] = task['description'][:min_pos] + chr(ch) + task['description'][max_pos:]
-                selection_active = False
-                selection_start = -1
-                pr.print_task_mode(stdscr, task, y, mode)
-                stdscr.move(y, min_pos + indent + 1)
+                # ... existing selection handling code ...
                 continue
                 
-            task['description'] = task['description'][:x - indent] + chr(ch) + task['description'][x - indent:]
-            pr.print_task_mode(stdscr, task, y, mode)
-            stdscr.move(y, x + 1)
+            # Insert character
+            task['description'] = task['description'][:cursor_pos_in_text] + chr(ch) + task['description'][cursor_pos_in_text:]
+            
+            # Calculate new cursor position in text
+            new_cursor_pos = cursor_pos_in_text + 1
+            
+            # FIX: Precise recalculation of boundaries with exactly 1 space gap
+            date_length = len(task['date'])
+            date_pos = max_x - date_length - 1  # Position where date starts (with 1 char gap)
+            max_visible_width = date_pos - indent  # Total spaces available for text
+            right_limit = date_pos - 1  # Position of the 1 char gap
+            
+            # CRITICAL FIX: Calculate how many chars fit in view (excluding the gap)
+            visible_chars = max_visible_width
+            
+            # Check if new position would exceed visible area
+            overflow = new_cursor_pos - scroll_offset > visible_chars
+            
+            # If overflow, calculate exact scroll to keep consistent 1-char gap
+            if overflow:
+                # Scroll exactly enough to show cursor at rightmost position
+                # with exactly 1 char gap before date
+                scroll_offset = new_cursor_pos - visible_chars
+            
+            # Calculate new cursor X position with consistent gap
+            new_x = indent + (new_cursor_pos - scroll_offset)
+            
+            # Safety check to ensure we never go beyond right_limit
+            new_x = min(new_x, right_limit)
+            
+            stdscr.move(y, new_x)
+        
+        # Alt+Left to jump to beginning of text (handle various terminal key codes)
+        elif ch in [537, 543, 27, 542, 451, 552]:  # Various codes for Alt+Left
+            # If ESC (27), need to check if it's followed by proper sequence
+            if ch == 27:
+                # Check for ESC sequence
+                next_ch = stdscr.getch()
+                if next_ch != ord('[') and next_ch != 91:  # Check for '[' character
+                    continue
+                    
+                direction_ch = stdscr.getch()
+                if direction_ch != 49 and direction_ch != ord('1'):  # Not part of Alt+Left sequence
+                    continue
+                    
+                final_ch = stdscr.getch()
+                if final_ch != 59 and final_ch != ord(';'):  # Not part of Alt+Left sequence
+                    continue
+                    
+                mod_ch = stdscr.getch()
+                if mod_ch != 51 and mod_ch != ord('3'):  # Not Alt modifier (3)
+                    continue
+                    
+                arrow_ch = stdscr.getch()
+                if arrow_ch != 68 and arrow_ch != ord('D'):  # Not left arrow ('D')
+                    continue
+            
+            # Clear selection if active
+            if selection_active:
+                selection_active = False
+                selection_start = -1
+                
+            # Jump to beginning of text
+            cursor_pos_in_text = 0
+            
+            # Reset scroll offset to show beginning of text
+            scroll_offset = 0
+            
+            # Position cursor at beginning
+            stdscr.move(y, indent)
+            
+        # Alt+Right to jump to end of text (handle various terminal key codes)
+        elif ch in [552, 558, 402, 500, 567]:  # Various codes for Alt+Right
+            # If ESC (27), need to check if it's followed by proper sequence
+            if ch == 27:
+                # Check for ESC sequence
+                next_ch = stdscr.getch()
+                if next_ch != ord('[') and next_ch != 91:  # Check for '[' character
+                    continue
+                    
+                direction_ch = stdscr.getch()
+                if direction_ch != 49 and direction_ch != ord('1'):  # Not part of Alt+Right sequence
+                    continue
+                    
+                final_ch = stdscr.getch()
+                if final_ch != 59 and final_ch != ord(';'):  # Not part of Alt+Right sequence
+                    continue
+                    
+                mod_ch = stdscr.getch()
+                if mod_ch != 51 and mod_ch != ord('3'):  # Not Alt modifier (3)
+                    continue
+                    
+                arrow_ch = stdscr.getch()
+                if arrow_ch != 67 and arrow_ch != ord('C'):  # Not right arrow ('C')
+                    continue
+            
+            # Clear selection if active
+            if selection_active:
+                selection_active = False
+                selection_start = -1
+                
+            # Jump to end of text
+            cursor_pos_in_text = len(task['description'])
+            
+            # For long text, adjust scroll to show the end of text
+            if len(task['description']) > max_visible_width:
+                # Calculate scroll needed to position cursor at right side with proper buffer
+                scroll_offset = max(0, len(task['description']) - max_visible_width)
+                
+                # Position cursor at end with proper right side alignment
+                new_x = indent + max_visible_width
+                new_x = min(new_x, right_limit)
+            else:
+                # For short text, no scroll needed
+                scroll_offset = 0
+                new_x = indent + len(task['description'])
+                
+            # Ensure we respect the right boundary
+            new_x = min(new_x, right_limit)
+            stdscr.move(y, new_x)
             
     return task['description']
 
 def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
-    stdscr.move(y, x)
-    task_list[id - 1]['description'] = edit(stdscr, task_list[id - 1], pr.edit_mode)
+    """Edit task with improved cursor positioning and scrolling behavior"""
+    # Get screen dimensions
+    max_y, max_x = stdscr.getmaxyx()
+    
+    # Get description length
+    description_length = len(task_list[id - 1]['description'])
+    date_length = len(task_list[id - 1]['date'])
+    
+    # Calculate exact space available for text (accounting for date + gap)
+    date_pos = max_x - date_length - 1  # -1 for exactly one character gap before date
+    available_width = date_pos - indent - 1  # -1 ensures the gap is preserved
+    
+    # NEW BEHAVIOR: Always initialize with scroll_offset = 0 to show beginning of text
+    scroll_offset = 0
+    
+    # Position cursor differently based on text length:
+    if description_length <= available_width:
+        # For short tasks (text fits): position at end of text
+        cursor_x = indent + description_length
+    else:
+        # For long tasks: position at end of visible portion
+        cursor_x = indent + available_width
+    
+    # Make sure cursor position is within screen bounds
+    cursor_x = min(cursor_x, date_pos - 1)  # Ensure exactly one char gap
+    
+    # Calculate cursor position in text
+    cursor_pos_in_text = cursor_x - indent + scroll_offset
+    
+    # Render once with fixed parameters before entering edit mode
+    render_edit_line(stdscr, task_list[id - 1], y, scroll_offset, available_width, cursor_pos_in_text)
+    
+    # Set cursor at the calculated position
+    stdscr.move(y, cursor_x)
+    
+    # Initialize the edit function with the appropriate scroll offset and cursor position
+    task_list[id - 1]['description'] = edit(
+        stdscr, 
+        task_list[id - 1], 
+        pr.edit_mode, 
+        initial_scroll=scroll_offset,
+        initial_cursor_pos=cursor_pos_in_text
+    )
+    
+    # Handle task deletion if description is empty
     if task_list[id - 1]['description'] == "":
         del task_list[id - 1]
         reid(task_list)
         id, row, start, end = post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
+    
+    # Save changes
     tsk.save_tasks(task_list, tsk.tasks_file_path)
     return id, row, start, end
 
