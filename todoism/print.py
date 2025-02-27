@@ -205,8 +205,21 @@ def print_tasks(stdscr, task_list, current_id, start, end):
 def print_status_bar(stdscr, done_cnt, task_cnt):
     """Print centered status bar with progress, percentage, date and time"""
     max_y, max_x = stdscr.getmaxyx()
-    percentage = f"({(done_cnt/task_cnt)*100:.0f}%)" if task_cnt > 0 else "(0%)"
-    status = f"Done: {done_cnt}/{task_cnt} {percentage}"
+    
+    # Calculate percentage
+    percent_value = (done_cnt/task_cnt)*100 if task_cnt > 0 else 0
+    percent_text = f"({percent_value:.0f}%)"
+    
+    # Choose color based on percentage range
+    if percent_value < 33:
+        color_pair = 4  # Red for low completion
+    elif percent_value < 67:
+        color_pair = 3  # Yellow for medium completion
+    else:
+        color_pair = 2  # Green for high completion
+    
+    # Split the status into parts for coloring
+    status_prefix = f"Done: {done_cnt}/{task_cnt} "
     
     # Format current date and time
     current_datetime = datetime.now()
@@ -215,16 +228,19 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     datetime_str = f"{date_str} {time_str}"
     
     # Calculate center position
-    total_len = len(status) + len(datetime_str) + 2  # +2 for spacing
+    total_len = len(status_prefix) + len(percent_text) + len(datetime_str) + 2  # +2 for spacing
     start_pos = (max_x - total_len) // 2
     
     # Clear only the top line
     stdscr.move(0, 0)
     stdscr.clrtoeol()
     
-    # Print centered status and datetime
-    stdscr.addstr(0, start_pos, status)
-    stdscr.addstr(0, start_pos + len(status) + 2, datetime_str)
+    # Print centered status with colored percentage and datetime
+    stdscr.addstr(0, start_pos, status_prefix)
+    stdscr.attron(curses.color_pair(color_pair))
+    stdscr.addstr(0, start_pos + len(status_prefix), percent_text)
+    stdscr.attroff(curses.color_pair(color_pair))
+    stdscr.addstr(0, start_pos + len(status_prefix) + len(percent_text) + 2, datetime_str)
 
 def print_main_view(stdscr, done_cnt, task_cnt, tasks, current_id, start, end):
     print_status_bar(stdscr, done_cnt, task_cnt)
