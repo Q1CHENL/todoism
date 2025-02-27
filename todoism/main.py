@@ -53,6 +53,8 @@ def main(stdscr):
     # Track when we last updated the time
     last_time_update = time.time()
     
+    # Initialize key to avoid UnboundLocalError
+    key = 0
     
     while True:
         task_cnt = len(task_list)
@@ -60,11 +62,10 @@ def main(stdscr):
         
         # Check if we need to update the time (every second)
         current_time = time.time()
-        if current_time - last_time_update >= 1.0:
+        if current_time - last_time_update >= 2.0:  # Increased to 2 seconds to reduce lag
             pr.print_status_bar(stdscr, done_cnt, task_cnt)
             stdscr.refresh()
             last_time_update = current_time
-            should_repaint = False
             
         # Selected task highlighting
         if should_repaint:
@@ -80,10 +81,6 @@ def main(stdscr):
                 end
             )
             
-            # siderbar_win = curses.newwin(height_task_win, width_siderbar_win, 0, 0)
-            # siderbar_win.addstr("hello from sidebar\n");
-            # siderbar_win.refresh()
-    
             if task_cnt == 0:
                 pr.print_status_bar(stdscr, done_cnt, task_cnt)
                 pr.print_msg(stdscr, pr.empty_msg)
@@ -102,6 +99,7 @@ def main(stdscr):
         
         if key == -1:
             continue
+            
         # Handle user input
         if key == ord('a'):
             if task_cnt == ut.max_task_count:
