@@ -18,6 +18,9 @@ help_msg =  '''
 │   vim-like long commands:                        │            
 │   (:<command> [args])                            │
 │   :help - show this help message                 │
+│   :del [task_id] - delete task                   │
+│   :edit [task_id] - edit task                    │
+│   :done [task_id] - mark task as done            |
 │   :purge - purge all done tasks                  │
 │   :sort f - sort flagged tasks to top            │
 │   :sort d - sort done tasks to bottom            │
@@ -25,9 +28,6 @@ help_msg =  '''
 │   :autosort d on|off                             │
 │   :setcolor blue|red|yellow|green                │
 │    - change background color of current task     │
-│   :del [task_id] - delete task                   │
-│   :edit [task_id] - edit task                    │
-│   :done [task_id] - mark task as done            |
 │   :st on|off - toggle strikethrough effect       │ 
 │                                                  │
 │   other key bindings:                            │
@@ -35,7 +35,11 @@ help_msg =  '''
 │   ESC - quit adding/editing task                 │
 │   Enter - finish adding/editing task             │
 │   Up/Down Arrow Keys - navigate through tasks    │
-│                                                  │
+│    Mouse Click:                                  │
+│    - on task: select task                        │
+│    - on done: toggle task completion             │
+│    - on flag: toggle task flag                   │  
+│                                                  │                     
 └──────────────────────────────────────────────────┘
 '''
 
