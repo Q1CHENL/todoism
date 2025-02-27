@@ -480,29 +480,47 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 # ... existing selection handling code ...
                 continue
                 
-            # Insert character
+            # FIXED: Ensure cursor position is valid before insertion
+            if cursor_pos_in_text < 0 or cursor_pos_in_text > len(task['description']):
+                cursor_pos_in_text = min(max(0, cursor_pos_in_text), len(task['description']))
+            
+            # Keep track of whether we're at the end of text before insertion
+            at_end_of_text = cursor_pos_in_text == len(task['description'])
+            
+            # CRITICAL FIX: Record length before insertion to detect pastes
+            original_length = len(task['description'])
+            
+            # Insert character at the correct position
             task['description'] = task['description'][:cursor_pos_in_text] + chr(ch) + task['description'][cursor_pos_in_text:]
             
             # Calculate new cursor position in text
             new_cursor_pos = cursor_pos_in_text + 1
             
-            # FIX: Precise recalculation of boundaries with exactly 1 space gap
+            at_end_of_text = cursor_pos_in_text == len(task['description'])
+            
+            # FIX: Recalculate screen boundaries with exactly 1 space gap
             date_length = len(task['date'])
             date_pos = max_x - date_length - 1  # Position where date starts (with 1 char gap)
             max_visible_width = date_pos - indent  # Total spaces available for text
             right_limit = date_pos - 1  # Position of the 1 char gap
             
-            # CRITICAL FIX: Calculate how many chars fit in view (excluding the gap)
-            visible_chars = max_visible_width
-            
-            # Check if new position would exceed visible area
-            overflow = new_cursor_pos - scroll_offset > visible_chars
-            
-            # If overflow, calculate exact scroll to keep consistent 1-char gap
-            if overflow:
-                # Scroll exactly enough to show cursor at rightmost position
-                # with exactly 1 char gap before date
-                scroll_offset = new_cursor_pos - visible_chars
+            # COMPLETELY REVISED LOGIC FOR END OF TEXT INSERTION
+            if at_end_of_text:
+                # When we're at the end of text and need to scroll:
+                if new_cursor_pos > scroll_offset + max_visible_width:
+                    # First update the scroll position before updating cursor
+                    scroll_offset = new_cursor_pos - max_visible_width
+                
+                # Always update cursor position after any scroll adjustment
+                cursor_pos_in_text = new_cursor_pos
+            elif cursor_pos_in_text - scroll_offset >= max_visible_width - 1:
+                # When cursor is at the edge of visible area but not at end of text
+                # We need to scroll by 1 to show the newly inserted character
+                scroll_offset += 1
+                cursor_pos_in_text = new_cursor_pos
+            else:
+                # Regular case - just update cursor position
+                cursor_pos_in_text = new_cursor_pos
             
             # Calculate new cursor X position with consistent gap
             new_x = indent + (new_cursor_pos - scroll_offset)
