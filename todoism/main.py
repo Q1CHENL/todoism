@@ -64,6 +64,66 @@ def main(stdscr):
         task_cnt = len(task_list)
         done_cnt = tsk.done_count(task_list)
         
+        # Get current window dimensions
+        new_max_y, max_x = stdscr.getmaxyx()
+        new_max_capacity = new_max_y - 1  # Account for status bar
+        
+        # Check if window height has changed and we need to adjust view
+        if new_max_capacity != max_capacity:
+            # Store old capacity before updating
+            old_max_capacity = max_capacity
+            max_capacity = new_max_capacity
+            
+            # If window got larger
+            if max_capacity > old_max_capacity:
+                # Calculate how many more tasks we can display
+                additional_capacity = max_capacity - old_max_capacity
+                
+                # Check if we're viewing the end of the task list (common when scrolled down)
+                if end == task_cnt and task_cnt > max_capacity:
+                    # We're at the end of the list - keep the end fixed and adjust start
+                    # to show more tasks at the beginning
+                    end = task_cnt  # Keep showing the last task
+                    start = max(1, end - max_capacity + 1)  # Show as many as possible
+                    
+                    # Adjust row to maintain the selected task position
+                    if current_id >= start and current_id <= end:
+                        current_row = current_id - start + 1
+                else:
+                    # Standard case - just expand the end to show more tasks
+                    new_end = min(end + additional_capacity, task_cnt)
+                    
+                    # Only update if we can actually show more tasks
+                    if new_end > end:
+                        end = new_end
+                        
+            # If window got smaller and can't display current range
+            elif end - start + 1 > max_capacity:
+                # Try to keep current task in view by adjusting the range
+                if current_id >= start and current_id <= end:
+                    # Calculate middle position to keep current task visible
+                    middle_offset = max_capacity // 2
+                    
+                    if current_id <= middle_offset:
+                        # Current task is near beginning
+                        start = 1
+                        end = min(start + max_capacity - 1, task_cnt)
+                    elif current_id > task_cnt - middle_offset:
+                        # Current task is near end
+                        end = task_cnt
+                        start = max(1, end - max_capacity + 1)
+                    else:
+                        # Current task is in middle
+                        start = current_id - middle_offset
+                        end = start + max_capacity - 1
+                
+                # Ensure row position is correct
+                if current_id >= start and current_id <= end:
+                    current_row = current_id - start + 1
+            
+            # Force a repaint after window resize
+            should_repaint = True
+        
         # Check if we need to update the time (every second)
         current_time = time.time()
         if current_time - last_time_update >= 2.0:  # Increased to 2 seconds to reduce lag
@@ -164,7 +224,7 @@ def main(stdscr):
                     end = task_cnt
             stdscr.erase()
             pr.print_status_bar(stdscr, done_cnt, task_cnt)
-            pr.print_tasks(stdscr, task_list, current_id, start, end)
+            pr.print_tasks(stdscr, task_list, 0, start, end)
             # Add a new task with proper indentation
             new_task_num = f"{task_cnt + 1:2d}"
             stdscr.addstr(max_capacity if task_cnt >= max_capacity else task_cnt + 1, 0, f"{new_task_num} ")
@@ -233,26 +293,36 @@ def main(stdscr):
         elif key == ord(':'):
             curses.echo()
             curses.curs_set(1)
+            
+            # Disable the timeout temporarily while in command mode
+            # This prevents getstr() from timing out while waiting for input
+            stdscr.timeout(-1)  # -1 disables timeout completely
+            
             if task_cnt >= max_capacity:
                 pr.repaint(stdscr, len(done_list), len(task_list), task_list, current_id, start, end - 1)
             stdscr.addstr(max_capacity, 0, ":")
             stdscr.refresh()
+            
+            # Now getstr() will wait indefinitely for input
             command_line = stdscr.getstr().decode('utf-8')
-            # No error handling for decode failures with non-UTF-8 input
+            
+            # Restore the timeout for the main loop
+            stdscr.timeout(500)  # Back to 500ms timeout
+            
             curses.curs_set(0)
             curses.noecho()
             task_list, done_list, current_id, current_row, start, end = cmd.execute_command(
-                                                                            stdscr,
-                                                                            command_line,
-                                                                            task_list,
-                                                                            done_list,
-                                                                            purged_list,
-                                                                            current_id,
-                                                                            start,
-                                                                            end,
-                                                                            current_row,
-                                                                            max_capacity
-                                                                            )
+                                                                          stdscr,
+                                                                          command_line,
+                                                                          task_list,
+                                                                          done_list,
+                                                                          purged_list,
+                                                                          current_id,
+                                                                          start,
+                                                                          end,
+                                                                          current_row,
+                                                                          max_capacity
+                                                                        )
             command_line = ""  # Clear the command line after executing the command
         elif key == curses.KEY_UP:
             start, end, current_id, current_row, should_repaint = keyup_update(     

@@ -104,20 +104,13 @@ def print_task_symbols(stdscr, task, y, status_x=3, flag_x=5, use_colors=True, i
     # Add space after flag
     stdscr.addstr(y, flag_x + 1, " ")
 
-def _print_task_core(stdscr, task, y, is_selected, max_x=0):
-    """Core function to print a task with appropriate formatting
-    
-    Args:
-        stdscr: The curses window
-        task: The task data dictionary
-        y: The row position
-        is_selected: Whether to use color highlighting (selection)
-        max_x: Terminal width (calculated if 0)
-    """
+def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0, 
+               cursor_pos=None, is_edit_mode=False):
+    """Core function to render a task with appropriate formatting"""
     if max_x == 0:
         max_x = stdscr.getmaxyx()[1]
     
-    # Clear the line and position cursor
+    # Clear the row for custom rendering
     stdscr.move(y, 0)
     stdscr.clrtoeol()
     
@@ -131,46 +124,83 @@ def _print_task_core(stdscr, task, y, is_selected, max_x=0):
     # Print symbols (with colors appropriate for selected/non-selected)
     print_task_symbols(stdscr, task, y, 3, 5, use_colors=True, is_selected=is_selected)
     
-    # Calculate remaining space for description and date
+    # Calculate date position and available text space
     date_str = task['date']
-    base_length = 7  # Length of ID + status + flag area
-    date_padding = 2  # Space between description and date
+    base_length = 7  # Length of ID + status + flag area (indent)
+    date_padding = 1  # Space between description and date - exact 1 char gap
     
-    # Calculate maximum description length
-    max_desc_space = max_x - base_length - len(date_str) - date_padding
+    # Calculate date position 
+    date_pos = max_x - len(date_str) - date_padding
     
-    # Handle description truncation
-    if len(task['description']) > max_desc_space - 3:
-        description = task['description'][:max_desc_space-3] + "..."
+    # Calculate available width for text - KEY FIX: subtract 1 more character for the gap
+    text_length = len(task['description'])
+    available_width = date_pos - base_length - 1  # -1 ensures the gap is preserved
+    
+    text_start_pos = base_length
+    
+    # In view mode, we just show what fits; in edit mode, we scroll
+    if is_edit_mode:
+        # Calculate visible portion of text based on scroll offset
+        visible_start = scroll_offset
+        visible_end = min(text_length, scroll_offset + available_width)
+        visible_text = task['description'][visible_start:visible_end]
     else:
-        description = task['description']
+        # In view mode: truncate if too long without ellipsis
+        if text_length > available_width:
+            visible_text = task['description'][:available_width]
+        else:
+            visible_text = task['description']
+            
+        import todoism.settings as settings
         
-    import todoism.settings as settings
+        # Apply strike-through for completed tasks in view mode
+        if task.get('status', False) and settings.get_strikethrough() and not is_edit_mode:
+            # Apply strike-through using Unicode combining characters
+            strikethrough_desc = ""
+            for char in visible_text:
+                strikethrough_desc += (char + "\u0336")  # Combine each character with strike
+            visible_text = strikethrough_desc
     
-    # Apply strike-through for completed tasks
-    if task.get('status', False) and settings.get_strikethrough():
-        # Apply strike-through using Unicode combining characters
-        strikethrough_desc = ""
-        for char in description:
-            strikethrough_desc += (char + "\u0336")  # Combine each character with strike
-        description = strikethrough_desc
-    
-    # Calculate padding for date alignment
-    padding_length = max_x - base_length - (int(len(description)/2) if (settings.get_strikethrough() and task.get('status', False)) else len(description)) - len(date_str) - 1
-    padding = " " * max(1, padding_length)
-    
-    # Print description and date
-    if task.get('status', False) and not is_selected:
-        # Use dim text (color pair 8) for completed tasks
+    # Display text at calculated position
+    if task.get('status', False) and not is_selected and not is_edit_mode:
+        # Use dim text for completed tasks in view mode
         stdscr.attron(curses.A_DIM)  # Dim attribute
-        stdscr.addstr(y, 7, f"{description}{padding}{date_str}")
+        stdscr.addstr(y, text_start_pos, visible_text)
         stdscr.attroff(curses.A_DIM)
     else:
-        stdscr.addstr(y, 7, f"{description}{padding}{date_str}")
+        stdscr.addstr(y, text_start_pos, visible_text)
+    
+    # Print date with exactly one character gap
+    stdscr.addstr(y, date_pos, date_str)
     
     # Turn off styling
     if is_selected:
         stdscr.attroff(curses.color_pair(1))
+    
+    # Calculate cursor position for edit mode
+    if is_edit_mode and cursor_pos is not None:
+        # Calculate position relative to visible text
+        visible_cursor_pos = cursor_pos - scroll_offset
+        
+        if visible_cursor_pos >= 0 and visible_cursor_pos <= len(visible_text):
+            # Normal case - cursor within visible text
+            target_x = text_start_pos + visible_cursor_pos
+        elif visible_cursor_pos < 0:
+            # Cursor is before visible text
+            target_x = text_start_pos
+        else:
+            # Cursor is after visible text
+            target_x = text_start_pos + len(visible_text)
+        
+        # Make sure cursor stays within text area bounds
+        target_x = min(target_x, date_pos - 1)  # -1 to respect the gap
+        return target_x
+    
+    return None
+
+def _print_task_core(stdscr, task, y, is_selected, max_x=0, is_edit_mode=False):
+    """Core function to print a task with appropriate formatting"""
+    return render_task(stdscr, task, y, is_selected, 0, max_x, None, is_edit_mode)
 
 def print_task(stdscr, task, row, is_current, max_x):
     """Print a task with status indicators"""
@@ -187,7 +217,8 @@ def print_task_selected(stdscr, task, y):
 def print_task_mode(stdscr, task, y, mode):
     """mode: add/edit"""
     if mode == edit_mode:
-        print_task_selected(stdscr, task, y)
+        # Pass is_edit_mode=True to prevent truncation with ellipsis
+        _print_task_core(stdscr, task, y, True, 0, is_edit_mode=True)
     else:
         print_task(stdscr, task, y, False, 0)  
         
