@@ -246,26 +246,36 @@ def main(stdscr):
         elif key == ord(':'):
             curses.echo()
             curses.curs_set(1)
+            
+            # Disable the timeout temporarily while in command mode
+            # This prevents getstr() from timing out while waiting for input
+            stdscr.timeout(-1)  # -1 disables timeout completely
+            
             if task_cnt >= max_capacity:
                 pr.repaint(stdscr, len(done_list), len(task_list), task_list, current_id, start, end - 1)
             stdscr.addstr(max_capacity, 0, ":")
             stdscr.refresh()
+            
+            # Now getstr() will wait indefinitely for input
             command_line = stdscr.getstr().decode('utf-8')
-            # No error handling for decode failures with non-UTF-8 input
+            
+            # Restore the timeout for the main loop
+            stdscr.timeout(500)  # Back to 500ms timeout
+            
             curses.curs_set(0)
             curses.noecho()
             task_list, done_list, current_id, current_row, start, end = cmd.execute_command(
-                                                                            stdscr,
-                                                                            command_line,
-                                                                            task_list,
-                                                                            done_list,
-                                                                            purged_list,
-                                                                            current_id,
-                                                                            start,
-                                                                            end,
-                                                                            current_row,
-                                                                            max_capacity
-                                                                            )
+                                                                          stdscr,
+                                                                          command_line,
+                                                                          task_list,
+                                                                          done_list,
+                                                                          purged_list,
+                                                                          current_id,
+                                                                          start,
+                                                                          end,
+                                                                          current_row,
+                                                                          max_capacity
+                                                                        )
             command_line = ""  # Clear the command line after executing the command
         elif key == curses.KEY_UP:
             start, end, current_id, current_row, should_repaint = keyup_update(     
