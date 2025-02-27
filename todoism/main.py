@@ -14,6 +14,10 @@ def main(stdscr):
     curses.curs_set(1)
     stdscr.clear()
     stdscr.refresh()
+    
+    # Enable mouse support
+    curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
+    
     # Initialize color pairs
     curses.start_color()
     # progress colors
@@ -100,8 +104,51 @@ def main(stdscr):
         if key == -1:
             continue
             
+        # Handle mouse events
+        if key == curses.KEY_MOUSE:
+            try:
+                mouse_id, mouse_x, mouse_y, mouse_z, button_state = curses.getmouse()
+                # Check if clicked on a task row (rows start at 1, status bar is at row 0)
+                if 1 <= mouse_y <= min(task_cnt, max_capacity):
+                    # Calculate the task ID that was clicked
+                    clicked_task_row = mouse_y  # Row on screen
+                    clicked_task_id = start + clicked_task_row - 1  # Actual task ID
+                    
+                    if 1 <= clicked_task_id <= task_cnt:
+                        # Define click regions
+                        status_x_start, status_x_end = 3, 4  # Status symbol at x=3
+                        flag_x_start, flag_x_end = 5, 6      # Flag symbol at x=5
+                        
+                        # Check if clicked on status symbol (✓)
+                        if status_x_start <= mouse_x <= status_x_end:
+                            # Toggle task status (done/undone)
+                            if task_list:
+                                done_list.append(task_list[clicked_task_id - 1])
+                                task_list[clicked_task_id - 1]['status'] = not task_list[clicked_task_id - 1]['status']
+                                done_cnt = done_cnt + 1 if task_list[clicked_task_id - 1]['status'] is True else done_cnt - 1
+                                tsk.save_tasks(task_list, tsk.tasks_file_path)
+                                should_repaint = True
+                        
+                        # Check if clicked on flag symbol (⚑)
+                        elif flag_x_start <= mouse_x <= flag_x_end:
+                            # Toggle task flag
+                            if task_list:
+                                task_list[clicked_task_id - 1]['flagged'] = not task_list[clicked_task_id - 1]['flagged']
+                                tsk.save_tasks(task_list, tsk.tasks_file_path)
+                                should_repaint = True
+                        
+                        # Otherwise, just select the task
+                        else:
+                            # Update current selection
+                            current_id = clicked_task_id
+                            current_row = clicked_task_row
+                            should_repaint = True
+            except curses.error:
+                # getmouse() can raise an exception if the terminal doesn't support mouse
+                pass
+            
         # Handle user input
-        if key == ord('a'):
+        elif key == ord('a'):
             if task_cnt == ut.max_task_count:
                 pr.print_msg(stdscr, pr.limit_msg)
                 stdscr.refresh()
