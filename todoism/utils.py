@@ -59,7 +59,7 @@ def move_by_word(text, current_pos, direction):
             
         return pos
 
-def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text=None):
+def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text=None, is_sidebar=False):
     """Helper function to render a task being edited with appropriate scrolling and styling"""
     return pr.render_task(
         stdscr=stdscr,
@@ -69,10 +69,11 @@ def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_p
         scroll_offset=scroll_offset,
         max_x=0,  # Let the function calculate this
         cursor_pos=cursor_pos_in_text,
-        is_edit_mode=True
+        is_edit_mode=True,
+        is_sidebar=is_sidebar  # Pass the sidebar flag
     )
 
-def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset):
+def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset, is_sidebar=False):
     """Highlight selected text region"""
     # Highlight the selected region
     min_pos = min(start_pos, end_pos)
@@ -84,8 +85,12 @@ def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset):
     
     # Apply highlighting to each visible character
     for i in range(visible_start, visible_end):
-        # Calculate screen position - consistent with render_task's text start pos
-        screen_pos = indent + (i - scroll_offset)
+        # Calculate screen position based on whether we're in sidebar or task area
+        if is_sidebar:
+            screen_pos = 3 + (i - scroll_offset)  # 3 is position after ID in sidebar
+        else:
+            screen_pos = indent + 16 + (i - scroll_offset)  # Task position with sidebar offset
+            
         if i - scroll_offset >= 0:  # Ensure we only render visible chars
             try:
                 stdscr.addstr(y, screen_pos, task['description'][i], curses.A_REVERSE)
@@ -93,71 +98,131 @@ def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset):
                 # Skip characters that would go past the edge of the screen
                 pass
 
-def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
+def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sidebar=False):
     """
     A editing wrapper implemented using getch(). It delivers 
     more comprehensive functionalities than getstr() does.
     """
+    # Standardize indent calculations
+    if is_sidebar:
+        # For sidebar, text starts at position 3 (after ID and space)
+        sidebar_width = 0  # No offset needed when editing sidebar items
+        base_indent = 3    # 2 chars for ID + 1 space
+        text_start_pos = base_indent  # Just start after the ID
+    else:
+        # For tasks, use the standard sidebar offset
+        sidebar_width = 16  # 15 chars + 1 for separator
+        base_indent = 7    # Length of ID + status + flag area
+        text_start_pos = sidebar_width + base_indent  # Combined offset for text start
+    
     # Selection state variables
     selection_active = False
     selection_start = -1
-    # Add debug mode flag
     debug_keys = False
-    # Add horizontal scrolling support - use initial value if provided
     scroll_offset = initial_scroll
-    # Maximum length for task description (adjust as needed)
     MAX_DESCRIPTION_LENGTH = 500
     
-    # Initialize cursor position based on parameter or default behavior
+    # Initialize cursor position
     if initial_cursor_pos is not None:
         cursor_pos_in_text = min(initial_cursor_pos, len(task['description']))
     else:
-        # Default behavior: if no position specified, put cursor at beginning
-        cursor_pos_in_text = 0
+        cursor_pos_in_text = len(task['description'])  # Start at end of text for new tasks
     
     max_y, max_x = stdscr.getmaxyx()
     
-    # Calculate exact date position and available width once 
-    date_length = len(task['date'])
-    date_pos = max_x - date_length - 1  # -1 for one character gap before date
-    max_visible_width = date_pos - indent - 1  # -1 for exact one character gap
+    # Calculate available width
+    if is_sidebar:
+        # For sidebar, limit width to sidebar width (15) minus the starting position
+        date_length = 0  # No date shown in sidebar
+        date_pos = 15  # End at sidebar width
+        max_visible_width = date_pos - base_indent  # Usually around 12 characters visible
+    else:
+        # For tasks, calculate based on date position
+        date_length = len(task['date'])
+        date_pos = max_x - date_length - 1
+        max_visible_width = date_pos - text_start_pos - 1
     
-    # Track original text and text changes to know when edits are made
     original_text = task['description']
-    
     y = stdscr.getyx()[0]
     
-    # Initial render
-    target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text)
+    # Initial render with proper offset
+    target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text, is_sidebar)
     stdscr.move(y, target_x)
+    stdscr.refresh()
     
-    ch = 0  # Initialize ch to avoid UnboundLocalError
-    
-    # Add a flag to completely lock all cursor positioning until user input
     lock_scrolling = True 
     stabilize_count = 3
     
     while True:
+        # Get current position
         y, x = stdscr.getyx()
         max_y, max_x = stdscr.getmaxyx()
         
-        # Recalculate with current screen dimensions to handle terminal resizing
-        date_pos = max_x - date_length - 1  # -1 for one character gap
-        max_visible_width = date_pos - indent - 1  # -1 for exact one character gap
-        right_limit = date_pos - 1  # For consistent boundary checks
+        # Clear the edit line WITHOUT clearing the category at the same height
+        if is_sidebar:
+            # For sidebar editing, clear just the sidebar area
+            stdscr.move(y, 0)
+            # Don't use clrtoeol() - it clears the entire line including task area
+            # Instead, clear character by character only in sidebar area
+            for j in range(15):  # Columns 0-14 (sidebar area)
+                stdscr.addch(y, j, ' ')
+            stdscr.refresh()
+            # Restore the separator after clearing
+            stdscr.addch(y, 15, '│')
+            stdscr.refresh()
+            
+            # Redraw ID part (always preserved)
+            stdscr.addstr(y, 0, f"{task['id']:2d} ")
+            stdscr.refresh()
+        else:
+            # Only clear from the separator onwards, preserving sidebar content
+            sidebar_width = 16  # Always use 16 here to preserve sidebar content
+            
+            # Move to the separator and clear only to the right
+            stdscr.move(y, 16)  # Position just after separator
+            stdscr.clrtoeol()
+            
+            # Redraw vertical separator (critical fix)
+            stdscr.addstr(y, 15, "│")
+            
+            # Redraw task ID
+            stdscr.addstr(y, sidebar_width, f"{task['id']:2d} ")
+            
+            # Task symbol area needs redrawing too
+            if 'status' in task or 'flagged' in task:
+                import todoism.print as pr
+                pr.print_task_symbols(
+                    stdscr, 
+                    task, 
+                    y, 
+                    sidebar_width + 3, 
+                    sidebar_width + 5, 
+                    True, 
+                    True
+                )
+        
+        # Recalculate with current screen dimensions
+        if is_sidebar:
+            date_pos = 15  # End of sidebar area
+            max_visible_width = date_pos - base_indent
+        else:
+            date_pos = max_x - date_length - 1
+            max_visible_width = date_pos - text_start_pos - 1
+            
+        right_limit = date_pos - 1
         
         # Calculate cursor position in text
-        cursor_pos_in_text = x - indent + scroll_offset
+        cursor_pos_in_text = x - text_start_pos + scroll_offset
         
-        # Check if actual text has changed (not just navigation)
+        # Check if text has changed
         text_modified = task['description'] != original_text
         
-        # Render the edit line with current scroll offset - NO AUTOMATIC ADJUSTMENT
-        target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text)
+        # Render the edit line with current scroll offset
+        target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text, is_sidebar)
         
         # Add selection highlighting if active
         if selection_active:
-            highlight_selection(stdscr, task, y, selection_start, cursor_pos_in_text, scroll_offset)
+            highlight_selection(stdscr, task, y, selection_start, cursor_pos_in_text, scroll_offset, is_sidebar)
         
         # Position cursor
         stdscr.move(y, target_x)
@@ -220,15 +285,15 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 new_pos_in_text = cursor_pos_in_text - 1
                 
                 # Calculate new screen position
-                new_x = indent + (new_pos_in_text - scroll_offset)
+                new_x = text_start_pos + (new_pos_in_text - scroll_offset)
                 # If cursor would move off-screen left, adjust scroll
                 if new_pos_in_text < scroll_offset:
                     scroll_offset = max(0, new_pos_in_text)
-                    new_x = indent
+                    new_x = text_start_pos
                 stdscr.move(y, new_x)
             else:
                 # Already at beginning of text
-                stdscr.move(y, indent)
+                stdscr.move(y, text_start_pos)
                 
         elif ch == curses.KEY_RIGHT:
             # Clear selection if active
@@ -239,7 +304,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
             # Don't move if already at the absolute end of the text
             if cursor_pos_in_text >= len(task['description']):
                 # This is critical - reset cursor to end position but don't change scroll
-                new_x = indent + (len(task['description']) - scroll_offset)
+                new_x = text_start_pos + (len(task['description']) - scroll_offset)
                 new_x = min(new_x, right_limit)
                 stdscr.move(y, new_x)
                 continue
@@ -250,7 +315,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
             new_pos = min(new_pos, len(task['description']))
                 
             # Calculate screen position
-            new_x = indent + (new_pos - scroll_offset)
+            new_x = text_start_pos + (new_pos - scroll_offset)
             
             # Only scroll if cursor would move out of view
             if new_x > right_limit:
@@ -285,7 +350,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 scroll_offset = new_pos
             
             # Calculate new safe screen position
-            new_x = indent + (new_pos - scroll_offset)
+            new_x = text_start_pos + (new_pos - scroll_offset)
             # Use right_limit instead of hardcoded max_x - 23
             new_x = min(new_x, right_limit)
             
@@ -296,7 +361,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
             # Don't do anything if already at the end of text
             if cursor_pos_in_text >= len(task['description']):
                 # KEY FIX: Explicitly stabilize position at the end
-                new_x = indent + (len(task['description']) - scroll_offset)
+                new_x = text_start_pos + (len(task['description']) - scroll_offset)
                 new_x = min(new_x, date_pos - 1)  # Ensure we respect the gap
                 stdscr.move(y, new_x)
                 continue
@@ -315,7 +380,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 scroll_offset = max(0, scroll_offset)
             
             # Calculate new safe screen position
-            new_x = indent + (new_pos - scroll_offset)
+            new_x = text_start_pos + (new_pos - scroll_offset)
             # Use date_pos instead of hardcoded max_x - 23
             new_x = min(new_x, date_pos - 1)
             
@@ -338,7 +403,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 scroll_offset = max(0, new_pos - 5)
             
             # Calculate new safe screen position
-            new_x = indent + (new_pos - scroll_offset)
+            new_x = text_start_pos + (new_pos - scroll_offset)
             if new_x >= max_x - 23:
                 new_x = max_x - 23
             
@@ -361,7 +426,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 scroll_offset = new_pos - max_visible_width + 5
             
             # Calculate new safe screen position
-            new_x = indent + (new_pos - scroll_offset)
+            new_x = text_start_pos + (new_pos - scroll_offset)
             if new_x >= max_x - 23:
                 new_x = max_x - 23
             
@@ -383,7 +448,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 scroll_offset = max(0, new_pos - 5)
             
             # Calculate new safe screen position
-            new_x = indent + (new_pos - scroll_offset)
+            new_x = text_start_pos + (new_pos - scroll_offset)
             if new_x >= max_x - 23:
                 new_x = max_x - 23
             
@@ -426,15 +491,15 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                     scroll_offset = max(0, min_pos - 5)
                 
                 # Position cursor at deletion point
-                new_x = indent + (min_pos - scroll_offset)
+                new_x = text_start_pos + (min_pos - scroll_offset)
                 new_x = min(new_x, right_limit)  # Use right_limit instead of hardcoded value
                 
                 stdscr.move(y, new_x)
                 continue
             
             # Can't backspace past the start
-            if x <= indent:
-                stdscr.move(y, indent)
+            if x <= text_start_pos:
+                stdscr.move(y, text_start_pos)
                 continue
             
             # CRITICAL FIX: Save the text length before deletion
@@ -463,10 +528,10 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 scroll_offset = max(0, new_cursor_pos - 5)
             
             # Calculate correct screen position after deletion
-            new_x = indent + (new_cursor_pos - scroll_offset)
+            new_x = text_start_pos + (new_cursor_pos - scroll_offset)
             
             # Ensure position is valid
-            new_x = max(indent, min(new_x, right_limit))
+            new_x = max(text_start_pos, min(new_x, right_limit))
             
             stdscr.move(y, new_x)
         
@@ -501,7 +566,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
             # FIX: Recalculate screen boundaries with exactly 1 space gap
             date_length = len(task['date'])
             date_pos = max_x - date_length - 1  # Position where date starts (with 1 char gap)
-            max_visible_width = date_pos - indent  # Total spaces available for text
+            max_visible_width = date_pos - (text_start_pos)  # Total spaces available for text
             right_limit = date_pos - 1  # Position of the 1 char gap
             
             # COMPLETELY REVISED LOGIC FOR END OF TEXT INSERTION
@@ -523,7 +588,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 cursor_pos_in_text = new_cursor_pos
             
             # Calculate new cursor X position with consistent gap
-            new_x = indent + (new_cursor_pos - scroll_offset)
+            new_x = text_start_pos + (new_cursor_pos - scroll_offset)
             
             # Safety check to ensure we never go beyond right_limit
             new_x = min(new_x, right_limit)
@@ -567,7 +632,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
             scroll_offset = 0
             
             # Position cursor at beginning
-            stdscr.move(y, indent)
+            stdscr.move(y, text_start_pos)
             
         # Alt+Right to jump to end of text (handle various terminal key codes)
         elif ch in [552, 558, 402, 500, 567]:  # Various codes for Alt+Right
@@ -608,12 +673,12 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 scroll_offset = max(0, len(task['description']) - max_visible_width)
                 
                 # Position cursor at end with proper right side alignment
-                new_x = indent + max_visible_width
+                new_x = text_start_pos + max_visible_width
                 new_x = min(new_x, right_limit)
             else:
                 # For short text, no scroll needed
                 scroll_offset = 0
-                new_x = indent + len(task['description'])
+                new_x = text_start_pos + len(task['description'])
                 
             # Ensure we respect the right boundary
             new_x = min(new_x, right_limit)
@@ -632,7 +697,7 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     
     # Calculate exact space available for text (accounting for date + gap)
     date_pos = max_x - date_length - 1  # -1 for exactly one character gap before date
-    available_width = date_pos - indent - 1  # -1 ensures the gap is preserved
+    available_width = date_pos - (indent + 16) - 1  # -1 ensures the gap is preserved
     
     # NEW BEHAVIOR: Always initialize with scroll_offset = 0 to show beginning of text
     scroll_offset = 0
@@ -640,16 +705,16 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     # Position cursor differently based on text length:
     if description_length <= available_width:
         # For short tasks (text fits): position at end of text
-        cursor_x = indent + description_length
+        cursor_x = indent + 16 + description_length
     else:
         # For long tasks: position at end of visible portion
-        cursor_x = indent + available_width
+        cursor_x = indent + 16 + available_width
     
     # Make sure cursor position is within screen bounds
     cursor_x = min(cursor_x, date_pos - 1)  # Ensure exactly one char gap
     
     # Calculate cursor position in text
-    cursor_pos_in_text = cursor_x - indent + scroll_offset
+    cursor_pos_in_text = cursor_x - (indent + 16) + scroll_offset
     
     # Render once with fixed parameters before entering edit mode
     render_edit_line(stdscr, task_list[id - 1], y, scroll_offset, available_width, cursor_pos_in_text)

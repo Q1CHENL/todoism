@@ -5,6 +5,7 @@ import todoism.task as tsk
 import todoism.utils as ut
 import todoism.print as pr
 import todoism.settings as st
+import todoism.category as cat
 
 
 def purge(task_list, purged_list):
@@ -150,16 +151,16 @@ def execute_command(
             current_row = edit_id - start + 1
             if len(task_list) and edit_id >= start and edit_id <= end:
                 current_id, current_row, start, end = ut.edit_and_save(
-                                                            stdscr, 
-                                                            task_list, 
-                                                            edit_id,
-                                                            current_row,
-                                                            start,
-                                                            end,
-                                                            edit_id - start + 1,
-                                                            len(task_list[edit_id - 1]['description']) + ut.indent,
-                                                            max_capacity
-                                                            )
+                    stdscr, 
+                    task_list, 
+                    edit_id,
+                    current_row,
+                    start,
+                    end,
+                    edit_id - start + 1,
+                    len(task_list[edit_id - 1]['description']) + ut.indent,
+                    max_capacity
+                )
             curses.curs_set(0)
             curses.noecho()      
     elif command.startswith("st"):
@@ -184,5 +185,67 @@ def get_id_by_description(task_list, description):
         if task['description'] == description:
             return task['id']
     return -1
-        
+
+def execute_category_command(
+        stdscr,
+        command,
+        categories,
+        task_list,
+        current_category_id
+        ):
+    """Execute category-related commands"""
+    if command.startswith("cadd "):
+        category_name = command[5:]
+        if category_name:
+            new_cat = cat.add_category(category_name)
+            if new_cat:
+                return categories + [new_cat], current_category_id
+    elif command.startswith("cdel"):
+        # Parse category ID to delete
+        parts = command.split()
+        if len(parts) > 1 and parts[1].isdigit():
+            category_id = int(parts[1])
+            # Don't allow deleting the "All" category
+            if category_id != 0:
+                # Handle tasks in this category
+                for task in task_list:
+                    if task.get('category_id', 0) == category_id:
+                        # Move tasks to "All" category
+                        task['category_id'] = 0
+                
+                # Delete the category
+                success = cat.delete_category(category_id)
+                if success:
+                    # If we deleted the current category, go back to "All"
+                    if current_category_id == category_id:
+                        current_category_id = 0
+                    
+                    # Reload categories
+                    categories = cat.load_categories()
+                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+    elif command.startswith("cedit "):
+        # Parse category ID and new name
+        parts = command.split()
+        if len(parts) >= 3:
+            if parts[1].isdigit():
+                category_id = int(parts[1])
+                new_name = ' '.join(parts[2:])
+                success = cat.update_category_name(category_id, new_name)
+                if success:
+                    categories = cat.load_categories()
+    elif command.startswith("ccolor "):
+        # Parse category ID and color
+        parts = command.split()
+        if len(parts) == 3 and parts[1].isdigit():
+            category_id = int(parts[1])
+            color = parts[2]
+            categories = cat.load_categories()
+            for category in categories:
+                if category['id'] == category_id:
+                    category['color'] = color
+                    cat.save_categories(categories)
+                    break
     
+    return categories, current_category_id
+
+

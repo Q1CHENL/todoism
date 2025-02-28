@@ -57,12 +57,32 @@ limit_msg = f'''
 └────────────────────────────────────────┘
 '''
 
-def print_msg(stdscr, msg):
+def print_msg(stdscr, msg, x_offset=16):
+    """Print a message box with proper centering in the task area"""
     lines = msg.split('\n')
     width = len(lines[1])
-    max_x = stdscr.getmaxyx()[1]
-    final_str = '\n'.join([' ' * ((max_x - width) // 2) + line for line in lines])
-    stdscr.addstr(1, 0, f"{final_str}")
+    max_y, max_x = stdscr.getmaxyx()
+    
+    # Calculate available width for task area (total width minus sidebar)
+    available_width = max_x - x_offset
+    
+    # Calculate center position within the available task area
+    center_offset = (available_width - width) // 2
+    
+    # Clear the task area before printing
+    for i in range(1, max_y):
+        stdscr.move(i, x_offset)
+        stdscr.clrtoeol()
+    
+    # Print each line separately at the calculated position
+    for i, line in enumerate(lines):
+        y = i + 1  # Start at row 1 (row 0 is status bar)
+        if y < max_y and line.strip():  # Only print non-empty lines and check bounds
+            # Position cursor at sidebar edge + centering offset
+            stdscr.move(y, x_offset + center_offset)
+            # Print the line directly
+            stdscr.addstr(line)
+    
     stdscr.refresh()
 
 def print_version():
@@ -109,47 +129,69 @@ def print_task_symbols(stdscr, task, y, status_x=3, flag_x=5, use_colors=True, i
     stdscr.addstr(y, flag_x + 1, " ")
 
 def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0, 
-               cursor_pos=None, is_edit_mode=False):
-    """Core function to render a task with appropriate formatting"""
+               cursor_pos=None, is_edit_mode=False, is_sidebar=False):
+    """Render a task with proper formatting and positioning"""
     if max_x == 0:
         max_x = stdscr.getmaxyx()[1]
     
-    # Clear the row for custom rendering
-    stdscr.move(y, 0)
-    stdscr.clrtoeol()
+    # Determine position calculations based on sidebar mode
+    if is_sidebar:
+        # Sidebar positioning - no offset
+        sidebar_width = 0  # No sidebar offset needed
+        base_indent = 3    # ID (2 chars) + 1 space
+        
+        # Clear the row for custom rendering
+        stdscr.move(y, 0)
+        # stdscr.clrtoeol()
+        
+        # Draw category ID
+        stdscr.addstr(y, 0, f"{task['id']:2d} ")
+        
+        text_start_pos = base_indent
+        total_indent = base_indent
+        date_str = ""
+        date_pos = 15  # End of sidebar
+    else:
+        # Task area positioning - include sidebar offset
+        sidebar_width = 16  # 15 chars + 1 for separator
+        base_indent = 7    # Length of ID + status + flag area
+        
+        # Clear the row for custom rendering
+        stdscr.move(y, sidebar_width)
+        stdscr.clrtoeol()
+        
+        # Print separator at correct position
+        stdscr.addstr(y, 15, "│")
+        
+        if is_selected:
+            stdscr.attron(curses.color_pair(1))
+        
+        # Print task ID with offset
+        stdscr.addstr(y, sidebar_width, f"{task['id']:2d} ")
+        
+        # Print symbols with offset
+        print_task_symbols(stdscr, task, y, sidebar_width + 3, sidebar_width + 5, use_colors=True, is_selected=is_selected)
+        
+        # Calculate date position and available text space
+        date_str = task['date']
+        date_padding = 1  # Space between description and date
+        date_pos = max_x - len(date_str) - date_padding
+        
+        text_start_pos = sidebar_width + base_indent  # Combined offset
+        total_indent = text_start_pos
     
-    # Apply appropriate styling
-    if is_selected:
-        stdscr.attron(curses.color_pair(1))
-    
-    # Print task ID
-    stdscr.addstr(y, 0, f"{task['id']:2d} ")
-    
-    # Print symbols (with colors appropriate for selected/non-selected)
-    print_task_symbols(stdscr, task, y, 3, 5, use_colors=True, is_selected=is_selected)
-    
-    # Calculate date position and available text space
-    date_str = task['date']
-    base_length = 7  # Length of ID + status + flag area (indent)
-    date_padding = 1  # Space between description and date - exact 1 char gap
-    
-    # Calculate date position 
-    date_pos = max_x - len(date_str) - date_padding
-    
-    # Calculate available width for text - KEY FIX: subtract 1 more character for the gap
-    text_length = len(task['description'])
-    available_width = date_pos - base_length - 1  # -1 ensures the gap is preserved
-    
-    text_start_pos = base_length
+    # Calculate available width for text
+    available_width = date_pos - total_indent - (0 if is_sidebar else 1)
     
     # In view mode, we just show what fits; in edit mode, we scroll
+    text_length = len(task['description'])
     if is_edit_mode:
         # Calculate visible portion of text based on scroll offset
         visible_start = scroll_offset
         visible_end = min(text_length, scroll_offset + available_width)
         visible_text = task['description'][visible_start:visible_end]
     else:
-        # In view mode: truncate if too long without ellipsis
+        # In view mode: truncate if too long
         if text_length > available_width:
             visible_text = task['description'][:available_width]
         else:
@@ -159,23 +201,22 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         
         # Apply strike-through for completed tasks in view mode
         if task.get('status', False) and settings.get_strikethrough() and not is_edit_mode:
-            # Apply strike-through using Unicode combining characters
             strikethrough_desc = ""
             for char in visible_text:
-                strikethrough_desc += (char + "\u0336")  # Combine each character with strike
+                strikethrough_desc += (char + "\u0336")
             visible_text = strikethrough_desc
     
     # Display text at calculated position
     if task.get('status', False) and not is_selected and not is_edit_mode:
-        # Use dim text for completed tasks in view mode
-        stdscr.attron(curses.A_DIM)  # Dim attribute
+        stdscr.attron(curses.A_DIM)
         stdscr.addstr(y, text_start_pos, visible_text)
         stdscr.attroff(curses.A_DIM)
     else:
         stdscr.addstr(y, text_start_pos, visible_text)
     
-    # Print date with exactly one character gap
-    stdscr.addstr(y, date_pos, date_str)
+    # Print date with exactly one character gap (only for tasks, not sidebar)
+    if not is_sidebar and date_str:
+        stdscr.addstr(y, date_pos, date_str)
     
     # Turn off styling
     if is_selected:
@@ -183,21 +224,16 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     
     # Calculate cursor position for edit mode
     if is_edit_mode and cursor_pos is not None:
-        # Calculate position relative to visible text
         visible_cursor_pos = cursor_pos - scroll_offset
         
         if visible_cursor_pos >= 0 and visible_cursor_pos <= len(visible_text):
-            # Normal case - cursor within visible text
             target_x = text_start_pos + visible_cursor_pos
         elif visible_cursor_pos < 0:
-            # Cursor is before visible text
             target_x = text_start_pos
         else:
-            # Cursor is after visible text
             target_x = text_start_pos + len(visible_text)
         
-        # Make sure cursor stays within text area bounds
-        target_x = min(target_x, date_pos - 1)  # -1 to respect the gap
+        target_x = min(target_x, date_pos - (0 if is_sidebar else 1))
         return target_x
     
     return None
@@ -319,3 +355,161 @@ def print_all_cli(todos):
             todo_line = flagged_fmt % todo_line
         text += todo_line + "\n"
     print(text, end="")
+
+def print_sidebar(stdscr, categories, current_category_id, start_index, max_height, has_focus):
+    """Print the category sidebar"""
+    # Set sidebar width
+    sidebar_width = 15
+    
+    # Clear sidebar area
+    for y in range(1, max_height + 1):
+        stdscr.move(y, 0)
+        stdscr.clrtoeol()  # Use clrtoeol() for consistent clearing
+    
+    # Print visible categories
+    visible_categories = categories[start_index:start_index + max_height]
+    for i, category in enumerate(visible_categories):
+        row = i + 1  # Start from row 1 (row 0 is for status bar)
+        is_selected = category['id'] == current_category_id
+        print_category(stdscr, category, row, is_selected, has_focus)
+    
+    # Print vertical separator
+    for y in range(1, max_height + 1):
+        stdscr.addstr(y, sidebar_width, "│")
+
+def print_category(stdscr, category, y, is_selected=False, has_focus=False):
+    """Print a single category in the sidebar"""
+    # Set format based on selection and focus
+    if is_selected and has_focus:
+        stdscr.attron(curses.color_pair(1))  # Use the same highlight as tasks
+    elif is_selected and not has_focus:
+        stdscr.attron(curses.A_BOLD)
+    
+    # Print category ID and name
+    stdscr.addstr(y, 0, f"{category['id']:2d} ")
+    
+    # Calculate available width for category name
+    sidebar_width = 15
+    name_width = sidebar_width - 3  # 3 characters for ID and space
+    
+    # Truncate category name if too long
+    if len(category['name']) > name_width:
+        display_name = category['name'][:name_width-1] + "…"
+    else:
+        display_name = category['name']
+    
+    stdscr.addstr(y, 3, display_name)
+    
+    # Reset attributes
+    if is_selected and has_focus:
+        stdscr.attroff(curses.color_pair(1))
+    elif is_selected and not has_focus:
+        stdscr.attroff(curses.A_BOLD)
+
+def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_id, 
+                               start, end, categories, current_category_id, 
+                               category_start_index, sidebar_has_focus):
+    """Print the complete UI with sidebar and task list"""
+    # Get max visible height
+    max_y, _ = stdscr.getmaxyx()
+    max_height = max_y - 1  # Account for status bar
+    
+    # Print status bar first
+    print_status_bar(stdscr, done_cnt, task_cnt)
+    
+    # Print sidebar
+    print_sidebar(stdscr, categories, current_category_id, 
+                 category_start_index, max_height, sidebar_has_focus)
+    
+    # Print tasks or empty message
+    if task_cnt == 0:
+        # Clear task area
+        for y in range(1, max_height + 1):
+            stdscr.move(y, 16)
+            stdscr.clrtoeol()
+        # Print empty message with explicit sidebar offset
+        print_msg(stdscr, empty_msg, 16)
+    else:
+        print_tasks_with_offset(stdscr, tasks, current_id, start, end, 16)
+
+def print_tasks_with_offset(stdscr, task_list, current_id, start, end, x_offset=0):
+    """Print tasks with horizontal offset to accommodate sidebar"""
+    max_y, _ = stdscr.getmaxyx()
+    
+    # Clear task area first
+    for y in range(1, min(end - start + 2, max_y)):
+        stdscr.move(y, x_offset)
+        stdscr.clrtoeol()
+    
+    # Only print if we have tasks and a valid start index
+    if task_list and start > 0:
+        for i, task in enumerate(task_list[start - 1:end]):
+            row = i + 1  # +1 due to status bar
+            display_id = i + start  # Sequential display ID (1, 2, 3, etc.)
+            
+            if i + start == current_id:
+                # Selected task
+                print_task_selected_with_offset(stdscr, task, row, x_offset, display_id)
+            else:
+                # Normal task
+                print_task_with_offset(stdscr, task, row, False, x_offset, display_id)
+
+def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_id=None):
+    """Print a task with horizontal offset and optional display ID override"""
+    # Calculate available width for text
+    max_y, max_x = stdscr.getmaxyx()
+    
+    # Use display_id if provided, otherwise use task's actual ID
+    id_to_show = display_id if display_id is not None else task['id']
+    
+    # Print task ID
+    stdscr.addstr(row, x_offset, f"{id_to_show:2d} ")
+    
+    # Rest of the function remains the same
+    print_task_symbols(stdscr, task, row, 
+                      status_x=x_offset + 3, 
+                      flag_x=x_offset + 5,
+                      use_colors=True,
+                      is_selected=is_selected)
+    
+    # Calculate date position and available text space
+    date_str = task['date']
+    date_padding = 1
+    date_pos = max_x - len(date_str) - date_padding
+    
+    # Calculate available space for text
+    indent = 7  # ID + status + flag area
+    total_indent = x_offset + indent
+    available_width = date_pos - total_indent
+    
+    # Handle text display
+    text = task['description']
+    if len(text) > available_width:
+        visible_text = text[:available_width]
+    else:
+        visible_text = text
+        
+    # Apply strikethrough if needed
+    import todoism.settings as settings
+    if task.get('status', False) and settings.get_strikethrough() and not is_selected:
+        strikethrough_desc = ""
+        for char in visible_text:
+            strikethrough_desc += (char + "\u0336")
+        visible_text = strikethrough_desc
+    
+    # Display text at calculated position with proper styling
+    if task.get('status', False) and not is_selected:
+        stdscr.attron(curses.A_DIM)
+        stdscr.addstr(row, total_indent, visible_text)
+        stdscr.attroff(curses.A_DIM)
+    else:
+        stdscr.addstr(row, total_indent, visible_text)
+    
+    # Print date
+    stdscr.addstr(row, date_pos, date_str)
+
+def print_task_selected_with_offset(stdscr, task, row, x_offset=0, display_id=None):
+    """Print a selected task with offset"""
+    stdscr.attron(curses.color_pair(1))
+    print_task_with_offset(stdscr, task, row, True, x_offset, display_id)
+    stdscr.attroff(curses.color_pair(1))

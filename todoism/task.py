@@ -60,3 +60,49 @@ def remove_task_cli(task_id):
         ut.reid(task_list)
         save_tasks(task_list, tasks_file_path)   
         return True
+
+def create_new_task(task_id, task_description="", flagged=False, category_id=0):
+    """Create a new task with optional category assignment"""
+    return {
+        'id': task_id,
+        'description': task_description,
+        'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
+        'status': False,
+        'flagged': flagged,
+        'category_id': category_id  # Default to 'All' category (id=0)
+    }
+
+def add_new_task(task_list, task_id, task_description, flagged=False, category_id=0):
+    """Create, append and save a new task with category support"""
+    new_task = create_new_task(task_id, task_description, flagged, category_id)
+    task_list.append(new_task)
+    save_tasks(task_list, tasks_file_path)
+    return task_list
+
+def get_tasks_by_category(task_list, category_id):
+    """Filter tasks by category"""
+    if category_id == 0:  # 'All' category
+        return task_list
+    
+    result = []
+    for task in task_list:
+        # Handle tasks from before categories were implemented
+        task_category = task.get('category_id', 0)
+        if task_category == category_id:
+            result.append(task)
+    return result
+
+def update_existing_tasks():
+    """Update existing tasks to include category_id field if missing"""
+    task_list = load_tasks()
+    modified = False
+    
+    for task in task_list:
+        if 'category_id' not in task:
+            task['category_id'] = 0  # Default to "All" category
+            modified = True
+    
+    if modified:
+        save_tasks(task_list, tasks_file_path)
+    
+    return task_list
