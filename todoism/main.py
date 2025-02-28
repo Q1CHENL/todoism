@@ -241,7 +241,7 @@ def main(stdscr):
                         max_capacity,
                         False  # Sidebar does not have focus
                     )
-                    pr.print_msg(stdscr, pr.empty_msg)
+                    pr.print_msg(stdscr, pr.empty_msg, 16, True)  # Add highlight=True to highlight message when task panel has focus
             else:
                 # Focus on sidebar - don't highlight any task
                 pr.print_main_view_with_sidebar(
