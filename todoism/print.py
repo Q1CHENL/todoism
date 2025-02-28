@@ -57,8 +57,8 @@ limit_msg = f'''
 └────────────────────────────────────────┘
 '''
 
-def print_msg(stdscr, msg, x_offset=16):
-    """Print a message box with proper centering in the task area"""
+def print_msg(stdscr, msg, x_offset=16, highlight=False):
+    """Print a message box with proper centering in the task area with optional highlighting"""
     lines = msg.split('\n')
     width = len(lines[1])
     max_y, max_x = stdscr.getmaxyx()
@@ -74,6 +74,10 @@ def print_msg(stdscr, msg, x_offset=16):
         stdscr.move(i, x_offset)
         stdscr.clrtoeol()
     
+    # Apply highlighting if requested
+    if highlight:
+        stdscr.attron(curses.color_pair(1))
+    
     # Print each line separately at the calculated position
     for i, line in enumerate(lines):
         y = i + 1  # Start at row 1 (row 0 is status bar)
@@ -82,6 +86,10 @@ def print_msg(stdscr, msg, x_offset=16):
             stdscr.move(y, x_offset + center_offset)
             # Print the line directly
             stdscr.addstr(line)
+    
+    # Remove highlighting if it was applied
+    if highlight:
+        stdscr.attroff(curses.color_pair(1))
     
     stdscr.refresh()
 
@@ -138,14 +146,13 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     if is_sidebar:
         # Sidebar positioning - no offset
         sidebar_width = 0  # No sidebar offset needed
-        base_indent = 3    # ID (2 chars) + 1 space
+        base_indent = 1    # 1-space indent from left edge (matching print_category)
         
         # Clear the row for custom rendering
         stdscr.move(y, 0)
         # stdscr.clrtoeol()
         
-        # Draw category ID
-        stdscr.addstr(y, 0, f"{task['id']:2d} ")
+        # No ID display anymore
         
         text_start_pos = base_indent
         total_indent = base_indent
@@ -300,7 +307,7 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     
     # Calculate center position
     total_len = len(status_prefix) + len(percent_text) + len(datetime_str) + 2  # +2 for spacing
-    start_pos = (max_x - total_len) // 2
+    start_pos = (max_x - total_len - 16) // 2 + 16
     
     # Clear only the top line
     stdscr.move(0, 0)
@@ -385,12 +392,11 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     elif is_selected and not has_focus:
         stdscr.attron(curses.A_BOLD)
     
-    # Print category ID and name
-    stdscr.addstr(y, 0, f"{category['id']:2d} ")
-    
     # Calculate available width for category name
     sidebar_width = 15
-    name_width = sidebar_width - 3  # 3 characters for ID and space
+    name_width = sidebar_width - 1  # Just 1 character for spacing now
+    
+    # Don't display the ID number, just offset the name by 1 space from the left edge
     
     # Truncate category name if too long
     if len(category['name']) > name_width:
@@ -398,7 +404,8 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     else:
         display_name = category['name']
     
-    stdscr.addstr(y, 3, display_name)
+    # Display name with 1 character offset from left edge
+    stdscr.addstr(y, 1, display_name)
     
     # Reset attributes
     if is_selected and has_focus:
@@ -427,8 +434,8 @@ def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_id,
         for y in range(1, max_height + 1):
             stdscr.move(y, 16)
             stdscr.clrtoeol()
-        # Print empty message with explicit sidebar offset
-        print_msg(stdscr, empty_msg, 16)
+        # Print empty message with highlighting when task area has focus
+        print_msg(stdscr, empty_msg, 16, highlight=(not sidebar_has_focus))
     else:
         print_tasks_with_offset(stdscr, tasks, current_id, start, end, 16)
 
@@ -487,7 +494,7 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
     if len(text) > available_width:
         visible_text = text[:available_width]
     else:
-        visible_text = text
+        visible_text = text  # FIX: Properly assign text to visible_text
         
     # Apply strikethrough if needed
     import todoism.settings as settings

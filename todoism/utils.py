@@ -105,10 +105,10 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
     """
     # Standardize indent calculations
     if is_sidebar:
-        # For sidebar, text starts at position 3 (after ID and space)
+        # For sidebar, text starts at position 1 (1-space indent from left)
         sidebar_width = 0  # No offset needed when editing sidebar items
-        base_indent = 3    # 2 chars for ID + 1 space
-        text_start_pos = base_indent  # Just start after the ID
+        base_indent = 1    # 1 space indent from left edge
+        text_start_pos = base_indent  # Start with consistent 1-space indent
     else:
         # For tasks, use the standard sidebar offset
         sidebar_width = 16  # 15 chars + 1 for separator
@@ -170,10 +170,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # Restore the separator after clearing
             stdscr.addch(y, 15, '│')
             stdscr.refresh()
-            
-            # Redraw ID part (always preserved)
-            stdscr.addstr(y, 0, f"{task['id']:2d} ")
-            stdscr.refresh()
+            # No ID redrawing - we're not displaying IDs anymore
         else:
             # Only clear from the separator onwards, preserving sidebar content
             sidebar_width = 16  # Always use 16 here to preserve sidebar content
@@ -754,8 +751,8 @@ def post_deletion_update(current_id, current_row, start, end, prev_task_cnt, max
     Senario 1: ┌───────┐    Senario 2: ├───────┤    Senario 3: ┌───────┐    Senario 4: ├───────┤
                ├───────┤               ├───────┤               ├───────┤               ├───────┤
                ├───────┤               ├───────┤               ├───────┤               ├───────┤   
-               ├───────┤               ├───────┤               ├───────┤               ├───────┤
-               └───────┘               └───────┘               ├───────┤               ├───────┤                  
+               ├───────┤               ├───────┤               └───────┘               ├───────┤                  
+               └───────┘               └───────┘                                       │       │
                                                                │       │               │       │
     And the view update rules are similar to the Apple Reminder's
                 

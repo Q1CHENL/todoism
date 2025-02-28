@@ -453,8 +453,8 @@ def main(stdscr):
                 # Print new category placeholder
                 stdscr.addstr(new_cat_row, 0, f"{new_cat_id:2d} ")
                 
-                # Move cursor to start of category name position
-                stdscr.move(new_cat_row, 3)  # 3 is position after ID (2 digits + space)
+                # Move cursor to the consistent 1-space indent position
+                stdscr.move(new_cat_row, 1)  # 1-space indent, matching print_category()
                 stdscr.refresh()
                 
                 # Use the same edit function as for tasks, but adapt for sidebar position
@@ -520,11 +520,10 @@ def main(stdscr):
                     stdscr.attron(curses.color_pair(1))
                     stdscr.move(row, 0)
                     stdscr.clrtoeol()
-                    stdscr.addstr(row, 0, f"{current_cat['id']:2d} ")
                     stdscr.attroff(curses.color_pair(1))
                     
-                    # Position cursor at start of category name
-                    stdscr.move(row, 3)
+                    # Position cursor at start of category name (1-space indent)
+                    stdscr.move(row, 1)
                     stdscr.refresh()
                     
                     # Create a temporary copy for editing using the same mechanism as tasks
