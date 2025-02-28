@@ -180,7 +180,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             stdscr.clrtoeol()
             
             # Redraw vertical separator (critical fix)
-            stdscr.addstr(y, 15, "│")
+            stdscr.addstr(y, 15, '│')
             
             # Redraw task ID
             stdscr.addstr(y, sidebar_width, f"{task['id']:2d} ")
@@ -233,7 +233,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # Save current cursor position
             current_y, current_x = stdscr.getyx()
             # Clear the debug area
-            stdscr.addstr(0, 0, " " * min(len(debug_info) + 5, max_x))
+            stdscr.addstr(0, 0, ' ' * min(len(debug_info) + 5, max_x))
             # Display debug info
             stdscr.attron(curses.color_pair(4))  # Red color for visibility
             stdscr.addstr(0, 0, debug_info)
@@ -256,7 +256,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # Clear debug area when turning off
             if not debug_keys:
                 current_y, current_x = stdscr.getyx()
-                stdscr.addstr(0, 0, " " * max_x)
+                stdscr.addstr(0, 0, ' ' * max_x)
                 stdscr.move(current_y, current_x)
             continue
         elif ch == 10:  # Enter to complete

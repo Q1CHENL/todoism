@@ -194,6 +194,9 @@ def main(stdscr):
             
             # Force a repaint after window resize
             should_repaint = True
+            
+            # Ensure separator is visible after resize
+            pr.ensure_separator_visible(stdscr, new_max_y)
         
         # Check if we need to update the time (every second)
         current_time = time.time()
@@ -425,7 +428,7 @@ def main(stdscr):
                 
                 # Only clear and redraw the SIDEBAR PORTION of each line (columns 0-14)
                 # This preserves tasks on the same lines
-                for i in range(1, max_capacity + 1):
+                for i in range(0, max_capacity + 1):
                     # Clear only the sidebar portion of each line (not the entire line)
                     for j in range(15):  # Clear only columns 0-14
                         stdscr.addch(i, j, ' ')
@@ -687,8 +690,15 @@ def main(stdscr):
                     current_id = new_id  # new id
                     end = end + 1  # change end as well
                 else:
+                    # User cancelled adding a new task
                     start = old_start
                     end = old_end
+                    # Force full repaint to clear the empty task line
+                    should_repaint = True
+                    # Continue to next iteration without adding a task
+                    curses.curs_set(0)
+                    curses.noecho()
+                    continue
                     
                 # Redraw with updated task list
                 pr.print_tasks_with_offset(stdscr, filtered_tasks, current_id, start, end, sidebar_width)
@@ -696,7 +706,7 @@ def main(stdscr):
                 curses.curs_set(0)
                 curses.noecho()
                 
-            elif key == ord("d"):
+            elif key == ord('d') or key == ord(' '):
                 # mark the current task as 'done'
                 if filtered_tasks and current_id > 0:
                     task_idx = current_id - 1

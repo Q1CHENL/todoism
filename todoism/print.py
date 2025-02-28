@@ -112,29 +112,29 @@ def print_task_symbols(stdscr, task, y, status_x=3, flag_x=5, use_colors=True, i
     if task.get('status', False):
         if use_colors and not is_selected:
             stdscr.attron(curses.color_pair(6))  # Green
-            stdscr.addstr(y, status_x, "✓")
+            stdscr.addstr(y, status_x, '✓')
             stdscr.attroff(curses.color_pair(6))
         else:
-            stdscr.addstr(y, status_x, "✓")
+            stdscr.addstr(y, status_x, '✓')
     else:
-        stdscr.addstr(y, status_x, " ")
+        stdscr.addstr(y, status_x, ' ')
     
     # Add space between status and flag
-    stdscr.addstr(y, status_x + 1, " ")
+    stdscr.addstr(y, status_x + 1, ' ')
     
     # Print flag indicator
     if task.get('flagged', False):
         if use_colors and not is_selected:
             stdscr.attron(curses.color_pair(7))  # Orange/Yellow
-            stdscr.addstr(y, flag_x, "⚑")
+            stdscr.addstr(y, flag_x, '⚑')
             stdscr.attroff(curses.color_pair(7))
         else:
-            stdscr.addstr(y, flag_x, "⚑")
+            stdscr.addstr(y, flag_x, '⚑')
     else:
-        stdscr.addstr(y, flag_x, " ")
+        stdscr.addstr(y, flag_x, ' ')
     
     # Add space after flag
-    stdscr.addstr(y, flag_x + 1, " ")
+    stdscr.addstr(y, flag_x + 1, ' ')
 
 def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0, 
                cursor_pos=None, is_edit_mode=False, is_sidebar=False):
@@ -220,6 +220,9 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         stdscr.attroff(curses.A_DIM)
     else:
         stdscr.addstr(y, text_start_pos, visible_text)
+    
+    for i in range(available_width - len(visible_text)):
+        stdscr.addstr(' ')
     
     # Print date with exactly one character gap (only for tasks, not sidebar)
     if not is_sidebar and date_str:
@@ -309,6 +312,15 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     total_len = len(status_prefix) + len(percent_text) + len(datetime_str) + 2  # +2 for spacing
     start_pos = (max_x - total_len - 16) // 2 + 16
     
+    # Save character at the separator position
+    separator_char = None
+    try:
+        # Try to read the current character at separator position
+        separator_char = stdscr.inch(0, 15) & curses.A_CHARTEXT
+    except curses.error:
+        # Handle edge case when reading might fail
+        pass
+        
     # Clear only the top line
     stdscr.move(0, 0)
     stdscr.clrtoeol()
@@ -319,6 +331,13 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     stdscr.addstr(0, start_pos + len(status_prefix), percent_text)
     stdscr.attroff(curses.color_pair(color_pair))
     stdscr.addstr(0, start_pos + len(status_prefix) + len(percent_text) + 2, datetime_str)
+    
+    # CRITICAL FIX: Restore the separator character at position (0,15)
+    try:
+        stdscr.addstr(0, 15, "│")
+    except curses.error:
+        # Handle edge case when terminal is too small
+        pass
 
 def print_main_view(stdscr, done_cnt, task_cnt, tasks, current_id, start, end):
     print_status_bar(stdscr, done_cnt, task_cnt)
@@ -381,7 +400,7 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
         print_category(stdscr, category, row, is_selected, has_focus)
     
     # Print vertical separator
-    for y in range(1, max_height + 1):
+    for y in range(0, max_height + 1):
         stdscr.addstr(y, sidebar_width, "│")
 
 def print_category(stdscr, category, y, is_selected=False, has_focus=False):
@@ -406,6 +425,9 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     
     # Display name with 1 character offset from left edge
     stdscr.addstr(y, 1, display_name)
+    
+    for i in range(name_width - len(display_name)):
+        stdscr.addstr(' ')
     
     # Reset attributes
     if is_selected and has_focus:
@@ -512,6 +534,9 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
     else:
         stdscr.addstr(row, total_indent, visible_text)
     
+    for i in range(available_width - len(visible_text)):
+        stdscr.addstr(' ')
+    
     # Print date
     stdscr.addstr(row, date_pos, date_str)
 
@@ -520,3 +545,20 @@ def print_task_selected_with_offset(stdscr, task, row, x_offset=0, display_id=No
     stdscr.attron(curses.color_pair(1))
     print_task_with_offset(stdscr, task, row, True, x_offset, display_id)
     stdscr.attroff(curses.color_pair(1))
+
+def ensure_separator_visible(stdscr, max_height=None):
+    """Ensure the vertical separator is visible across the entire height"""
+    if max_height is None:
+        max_y, _ = stdscr.getmaxyx()
+        max_height = max_y
+    
+    # Draw separator at each row
+    for y in range(max_height):
+        try:
+            stdscr.addstr(y, 15, '│')
+        except curses.error:
+            # Handle edge case when writing to bottom-right corner
+            pass
+    
+    # Force immediate refresh for the separator
+    stdscr.noutrefresh()
