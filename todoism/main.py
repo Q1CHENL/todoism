@@ -516,14 +516,20 @@ def main(stdscr):
                         True
                     )
                     
-                    # Draw tasks area (dimmed)
-                    pr.print_tasks_with_offset(stdscr, filtered_tasks, current_id, start, end, sidebar_width)
+                    # Draw tasks area
+                    pr.print_tasks_with_offset(stdscr, filtered_tasks, 0, start, end, sidebar_width)
                     
-                    # Highlight the category being edited
+                    # Highlight ONLY THE SIDEBAR PORTION of the category being edited
                     stdscr.attron(curses.color_pair(1))
                     stdscr.move(row, 0)
-                    stdscr.clrtoeol()
+                    
+                    # FIXED: Don't use clrtoeol() - instead clear only the sidebar area
+                    for j in range(15):  # Clear only the sidebar width
+                        stdscr.addch(row, j, ' ')
+                        
+                    # Redraw the separator
                     stdscr.attroff(curses.color_pair(1))
+                    stdscr.addstr(row, 15, '│')
                     
                     # Position cursor at start of category name (1-space indent)
                     stdscr.move(row, 1)
@@ -534,7 +540,6 @@ def main(stdscr):
                     edit_cat['description'] = current_cat['name']  # Map name to description for edit function
                     
                     # Use the edit function with the same scrolling capabilities
-                    # Add is_sidebar=True parameter
                     new_name = ut.edit(stdscr, edit_cat, pr.edit_mode, 0, 0, is_sidebar=True)
                     
                     if new_name:
@@ -543,6 +548,9 @@ def main(stdscr):
                         
                         # Reload categories
                         categories = cat.load_categories()
+                    
+                    # ADDED: Restore task display after editing
+                    pr.print_tasks_with_offset(stdscr, filtered_tasks, current_id, start, end, sidebar_width)
                     
                     curses.curs_set(0)
                     curses.noecho()
