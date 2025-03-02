@@ -167,8 +167,9 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         stdscr.move(y, sidebar_width)
         stdscr.clrtoeol()
         
-        # Print separator at correct position
-        stdscr.addstr(y, 15, "│")
+        # Print separator at correct position - check if this is the top row
+        char = '┬' if y == 0 else '│'
+        stdscr.addstr(y, 15, char)
         
         if is_selected:
             stdscr.attron(curses.color_pair(1))
@@ -318,18 +319,25 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     total_len = len(status_prefix) + len(percent_text) + len(datetime_str) + 2  # +2 for spacing
     start_pos = (max_x - total_len - 16) // 2 + 16
     
-    # Save character at the separator position
-    separator_char = None
-    try:
-        # Try to read the current character at separator position
-        separator_char = stdscr.inch(0, 15) & curses.A_CHARTEXT
-    except curses.error:
-        # Handle edge case when reading might fail
-        pass
-        
     # Clear only the top line
     stdscr.move(0, 0)
     stdscr.clrtoeol()
+    
+    # ADDED: Draw horizontal frame across entire top line
+    for x in range(max_x):
+        # Skip position 15 (will be ┬)
+        if x != 15:
+            try:
+                stdscr.addstr(0, x, "─")
+            except curses.error:
+                # Handle edge case when writing to bottom-right corner
+                pass
+    
+    # MODIFIED: Add the T-junction at position (0, 15) where vertical meets horizontal
+    try:
+        stdscr.addstr(0, 15, "┬")
+    except curses.error:
+        pass
     
     # Print centered status with colored percentage and datetime
     stdscr.addstr(0, start_pos, status_prefix)
@@ -337,13 +345,6 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     stdscr.addstr(0, start_pos + len(status_prefix), percent_text)
     stdscr.attroff(curses.color_pair(color_pair))
     stdscr.addstr(0, start_pos + len(status_prefix) + len(percent_text) + 2, datetime_str)
-    
-    # CRITICAL FIX: Restore the separator character at position (0,15)
-    try:
-        stdscr.addstr(0, 15, "│")
-    except curses.error:
-        # Handle edge case when terminal is too small
-        pass
 
 def print_main_view(stdscr, done_cnt, task_cnt, tasks, current_id, start, end):
     print_status_bar(stdscr, done_cnt, task_cnt)
@@ -407,7 +408,9 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
     
     # Print vertical separator
     for y in range(0, max_height + 1):
-        stdscr.addstr(y, sidebar_width, "│")
+        # Use T-junction for top row
+        char = '┬' if y == 0 else '│'
+        stdscr.addstr(y, sidebar_width, char)
 
 def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     """Print a single category in the sidebar with fixed width"""
@@ -565,7 +568,9 @@ def ensure_separator_visible(stdscr, max_height=None):
     # Draw separator at each row
     for y in range(max_height):
         try:
-            stdscr.addstr(y, 15, '│')
+            # Use T-junction character for the top row, vertical bar for others
+            char = '┬' if y == 0 else '│'
+            stdscr.addstr(y, 15, char)
         except curses.error:
             # Handle edge case when writing to bottom-right corner
             pass
