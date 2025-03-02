@@ -194,9 +194,15 @@ def execute_category_command(
         current_category_id
         ):
     """Execute category-related commands"""
+    import todoism.category as cat
+    
     if command.startswith("cadd "):
         category_name = command[5:]
         if category_name:
+            # Enforce maximum length for category name
+            if len(category_name) > cat.MAX_CATEGORY_NAME_LENGTH:
+                category_name = category_name[:cat.MAX_CATEGORY_NAME_LENGTH]
+                
             new_cat = cat.add_category(category_name)
             if new_cat:
                 return categories + [new_cat], current_category_id
@@ -230,6 +236,11 @@ def execute_category_command(
             if parts[1].isdigit():
                 category_id = int(parts[1])
                 new_name = ' '.join(parts[2:])
+                
+                # Enforce maximum length for category name
+                if len(new_name) > cat.MAX_CATEGORY_NAME_LENGTH:
+                    new_name = new_name[:cat.MAX_CATEGORY_NAME_LENGTH]
+                    
                 success = cat.update_category_name(category_id, new_name)
                 if success:
                     categories = cat.load_categories()

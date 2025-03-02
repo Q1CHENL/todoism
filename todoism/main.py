@@ -466,6 +466,10 @@ def main(stdscr):
                 temp_category['name'] = new_cat_name  # Store result in name field
                 
                 if new_cat_name:
+                    # Enforce maximum length for category name
+                    if len(new_cat_name) > cat.MAX_CATEGORY_NAME_LENGTH:
+                        new_cat_name = new_cat_name[:cat.MAX_CATEGORY_NAME_LENGTH]
+                        
                     # Add the category
                     new_cat = cat.add_category(new_cat_name)
                     if new_cat:
@@ -540,9 +544,14 @@ def main(stdscr):
                     edit_cat['description'] = current_cat['name']  # Map name to description for edit function
                     
                     # Use the edit function with the same scrolling capabilities
-                    new_name = ut.edit(stdscr, edit_cat, pr.edit_mode, 0, 0, is_sidebar=True)
+                    # MODIFIED LINE BELOW: Set initial cursor position to the end of the name
+                    new_name = ut.edit(stdscr, edit_cat, pr.edit_mode, 0, len(current_cat['name']), is_sidebar=True)
                     
                     if new_name:
+                        # Enforce maximum length for category name
+                        if len(new_name) > cat.MAX_CATEGORY_NAME_LENGTH:
+                            new_name = new_name[:cat.MAX_CATEGORY_NAME_LENGTH]
+                            
                         # Update the name
                         cat.update_category_name(current_category_id, new_name)
                         

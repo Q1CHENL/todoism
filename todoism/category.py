@@ -7,6 +7,9 @@ import todoism.task as tsk
 
 categories_file_path = os.path.join(tsk.config_dir, "categories.json")
 
+# Maximum allowed length for category names
+MAX_CATEGORY_NAME_LENGTH = 12
+
 def load_categories():
     """Load categories from the categories.json file"""
     try:

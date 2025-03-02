@@ -243,7 +243,13 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         else:
             target_x = text_start_pos + len(visible_text)
         
-        target_x = min(target_x, date_pos - (0 if is_sidebar else 1))
+        if is_sidebar:
+            # Hard limit for sidebar - never allow cursor beyond column 14
+            target_x = min(target_x, 14)
+        else:
+            # Normal limit for task area
+            target_x = min(target_x, date_pos - (0 if is_sidebar else 1))
+        
         return target_x
     
     return None
@@ -404,30 +410,34 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
         stdscr.addstr(y, sidebar_width, "│")
 
 def print_category(stdscr, category, y, is_selected=False, has_focus=False):
-    """Print a single category in the sidebar"""
+    """Print a single category in the sidebar with fixed width"""
     # Set format based on selection and focus
     if is_selected and has_focus:
         stdscr.attron(curses.color_pair(1))  # Use the same highlight as tasks
     elif is_selected and not has_focus:
         stdscr.attron(curses.A_BOLD)
     
+    # Import the max category name length
+    import todoism.category as cat
+    
     # Calculate available width for category name
     sidebar_width = 15
-    name_width = sidebar_width - 1  # Just 1 character for spacing now
+    name_width = sidebar_width - 1  # 1 space for indent
     
-    # Don't display the ID number, just offset the name by 1 space from the left edge
-    
-    # Truncate category name if too long
+    # Always show the full name (it's already limited by MAX_CATEGORY_NAME_LENGTH)
+    # If it's somehow longer, truncate it with an ellipsis
     if len(category['name']) > name_width:
         display_name = category['name'][:name_width-1] + "…"
     else:
         display_name = category['name']
     
-    # Display name with 1 character offset from left edge
+    # Display name with fixed width
     stdscr.addstr(y, 1, display_name)
     
-    for i in range(name_width - len(display_name)):
-        stdscr.addstr(' ')
+    # Fill remaining space with spaces to ensure fixed width
+    padding = name_width - len(display_name)
+    if padding > 0:
+        stdscr.addstr(' ' * padding)
     
     # Reset attributes
     if is_selected and has_focus:
@@ -562,3 +572,4 @@ def ensure_separator_visible(stdscr, max_height=None):
     
     # Force immediate refresh for the separator
     stdscr.noutrefresh()
+    curses.doupdate()
