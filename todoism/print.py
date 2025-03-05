@@ -146,11 +146,12 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     if is_sidebar:
         # Sidebar positioning - no offset
         sidebar_width = 0  # No sidebar offset needed
-        base_indent = 1    # 1-space indent from left edge (matching print_category)
+        base_indent = 2    # Changed from 1 to 2 spaces (1 for left border + 1 for spacing)
         
         # Clear the row for custom rendering
         stdscr.move(y, 0)
-        # stdscr.clrtoeol()
+        # Draw left frame
+        stdscr.addstr(y, 0, "│")
         
         # No ID display anymore
         
@@ -325,16 +326,19 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     
     # ADDED: Draw horizontal frame across entire top line
     for x in range(max_x):
-        # Skip position 15 (will be ┬)
-        if x != 15:
+        # Skip position 0 (will be ┌) and position 15 (will be ┬)
+        if x != 0 and x != 15:
             try:
                 stdscr.addstr(0, x, "─")
             except curses.error:
                 # Handle edge case when writing to bottom-right corner
                 pass
     
-    # MODIFIED: Add the T-junction at position (0, 15) where vertical meets horizontal
+    # MODIFIED: Add the corners and junctions
     try:
+        # Left corner
+        stdscr.addstr(0, 0, "┌")
+        # T-junction at position (0, 15) where vertical meets horizontal
         stdscr.addstr(0, 15, "┬")
     except curses.error:
         pass
@@ -399,6 +403,13 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
         stdscr.move(y, 0)
         stdscr.clrtoeol()  # Use clrtoeol() for consistent clearing
     
+    # Add left vertical frame for each row
+    for y in range(1, max_height + 1):
+        try:
+            stdscr.addstr(y, 0, "│")
+        except curses.error:
+            pass
+    
     # Print visible categories
     visible_categories = categories[start_index:start_index + max_height]
     for i, category in enumerate(visible_categories):
@@ -425,7 +436,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     
     # Calculate available width for category name
     sidebar_width = 15
-    name_width = sidebar_width - 1  # 1 space for indent
+    name_width = sidebar_width - 2  # 2 spaces for indentation (1 for left border + 1 for spacing)
     
     # Always show the full name (it's already limited by MAX_CATEGORY_NAME_LENGTH)
     # If it's somehow longer, truncate it with an ellipsis
@@ -434,8 +445,8 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     else:
         display_name = category['name']
     
-    # Display name with fixed width
-    stdscr.addstr(y, 1, display_name)
+    # Display name with fixed width - now at position 2 (after the left frame)
+    stdscr.addstr(y, 2, display_name)
     
     # Fill remaining space with spaces to ensure fixed width
     padding = name_width - len(display_name)
@@ -565,14 +576,22 @@ def ensure_separator_visible(stdscr, max_height=None):
         max_y, _ = stdscr.getmaxyx()
         max_height = max_y
     
-    # Draw separator at each row
+    # Draw left frame
+    for y in range(max_height):
+        try:
+            # Use corner for top row, vertical bar for others
+            char = '┌' if y == 0 else '│'
+            stdscr.addstr(y, 0, char)
+        except curses.error:
+            pass
+    
+    # Draw right separator
     for y in range(max_height):
         try:
             # Use T-junction character for the top row, vertical bar for others
             char = '┬' if y == 0 else '│'
             stdscr.addstr(y, 15, char)
         except curses.error:
-            # Handle edge case when writing to bottom-right corner
             pass
     
     # Force immediate refresh for the separator

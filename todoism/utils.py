@@ -113,10 +113,10 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
     """
     # Standardize indent calculations
     if is_sidebar:
-        # For sidebar, text starts at position 1 (1-space indent from left)
+        # For sidebar, text starts at position 2 (account for left frame)
         sidebar_width = 0  # No offset needed when editing sidebar items
-        base_indent = 1    # 1 space indent from left edge
-        text_start_pos = base_indent  # Start with consistent 1-space indent
+        base_indent = 2    # Changed from 1 to 2 spaces (1 for left frame + 1 for spacing)
+        text_start_pos = base_indent  # Start with consistent 2-space indent
         
         # Import the max category name length
         import todoism.category as cat
@@ -181,8 +181,11 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         if is_sidebar:
             # For sidebar editing, clear just the sidebar area
             stdscr.move(y, 0)
-            # Clear character by character only in sidebar area
-            for j in range(15):  # Columns 0-14 (sidebar area)
+            # Preserve left frame
+            stdscr.addch(y, 0, '│')
+            
+            # Clear character by character only in sidebar area (columns 1-14)
+            for j in range(1, 15):  # Clear columns 1-14, preserving left frame
                 stdscr.addch(y, j, ' ')
             
             # Restore the separator after clearing
@@ -191,7 +194,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # IMPORTANT: Immediately draw the text after clearing
             # This ensures the text is always visible without flicker
             if len(task['description']) > 0:
-                # Add 1-space indent for category names
+                # Add 2-space indent for category names (account for left frame)
                 visible_text = task['description'][scroll_offset:scroll_offset + max_visible_width]
                 stdscr.addstr(y, base_indent, visible_text)
             
