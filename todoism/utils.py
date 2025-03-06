@@ -64,6 +64,11 @@ def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_p
     max_y, max_x = stdscr.getmaxyx()
     right_frame_pos = max_x - 1
     
+    stdscr.addstr(0, 0, "┌")  # Top-left corner
+    for x in range(1, 15):
+        stdscr.addstr(0, x, "─")  # Top horizontal line for sidebar
+    stdscr.addstr(0, 15, "┬")  
+    
     # Turn off highlight before drawing frame
     if not is_sidebar:
         stdscr.attroff(curses.color_pair(1))
