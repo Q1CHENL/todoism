@@ -599,9 +599,8 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
         stdscr.attron(curses.color_pair(1))
         stdscr.addstr(row, total_indent, visible_text)
         # Fill remaining space with spaces
-        for i in range(available_width - len(visible_text)):
+        for i in range(available_width - len(visible_text) + 1):
             stdscr.addstr(' ')
-        # Print date with highlight
         stdscr.addstr(row, date_pos, date_str)
         stdscr.attroff(curses.color_pair(1))
     else:
