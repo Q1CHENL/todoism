@@ -60,7 +60,8 @@ def main(stdscr):
     
     # Get screen dimensions
     max_y, max_x = stdscr.getmaxyx()
-    max_capacity = max_y - 1  # Account for status bar
+    # Subtract 2 instead of 1 (1 for status bar + 1 for bottom frame)
+    max_capacity = max_y - 2
     
     # Initialize sidebar scroller
     sidebar_scroller = app.SidebarScroller(len(categories), max_capacity)
@@ -99,7 +100,7 @@ def main(stdscr):
         
         # Get current window dimensions
         new_max_y, max_x = stdscr.getmaxyx()
-        new_max_capacity = new_max_y - 1  # Account for status bar
+        new_max_capacity = new_max_y - 2  # Account for status bar
         
         # Check if window height has changed and we need to adjust view
         if new_max_capacity != max_capacity:

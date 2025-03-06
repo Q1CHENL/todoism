@@ -429,6 +429,7 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
     """Print the category sidebar"""
     # Set sidebar width
     sidebar_width = 15
+    max_y, max_x = stdscr.getmaxyx()
     
     # Clear sidebar area
     for y in range(1, max_height + 1):
@@ -436,11 +437,15 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
         stdscr.clrtoeol()  # Use clrtoeol() for consistent clearing
     
     # Add left vertical frame for each row
-    for y in range(1, max_height + 1):
+    for y in range(1, max_y - 1):
         try:
             stdscr.addstr(y, 0, "│")
         except curses.error:
             pass
+    stdscr.addstr(max_y - 1, 0, "└")
+    
+    for x in range(1, sidebar_width):
+        stdscr.addstr(max_y - 1, x, "─")
     
     # Print visible categories
     visible_categories = categories[start_index:start_index + max_height]
@@ -450,11 +455,16 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
         print_category(stdscr, category, row, is_selected, has_focus)
     
     # Print vertical separator
-    for y in range(0, max_height + 1):
+    for y in range(0, max_y - 1):
         # Use T-junction for top row
         char = '┬' if y == 0 else '│'
         stdscr.addstr(y, sidebar_width, char)
-        
+    
+    # draw bottom frame
+    stdscr.addstr(max_y - 1, sidebar_width, "┴")
+    
+    for x in range(sidebar_width + 1, max_x - 2):
+        stdscr.addstr(max_y - 1, x, "─")
 
 def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     """Print a single category in the sidebar with fixed width"""
@@ -498,7 +508,8 @@ def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_id,
     """Print the complete UI with sidebar and task list"""
     # Get max visible height
     max_y, _ = stdscr.getmaxyx()
-    max_height = max_y - 1  # Account for status bar
+    # Reduce max_height by 1 to account for bottom frame
+    max_height = max_y - 2  # -1 for status bar, -1 for bottom frame
     
     # Print status bar first
     print_status_bar(stdscr, done_cnt, task_cnt)
@@ -546,8 +557,9 @@ def print_tasks_with_offset(stdscr, task_list, current_id, start, end, x_offset=
         stdscr.addstr(y, max_x - 1, "│")
     # https://stackoverflow.com/questions/7063128/last-character-of-a-window-in-python-curses
     # Special trick for last char error in cursor window
-    stdscr.addstr(max_y-1, max_x - 2, "│")
-    stdscr.insstr(max_y-1, max_x - 2, " ")
+    stdscr.addstr(max_y-1, max_x - 2, "┘")
+    stdscr.insstr(max_y-1, max_x - 2, "─")
+
     
     
 def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_id=None):
@@ -558,15 +570,17 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
     # Use display_id if provided, otherwise use task's actual ID
     id_to_show = display_id if display_id is not None else task['id']
     
+    if not is_selected:
+        stdscr.attroff(curses.color_pair(1))
+
     # Print task ID
     stdscr.addstr(row, x_offset, f"{id_to_show:2d} ")
-    # stdscr.refresh()
     
     # Print task symbols
     print_task_symbols(stdscr, task, row, 
                       status_x=x_offset + 3, 
                       flag_x=x_offset + 5,
-                      use_colors=True,
+                      use_colors=not is_selected,
                       is_selected=is_selected)
     
     # Calculate positions with right frame
