@@ -169,9 +169,11 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         stdscr.clrtoeol()
         
         # Print separator at correct position - check if this is the top row
+        # Turn off highlight before drawing frame
+        if is_selected:
+            stdscr.attroff(curses.color_pair(1))
         char = '┬' if y == 0 else '│'
         stdscr.addstr(y, 15, char)
-        
         if is_selected:
             stdscr.attron(curses.color_pair(1))
         
@@ -184,7 +186,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         # Calculate date position and available text space
         date_str = task['date']
         date_padding = 1  # Space between description and date
-        date_pos = max_x - len(date_str) - date_padding
+        date_pos = max_x - len(date_str) - date_padding - 1  # Account for right frame
         
         text_start_pos = sidebar_width + base_indent  # Combined offset
         total_indent = text_start_pos
@@ -230,9 +232,16 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     if not is_sidebar and date_str:
         stdscr.addstr(y, date_pos, date_str)
     
-    # Turn off styling
-    if is_selected:
-        stdscr.attroff(curses.color_pair(1))
+    # Print right frame without highlight
+    if not is_sidebar:
+        if is_selected:
+            stdscr.attroff(curses.color_pair(1))
+        try:
+            stdscr.addstr(y, max_x - 1, '│')
+        except curses.error:
+            pass
+        if is_selected:
+            stdscr.attron(curses.color_pair(1))
     
     # Calculate cursor position for edit mode
     if is_edit_mode and cursor_pos is not None:
@@ -295,6 +304,10 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     """Print centered status bar with progress, percentage, date and time"""
     max_y, max_x = stdscr.getmaxyx()
     
+    # Reset all attributes at the start
+    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(1) | 
+                   curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
+    
     # Calculate percentage
     percent_value = (done_cnt/task_cnt)*100 if task_cnt > 0 else 0
     percent_text = f"({percent_value:.0f}%)"
@@ -308,13 +321,13 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
         color_pair = 2  # Green for high completion
     
     # Split the status into parts for coloring
-    status_prefix = f"Done: {done_cnt}/{task_cnt} "
+    status_prefix = f"┤Done: {done_cnt}/{task_cnt} "
     
     # Format current date and time
     current_datetime = datetime.now()
     date_str = current_datetime.strftime("%Y-%m-%d")
     time_str = current_datetime.strftime("%H:%M")
-    datetime_str = f"{date_str} {time_str}"
+    datetime_str = f"{date_str} {time_str}├"
     
     # Calculate center position
     total_len = len(status_prefix) + len(percent_text) + len(datetime_str) + 2  # +2 for spacing
@@ -324,22 +337,23 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     stdscr.move(0, 0)
     stdscr.clrtoeol()
     
-    # ADDED: Draw horizontal frame across entire top line
-    for x in range(max_x):
+    # Draw horizontal frame across entire top line
+    for x in range(max_x - 1):  # Stop one char before the end
         # Skip position 0 (will be ┌) and position 15 (will be ┬)
         if x != 0 and x != 15:
             try:
                 stdscr.addstr(0, x, "─")
             except curses.error:
-                # Handle edge case when writing to bottom-right corner
                 pass
     
-    # MODIFIED: Add the corners and junctions
+    # Add the corners and junctions without highlight
     try:
         # Left corner
         stdscr.addstr(0, 0, "┌")
         # T-junction at position (0, 15) where vertical meets horizontal
         stdscr.addstr(0, 15, "┬")
+        # Right corner
+        stdscr.addstr(0, max_x - 1, "┐")
     except curses.error:
         pass
     
@@ -349,6 +363,10 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     stdscr.addstr(0, start_pos + len(status_prefix), percent_text)
     stdscr.attroff(curses.color_pair(color_pair))
     stdscr.addstr(0, start_pos + len(status_prefix) + len(percent_text) + 2, datetime_str)
+    
+    # Ensure all attributes are reset at the end
+    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(1) | 
+                   curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
 
 def print_main_view(stdscr, done_cnt, task_cnt, tasks, current_id, start, end):
     print_status_bar(stdscr, done_cnt, task_cnt)
@@ -367,10 +385,24 @@ def repaint(stdscr, done_cnt, task_cnt, task_list, current_id, start, end):
             task = task_list[i]
             print_task(stdscr, task, i - (start-1) + 1, task['id'] == current_id, max_x)
     
-    # Clear any remaining lines if tasks were deleted
-    for i in range(end - start + 2, max_y):
-        stdscr.move(i, 0)
-        stdscr.clrtoeol()
+    # Draw frames for all lines
+    for i in range(1, max_y):  # Start from 1 to skip status bar
+        # Draw left frame
+        stdscr.addstr(i, 0, "│")
+        
+        # Draw separator frame
+        stdscr.addstr(i, 15, "│")
+        
+        # Draw right frame (always)
+        try:
+            stdscr.addstr(i, max_x - 1, "│")
+        except curses.error:
+            pass
+        
+        # If this line is beyond our tasks, clear the content area
+        if i > end - start + 1:
+            stdscr.move(i, 16)  # Move to start of content area
+            stdscr.clrtoeol()   # Clear to end of line
     
     # Single screen update
     stdscr.noutrefresh()
@@ -422,6 +454,7 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
         # Use T-junction for top row
         char = '┬' if y == 0 else '│'
         stdscr.addstr(y, sidebar_width, char)
+        
 
 def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     """Print a single category in the sidebar with fixed width"""
@@ -484,10 +517,11 @@ def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_id,
         print_msg(stdscr, empty_msg, 16, highlight=(not sidebar_has_focus))
     else:
         print_tasks_with_offset(stdscr, tasks, current_id, start, end, 16)
+    
 
 def print_tasks_with_offset(stdscr, task_list, current_id, start, end, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
-    max_y, _ = stdscr.getmaxyx()
+    max_y, max_x = stdscr.getmaxyx()
     
     # Clear task area first
     for y in range(1, min(end - start + 2, max_y)):
@@ -506,7 +540,16 @@ def print_tasks_with_offset(stdscr, task_list, current_id, start, end, x_offset=
             else:
                 # Normal task
                 print_task_with_offset(stdscr, task, row, False, x_offset, display_id)
-
+    
+    max_y, max_x = stdscr.getmaxyx()
+    for y in range(len(task_list), max_y - 1):
+        stdscr.addstr(y, max_x - 1, "│")
+    # https://stackoverflow.com/questions/7063128/last-character-of-a-window-in-python-curses
+    # Special trick for last char error in cursor window
+    stdscr.addstr(max_y-1, max_x - 2, "│")
+    stdscr.insstr(max_y-1, max_x - 2, " ")
+    
+    
 def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_id=None):
     """Print a task with horizontal offset and optional display ID override"""
     # Calculate available width for text
@@ -517,30 +560,31 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
     
     # Print task ID
     stdscr.addstr(row, x_offset, f"{id_to_show:2d} ")
+    # stdscr.refresh()
     
-    # Rest of the function remains the same
+    # Print task symbols
     print_task_symbols(stdscr, task, row, 
                       status_x=x_offset + 3, 
                       flag_x=x_offset + 5,
                       use_colors=True,
                       is_selected=is_selected)
     
-    # Calculate date position and available text space
+    # Calculate positions with right frame
+    right_frame_pos = max_x - 1
     date_str = task['date']
-    date_padding = 1
-    date_pos = max_x - len(date_str) - date_padding
+    date_pos = right_frame_pos - len(date_str) - 1  # Only 1 char gap from right frame
     
     # Calculate available space for text
     indent = 7  # ID + status + flag area
     total_indent = x_offset + indent
-    available_width = date_pos - total_indent
+    available_width = date_pos - total_indent - 1  # Space for gap before date
     
     # Handle text display
     text = task['description']
     if len(text) > available_width:
         visible_text = text[:available_width]
     else:
-        visible_text = text  # FIX: Properly assign text to visible_text
+        visible_text = text
         
     # Apply strikethrough if needed
     import todoism.settings as settings
@@ -551,18 +595,35 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
         visible_text = strikethrough_desc
     
     # Display text at calculated position with proper styling
-    if task.get('status', False) and not is_selected:
-        stdscr.attron(curses.A_DIM)
+    if is_selected:
+        stdscr.attron(curses.color_pair(1))
         stdscr.addstr(row, total_indent, visible_text)
-        stdscr.attroff(curses.A_DIM)
+        # Fill remaining space with spaces
+        for i in range(available_width - len(visible_text)):
+            stdscr.addstr(' ')
+        # Print date with highlight
+        stdscr.addstr(row, date_pos, date_str)
+        stdscr.attroff(curses.color_pair(1))
     else:
+        if task.get('status', False):
+            stdscr.attron(curses.A_DIM)
         stdscr.addstr(row, total_indent, visible_text)
+        # Fill remaining space with spaces
+        for i in range(available_width - len(visible_text)):
+            stdscr.addstr(' ')
+        # Print date
+        stdscr.addstr(row, date_pos, date_str)
+        if task.get('status', False):
+            stdscr.attroff(curses.A_DIM)
     
-    for i in range(available_width - len(visible_text)):
-        stdscr.addstr(' ')
-    
-    # Print date
-    stdscr.addstr(row, date_pos, date_str)
+    # Print right frame without highlight
+    try:
+        if is_selected:
+            stdscr.attroff(curses.color_pair(1))
+        stdscr.addstr(row, right_frame_pos, '│')
+    except curses.error:
+        pass
+
 
 def print_task_selected_with_offset(stdscr, task, row, x_offset=0, display_id=None):
     """Print a selected task with offset"""
@@ -585,12 +646,21 @@ def ensure_separator_visible(stdscr, max_height=None):
         except curses.error:
             pass
     
-    # Draw right separator
+    # Draw right separator (between sidebar and main area)
     for y in range(max_height):
         try:
             # Use T-junction character for the top row, vertical bar for others
             char = '┬' if y == 0 else '│'
             stdscr.addstr(y, 15, char)
+        except curses.error:
+            pass
+    
+    # Draw right frame
+    for y in range(max_height):
+        try:
+            # Use corner for top row, vertical bar for others
+            char = '┐' if y == 0 else '│'
+            stdscr.addstr(y, stdscr.getmaxyx()[1] - 1, char)
         except curses.error:
             pass
     

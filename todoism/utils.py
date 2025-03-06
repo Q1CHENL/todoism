@@ -61,23 +61,31 @@ def move_by_word(text, current_pos, direction):
 
 def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text=None, is_sidebar=False):
     """Helper function to render a task being edited with appropriate scrolling and styling"""
+    max_y, max_x = stdscr.getmaxyx()
+    right_frame_pos = max_x - 1
+    
+    # Turn off highlight before drawing frame
+    if not is_sidebar:
+        stdscr.attroff(curses.color_pair(1))
+        stdscr.addstr(y, right_frame_pos, '│')
+        stdscr.attron(curses.color_pair(1))
+    
     result = pr.render_task(
         stdscr=stdscr,
         task=task,
         y=y,
         is_selected=True,
         scroll_offset=scroll_offset,
-        max_x=0,  # Let the function calculate this
+        max_x=max_x,
         cursor_pos=cursor_pos_in_text,
         is_edit_mode=True,
-        is_sidebar=is_sidebar  # Pass the sidebar flag
+        is_sidebar=is_sidebar
     )
     
     # Add extra protection for sidebar mode
     if is_sidebar and result is not None and result > 14:
-        # Force cursor to stay within sidebar boundary
         return 14
-        
+    
     return result
 
 def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset, is_sidebar=False):
@@ -111,22 +119,22 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
     A editing wrapper implemented using getch(). It delivers 
     more comprehensive functionalities than getstr() does.
     """
+    # Get screen dimensions
+    max_y, max_x = stdscr.getmaxyx()
+    right_frame_pos = max_x - 1
+    
     # Standardize indent calculations
     if is_sidebar:
-        # For sidebar, text starts at position 2 (account for left frame)
-        sidebar_width = 0  # No offset needed when editing sidebar items
-        base_indent = 2    # Changed from 1 to 2 spaces (1 for left frame + 1 for spacing)
-        text_start_pos = base_indent  # Start with consistent 2-space indent
-        
-        # Import the max category name length
+        sidebar_width = 0
+        base_indent = 2
+        text_start_pos = base_indent
         import todoism.category as cat
         MAX_LENGTH = cat.MAX_CATEGORY_NAME_LENGTH
     else:
-        # For tasks, use the standard sidebar offset
-        sidebar_width = 16  # 15 chars + 1 for separator
-        base_indent = 7    # Length of ID + status + flag area
-        text_start_pos = sidebar_width + base_indent  # Combined offset for text start
-        MAX_LENGTH = 500  # Default max length for tasks
+        sidebar_width = 16
+        base_indent = 7
+        text_start_pos = sidebar_width + base_indent
+        MAX_LENGTH = 500
     
     # Selection state variables
     selection_active = False
@@ -141,18 +149,14 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
     else:
         cursor_pos_in_text = len(task['description'])  # Start at end of text for new tasks
     
-    max_y, max_x = stdscr.getmaxyx()
-    
     # Calculate available width
     if is_sidebar:
-        # For sidebar, limit width to sidebar width (15) minus the starting position
-        date_length = 0  # No date shown in sidebar
-        date_pos = 15  # End at sidebar width
-        max_visible_width = date_pos - base_indent  # Usually around 12 characters visible
+        date_length = 0
+        date_pos = 15
+        max_visible_width = date_pos - base_indent
     else:
-        # For tasks, calculate based on date position
         date_length = len(task['date'])
-        date_pos = max_x - date_length - 1
+        date_pos = right_frame_pos - date_length - 1  # Only 1 char gap from right frame
         max_visible_width = date_pos - text_start_pos - 1
     
     original_text = task['description']
@@ -238,7 +242,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             date_pos = 15  # End of sidebar area
             max_visible_width = date_pos - base_indent
         else:
-            date_pos = max_x - date_length - 1
+            date_pos = right_frame_pos - date_length - 1
             max_visible_width = date_pos - text_start_pos - 1
             
         right_limit = date_pos - 1
@@ -648,7 +652,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             # FIX: Recalculate screen boundaries with exactly 1 space gap
             date_length = len(task['date'])
-            date_pos = max_x - date_length - 1  # Position where date starts (with 1 char gap)
+            date_pos = right_frame_pos - date_length - 1  # Position where date starts (with 1 char gap)
             max_visible_width = date_pos - (text_start_pos)  # Total spaces available for text
             right_limit = date_pos - 1  # Position of the 1 char gap
             
