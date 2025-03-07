@@ -6,6 +6,7 @@ import todoism.utils as ut
 import todoism.print as pr
 import todoism.settings as st
 import todoism.category as cat
+import todoism.scroll as scr
 
 
 def purge(task_list, purged_list):
@@ -18,7 +19,7 @@ def purge(task_list, purged_list):
             remained.append(t)
         else:
             purged_list.append(t)
-    ut.reassign_task_ids(remained)
+    tsk.reassign_task_ids(remained)
     tsk.save_tasks(purged_list, tsk.purged_file_path)
     return remained, []
 
@@ -90,10 +91,10 @@ def execute_command(
         category = command[5:]
         if category == "f":
             task_list = sort(task_list, "flagged")
-            ut.reassign_task_ids(task_list)
+            tsk.reassign_task_ids(task_list)
         elif category == 'd':
             task_list = sort(task_list, "status")
-            ut.reassign_task_ids(task_list)
+            tsk.reassign_task_ids(task_list)
     elif command == "group":
         pass
     elif command.startswith("color "):
@@ -116,8 +117,8 @@ def execute_command(
                 current_row = current_id - start + 1
                 old_description = task_list[old_current_id - 1]['description']
                 del task_list[int(del_task_id) - 1]
-                ut.reassign_task_ids(task_list)
-                _, _, start, end = ut.post_deletion_update(
+                tsk.reassign_task_ids(task_list)
+                _, _, start, end = scr.post_deletion_update(
                                                             current_id,
                                                             current_row, 
                                                             start, 

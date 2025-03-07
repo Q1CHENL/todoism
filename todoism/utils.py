@@ -1,21 +1,10 @@
 import curses
 import todoism.print as pr
 import todoism.task as tsk
-
+import todoism.scroll as scr
 
 indent = 7
 max_task_count = 99
-
-def reassign_task_ids(task_list):
-    """Reassign ids to every task in the list"""
-    for i, t in enumerate(task_list):
-        t['id'] = i + 1
-
-
-def is_view_fully_packed(start, end, capacity):
-    """indicates whether the current view is completely filled with tasks"""
-    return end - start + 1 >= capacity
-
 
 def move_by_word(text, current_pos, direction):
     """Move cursor by word in the specified direction
@@ -842,58 +831,9 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     if task_list[id - 1]['description'] == "":
         del task_list[id - 1]
         reassign_task_ids(task_list)
-        id, row, start, end = post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
+        id, row, start, end = scr.post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
     
     # Save changes
     tsk.save_tasks(task_list, tsk.tasks_file_path)
     return id, row, start, end
 
-def post_deletion_update(current_id, current_row, start, end, prev_task_cnt, max_capacity):
-    """
-    Update the current view after deletion: 
-    1. 2x Backspaces
-    2. edit to empty 
-    3. command del
-    
-    There are 4 senarios where the view is fully packed with tasks before deletion:
-    
-                                       │       │                                       │       │
-    Senario 1: ┌───────┐    Senario 2: ├───────┤    Senario 3: ┌───────┐    Senario 4: ├───────┤
-               ├───────┤               ├───────┤               ├───────┤               ├───────┤
-               ├───────┤               ├───────┤               ├───────┤               ├───────┤   
-               ├───────┤               ├───────┤               ├───────┤               ├───────┤                  
-               └───────┘               └───────┘               │       │               │       │
-                                                               │       │               │       │
-    And the view update rules are similar to the Apple Reminder's
-                
-                
-    There is only 1 senario where the view is not fully packed with tasks:
-    
-    Senario 5: ┌───────┐
-               ├───────┤
-               ├───────┤
-               │       │
-               └───────┘
-    """
-    if is_view_fully_packed(start, end, max_capacity):
-        # Senarios 1
-        if prev_task_cnt == max_capacity:
-            # delete the last task, otherwise the row and id both remains unchanged
-            if current_id == end:
-                current_row = current_row - 1
-                current_id = current_id - 1
-            end = end - 1
-        # Senario 2
-        elif prev_task_cnt == end and prev_task_cnt > max_capacity:
-            start = start - 1
-            end = end - 1
-            current_id = current_id - 1
-        # Senario 3 and 4 does not lead to any change
-    
-    # Senario 5
-    else:
-        end = end - 1
-        if current_id == prev_task_cnt:
-            current_row = current_row - 1
-            current_id = current_id - 1
-    return current_id, current_row, start, end

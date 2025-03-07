@@ -57,7 +57,7 @@ def remove_task_cli(task_id):
     task_list = load_tasks()
     if task_id <= len(task_list):
         del task_list[task_id - 1]
-        ut.reassign_task_ids(task_list)
+        tsk.reassign_task_ids(task_list)
         save_tasks(task_list, tasks_file_path)   
         return True
 
@@ -106,3 +106,8 @@ def update_existing_tasks():
         save_tasks(task_list, tasks_file_path)
     
     return task_list
+
+def reassign_task_ids(task_list):
+    """Reassign ids to every task in the list"""
+    for i, t in enumerate(task_list):
+        t['id'] = i + 1
