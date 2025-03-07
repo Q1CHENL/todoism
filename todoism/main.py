@@ -50,7 +50,6 @@ def main(stdscr):
     # Initialize focus manager
     focus_manager = app.FocusManager()
     
-    # Initialize category state
     current_category_id = 0  # Start with "All" category
     
     done_list = []  # a part of task list
@@ -60,8 +59,8 @@ def main(stdscr):
     
     # Get screen dimensions
     max_y, max_x = stdscr.getmaxyx()
-    # Subtract 2 instead of 1 (1 for status bar + 1 for bottom frame)
-    max_capacity = max_y - 2
+    
+    max_capacity = max_y - 2 # status and bottom frame
     
     # Initialize sidebar scroller
     sidebar_scroller = app.SidebarScroller(len(categories), max_capacity)
@@ -71,7 +70,6 @@ def main(stdscr):
     
     # Initialize task display state
     task_cnt = len(filtered_tasks)  # done + undone
-    done_cnt = tsk.done_count(filtered_tasks)
     current_id = 1 if task_cnt > 0 else 0  # id of task selected
     current_row = 1 if task_cnt > 0 else 0  # range: [0, height-1]
     
@@ -98,25 +96,24 @@ def main(stdscr):
         task_cnt = len(filtered_tasks)
         done_cnt = tsk.done_count(filtered_tasks)
         
-        # Get current window dimensions
+        # Handling window resizing
         new_max_y, max_x = stdscr.getmaxyx()
-        new_max_capacity = new_max_y - 2  # Account for status bar
+        new_max_capacity = new_max_y - 2
         
-        # Check if window height has changed and we need to adjust view
+        # In case of window height change
         if new_max_capacity != max_capacity:
             # Store if we're getting more or less space
             is_growing = new_max_capacity > max_capacity
             old_capacity = max_capacity
             max_capacity = new_max_capacity
             
-            # Update sidebar scroller with new visible height
+            # Update sidebar view
             sidebar_scroller.update_visible_height(max_capacity)
             
-            # For tasks, use improved resize logic
+            # Update task view
             if task_cnt > 0:
                 if is_growing:
                     # WINDOW GROWING: Show maximum possible tasks while keeping current selection visible
-
                     # Calculate how much more space we have
                     extra_capacity = max_capacity - old_capacity
 
@@ -206,7 +203,6 @@ def main(stdscr):
             stdscr.refresh()
             last_time_update = current_time
             
-        # Selected task highlighting
         if should_repaint:
             stdscr.erase()
             color_selected = st.get_color_selected()
@@ -232,7 +228,7 @@ def main(stdscr):
                         categories,
                         current_category_id,
                         sidebar_scroller.start_index,
-                        False  # Sidebar does not have focus
+                        sidebar_has_focus=False
                     )
                 else:
                     # No tasks in current category
@@ -243,11 +239,10 @@ def main(stdscr):
                         current_category_id,
                         sidebar_scroller.start_index,
                         max_capacity,
-                        False  # Sidebar does not have focus
+                        has_focus=False
                     )
-                    pr.print_msg(stdscr, pr.empty_msg, 16, True)  # Add highlight=True to highlight message when task panel has focus
+                    pr.print_msg(stdscr, pr.empty_msg, 16, highlight=True)
             else:
-                # Focus on sidebar - don't highlight any task
                 pr.print_main_view_with_sidebar(
                     stdscr,
                     done_cnt,
@@ -266,17 +261,15 @@ def main(stdscr):
             
         # Wait for user input
         key = stdscr.getch()
-        
+                
         if key == -1:
             continue
             
-        # Handle Tab key to switch focus
-        if key == 9:  # Tab key
+        if key == 9:  # Tab key for switching focus
             focus_manager.toggle_focus()
             should_repaint = True
             continue
             
-        # Handle mouse events
         if key == curses.KEY_MOUSE:
             try:
                 mouse_id, mouse_x, mouse_y, mouse_z, button_state = curses.getmouse()
@@ -285,10 +278,9 @@ def main(stdscr):
                 if mouse_x < sidebar_width:
                     if 1 <= mouse_y <= min(len(categories), max_capacity):
                         # Calculate the category ID that was clicked
-                        clicked_cat_index = sidebar_scroller.start_index + mouse_y - 1
+                        clicked_cat_id = sidebar_scroller.start_index + mouse_y - 1
                         
-                        if 0 <= clicked_cat_index < len(categories):
-                            # Set focus to sidebar if not already
+                        if 0 <= clicked_cat_id < len(categories):
                             if not focus_manager.is_sidebar_focused():
                                 focus_manager.toggle_focus()
                                 
@@ -308,60 +300,44 @@ def main(stdscr):
                     continue
                 
                 # Handle clicks in task area
-                # Check if clicked on a task row (rows start at 1, status bar is at row 0)
                 if 1 <= mouse_y <= min(task_cnt, max_capacity):
-                    # Set focus to tasks if not already
                     if not focus_manager.is_tasks_focused():
                         focus_manager.toggle_focus()
                         
-                    # Calculate the display position clicked (this is now the same as the display ID)
-                    clicked_display_position = start + mouse_y - 1
+                    clicked_task_id = start + mouse_y - 1
                     
                     # Get the visual row that was clicked
                     clicked_task_row = mouse_y  # Row on screen
                     
-                    # Map this to actual task in filtered_tasks
-                    if start <= clicked_display_position <= end and clicked_display_position - start < len(filtered_tasks):
-                        task_index = clicked_display_position - 1  # Adjust to 0-based index for array
+                    if start <= clicked_task_id <= end:
+                        task_index = clicked_task_id - 1
                         
-                        # Define click regions - adjusted for sidebar offset
                         status_x_start = sidebar_width + 3
-                        status_x_end = sidebar_width + 4  # Status symbol 
-                        flag_x_start = sidebar_width + 5
-                        flag_x_end = sidebar_width + 6    # Flag symbol
+                        status_x_end = status_x_start + 1 
                         
-                        # Check if clicked on status symbol (✓)
+                        flag_x_start = sidebar_width + 5
+                        flag_x_end = flag_x_start + 1
+
                         if status_x_start <= mouse_x <= status_x_end:
-                            # Toggle task status (done/undone)
                             if filtered_tasks:
                                 done_list.append(filtered_tasks[task_index])
                                 filtered_tasks[task_index]['status'] = not filtered_tasks[task_index]['status']
                                 tsk.save_tasks(task_list, tsk.tasks_file_path)
-                                should_repaint = True
-                        
-                        # Check if clicked on flag symbol (⚑)
                         elif flag_x_start <= mouse_x <= flag_x_end:
-                            # Toggle task flag
                             if filtered_tasks:
                                 filtered_tasks[task_index]['flagged'] = not filtered_tasks[task_index]['flagged']
                                 tsk.save_tasks(task_list, tsk.tasks_file_path)
-                                should_repaint = True
-                        
-                        # Otherwise, just select the task
                         else:
-                            # Update current selection - the current_id is now a display position
-                            current_id = clicked_display_position
+                            current_id = clicked_task_id
                             current_row = clicked_task_row
-                            should_repaint = True
+                        should_repaint = True
             except curses.error:
                 # getmouse() can raise an exception if the terminal doesn't support mouse
                 pass
             
-        # Handle sidebar navigation when sidebar is focused
         elif focus_manager.is_sidebar_focused():
             if key == curses.KEY_UP:
                 sidebar_scroller.scroll_up()
-                # Update current_category_id based on current_index
                 if len(categories) > 0:
                     current_category_id = categories[sidebar_scroller.current_index]['id']
                     
@@ -372,12 +348,11 @@ def main(stdscr):
                     current_row = 1 if task_cnt > 0 else 0
                     start = 1 if task_cnt > 0 else 0
                     end = task_cnt if task_cnt < max_capacity else max_capacity
-                    
+
                 should_repaint = True
                 
             elif key == curses.KEY_DOWN:
                 sidebar_scroller.scroll_down()
-                # Update current_category_id based on current_index
                 if len(categories) > 0:
                     current_category_id = categories[sidebar_scroller.current_index]['id']
                     
@@ -391,11 +366,9 @@ def main(stdscr):
                     
                 should_repaint = True
             
-            # Add quit functionality 
             elif key == ord('q'):
                 break
                 
-            # Add key handlers for categories - just like tasks
             elif key == ord('a'):
                 # Add a new category with live preview
                 curses.echo()
@@ -410,7 +383,6 @@ def main(stdscr):
                 if new_cat_row > max_capacity:
                     new_cat_row = max_capacity
                 
-                # Calculate new category ID
                 new_cat_id = max([c['id'] for c in categories], default=0) + 1
                 
                 # Create a temporary category for editing
@@ -420,12 +392,6 @@ def main(stdscr):
                     'color': 'blue',
                     'date': datetime.now().strftime("%Y-%m-%d %H:%M")
                 }
-                
-                # DON'T erase the entire screen - save the current screen content
-                stdscr.refresh()
-                
-                # Redraw status bar first (always needed)
-                pr.print_status_bar(stdscr, done_cnt, task_cnt)
                 
                 # Only clear and redraw the SIDEBAR PORTION of each line (columns 0-14)
                 # This preserves tasks on the same lines
@@ -444,7 +410,7 @@ def main(stdscr):
                     current_category_id,
                     sidebar_scroller.start_index,
                     max_capacity,
-                    True  # Sidebar has focus
+                    has_focus=True
                 )
                 stdscr.refresh()
 
@@ -524,12 +490,11 @@ def main(stdscr):
                     # Draw tasks area
                     pr.print_tasks_with_offset(stdscr, filtered_tasks, 0, start, end, sidebar_width)
                     
-                    # Highlight ONLY THE SIDEBAR PORTION of the category being edited
                     stdscr.attron(curses.color_pair(1))
                     stdscr.move(row, 0)
                     
-                    # FIXED: Don't use clrtoeol() - instead clear only the sidebar area
-                    for j in range(15):  # Clear only the sidebar width
+                    # Append spaces
+                    for j in range(15): 
                         stdscr.addch(row, j, ' ')
                         
                     # Redraw the separator
@@ -544,8 +509,6 @@ def main(stdscr):
                     edit_cat = current_cat.copy()
                     edit_cat['description'] = current_cat['name']  # Map name to description for edit function
                     
-                    # Use the edit function with the same scrolling capabilities
-                    # MODIFIED LINE BELOW: Set initial cursor position to the end of the name
                     new_name = ut.edit(stdscr, edit_cat, pr.edit_mode, 0, len(current_cat['name']), is_sidebar=True)
                     
                     if new_name:
@@ -559,7 +522,6 @@ def main(stdscr):
                         # Reload categories
                         categories = cat.load_categories()
                     
-                    # ADDED: Restore task display after editing
                     pr.print_tasks_with_offset(stdscr, filtered_tasks, current_id, start, end, sidebar_width)
                     
                     curses.curs_set(0)
@@ -568,7 +530,7 @@ def main(stdscr):
             
             elif key == curses.KEY_BACKSPACE or key == 127:
                 # Delete selected category (with double backspace confirmation)
-                if len(categories) > 0 and current_category_id != 0:  # Don't delete "All"
+                if len(categories) > 0 and current_category_id != 0:
                     # Wait for second backspace
                     stdscr.addstr(max_capacity, sidebar_width, "Press backspace again to delete")
                     stdscr.refresh()
@@ -579,19 +541,11 @@ def main(stdscr):
                         # Remember current position in the list
                         current_index = sidebar_scroller.current_index
                         
-                        # Handle tasks in this category - REMOVE instead of moving to "All"
+                        # Handle tasks in this category
                         task_list = [task for task in task_list if task.get('category_id', 0) != current_category_id]
-
-                        # Renumber all tasks
                         ut.reid(task_list)
-
-                        # Save tasks
                         tsk.save_tasks(task_list, tsk.tasks_file_path)
-                        
-                        # Delete the category
                         cat.delete_category(current_category_id)
-                        
-                        # Renumber all categories to maintain sequential IDs
                         categories = cat.reassign_category_ids()
                         
                         # Update task category references to match new category IDs
@@ -604,21 +558,17 @@ def main(stdscr):
                         sidebar_scroller.update_total(len(categories))
                         
                         # Select appropriate category after deletion
-                        if len(categories) > 1:  # If we have categories beyond just "All"
-                            # Always select the last non-All category after deletion
+                        if len(categories) > 1:
                             new_index = len(categories) - 1
                             sidebar_scroller.current_index = new_index
                             current_category_id = categories[new_index]['id']
                         else:
-                            # If only "All" remains, select it
                             sidebar_scroller.current_index = 0
                             current_category_id = 0
-                        
-                        # Reset filtered tasks
+
                         filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
                         task_cnt = len(filtered_tasks)
                         
-                        # Reset task selection using original logic
                         current_id = 1 if task_cnt > 0 else 0
                         current_row = 1 if task_cnt > 0 else 0
                         start = 1 if task_cnt > 0 else 0
@@ -640,7 +590,6 @@ def main(stdscr):
                     time.sleep(1.2)
                     continue
                 
-                # Rest of the task addition code continues...
                 curses.echo()
                 curses.curs_set(1)
                 
@@ -654,11 +603,6 @@ def main(stdscr):
                     if end <= task_cnt:
                         start = task_cnt - (end - start - 1)
                         end = task_cnt
-                        
-                # DO NOT use erase() as it clears everything
-                # Instead, only clear the task area while preserving sidebar
-                stdscr.erase()  # We'll redraw everything properly
-                pr.print_status_bar(stdscr, done_cnt, task_cnt)
 
                 # Draw sidebar
                 pr.print_sidebar(
