@@ -2,7 +2,7 @@ import os
 import json
 import todoism.utils as ut
 from datetime import datetime
-
+import uuid
 
 home_dir = os.path.expanduser("~")
 config_dir = os.path.join(home_dir, ".todoism")
@@ -27,50 +27,44 @@ def load_tasks(arg=''):
         task_list = []
     return task_list
 
-def create_new_task(task_id, task_description="", flagged=False):
+def create_new_task(task_id, task_description="", flagged=False, category_id=0):
+    """Create a new task with UUID and optional category assignment"""
     return {
+        'uuid': str(uuid.uuid4()),
         'id': task_id,
         'description': task_description,
         'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
         'status': False,
-        'flagged': flagged
+        'flagged': flagged,
+        'category_id': category_id
     }
 
 def save_tasks(task_list, path):
     with open(path, 'w') as file:
         json.dump(task_list, file, indent=4)
 
-def add_new_task(task_list, task_id, task_description, flagged=False):
-    """create, append and save a new task with id: task_id and description: task_description to task_list"""
-    new_task = create_new_task(task_id, task_description, flagged)
-    task_list.append(new_task)
-    save_tasks(task_list, tasks_file_path)
-    return task_list
-
 def add_new_task_cli(task_description, flagged=False):
     task_list = load_tasks()
     task_id = len(task_list) + 1
-    _ = add_new_task(task_list, task_id, task_description, flagged)[-1]
+    new_task = create_new_task(task_id, task_description, flagged)
+    task_list.append(new_task)
+    save_tasks(task_list, tasks_file_path)
     return task_id
 
 def remove_task_cli(task_id):
+    """Remove a task by its display ID from the command line"""
     task_list = load_tasks()
     if task_id <= len(task_list):
-        del task_list[task_id - 1]
-        tsk.reassign_task_ids(task_list)
-        save_tasks(task_list, tasks_file_path)   
+        task_uuid = task_list[task_id - 1].get('uuid')
+        if task_uuid:
+            task_list = delete_task_by_uuid(task_list, task_uuid)
+        else:
+            # Fallback for legacy tasks
+            del task_list[task_id - 1]
+            reassign_task_ids(task_list)
+            save_tasks(task_list, tasks_file_path)
         return True
-
-def create_new_task(task_id, task_description="", flagged=False, category_id=0):
-    """Create a new task with optional category assignment"""
-    return {
-        'id': task_id,
-        'description': task_description,
-        'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
-        'status': False,
-        'flagged': flagged,
-        'category_id': category_id  # Default to 'All' category (id=0)
-    }
+    return False
 
 def add_new_task(task_list, task_id, task_description, flagged=False, category_id=0):
     """Create, append and save a new task with category support"""
@@ -86,20 +80,23 @@ def get_tasks_by_category(task_list, category_id):
     
     result = []
     for task in task_list:
-        # Handle tasks from before categories were implemented
         task_category = task.get('category_id', 0)
         if task_category == category_id:
             result.append(task)
     return result
 
 def update_existing_tasks():
-    """Update existing tasks to include category_id field if missing"""
+    """Update existing tasks to include category_id and uuid fields if missing"""
     task_list = load_tasks()
     modified = False
     
     for task in task_list:
         if 'category_id' not in task:
-            task['category_id'] = 0  # Default to "All" category
+            task['category_id'] = 0
+            modified = True
+        
+        if 'uuid' not in task:
+            task['uuid'] = str(uuid.uuid4())
             modified = True
     
     if modified:
@@ -111,3 +108,10 @@ def reassign_task_ids(task_list):
     """Reassign ids to every task in the list"""
     for i, t in enumerate(task_list):
         t['id'] = i + 1
+
+def delete_task_by_uuid(task_list, task_uuid):
+    """Delete task by UUID and return updated list"""
+    task_list = [task for task in task_list if task.get('uuid') != task_uuid]
+    reassign_task_ids(task_list)
+    save_tasks(task_list, tasks_file_path)
+    return task_list

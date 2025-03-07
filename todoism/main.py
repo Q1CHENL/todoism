@@ -1,4 +1,5 @@
 import time
+import uuid
 import curses
 import todoism.utils as ut
 import todoism.task as tsk
@@ -207,7 +208,7 @@ def main(stdscr):
             stdscr.erase()
             color_selected = st.get_color_selected()
             curses.init_pair(1, curses.COLOR_BLACK, color_selected)
-            
+            tsk.reassign_task_ids(filtered_tasks)
             if focus_manager.is_tasks_focused():
                 # Update task view using existing scrolling logic
                 if task_cnt > 0:
@@ -680,7 +681,7 @@ def main(stdscr):
             elif key == ord('e'):
                 curses.echo()
                 curses.curs_set(1)
-                if task_cnt > 0 and current_id > 0:
+                if len(filtered_tasks) > 0 and current_id > 0:
                     task_idx = current_id - 1
                     
                     # Override the current task row y-position to account for sidebar
@@ -691,7 +692,7 @@ def main(stdscr):
                     
                     # Call edit_and_save with adjusted parameters for sidebar offset
                     stdscr.erase()
-                    pr.print_status_bar(stdscr, done_cnt, task_cnt)
+                    pr.print_status_bar(stdscr, done_cnt, len(filtered_tasks))
                     
                     # Display sidebar
                     pr.print_sidebar(
@@ -719,17 +720,15 @@ def main(stdscr):
                     
                     # Handle task deletion if description is empty
                     if filtered_tasks[task_idx]['description'] == "":
-                        # Find and delete the task
-                        for i, task in enumerate(task_list):
-                            if task['id'] == filtered_tasks[task_idx]['id']:
-                                del task_list[i]
-                                break
+                        task_uuid = filtered_tasks[task_idx]['uuid']
+                        task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
+                        filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
+                        task_cnt = len(filtered_tasks)
                         
                         # Update IDs
                         tsk.reassign_task_ids(task_list)
                         
                         # Update filtered tasks and counts
-                        filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
                         task_cnt = len(filtered_tasks)
                         
                         # Adjust selection after deletion
@@ -896,12 +895,13 @@ def main(stdscr):
                 # Double backspace to delete a task
                 k = stdscr.getch()
                 if k == curses.KEY_BACKSPACE or k == 127:
-                    if task_cnt > 0:
-                        if task_list[current_id - 1]['status'] is True:
+                    if len(filtered_tasks) > 0:
+                        if filtered_tasks[current_id - 1]['status'] is True:
                             done_cnt = done_cnt - 1
-                        del task_list[current_id - 1]
-                        tsk.reassign_task_ids(task_list)
-                        # view change rules are similar to apple reminder
+                        task_uuid = filtered_tasks[current_id - 1]['uuid']
+                        task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
+                        filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
+                        task_cnt = len(filtered_tasks)
                         current_id, current_row, start, end = scr.post_deletion_update(
                             current_id,
                             current_row,
@@ -910,7 +910,6 @@ def main(stdscr):
                             task_cnt,
                             max_capacity
                         )
-                        task_cnt = task_cnt - 1
                     tsk.save_tasks(task_list, tsk.tasks_file_path)
                     should_repaint = True
 

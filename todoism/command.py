@@ -1,5 +1,6 @@
 import curses
 import copy
+import time
 
 import todoism.task as tsk
 import todoism.utils as ut
@@ -100,47 +101,30 @@ def execute_command(
     elif command.startswith("color "):
         st.set_color_selected(command[6:])
     elif command == "help":
-        stdscr.erase()
         pr.print_msg(stdscr, pr.help_msg)
-        while stdscr.getch() != ord('q'):
-            continue
+        stdscr.refresh()
+        time.sleep(3)
     elif command.startswith("del"):
-        # In order to apply post_deletion_update, need to first change 
-        # current_id & current_row to the the one to be deleted
-        del_task_id = command[4:]
-        if del_task_id.isdigit():
-            # only deletion of task in current view is allowed
-            if start <= int(del_task_id) <= end:
-                old_current_id = current_id
-                # old_current_row = current_row
-                current_id = int(del_task_id)
-                current_row = current_id - start + 1
-                old_description = task_list[old_current_id - 1]['description']
-                del task_list[int(del_task_id) - 1]
-                tsk.reassign_task_ids(task_list)
-                _, _, start, end = scr.post_deletion_update(
-                                                            current_id,
-                                                            current_row, 
-                                                            start, 
-                                                            end,
-                                                            len(task_list) + 1,
-                                                            max_capacity
-                                                            )
-                # restore to previous current_id and current_row
-                # These 2 remain unchaned unless the last task was deleted:
-                new_id_of_prev_current_task = get_id_by_description(task_list, old_description)
-                # if the prev current task was deleted: the selected task was deleted
-                if new_id_of_prev_current_task == -1:
-                    # if the first task was selected and deleted
-                    if old_current_id == 1:
-                        current_id = 1
-                    else:
-                        current_id = old_current_id - 1
+        # Delete a task
+        parts = command.split()
+        if len(parts) > 1 and parts[1].isdigit():
+            task_id = int(parts[1])
+            if 1 <= task_id <= len(task_list):
+                # Get the task's UUID before deleting
+                task_uuid = task_list[task_id - 1].get('uuid')
+                if task_uuid:
+                    # Use UUID-based deletion
+                    task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
                 else:
-                    current_id = new_id_of_prev_current_task
-                current_row = current_id - start + 1
-                tsk.save_tasks(task_list, tsk.tasks_file_path)
-                                        
+                    # Fallback for legacy tasks without UUID
+                    del task_list[task_id - 1]
+                    tsk.reassign_task_ids(task_list)
+                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                
+                # Update current_id, current_row, start, end after deletion
+                current_id, current_row, start, end = scr.post_deletion_update(
+                    current_id, current_row, start, end, len(task_list), max_capacity
+                )
     elif command.startswith("edit"):
         task_id = command[5:]
         if task_id.isdigit() and int(task_id) <= len(task_list):
