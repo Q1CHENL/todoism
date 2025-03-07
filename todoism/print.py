@@ -63,16 +63,24 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
     width = len(lines[1])
     max_y, max_x = stdscr.getmaxyx()
     
+    # Ensure we have minimum required space
+    if max_y < 2 or max_x < x_offset + 1:
+        return
+    
     # Calculate available width for task area (total width minus sidebar)
-    available_width = max_x - x_offset
+    available_width = max(0, max_x - x_offset)
     
     # Calculate center position within the available task area
-    center_offset = (available_width - width) // 2
+    # Ensure center_offset is never negative
+    center_offset = max(0, (available_width - width) // 2)
     
     # Clear the task area before printing
     for i in range(1, max_y - 1):  # Leave the bottom row for bottom frame
-        stdscr.move(i, x_offset)
-        stdscr.clrtoeol()
+        try:
+            stdscr.move(i, x_offset)
+            stdscr.clrtoeol()
+        except curses.error:
+            continue
     
     # Apply highlighting if requested
     if highlight:
@@ -82,10 +90,19 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
     for i, line in enumerate(lines):
         y = i + 1  # Start at row 1 (row 0 is status bar)
         if y < max_y - 1 and line.strip():  # Only print non-empty lines and check bounds
-            # Position cursor at sidebar edge + centering offset
-            stdscr.move(y, x_offset + center_offset)
-            # Print the line directly
-            stdscr.addstr(line)
+            try:
+                # Position cursor at sidebar edge + centering offset
+                stdscr.move(y, x_offset + center_offset)
+                # Print the line directly, truncating if necessary
+                if x_offset + center_offset + len(line) > max_x:
+                    # Truncate line to fit available space
+                    available_space = max_x - (x_offset + center_offset)
+                    if available_space > 0:
+                        stdscr.addstr(line[:available_space])
+                else:
+                    stdscr.addstr(line)
+            except curses.error:
+                continue
     
     # Remove highlighting if it was applied
     if highlight:
@@ -96,20 +113,23 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
         try:
             stdscr.addstr(y, max_x - 1, '│')
         except curses.error:
+            continue
+    
+    # Draw the bottom frame if there's enough space
+    if max_y > 2:
+        try:
+            stdscr.addstr(max_y - 1, x_offset - 1, "┴")
+            # Draw horizontal line only if there's space
+            remaining_width = max_x - x_offset - 1
+            if remaining_width > 0:
+                for x in range(x_offset, max_x - 2):
+                    stdscr.addstr(max_y - 1, x, "─")
+                stdscr.addstr(max_y - 1, max_x - 2, "┘")
+                stdscr.insstr(max_y - 1, max_x - 2, "─")
+        except curses.error:
             pass
     
-    # Draw the bottom frame
-    try:
-        stdscr.addstr(max_y - 1, x_offset - 1, "┴")
-        for x in range(16 + 1, max_x - 2):
-            stdscr.addstr(max_y - 1, x, "─")
-        stdscr.addstr(max_y-1, max_x - 2, "┘")
-        stdscr.insstr(max_y-1, max_x - 2, "─")
-
-    except curses.error:
-        pass
-    
-    # No need for full refresh, just update specific areas
+    # Update specific areas instead of full refresh
     stdscr.noutrefresh()
     curses.doupdate()
 
