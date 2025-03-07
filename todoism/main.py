@@ -271,15 +271,17 @@ def main(stdscr):
             try:
                 mouse_id, mouse_x, mouse_y, mouse_z, button_state = curses.getmouse()
                 
-                # Check if clicked in sidebar area
+                # Check if clicked in sidebar area (including blank areas)
                 if mouse_x < sidebar_width:
+                    if not focus_manager.is_sidebar_focused():
+                        focus_manager.toggle_focus()
+                        should_repaint = True
+                    
+                    # Only handle category selection if clicked on a valid category
                     if 1 <= mouse_y <= min(len(categories), max_capacity):
                         clicked_cat_index = sidebar_scroller.start_index + mouse_y - 1
                         
                         if 0 <= clicked_cat_index < len(categories):
-                            if not focus_manager.is_sidebar_focused():
-                                focus_manager.toggle_focus()
-                                
                             old_category_id = current_category_id
                             sidebar_scroller.current_index = clicked_cat_index
                             current_category_id = categories[clicked_cat_index]['id']
@@ -294,38 +296,39 @@ def main(stdscr):
                                 should_repaint = True
                     continue
                 
-                # Handle clicks in task area
-                if 1 <= mouse_y <= min(task_cnt, max_capacity):
+                # Handle clicks in task area (including blank areas)
+                if mouse_x >= sidebar_width:
                     if not focus_manager.is_tasks_focused():
                         focus_manager.toggle_focus()
-                        
-                    clicked_task_id = start + mouse_y - 1
-                    
-                    # Get the visual row that was clicked
-                    clicked_task_row = mouse_y  # Row on screen
-                    
-                    if start <= clicked_task_id <= end:
-                        task_index = clicked_task_id - 1
-                        
-                        status_x_start = sidebar_width + 3
-                        status_x_end = status_x_start + 1 
-                        
-                        flag_x_start = sidebar_width + 5
-                        flag_x_end = flag_x_start + 1
-
-                        if status_x_start <= mouse_x <= status_x_end:
-                            if filtered_tasks:
-                                done_list.append(filtered_tasks[task_index])
-                                filtered_tasks[task_index]['status'] = not filtered_tasks[task_index]['status']
-                                tsk.save_tasks(task_list, tsk.tasks_file_path)
-                        elif flag_x_start <= mouse_x <= flag_x_end:
-                            if filtered_tasks:
-                                filtered_tasks[task_index]['flagged'] = not filtered_tasks[task_index]['flagged']
-                                tsk.save_tasks(task_list, tsk.tasks_file_path)
-                        else:
-                            current_id = clicked_task_id
-                            current_row = clicked_task_row
                         should_repaint = True
+                    
+                    # Only handle task selection if clicked on a valid task row
+                    if 1 <= mouse_y <= min(task_cnt, max_capacity):
+                        clicked_task_id = start + mouse_y - 1
+                        clicked_task_row = mouse_y  # Row on screen
+                        
+                        if start <= clicked_task_id <= end:
+                            task_index = clicked_task_id - 1
+                            
+                            status_x_start = sidebar_width + 3
+                            status_x_end = status_x_start + 1 
+                            
+                            flag_x_start = sidebar_width + 5
+                            flag_x_end = flag_x_start + 1
+
+                            if status_x_start <= mouse_x <= status_x_end:
+                                if filtered_tasks:
+                                    done_list.append(filtered_tasks[task_index])
+                                    filtered_tasks[task_index]['status'] = not filtered_tasks[task_index]['status']
+                                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                            elif flag_x_start <= mouse_x <= flag_x_end:
+                                if filtered_tasks:
+                                    filtered_tasks[task_index]['flagged'] = not filtered_tasks[task_index]['flagged']
+                                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                            else:
+                                current_id = clicked_task_id
+                                current_row = clicked_task_row
+                            should_repaint = True
             except curses.error:
                 # getmouse() can raise an exception if the terminal doesn't support mouse
                 pass
