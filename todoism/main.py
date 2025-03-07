@@ -277,15 +277,15 @@ def main(stdscr):
                 if mouse_x < sidebar_width:
                     if 1 <= mouse_y <= min(len(categories), max_capacity):
                         # Calculate the category ID that was clicked
-                        clicked_cat_id = sidebar_scroller.start_index + mouse_y - 1
+                        clicked_cat_index = sidebar_scroller.start_index + mouse_y - 1
                         
-                        if 0 <= clicked_cat_id < len(categories):
+                        if 0 <= clicked_cat_index < len(categories):
                             if not focus_manager.is_sidebar_focused():
                                 focus_manager.toggle_focus()
                                 
                             # Update the selected category
-                            sidebar_scroller.current_index = clicked_cat_id - 1
-                            current_category_id = categories[clicked_cat_id - 1]['id']
+                            sidebar_scroller.current_index = clicked_cat_index
+                            current_category_id = categories[clicked_cat_index]['id']
                             
                             # Reset task selection for the new category
                             filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
