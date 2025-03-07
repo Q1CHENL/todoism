@@ -94,7 +94,7 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
     stdscr.refresh()
 
 def print_version():
-    print("todoism version 1.20")
+    print("todoism version 1.21.1")
 
 def print_task_symbols(stdscr, task, y, status_x=3, flag_x=5, use_colors=True, is_selected=False):
     """Print task status and flag symbols with appropriate colors
@@ -265,40 +265,6 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     
     return None
 
-def _print_task_core(stdscr, task, y, is_selected, max_x=0, is_edit_mode=False):
-    """Core function to print a task with appropriate formatting"""
-    return render_task(stdscr, task, y, is_selected, 0, max_x, None, is_edit_mode)
-
-def print_task(stdscr, task, row, is_current, max_x):
-    """Print a task with status indicators"""
-    if is_current:
-        print_task_selected(stdscr, task, row)
-        return
-    
-    _print_task_core(stdscr, task, row, False, max_x)
-
-def print_task_selected(stdscr, task, y):
-    """Print a selected task with appropriate highlighting"""
-    _print_task_core(stdscr, task, y, True)
-
-def print_task_mode(stdscr, task, y, mode):
-    """mode: add/edit"""
-    if mode == edit_mode:
-        # Pass is_edit_mode=True to prevent truncation with ellipsis
-        _print_task_core(stdscr, task, y, True, 0, is_edit_mode=True)
-    else:
-        print_task(stdscr, task, y, False, 0)  
-        
-def print_tasks(stdscr, task_list, current_id, start, end):
-    if start > 0:
-        for i, task in enumerate(task_list[start - 1:end]):
-            if i + start == current_id: # handle task overflow: +start
-                print_task_selected(stdscr, task, i + 1) # +1 due to status bar
-                stdscr.refresh()
-            else:
-                print_task(stdscr, task, i + 1, task['id'] == current_id, 0)
-                stdscr.refresh()
-
 
 def print_status_bar(stdscr, done_cnt, task_cnt):
     """Print centered status bar with progress, percentage, date and time"""
@@ -368,9 +334,6 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(1) | 
                    curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
 
-def print_main_view(stdscr, done_cnt, task_cnt, tasks, current_id, start, end):
-    print_status_bar(stdscr, done_cnt, task_cnt)
-    print_tasks(stdscr, tasks, current_id, start, end)
     
 def repaint(stdscr, done_cnt, task_cnt, task_list, current_id, start, end):
     """Update screen efficiently without full clear"""
