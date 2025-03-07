@@ -269,9 +269,11 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     for i in range(available_width - len(visible_text)):
         stdscr.addstr(' ')
     
-    # Print date with exactly one character gap (only for tasks, not sidebar)
+    # Print date with exactly one character gap to right
     if not is_sidebar and date_str:
         stdscr.addstr(y, date_pos, date_str)
+        if is_selected:
+            stdscr.addstr(y, date_pos + len(date_str), ' ')
     
     # Print right frame without highlight
     if not is_sidebar:
@@ -476,7 +478,6 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     if is_selected and has_focus:
         stdscr.attron(curses.color_pair(1))  # Use the same highlight as tasks
     elif is_selected and not has_focus:
-        # st.get_color_selected()
         curses.init_pair(8, st.get_color_selected(), curses.COLOR_BLACK)
         stdscr.attron(curses.color_pair(8))
         stdscr.attron(curses.A_BOLD)
@@ -487,6 +488,9 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     # Calculate available width for category name
     sidebar_width = 15
     name_width = sidebar_width - 2  # 2 spaces for indentation (1 for left border + 1 for spacing)
+    
+    if is_selected:
+        stdscr.addstr(y, 1, ' ')
     
     # Always show the full name (it's already limited by MAX_CATEGORY_NAME_LENGTH)
     # If it's somehow longer, truncate it with an ellipsis
@@ -637,9 +641,10 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
         if task.get('status', False):
             stdscr.attroff(curses.A_DIM)
     
-    # Print right frame without highlight
     try:
         if is_selected:
+            stdscr.attron(curses.color_pair(1))
+            stdscr.addstr(row, right_frame_pos - 1, ' ')
             stdscr.attroff(curses.color_pair(1))
         stdscr.addstr(row, right_frame_pos, '│')
     except curses.error:

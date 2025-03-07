@@ -632,14 +632,14 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
                     stdscr.move(y, new_x)
                     continue
                 
-            # FIXED: Ensure cursor position is valid before insertion
+            # Ensure cursor position is valid before insertion
             if cursor_pos_in_text < 0 or cursor_pos_in_text > len(task['description']):
                 cursor_pos_in_text = min(max(0, cursor_pos_in_text), len(task['description']))
             
             # Keep track of whether we're at the end of text before insertion
             at_end_of_text = cursor_pos_in_text == len(task['description'])
             
-            # CRITICAL FIX: Record length before insertion to detect pastes
+            # Record length before insertion to detect pastes
             original_length = len(task['description'])
             
             # Insert character at the correct position
@@ -650,13 +650,12 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             at_end_of_text = cursor_pos_in_text == len(task['description'])
             
-            # FIX: Recalculate screen boundaries with exactly 1 space gap
+            # Recalculate screen boundaries with exactly 1 space gap
             date_length = len(task['date'])
             date_pos = right_frame_pos - date_length - 1  # Position where date starts (with 1 char gap)
             max_visible_width = date_pos - (text_start_pos)  # Total spaces available for text
             right_limit = date_pos - 1  # Position of the 1 char gap
             
-            # COMPLETELY REVISED LOGIC FOR END OF TEXT INSERTION
             if at_end_of_text:
                 # When we're at the end of text and need to scroll:
                 if new_cursor_pos > scroll_offset + max_visible_width:

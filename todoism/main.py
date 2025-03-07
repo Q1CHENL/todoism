@@ -207,7 +207,6 @@ def main(stdscr):
             if focus_manager.is_tasks_focused():
                 # Update task view using existing scrolling logic
                 if task_cnt > 0:
-                    # Ensure valid current_id
                     if current_id > task_cnt:
                         current_id = task_cnt
                         current_row = min(current_row, max_capacity)
