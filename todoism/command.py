@@ -18,7 +18,7 @@ def purge(task_list, purged_list):
             remained.append(t)
         else:
             purged_list.append(t)
-    ut.reid(remained)
+    ut.reassign_task_ids(remained)
     tsk.save_tasks(purged_list, tsk.purged_file_path)
     return remained, []
 
@@ -90,10 +90,10 @@ def execute_command(
         category = command[5:]
         if category == "f":
             task_list = sort(task_list, "flagged")
-            ut.reid(task_list)
+            ut.reassign_task_ids(task_list)
         elif category == 'd':
             task_list = sort(task_list, "status")
-            ut.reid(task_list)
+            ut.reassign_task_ids(task_list)
     elif command == "group":
         pass
     elif command.startswith("color "):
@@ -116,7 +116,7 @@ def execute_command(
                 current_row = current_id - start + 1
                 old_description = task_list[old_current_id - 1]['description']
                 del task_list[int(del_task_id) - 1]
-                ut.reid(task_list)
+                ut.reassign_task_ids(task_list)
                 _, _, start, end = ut.post_deletion_update(
                                                             current_id,
                                                             current_row, 

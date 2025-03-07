@@ -70,7 +70,7 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
     center_offset = (available_width - width) // 2
     
     # Clear the task area before printing
-    for i in range(1, max_y):
+    for i in range(1, max_y - 1):  # Leave the bottom row for bottom frame
         stdscr.move(i, x_offset)
         stdscr.clrtoeol()
     
@@ -81,7 +81,7 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
     # Print each line separately at the calculated position
     for i, line in enumerate(lines):
         y = i + 1  # Start at row 1 (row 0 is status bar)
-        if y < max_y and line.strip():  # Only print non-empty lines and check bounds
+        if y < max_y - 1 and line.strip():  # Only print non-empty lines and check bounds
             # Position cursor at sidebar edge + centering offset
             stdscr.move(y, x_offset + center_offset)
             # Print the line directly
@@ -91,7 +91,27 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
     if highlight:
         stdscr.attroff(curses.color_pair(1))
     
-    stdscr.refresh()
+    # Draw the right frame for each line
+    for y in range(1, max_y - 1):
+        try:
+            stdscr.addstr(y, max_x - 1, '│')
+        except curses.error:
+            pass
+    
+    # Draw the bottom frame
+    try:
+        stdscr.addstr(max_y - 1, x_offset - 1, "┴")
+        for x in range(16 + 1, max_x - 2):
+            stdscr.addstr(max_y - 1, x, "─")
+        stdscr.addstr(max_y-1, max_x - 2, "┘")
+        stdscr.insstr(max_y-1, max_x - 2, "─")
+
+    except curses.error:
+        pass
+    
+    # No need for full refresh, just update specific areas
+    stdscr.noutrefresh()
+    curses.doupdate()
 
 def print_version():
     print("todoism version 1.21.1")
@@ -516,7 +536,7 @@ def print_tasks_with_offset(stdscr, task_list, current_id, start, end, x_offset=
                 print_task_with_offset(stdscr, task, row, False, x_offset, display_id)
     
     max_y, max_x = stdscr.getmaxyx()
-    for y in range(len(task_list), max_y - 1):
+    for y in range(len(task_list) if len(task_list) > 0 else 1, max_y - 1):
         stdscr.addstr(y, max_x - 1, "│")
     # https://stackoverflow.com/questions/7063128/last-character-of-a-window-in-python-curses
     # Special trick for last char error in cursor window

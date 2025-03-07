@@ -6,7 +6,7 @@ import todoism.task as tsk
 indent = 7
 max_task_count = 99
 
-def reid(task_list):
+def reassign_task_ids(task_list):
     """Reassign ids to every task in the list"""
     for i, t in enumerate(task_list):
         t['id'] = i + 1
@@ -841,7 +841,7 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     # Handle task deletion if description is empty
     if task_list[id - 1]['description'] == "":
         del task_list[id - 1]
-        reid(task_list)
+        reassign_task_ids(task_list)
         id, row, start, end = post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
     
     # Save changes
@@ -861,8 +861,8 @@ def post_deletion_update(current_id, current_row, start, end, prev_task_cnt, max
     Senario 1: ┌───────┐    Senario 2: ├───────┤    Senario 3: ┌───────┐    Senario 4: ├───────┤
                ├───────┤               ├───────┤               ├───────┤               ├───────┤
                ├───────┤               ├───────┤               ├───────┤               ├───────┤   
-               ├───────┤               ├───────┤               └───────┘               ├───────┤                  
-               └───────┘               └───────┘                                       │       │
+               ├───────┤               ├───────┤               ├───────┤               ├───────┤                  
+               └───────┘               └───────┘               │       │               │       │
                                                                │       │               │       │
     And the view update rules are similar to the Apple Reminder's
                 

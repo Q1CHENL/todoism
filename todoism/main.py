@@ -55,7 +55,7 @@ def main(stdscr):
     done_list = []  # a part of task list
     purged_list = []
 
-    ut.reid(task_list)  # reid in case something went wrong in last session
+    ut.reassign_task_ids(task_list)  # reassign_task_ids in case something went wrong in last session
     
     # Get screen dimensions
     max_y, max_x = stdscr.getmaxyx()
@@ -543,7 +543,7 @@ def main(stdscr):
                         
                         # Handle tasks in this category
                         task_list = [task for task in task_list if task.get('category_id', 0) != current_category_id]
-                        ut.reid(task_list)
+                        ut.reassign_task_ids(task_list)
                         tsk.save_tasks(task_list, tsk.tasks_file_path)
                         cat.delete_category(current_category_id)
                         categories = cat.reassign_category_ids()
@@ -726,7 +726,7 @@ def main(stdscr):
                                 break
                         
                         # Update IDs
-                        ut.reid(task_list)
+                        ut.reassign_task_ids(task_list)
                         
                         # Update filtered tasks and counts
                         filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
@@ -903,8 +903,8 @@ def main(stdscr):
                             done_cnt = done_cnt - 1
                         # perform deletion
                         del task_list[current_id - 1]
-                        # reid
-                        ut.reid(task_list)
+                        # reassign_task_ids
+                        ut.reassign_task_ids(task_list)
                         # view change rules are similar to apple reminder
                         current_id, current_row, start, end = ut.post_deletion_update(
                             current_id,
