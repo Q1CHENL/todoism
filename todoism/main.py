@@ -1,7 +1,7 @@
 import time
 import uuid
 import curses
-import todoism.utils as ut
+import todoism.edit as ed
 import todoism.task as tsk
 import todoism.print as pr
 import todoism.settings as st
@@ -430,7 +430,7 @@ def main(stdscr):
                 
                 # Use the same edit function as for tasks, but adapt for sidebar position
                 temp_category['description'] = ''  # Add this field for edit function compatibility
-                new_cat_name = ut.edit(stdscr, temp_category, pr.add_mode, 0, 0, is_sidebar=True)
+                new_cat_name = ed.edit(stdscr, temp_category, pr.add_mode, 0, 0, is_sidebar=True)
                 temp_category['name'] = new_cat_name  # Store result in name field
                 
                 if new_cat_name:
@@ -510,7 +510,7 @@ def main(stdscr):
                     edit_cat = current_cat.copy()
                     edit_cat['description'] = current_cat['name']  # Map name to description for edit function
                     
-                    new_name = ut.edit(stdscr, edit_cat, pr.edit_mode, 0, len(current_cat['name']), is_sidebar=True)
+                    new_name = ed.edit(stdscr, edit_cat, pr.edit_mode, 0, len(current_cat['name']), is_sidebar=True)
                     
                     if new_name:
                         # Enforce maximum length for category name
@@ -585,7 +585,7 @@ def main(stdscr):
             # Handle user input for tasks
             if key == ord('a'):
                 # Allow task creation in "All" category
-                if task_cnt == ut.max_task_count:
+                if task_cnt == ed.max_task_count:
                     pr.print_msg(stdscr, pr.limit_msg)
                     stdscr.refresh()
                     time.sleep(1.2)
@@ -624,7 +624,7 @@ def main(stdscr):
                 stdscr.addstr(y_pos, sidebar_width, f"{new_task_num} ")
 
                 # Move cursor to the correct position after task number
-                stdscr.move(y_pos, sidebar_width + ut.indent)
+                stdscr.move(y_pos, sidebar_width + ed.indent)
                 stdscr.refresh()
 
                 # Add a new task
@@ -633,7 +633,7 @@ def main(stdscr):
                 # Set category_id to 0 if in "All" category, otherwise use current category
                 new_task['category_id'] = 0 if current_category_id == 0 else current_category_id
                 
-                new_task_description = ut.edit(stdscr, new_task, pr.add_mode)
+                new_task_description = ed.edit(stdscr, new_task, pr.add_mode)
                 
                 if new_task_description != "":
                     new_id = task_cnt + 1
@@ -688,7 +688,7 @@ def main(stdscr):
                     edit_row = current_row  # Row is correct, it's relative to visible area
                     
                     # Get the task's description length and add offset for sidebar
-                    desc_length = len(filtered_tasks[task_idx]['description']) + ut.indent
+                    desc_length = len(filtered_tasks[task_idx]['description']) + ed.indent
                     
                     # Call edit_and_save with adjusted parameters for sidebar offset
                     stdscr.erase()
@@ -708,11 +708,11 @@ def main(stdscr):
                     pr.print_tasks_with_offset(stdscr, filtered_tasks, current_id, start, end, sidebar_width)
                     
                     # Move cursor to edit position
-                    stdscr.move(edit_row, sidebar_width + ut.indent)
+                    stdscr.move(edit_row, sidebar_width + ed.indent)
                     stdscr.refresh()
                     
                     # Use regular edit, but with the task offset in the interface
-                    filtered_tasks[task_idx]['description'] = ut.edit(
+                    filtered_tasks[task_idx]['description'] = ed.edit(
                         stdscr, 
                         filtered_tasks[task_idx], 
                         pr.edit_mode

@@ -1,6 +1,6 @@
 import os
 import json
-import todoism.utils as ut
+import todoism.edit as ed
 from datetime import datetime
 import uuid
 

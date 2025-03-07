@@ -3,7 +3,7 @@ import todoism.task as tsk
 import todoism.category as cat
 import todoism.print as pr
 import todoism.command as cmd
-import todoism.utils as ut
+import todoism.edit as ed
 
 class FocusManager:
     """Manages focus between sidebar and task list"""

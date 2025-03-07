@@ -3,7 +3,7 @@ import copy
 import time
 
 import todoism.task as tsk
-import todoism.utils as ut
+import todoism.edit as ed
 import todoism.print as pr
 import todoism.settings as st
 import todoism.category as cat
@@ -135,7 +135,7 @@ def execute_command(
             curses.curs_set(1)
             current_row = edit_id - start + 1
             if len(task_list) and edit_id >= start and edit_id <= end:
-                current_id, current_row, start, end = ut.edit_and_save(
+                current_id, current_row, start, end = ed.edit_and_save(
                     stdscr, 
                     task_list, 
                     edit_id,
@@ -143,7 +143,7 @@ def execute_command(
                     start,
                     end,
                     edit_id - start + 1,
-                    len(task_list[edit_id - 1]['description']) + ut.indent,
+                    len(task_list[edit_id - 1]['description']) + ed.indent,
                     max_capacity
                 )
             curses.curs_set(0)
