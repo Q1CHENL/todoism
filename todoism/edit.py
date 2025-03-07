@@ -612,8 +612,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
                 max_pos = max(0, min(max_pos, len(task['description'])))
                 
                 if min_pos != max_pos:  # Only if there's an actual selection
-                    # Replace selected text with typed character
-                    task['description'] = task['description'][:min_pos] + chr(ch) + task['description'][:max_pos]
+                    task['description'] = task['description'][:min_pos] + chr(ch) + task['description'][max_pos:]
                     
                     # Position cursor after the inserted character
                     cursor_pos_in_text = min_pos + 1
