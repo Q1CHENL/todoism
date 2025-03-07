@@ -98,8 +98,11 @@ def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset, is_s
     for i in range(visible_start, visible_end):
         # Calculate screen position based on whether we're in sidebar or task area
         if is_sidebar:
-            # FIX: Use base_indent (1) for sidebar, not 3
-            screen_pos = 1 + (i - scroll_offset)  # Sidebar starts at position 1
+            # Use base_indent (2) for sidebar to match text_start_pos in edit function
+            screen_pos = 2 + (i - scroll_offset)  # Sidebar starts at position 2
+            # Ensure we don't highlight beyond sidebar boundary
+            if screen_pos > 14:  # Sidebar width limit
+                break
         else:
             screen_pos = indent + 16 + (i - scroll_offset)  # Task position with sidebar offset
             
@@ -441,17 +444,18 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # Find the start of the previous word
             new_pos = move_by_word(task['description'], cursor_pos_in_text, -1)
             
-            # Adjust scroll if needed
-            if new_pos < scroll_offset + 5:
-                scroll_offset = max(0, new_pos - 5)
-            
-            # Update cursor position
-            cursor_pos_in_text = new_pos
-            
-            # Calculate new safe screen position
-            new_x = text_start_pos + (new_pos - scroll_offset)
-            # Use right_limit for proper boundary
-            new_x = min(new_x, right_limit)
+            # For sidebar (category names), no scrolling needed
+            if is_sidebar:
+                cursor_pos_in_text = new_pos
+                new_x = text_start_pos + new_pos
+                new_x = min(new_x, 14)  # Hard limit for sidebar
+            else:
+                # Adjust scroll if needed
+                if new_pos < scroll_offset + 5:
+                    scroll_offset = max(0, new_pos - 5)
+                cursor_pos_in_text = new_pos
+                new_x = text_start_pos + (new_pos - scroll_offset)
+                new_x = min(new_x, right_limit)
             
             stdscr.move(y, new_x)
             
@@ -468,17 +472,18 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # Find the end of the next word
             new_pos = move_by_word(task['description'], cursor_pos_in_text, 1)
             
-            # Adjust scroll if needed
-            if new_pos > scroll_offset + max_visible_width - 5:
-                scroll_offset = new_pos - max_visible_width + 5
-            
-            # Update cursor position
-            cursor_pos_in_text = new_pos
-            
-            # Calculate new safe screen position
-            new_x = text_start_pos + (new_pos - scroll_offset)
-            # Use right_limit for proper boundary
-            new_x = min(new_x, right_limit)
+            # For sidebar (category names), no scrolling needed
+            if is_sidebar:
+                cursor_pos_in_text = new_pos
+                new_x = text_start_pos + new_pos
+                new_x = min(new_x, 14)  # Hard limit for sidebar
+            else:
+                # Adjust scroll if needed
+                if new_pos > scroll_offset + max_visible_width - 5:
+                    scroll_offset = new_pos - max_visible_width + 5
+                cursor_pos_in_text = new_pos
+                new_x = text_start_pos + (new_pos - scroll_offset)
+                new_x = min(new_x, right_limit)
             
             stdscr.move(y, new_x)
             
