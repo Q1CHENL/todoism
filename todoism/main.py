@@ -22,9 +22,7 @@ def main(stdscr):
     # Enable mouse support
     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
     
-    # Initialize color pairs
     curses.start_color()
-    # progress colors
     curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
@@ -276,26 +274,24 @@ def main(stdscr):
                 # Check if clicked in sidebar area
                 if mouse_x < sidebar_width:
                     if 1 <= mouse_y <= min(len(categories), max_capacity):
-                        # Calculate the category ID that was clicked
                         clicked_cat_index = sidebar_scroller.start_index + mouse_y - 1
                         
                         if 0 <= clicked_cat_index < len(categories):
                             if not focus_manager.is_sidebar_focused():
                                 focus_manager.toggle_focus()
                                 
-                            # Update the selected category
+                            old_category_id = current_category_id
                             sidebar_scroller.current_index = clicked_cat_index
                             current_category_id = categories[clicked_cat_index]['id']
                             
-                            # Reset task selection for the new category
-                            filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
-                            task_cnt = len(filtered_tasks)
-                            current_id = 1 if task_cnt > 0 else 0
-                            current_row = 1 if task_cnt > 0 else 0
-                            start = 1 if task_cnt > 0 else 0
-                            end = task_cnt if task_cnt < max_capacity else max_capacity
-                            
-                            should_repaint = True
+                            if old_category_id != current_category_id:
+                                filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
+                                task_cnt = len(filtered_tasks)
+                                current_id = 1 if task_cnt > 0 else 0
+                                current_row = 1 if task_cnt > 0 else 0
+                                start = 1 if task_cnt > 0 else 0
+                                end = task_cnt if task_cnt < max_capacity else max_capacity
+                                should_repaint = True
                     continue
                 
                 # Handle clicks in task area
