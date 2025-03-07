@@ -285,8 +285,8 @@ def main(stdscr):
                                 focus_manager.toggle_focus()
                                 
                             # Update the selected category
-                            sidebar_scroller.current_index = clicked_cat_index
-                            current_category_id = categories[clicked_cat_index]['id']
+                            sidebar_scroller.current_index = clicked_cat_id - 1
+                            current_category_id = categories[clicked_cat_id - 1]['id']
                             
                             # Reset task selection for the new category
                             filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
@@ -896,14 +896,10 @@ def main(stdscr):
                 # Double backspace to delete a task
                 k = stdscr.getch()
                 if k == curses.KEY_BACKSPACE or k == 127:
-                # only perform deletion when task_cnt > 0
                     if task_cnt > 0:
-                        # update done_cnt
                         if task_list[current_id - 1]['status'] is True:
                             done_cnt = done_cnt - 1
-                        # perform deletion
                         del task_list[current_id - 1]
-                        # reassign_task_ids
                         ut.reassign_task_ids(task_list)
                         # view change rules are similar to apple reminder
                         current_id, current_row, start, end = ut.post_deletion_update(
@@ -914,8 +910,6 @@ def main(stdscr):
                             task_cnt,
                             max_capacity
                         )
-
-                        # update task_cnt
                         task_cnt = task_cnt - 1
                     tsk.save_tasks(task_list, tsk.tasks_file_path)
                     should_repaint = True
