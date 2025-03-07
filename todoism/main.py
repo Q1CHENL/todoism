@@ -907,7 +907,7 @@ def main(stdscr):
                             current_row,
                             start,
                             end,
-                            task_cnt,
+                            task_cnt + 1,
                             max_capacity
                         )
                     tsk.save_tasks(task_list, tsk.tasks_file_path)
