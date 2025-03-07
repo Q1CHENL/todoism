@@ -8,8 +8,7 @@ import todoism.settings as st
 import todoism.command as cmd
 import todoism.cli as cli
 import todoism.category as cat
-import todoism.app as app
-import todoism.scroll as scr
+import todoism.navigate as nv
 from datetime import datetime
 
 def main(stdscr):
@@ -45,7 +44,7 @@ def main(stdscr):
     categories = cat.load_categories()
     
     # Initialize focus manager
-    focus_manager = app.FocusManager()
+    focus_manager = nv.FocusManager()
     
     current_category_id = 0  # Start with "All" category
     
@@ -60,7 +59,7 @@ def main(stdscr):
     max_capacity = max_y - 2 # status and bottom frame
     
     # Initialize sidebar scroller
-    sidebar_scroller = app.SidebarScroller(len(categories), max_capacity)
+    sidebar_scroller = nv.SidebarScroller(len(categories), max_capacity)
     
     # Get filtered task list for current category
     filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
@@ -877,14 +876,14 @@ def main(stdscr):
             elif key == curses.KEY_UP:
                 if task_cnt > 0:
                     # Use original keyup logic
-                    start, end, current_id, current_row, should_repaint = scr.keyup_update(
+                    start, end, current_id, current_row, should_repaint = nv.keyup_update(
                         start, end, current_id, current_row, task_cnt, max_capacity, True
                     )
                 
             elif key == curses.KEY_DOWN:
                 if task_cnt > 0:
                     # Use original keydown logic
-                    start, end, current_id, current_row, should_repaint = scr.keydown_update(
+                    start, end, current_id, current_row, should_repaint = nv.keydown_update(
                         start, end, current_id, current_row, task_cnt, max_capacity, True
                     )
                 
@@ -899,7 +898,7 @@ def main(stdscr):
                         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
                         filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
                         task_cnt = len(filtered_tasks)
-                        current_id, current_row, start, end = scr.post_deletion_update(
+                        current_id, current_row, start, end = nv.post_deletion_update(
                             current_id,
                             current_row,
                             start,

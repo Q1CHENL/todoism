@@ -1,7 +1,7 @@
 import curses
 import todoism.print as pr
 import todoism.task as tsk
-import todoism.scroll as scr
+import todoism.navigate as nv
 
 indent = 7
 max_task_count = 99
@@ -835,7 +835,7 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     if task_list[id - 1]['description'] == "":
         del task_list[id - 1]
         reassign_task_ids(task_list)
-        id, row, start, end = scr.post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
+        id, row, start, end = nv.post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
     
     # Save changes
     tsk.save_tasks(task_list, tsk.tasks_file_path)

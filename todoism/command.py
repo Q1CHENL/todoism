@@ -7,7 +7,7 @@ import todoism.edit as ed
 import todoism.print as pr
 import todoism.settings as st
 import todoism.category as cat
-import todoism.scroll as scr
+import todoism.navigate as nv
 
 
 def purge(task_list, purged_list):
@@ -122,7 +122,7 @@ def execute_command(
                     tsk.save_tasks(task_list, tsk.tasks_file_path)
                 
                 # Update current_id, current_row, start, end after deletion
-                current_id, current_row, start, end = scr.post_deletion_update(
+                current_id, current_row, start, end = nv.post_deletion_update(
                     current_id, current_row, start, end, len(task_list), max_capacity
                 )
     elif command.startswith("edit"):
