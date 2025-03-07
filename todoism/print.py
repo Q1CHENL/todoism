@@ -8,38 +8,39 @@ edit_mode = 1
 help_msg =  '''
 ┌──────────────────────────────────────────────────┐
 │                                                  │
-│   short commands:                                │
-│   a - create new task                            │
-│   d - mark task as done                          │
-│   e - edit task                                  │
-│   f - mark task as flagged                       │
-│   q - quit this help message/todoism             │
+│   Short commands:                                │
+│   a - Create new task                            │
+│   d - Mark task as done                          │
+│   e - Edit task                                  │
+│   f - Mark task as flagged                       │
+│   q - Quit this help message/todoism             │
 │                                                  │
-│   vim-like long commands:                        │            
+│   Vim-like long commands:                        │
 │   (:<command> [args])                            │
-│   :help - show this help message                 │
-│   :del [task_id] - delete task                   │
-│   :edit [task_id] - edit task                    │
-│   :done [task_id] - mark task as done            |
-│   :purge - purge all done tasks                  │
-│   :sort f - sort flagged tasks to top            │
-│   :sort d - sort done tasks to bottom            │
+│   :help - Show this help message                 │
+│   :del [task_id] - Delete task                   │
+│   :edit [task_id] - Edit task                    │
+│   :done [task_id] - Mark task as done            |
+│   :purge - Purge all done tasks                  │
+│   :sort f - Sort flagged tasks to top            │
+│   :sort d - Sort done tasks to bottom            │
 │   :autosort f on|off                             │
 │   :autosort d on|off                             │
 │   :setcolor blue|red|yellow|green                │
-│    - change background color of current task     │
-│   :st on|off - toggle strikethrough effect       │ 
+│    - Change background color of current task     │
+│   :st on|off - toggle strikethrough effect       │
 │                                                  │
-│   other key bindings:                            │
-│   double Backspace - delete task                 │
+│   Other key bindings:                            │
+│   Tab - Toggle focus bewteen tasks and sidebar   │
+│   Double Backspace - delete task                 │
 │   ESC - quit adding/editing task                 │
 │   Enter - finish adding/editing task             │
 │   Up/Down Arrow Keys - navigate through tasks    │
 │    Mouse Click:                                  │
-│    - on task: select task                        │
-│    - on done: toggle task completion             │
-│    - on flag: toggle task flag                   │  
-│                                                  │                     
+│    - on task: Select task                        │
+│    - on done: Toggle task completion             │
+│    - on flag: Toggle task flag                   │
+│                                                  │
 └──────────────────────────────────────────────────┘
 '''
 
