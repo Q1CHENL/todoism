@@ -9,7 +9,8 @@ color_set = {
     "yellow": curses.COLOR_YELLOW,
     "green": curses.COLOR_GREEN,
     "magenta": curses.COLOR_MAGENTA,
-    "cyan": curses.COLOR_CYAN
+    "cyan": curses.COLOR_CYAN,
+    "white": curses.COLOR_WHITE
 }
 
 def set_color_selected(color: str):

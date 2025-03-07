@@ -1,6 +1,6 @@
 import curses
+import todoism.settings as st
 from datetime import datetime
-
 
 add_mode  = 0
 edit_mode = 1
@@ -476,6 +476,9 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     if is_selected and has_focus:
         stdscr.attron(curses.color_pair(1))  # Use the same highlight as tasks
     elif is_selected and not has_focus:
+        # st.get_color_selected()
+        curses.init_pair(8, st.get_color_selected(), curses.COLOR_BLACK)
+        stdscr.attron(curses.color_pair(8))
         stdscr.attron(curses.A_BOLD)
     
     # Import the max category name length
@@ -504,6 +507,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     if is_selected and has_focus:
         stdscr.attroff(curses.color_pair(1))
     elif is_selected and not has_focus:
+        stdscr.attroff(curses.color_pair(8))
         stdscr.attroff(curses.A_BOLD)
 
 def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_id, 

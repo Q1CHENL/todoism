@@ -28,12 +28,10 @@ def main(stdscr):
     curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
-    # regular color pair
     curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    # Green for done symbol
     curses.init_pair(6, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    # Orange (using yellow as closest match) for flag symbol
     curses.init_pair(7, curses.COLOR_RED, curses.COLOR_BLACK)
+
     # Set up the screen
     curses.curs_set(0)
     stdscr.clear()
