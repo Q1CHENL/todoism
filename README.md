@@ -2,9 +2,9 @@
 
 A simple and easy-to-use todo TUI
 
-## Demo
+## Screenshot
 
-![UI](./assets/demo.gif)
+![UI](./assets/screenshot-v1.21.1.png)
 
 ## Install and use
 
