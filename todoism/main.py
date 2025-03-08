@@ -575,6 +575,72 @@ def main(stdscr):
                     stdscr.clrtoeol()
                     should_repaint = True
                 
+            elif key == ord(':'):
+                curses.echo()
+                curses.curs_set(1)
+                
+                # Disable timeout temporarily
+                stdscr.timeout(-1)
+                
+                # Place the command input at the bottom of the screen, after the sidebar
+                stdscr.addstr(max_capacity, sidebar_width, ":")
+                stdscr.refresh()
+                
+                # Get command input
+                command_line = stdscr.getstr().decode('utf-8')
+                
+                # Restore timeout
+                stdscr.timeout(500)
+                
+                curses.curs_set(0)
+                curses.noecho()
+                
+                task_list, done_list, current_id, current_row, start, end = cmd.execute_command(
+                    stdscr,
+                    command_line,
+                    task_list,
+                    filtered_tasks,
+                    done_list,
+                    purged_list,
+                    current_id,
+                    start,
+                    end,
+                    current_row,
+                    max_capacity
+                )
+                
+                if command_line.startswith("c"):
+                    categories, current_category_id = cmd.execute_category_command(
+                        stdscr,
+                        command_line,
+                        categories,
+                        task_list,
+                        current_category_id
+                    )
+                    
+                    sidebar_scroller.update_total(len(categories))                    
+                    for i, c in enumerate(categories):
+                        if c['id'] == current_category_id:
+                            sidebar_scroller.current_index = i
+                            break
+                    
+                    filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
+                    task_cnt = len(filtered_tasks)
+                    
+                    if task_cnt > 0:
+                        current_id = 1
+                        current_row = 1
+                        start = 1
+                        end = min(max_capacity, task_cnt)
+                    else:
+                        current_id = 0
+                        current_row = 0
+                        start = 0
+                        end = 0
+                
+                should_repaint = True
+                command_line = ""
+                
         # Handle task navigation and actions when task area is focused
         elif focus_manager.is_tasks_focused():
             # Handle user input for tasks
