@@ -22,6 +22,18 @@ A simple and easy-to-use todo TUI
 │   f - Mark task as flagged                       │
 │   q - Quit this help message/todoism             │
 │                                                  │
+│   Key bindings:                                  │
+│   Tab - Toggle focus bewteen tasks and sidebar   │
+│   Double Backspace - delete task                 │
+│   ESC - quit adding/editing task                 │
+│   Enter - finish adding/editing task             │
+│   Up/Down Arrow Keys - navigate through tasks    │
+│   Mouse Click:                                   │
+│    - on task: Select task                        │
+│    - on category: Select category                │
+│    - on done: Toggle task completion             │
+│    - on flag: Toggle task flag                   │
+│                                                  │
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
 │   :help - Show this help message                 │
@@ -37,20 +49,10 @@ A simple and easy-to-use todo TUI
 │    - Change background color of current task     │
 │   :st on|off - toggle strikethrough effect       │
 │                                                  │
-│   Other key bindings:                            │
-│   Tab - Toggle focus bewteen tasks and sidebar   │
-│   Double Backspace - delete task                 │
-│   ESC - quit adding/editing task                 │
-│   Enter - finish adding/editing task             │
-│   Up/Down Arrow Keys - navigate through tasks    │
-│   Mouse Click:                                   │
-│    - on task: Select task                        │
-│    - on category: Select category                │
-│    - on done: Toggle task completion             │
-│    - on flag: Toggle task flag                   │
-│                                                  │
 └──────────────────────────────────────────────────┘
 ```
+> [!NOTE]
+> Some terminal does not support mouse click or strike through effect.
 
 ## ToDos
 
