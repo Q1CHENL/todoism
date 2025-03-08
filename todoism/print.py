@@ -26,7 +26,7 @@ help_msg =  '''
 │   :sort d - Sort done tasks to bottom            │
 │   :autosort f on|off                             │
 │   :autosort d on|off                             │
-│   :setcolor blue|red|yellow|green                │
+│   :color blue|red|yellow|green                   │
 │    - Change background color of current task     │
 │   :st on|off - toggle strikethrough effect       │
 │                                                  │
