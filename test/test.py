@@ -27,7 +27,7 @@ def generate_test_tasks():
         {
             "id": 2,
             "uuid": str(uuid.uuid4()),
-            "description": "Add secret :test command",
+            "description": "Add autosort command",
             "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "status": True,
             "flagged": False,
@@ -36,7 +36,7 @@ def generate_test_tasks():
         {
             "id": 3,
             "uuid": str(uuid.uuid4()),
-            "description": "Add :restore command",
+            "description": "Auto update todoism",
             "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "status": False,
             "flagged": False,
