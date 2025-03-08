@@ -582,6 +582,14 @@ def main(stdscr):
                 # Disable timeout temporarily
                 stdscr.timeout(-1)
                 
+                # Clear the bottom line before showing command prompt
+                stdscr.move(max_capacity, 0)
+                stdscr.clrtoeol()
+                # Keep frames visible
+                stdscr.addstr(max_y - 2, 0, "│")
+                stdscr.addstr(max_y - 2, 15, "│")
+                stdscr.addstr(max_y - 2, max_x - 1, "│")
+                
                 # Place the command input at the bottom of the screen, after the sidebar
                 stdscr.addstr(max_capacity, sidebar_width, ":")
                 stdscr.refresh()
@@ -870,6 +878,14 @@ def main(stdscr):
                 
                 # Disable timeout temporarily
                 stdscr.timeout(-1)
+                
+                # Clear the bottom line
+                stdscr.move(max_capacity, 0)
+                stdscr.clrtoeol()
+                # Keep frames visible
+                stdscr.addstr(max_y - 2, 0, "│")
+                stdscr.addstr(max_y - 2, 15, "│")
+                stdscr.addstr(max_y - 2, max_x - 1, "│")
                 
                 # Place the command input at the bottom of the screen, after the sidebar
                 stdscr.addstr(max_capacity, sidebar_width, ":")
