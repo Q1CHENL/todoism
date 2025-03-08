@@ -54,13 +54,11 @@ A simple and easy-to-use todo TUI
 
 ## ToDos
 
-- prevent view blinking when scroll fast
-- maybe restore prev current id and row at command edit as well
 - properly display completed tasks
 - maybe make autosort flag and done default
 - grey background when adding new task using 'a'
 - make status bar prettier: wrap it as a block
-- add chinese language support
+- add multi language support
 - make no-task message more helpful
 - command autosort
 - emulate the popup menu when right click on task
@@ -72,7 +70,6 @@ A simple and easy-to-use todo TUI
 - group different kinds of tasks
 - simplify print args
 - history total done count in maybe settings
-- delete printing status bar except for time update
 - sound
 
 ## Contribute
