@@ -115,3 +115,21 @@ def delete_task_by_uuid(task_list, task_uuid):
     reassign_task_ids(task_list)
     save_tasks(task_list, tasks_file_path)
     return task_list
+
+def done_task_by_uuid(task_list, task_uuid):
+    """Mark task as done by UUID and return updated list"""
+    for task in task_list:
+        if task.get('uuid') == task_uuid:
+            task['status'] = True
+            save_tasks(task_list, tasks_file_path)
+            return task_list
+    return task_list
+
+def flag_task_by_uuid(task_list, task_uuid):
+    """Flag task by UUID and return updated list"""
+    for task in task_list:
+        if task.get('uuid') == task_uuid:
+            task['flagged'] = not task.get('flagged', False)
+            save_tasks(task_list, tasks_file_path)
+            return task_list
+    return task_list

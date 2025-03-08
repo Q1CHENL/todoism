@@ -823,6 +823,7 @@ def main(stdscr):
                     stdscr,
                     command_line,
                     task_list,
+                    filtered_tasks,
                     done_list,
                     purged_list,
                     current_id,

@@ -40,6 +40,7 @@ def execute_command(
         stdscr, 
         command, 
         task_list, 
+        filtered_tasks,
         done_list, 
         purged_list,
         current_id,
@@ -57,8 +58,8 @@ def execute_command(
                     index_to_done = int(id_to_done) - 1
                     if 0 <= index_to_done < len(task_list):
                         done_list.append(copy.copy(task_list[index_to_done]))
-                        task_list[index_to_done]['status'] = not task_list[index_to_done]['status']
-                        tsk.save_tasks(task_list, tsk.tasks_file_path)
+                        task_uuid = filtered_tasks[index_to_done].get('uuid')
+                        tsk.done_task_by_uuid(task_list, task_uuid)
     elif command.startswith("flag "):
         tasks_sperated_by_comma = command[5:].split(' ')
         if len(tasks_sperated_by_comma) == 1:
@@ -67,9 +68,7 @@ def execute_command(
                 for id_to_flag in ids_to_flag:
                     index_to_flag = int(id_to_flag) - 1
                     if 0 <= index_to_flag < len(task_list):
-                        done_list.append(copy.copy(task_list[index_to_flag]))
-                        task_list[index_to_flag]['flagged'] = not task_list[index_to_flag]['flagged']
-                        tsk.save_tasks(task_list, tsk.tasks_file_path)
+                        tsk.flag_task_by_uuid(task_list, task_list[index_to_flag]['uuid'])
     elif command == "purge":
         original_cnt = len(task_list)
         displayed_task_cnt = end - start + 1
