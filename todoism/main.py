@@ -366,19 +366,20 @@ def main(stdscr):
                 break
                 
             elif key == ord('a'):
-                # Add a new category with live preview
                 curses.echo()
                 curses.curs_set(1)
                 
                 # Calculate the position where new category would appear
                 cat_count = len(categories)
                 visible_count = min(cat_count, max_capacity)
-                new_cat_row = visible_count + 1  # Row after last visible category
-                
-                # If we're at max capacity, use the last line
-                if new_cat_row > max_capacity:
+                is_sidebar_full = visible_count >= max_capacity
+                if is_sidebar_full:
+                    # scroll up
+                    sidebar_scroller.start_index += 1
                     new_cat_row = max_capacity
-                
+                else:
+                    new_cat_row = visible_count + 1
+                    
                 new_cat_id = max([c['id'] for c in categories], default=0) + 1
                 
                 # Create a temporary category for editing
@@ -389,8 +390,6 @@ def main(stdscr):
                     'date': datetime.now().strftime("%Y-%m-%d %H:%M")
                 }
                 
-                # Only clear and redraw the SIDEBAR PORTION of each line (columns 0-14)
-                # This preserves tasks on the same lines
                 for i in range(0, max_capacity + 1):
                     # Clear only the sidebar portion of each line (not the entire line)
                     for j in range(15):  # Clear only columns 0-14
@@ -399,7 +398,7 @@ def main(stdscr):
                     # Restore the separator line
                     stdscr.addch(i, 15, '│')
                 
-                # Redraw all categories in the sidebar
+                # Redraw all categories in the sidebar with updated start_index
                 pr.print_sidebar(
                     stdscr,
                     categories,
