@@ -363,9 +363,14 @@ def main(stdscr):
                 should_repaint = True
             
             elif key == ord('q'):
-                import test.test as test_module
-                if test_module.is_test_mode_active():
-                    test_module.restore_data()
+                # Try to restore data if in test mode, but don't fail if test module isn't available
+                try:
+                    import test.test as test_module
+                    if test_module.is_test_mode_active():
+                        test_module.restore_data()
+                except ImportError:
+                    # No test module found (PyPI installation), continue with normal exit
+                    pass
                 break
                 
             elif key == ord('a'):
@@ -830,9 +835,14 @@ def main(stdscr):
                     should_repaint = True
                 
             elif key == ord('q'):
-                import test.test as test_module
-                if test_module.is_test_mode_active():
-                    test_module.restore_data()
+                # Try to restore data if in test mode, but don't fail if test module isn't available
+                try:
+                    import test.test as test_module
+                    if test_module.is_test_mode_active():
+                        test_module.restore_data()
+                except ImportError:
+                    # No test module found (PyPI installation), continue with normal exit
+                    pass
                 break
                 
             elif key == ord(':'):
