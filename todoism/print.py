@@ -377,42 +377,6 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(1) | 
                    curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
 
-    
-def repaint(stdscr, done_cnt, task_cnt, task_list, current_id, start, end):
-    """Update screen efficiently without full clear"""
-    max_y, max_x = stdscr.getmaxyx()
-    
-    # Update status bar
-    print_status_bar(stdscr, done_cnt, task_cnt)
-    
-    # Update tasks
-    for i in range(start-1, end):
-        if i < len(task_list):
-            task = task_list[i]
-            print_task(stdscr, task, i - (start-1) + 1, task['id'] == current_id, max_x)
-    
-    # Draw frames for all lines
-    for i in range(1, max_y):  # Start from 1 to skip status bar
-        # Draw left frame
-        stdscr.addstr(i, 0, "│")
-        
-        # Draw separator frame
-        stdscr.addstr(i, 15, "│")
-        
-        # Draw right frame (always)
-        try:
-            stdscr.addstr(i, max_x - 1, "│")
-        except curses.error:
-            pass
-        
-        # If this line is beyond our tasks, clear the content area
-        if i > end - start + 1:
-            stdscr.move(i, 16)  # Move to start of content area
-            stdscr.clrtoeol()   # Clear to end of line
-    
-    # Single screen update
-    stdscr.noutrefresh()
-    curses.doupdate()
 
 def print_all_cli(todos):
     if len(todos) == 0:

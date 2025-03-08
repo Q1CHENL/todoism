@@ -104,7 +104,7 @@ def execute_command(
         pr.print_msg(stdscr, pr.help_msg)
         stdscr.refresh()
         time.sleep(3)
-    elif command.startswith("del"):
+    elif command.startswith("del "):
         # Delete a task
         parts = command.split()
         if len(parts) > 1 and parts[1].isdigit():
@@ -125,12 +125,34 @@ def execute_command(
                 current_id, current_row, start, end = nv.post_deletion_update(
                     current_id, current_row, start, end, len(task_list), max_capacity
                 )
-    elif command.startswith("edit"):
+    elif command.startswith("edit "):
         task_id = command[5:]
         if task_id.isdigit() and int(task_id) <= len(task_list):
             max_capacity = stdscr.getmaxyx()[0] - 1    
             edit_id = int(task_id)
-            pr.repaint(stdscr, len(done_list), len(task_list), task_list, edit_id, start, end)
+            
+            # Replace obsolete repaint call
+            # Load current categories for sidebar rendering
+            categories = cat.load_categories()
+            done_cnt = tsk.done_count(task_list)
+            
+            current_category_id = 0
+            
+            # Render the main view with sidebar
+            pr.print_main_view_with_sidebar(
+                stdscr,
+                done_cnt,
+                len(task_list),
+                task_list,
+                edit_id,
+                start,
+                end,
+                categories,
+                current_category_id,
+                0,  # Start at first category 
+                False  # Tasks have focus
+            )
+            
             curses.echo()
             curses.curs_set(1)
             current_row = edit_id - start + 1
@@ -148,14 +170,34 @@ def execute_command(
                 )
             curses.curs_set(0)
             curses.noecho()      
-    elif command.startswith("st"):
-        option = command[3:]
+    elif command.startswith("st "):
+        option = command[4:]
         if option == "on":
             st.set_strikethrough(True)
         elif option == "off":
             st.set_strikethrough(False)
-        # Repaint the screen to show the change immediately
-        pr.repaint(stdscr, len(done_list), len(task_list), task_list, current_id, start, end)
+        
+        # Replace obsolete repaint call
+        # Load current categories for sidebar rendering
+        categories = cat.load_categories()
+        done_cnt = tsk.done_count(task_list)
+        
+        current_category_id = 0
+        
+        # Render the main view with sidebar
+        pr.print_main_view_with_sidebar(
+            stdscr,
+            done_cnt,
+            len(task_list),
+            task_list,
+            current_id,
+            start,
+            end,
+            categories,
+            current_category_id,
+            0,  # Start at first category 
+            False  # Tasks have focus
+        )
     
 
     return task_list, done_list, current_id, current_row, start, end
