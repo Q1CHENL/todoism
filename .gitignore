@@ -1,6 +1,7 @@
 __pycache__
 test.json
-.vscode
 dist
 build
 *.egg-info
+.cursorrules
+.vscode
