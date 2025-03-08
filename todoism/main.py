@@ -499,7 +499,7 @@ def main(stdscr):
                     stdscr.attroff(curses.color_pair(1))
                     stdscr.addstr(row, 15, '│')
                     
-                    # Position cursor at start of category name (1-space indent)
+                    # Position cursor at start of category name (1 char indent)
                     stdscr.move(row, 1)
                     stdscr.refresh()
                     
@@ -513,13 +513,8 @@ def main(stdscr):
                         # Enforce maximum length for category name
                         if len(new_name) > cat.MAX_CATEGORY_NAME_LENGTH:
                             new_name = new_name[:cat.MAX_CATEGORY_NAME_LENGTH]
-                            
-                        # Update the name
                         cat.update_category_name(current_category_id, new_name)
-                        
-                        # Reload categories
                         categories = cat.load_categories()
-                    
                     pr.print_tasks_with_offset(stdscr, filtered_tasks, current_id, start, end, sidebar_width)
                     
                     curses.curs_set(0)
@@ -536,8 +531,6 @@ def main(stdscr):
                     # Wait for confirmation
                     k = stdscr.getch()
                     if k == curses.KEY_BACKSPACE or k == 127:
-                        # Remember current position in the list
-                        current_index = sidebar_scroller.current_index
                         
                         # Handle tasks in this category
                         task_list = [task for task in task_list if task.get('category_id', 0) != current_category_id]
@@ -595,11 +588,8 @@ def main(stdscr):
                 # Place the command input at the bottom of the screen, after the sidebar
                 stdscr.addstr(max_capacity, sidebar_width, ":")
                 stdscr.refresh()
-                
-                # Get command input
+
                 command_line = stdscr.getstr().decode('utf-8')
-                
-                # Restore timeout
                 stdscr.timeout(500)
                 
                 curses.curs_set(0)
@@ -643,7 +633,6 @@ def main(stdscr):
         elif focus_manager.is_tasks_focused():
             # Handle user input for tasks
             if key == ord('a'):
-                # Allow task creation in "All" category
                 if task_cnt == ed.max_task_count:
                     pr.print_msg(stdscr, pr.limit_msg)
                     stdscr.refresh()
@@ -664,7 +653,6 @@ def main(stdscr):
                         start = task_cnt - (end - start - 1)
                         end = task_cnt
 
-                # Draw sidebar
                 pr.print_sidebar(
                     stdscr,
                     categories,
@@ -686,10 +674,7 @@ def main(stdscr):
                 stdscr.move(y_pos, sidebar_width + ed.indent)
                 stdscr.refresh()
 
-                # Add a new task
                 new_task = tsk.create_new_task(task_cnt + 1)
-                
-                # Set category_id to 0 if in "All" category, otherwise use current category
                 new_task['category_id'] = 0 if current_category_id == 0 else current_category_id
                 
                 new_task_description = ed.edit(stdscr, new_task, pr.add_mode)
@@ -699,8 +684,6 @@ def main(stdscr):
                     task_list = tsk.add_new_task(
                         task_list, new_id, new_task_description, False, new_task['category_id'])
                     task_cnt = task_cnt + 1
-                    
-                    # Update filtered tasks
                     filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
                     
                     if task_cnt == 1:
@@ -709,20 +692,16 @@ def main(stdscr):
                         current_row = task_cnt
                     else:
                         current_row = max_capacity
-                    current_id = new_id  # new id
-                    end = end + 1  # change end as well
+                    current_id = new_id
+                    end = end + 1
                 else:
-                    # User cancelled adding a new task
                     start = old_start
                     end = old_end
-                    # Force full repaint to clear the empty task line
                     should_repaint = True
-                    # Continue to next iteration without adding a task
                     curses.curs_set(0)
                     curses.noecho()
                     continue
                     
-                # Redraw with updated task list
                 pr.print_tasks_with_offset(stdscr, filtered_tasks, current_id, start, end, sidebar_width)
                 stdscr.refresh()
                 curses.curs_set(0)
@@ -746,9 +725,6 @@ def main(stdscr):
                     # Override the current task row y-position to account for sidebar
                     edit_row = current_row  # Row is correct, it's relative to visible area
                     
-                    # Get the task's description length and add offset for sidebar
-                    desc_length = len(filtered_tasks[task_idx]['description']) + ed.indent
-                    
                     # Call edit_and_save with adjusted parameters for sidebar offset
                     stdscr.erase()
                     pr.print_status_bar(stdscr, done_cnt, len(filtered_tasks))
@@ -763,7 +739,6 @@ def main(stdscr):
                         False
                     )
                     
-                    # Render all tasks with offset
                     pr.print_tasks_with_offset(stdscr, filtered_tasks, current_id, start, end, sidebar_width)
                     
                     # Move cursor to edit position
@@ -784,10 +759,7 @@ def main(stdscr):
                         filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
                         task_cnt = len(filtered_tasks)
                         
-                        # Update IDs
                         tsk.reassign_task_ids(task_list)
-                        
-                        # Update filtered tasks and counts
                         task_cnt = len(filtered_tasks)
                         
                         # Adjust selection after deletion
@@ -841,11 +813,9 @@ def main(stdscr):
                                 stdscr.move(task_cnt - start + 2, sidebar_width)
                                 stdscr.clrtoeol()
                         
-                        # Update status bar and refresh
                         pr.print_status_bar(stdscr, done_cnt, task_cnt)
                         stdscr.refresh()
                     
-                    # Save changes
                     tsk.save_tasks(task_list, tsk.tasks_file_path)
                     should_repaint = True
                     
@@ -880,14 +850,9 @@ def main(stdscr):
                 stdscr.addstr(max_y - 2, 15, "│")
                 stdscr.addstr(max_y - 2, max_x - 1, "│")
                 
-                # Place the command input at the bottom of the screen, after the sidebar
                 stdscr.addstr(max_capacity, sidebar_width, ":")
                 stdscr.refresh()
-                
-                # Get command input
                 command_line = stdscr.getstr().decode('utf-8')
-                
-                # Restore timeout
                 stdscr.timeout(500)
                 
                 curses.curs_set(0)
@@ -924,20 +889,16 @@ def main(stdscr):
                     task_list, done_list, current_id, current_row, start, end = command_result
                 
                 should_repaint = True
-                
-                # Clear command line
                 command_line = ""
                 
             elif key == curses.KEY_UP:
                 if task_cnt > 0:
-                    # Use original keyup logic
                     start, end, current_id, current_row, should_repaint = nv.keyup_update(
                         start, end, current_id, current_row, task_cnt, max_capacity, True
                     )
                 
             elif key == curses.KEY_DOWN:
                 if task_cnt > 0:
-                    # Use original keydown logic
                     start, end, current_id, current_row, should_repaint = nv.keydown_update(
                         start, end, current_id, current_row, task_cnt, max_capacity, True
                     )

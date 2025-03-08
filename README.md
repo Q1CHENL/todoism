@@ -51,6 +51,7 @@ A simple and easy-to-use todo TUI
 │                                                  │
 └──────────────────────────────────────────────────┘
 ```
+
 > [!NOTE]
 > Some terminal does not support mouse click or strike through effect.
 
