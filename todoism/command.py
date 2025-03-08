@@ -49,6 +49,7 @@ def execute_command(
         current_row,
         max_capacity
         ):
+    command_recognized = False    
     if command.startswith("done "):
         tasks_sperated_by_comma = command[5:].split(' ')
         if len(tasks_sperated_by_comma) == 1:
@@ -60,6 +61,7 @@ def execute_command(
                         done_list.append(copy.copy(task_list[index_to_done]))
                         task_uuid = filtered_tasks[index_to_done].get('uuid')
                         tsk.done_task_by_uuid(task_list, task_uuid)
+        command_recognized = True
     elif command.startswith("flag "):
         tasks_sperated_by_comma = command[5:].split(' ')
         if len(tasks_sperated_by_comma) == 1:
@@ -69,6 +71,7 @@ def execute_command(
                     index_to_flag = int(id_to_flag) - 1
                     if 0 <= index_to_flag < len(task_list):
                         tsk.flag_task_by_uuid(task_list, task_list[index_to_flag]['uuid'])
+        command_recognized = True
     elif command == "purge":
         original_cnt = len(task_list)
         displayed_task_cnt = end - start + 1
@@ -84,27 +87,43 @@ def execute_command(
                 end = displayed_task_cnt
             else:
                 end = len(task_list)
+        command_recognized = True
     elif command == "purge all":
         task_list = []
         tsk.save_tasks(task_list, tsk.tasks_file_path)
+        command_recognized = True
     elif command.startswith("sort "):
         category = command[5:]
-        if category == "f":
+        if category == 'f':
             task_list = sort(task_list, "flagged")
             tsk.reassign_task_ids(task_list)
+            command_recognized = True
         elif category == 'd':
             task_list = sort(task_list, "status")
             tsk.reassign_task_ids(task_list)
+            command_recognized = True
     elif command == "group":
-        pass
+        command_recognized = True
     elif command.startswith("color "):
         st.set_color_selected(command[6:])
+        command_recognized = True
     elif command == "help":
+        max_y, max_x = stdscr.getmaxyx()
         pr.print_msg(stdscr, pr.help_msg)
+        hint = "┤Press 'q' to close help├"
+        hint_pos_x = (max_x - 15) // 2 + 15 - len(hint) // 2
+        stdscr.addstr(max_y - 1, hint_pos_x, hint)
         stdscr.refresh()
-        time.sleep(3)
+        
+        old_timeout = 500
+        stdscr.timeout(-1)
+        while True:
+            ch = stdscr.getch()
+            if ch == ord('q') or ch == 27:  # 'q' or ESC
+                break
+        stdscr.timeout(old_timeout)
+        return task_list, done_list, current_id, current_row, start, end
     elif command.startswith("del "):
-        # Delete a task
         parts = command.split()
         if len(parts) > 1 and parts[1].isdigit():
             task_id = int(parts[1])
@@ -115,6 +134,7 @@ def execute_command(
                 current_id, current_row, start, end = nv.post_deletion_update(
                     current_id, current_row, start, end, len(task_list), max_capacity
                 )
+        command_recognized = True
     elif command.startswith("edit "):
         task_id = command[5:]
         if task_id.isdigit() and int(task_id) <= len(task_list):
@@ -155,6 +175,7 @@ def execute_command(
                 )
             curses.curs_set(0)
             curses.noecho()      
+        command_recognized = True
     elif command.startswith("st "):
         option = command[4:]
         if option == "on":
@@ -177,20 +198,33 @@ def execute_command(
             current_category_id,
             0,  # Start at first category 
             False  # Tasks have focus
-        )    
+        )
+        command_recognized = True
+    elif command.strip() == "":
+        command_recognized = True
 
-    return task_list, done_list, current_id, current_row, start, end
-
-def get_id_by_description(task_list, description):
-    # current solution: save the content of the prev task first
-    # or just iterate through the whole list to match description
-    # then restore back to the new id corresponding to that content
+    if not command_recognized and command.strip():
+        max_y, max_x = stdscr.getmaxyx()
+        sidebar_width = 16
+        error_msg = f"Invalid command: '{command}'. Type command 'help' for help."
+        
+        # Clear the line first
+        stdscr.move(max_capacity, sidebar_width)
+        stdscr.clrtoeol()
+        
+        stdscr.attron(curses.color_pair(4) | curses.A_BOLD)
+        stdscr.addstr(max_capacity, sidebar_width, error_msg)
+        stdscr.attroff(curses.color_pair(4) | curses.A_BOLD)
+        stdscr.refresh()
+        
+        time.sleep(2)
+        
+        # Clear the error message
+        stdscr.move(max_capacity, sidebar_width)
+        stdscr.clrtoeol()
+        stdscr.refresh()
     
-    # todo: python dict should support reverse retrieving
-    for task in task_list:
-        if task['description'] == description:
-            return task['id']
-    return -1
+    return task_list, done_list, current_id, current_row, start, end
 
 def execute_category_command(
         stdscr,
