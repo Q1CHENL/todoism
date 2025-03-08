@@ -200,6 +200,102 @@ def execute_command(
             False  # Tasks have focus
         )
         command_recognized = True
+    elif command == "test":
+        # Hidden command for developers - load test data
+        import test.test as test_module
+        import todoism.category as cat
+        
+        if test_module.is_test_mode_active():
+            max_y, max_x = stdscr.getmaxyx()
+            sidebar_width = 16
+            warning_msg = "Already in test mode!"
+            stdscr.move(max_capacity, sidebar_width)
+            stdscr.clrtoeol()
+            stdscr.attron(curses.color_pair(3) | curses.A_BOLD)  # Yellow
+            stdscr.addstr(max_capacity, sidebar_width, warning_msg)
+            stdscr.attroff(curses.color_pair(3) | curses.A_BOLD)
+            stdscr.refresh()
+            time.sleep(1)
+            stdscr.move(max_capacity, sidebar_width)
+            stdscr.clrtoeol()
+        else:
+            if test_module.load_test_mode():
+                task_list = tsk.load_tasks()
+                categories = cat.load_categories()
+                current_category_id = 0
+                
+                # Reset view
+                current_id = 1
+                current_row = 1
+                start = 1
+                end = min(len(task_list), max_capacity)
+                
+                # Show success message
+                max_y, max_x = stdscr.getmaxyx()
+                sidebar_width = 16
+                success_msg = "Test mode enabled. Test tasks and categories loaded. Will auto-restore on exit."
+                stdscr.move(max_capacity, sidebar_width)
+                stdscr.clrtoeol()
+                stdscr.attron(curses.color_pair(2) | curses.A_BOLD)  # Green
+                stdscr.addstr(max_capacity, sidebar_width, success_msg)
+                stdscr.attroff(curses.color_pair(2) | curses.A_BOLD)
+                stdscr.refresh()
+                time.sleep(1.5)
+                stdscr.move(max_capacity, sidebar_width)
+                stdscr.clrtoeol()
+                
+                # Return updated categories and category ID
+                return task_list, done_list, current_id, current_row, start, end, categories, current_category_id
+        command_recognized = True
+        
+    elif command == "restore":
+        # Hidden command for developers - restore real data
+        import test.test as test_module
+        import todoism.category as cat
+        
+        if not test_module.is_test_mode_active():
+            max_y, max_x = stdscr.getmaxyx()
+            sidebar_width = 16
+            warning_msg = "Not in test mode - nothing to restore!"
+            stdscr.move(max_capacity, sidebar_width)
+            stdscr.clrtoeol()
+            stdscr.attron(curses.color_pair(3) | curses.A_BOLD)  # Yellow
+            stdscr.addstr(max_capacity, sidebar_width, warning_msg)
+            stdscr.attroff(curses.color_pair(3) | curses.A_BOLD)
+            stdscr.refresh()
+            time.sleep(1)
+            stdscr.move(max_capacity, sidebar_width)
+            stdscr.clrtoeol()
+        else:
+            if test_module.exit_test_mode():
+                task_list = tsk.load_tasks()
+                categories = cat.load_categories()
+                current_category_id = 0
+                
+                # Reset view
+                current_id = 1 if len(task_list) > 0 else 0
+                current_row = 1 if len(task_list) > 0 else 0
+                start = 1 if len(task_list) > 0 else 0
+                end = min(len(task_list), max_capacity) if len(task_list) > 0 else 0
+                
+                # Show success message
+                max_y, max_x = stdscr.getmaxyx()
+                sidebar_width = 16
+                success_msg = "Test mode disabled. Original tasks and categories restored."
+                stdscr.move(max_capacity, sidebar_width)
+                stdscr.clrtoeol()
+                stdscr.attron(curses.color_pair(2) | curses.A_BOLD)  # Green
+                stdscr.addstr(max_capacity, sidebar_width, success_msg)
+                stdscr.attroff(curses.color_pair(2) | curses.A_BOLD)
+                stdscr.refresh()
+                time.sleep(1.5)
+                stdscr.move(max_capacity, sidebar_width)
+                stdscr.clrtoeol()
+                
+                # Return updated categories and category ID
+                return task_list, done_list, current_id, current_row, start, end, categories, current_category_id
+        command_recognized = True
+        
     elif command.strip() == "":
         command_recognized = True
 

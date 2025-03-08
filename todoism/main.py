@@ -363,6 +363,9 @@ def main(stdscr):
                 should_repaint = True
             
             elif key == ord('q'):
+                import test.test as test_module
+                if test_module.is_test_mode_active():
+                    test_module.restore_data()
                 break
                 
             elif key == ord('a'):
@@ -602,7 +605,7 @@ def main(stdscr):
                 curses.curs_set(0)
                 curses.noecho()
                 
-                task_list, done_list, current_id, current_row, start, end = cmd.execute_command(
+                command_result = cmd.execute_command(
                     stdscr,
                     command_line,
                     task_list,
@@ -615,35 +618,23 @@ def main(stdscr):
                     current_row,
                     max_capacity
                 )
-                
-                if command_line.startswith("c"):
-                    categories, current_category_id = cmd.execute_category_command(
-                        stdscr,
-                        command_line,
-                        categories,
-                        task_list,
-                        current_category_id
-                    )
+
+                # Check if we have categories in the result (special case for test/restore)
+                if len(command_result) > 6:
+                    task_list, done_list, current_id, current_row, start, end, categories, current_category_id = command_result
+                    sidebar_scroller.update_total(len(categories))
                     
-                    sidebar_scroller.update_total(len(categories))                    
+                    # Find the new category index
                     for i, c in enumerate(categories):
                         if c['id'] == current_category_id:
                             sidebar_scroller.current_index = i
                             break
-                    
+                            
+                    # Update filtered tasks for the new category
                     filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
                     task_cnt = len(filtered_tasks)
-                    
-                    if task_cnt > 0:
-                        current_id = 1
-                        current_row = 1
-                        start = 1
-                        end = min(max_capacity, task_cnt)
-                    else:
-                        current_id = 0
-                        current_row = 0
-                        start = 0
-                        end = 0
+                else:
+                    task_list, done_list, current_id, current_row, start, end = command_result
                 
                 should_repaint = True
                 command_line = ""
@@ -869,6 +860,9 @@ def main(stdscr):
                     should_repaint = True
                 
             elif key == ord('q'):
+                import test.test as test_module
+                if test_module.is_test_mode_active():
+                    test_module.restore_data()
                 break
                 
             elif key == ord(':'):
@@ -899,8 +893,7 @@ def main(stdscr):
                 curses.curs_set(0)
                 curses.noecho()
                 
-                # Process regular commands
-                task_list, done_list, current_id, current_row, start, end = cmd.execute_command(
+                command_result = cmd.execute_command(
                     stdscr,
                     command_line,
                     task_list,
@@ -913,41 +906,22 @@ def main(stdscr):
                     current_row,
                     max_capacity
                 )
-                
-                # Process category-specific commands
-                if command_line.startswith("c"):
-                    categories, current_category_id = cmd.execute_category_command(
-                        stdscr,
-                        command_line,
-                        categories,
-                        task_list,
-                        current_category_id
-                    )
-                    
-                    # Update sidebar scroller
+
+                # Check if we have categories in the result (special case for test/restore)
+                if len(command_result) > 6:
+                    task_list, done_list, current_id, current_row, start, end, categories, current_category_id = command_result
                     sidebar_scroller.update_total(len(categories))
                     
-                    # Find the index of the selected category
+                    # Find the new category index
                     for i, c in enumerate(categories):
                         if c['id'] == current_category_id:
                             sidebar_scroller.current_index = i
-                            break
-                    
-                    # Update filtered tasks
+                            break  
+                    # Update filtered tasks for the new category
                     filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
                     task_cnt = len(filtered_tasks)
-                    
-                    # Reset task selection using original logic
-                    if task_cnt > 0:
-                        current_id = 1
-                        current_row = 1
-                        start = 1
-                        end = min(max_capacity, task_cnt)
-                    else:
-                        current_id = 0
-                        current_row = 0
-                        start = 0
-                        end = 0
+                else:
+                    task_list, done_list, current_id, current_row, start, end = command_result
                 
                 should_repaint = True
                 
