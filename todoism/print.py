@@ -15,6 +15,19 @@ help_msg =  '''
 │   f - Mark task as flagged                       │
 │   q - Quit this help message/todoism             │
 │                                                  │
+│   Key bindings:                                  │
+│   Tab - Toggle focus bewteen tasks and sidebar   │
+│   Double Backspace - delete task                 │
+│   ESC - quit adding/editing task                 │
+│   Enter - finish adding/editing task             │
+│   Up/Down Arrow Keys - navigate through tasks    │
+│   Mouse Click:                                   │
+│    - on task: Select task                        │
+│    - on category: Select category                │
+│    - on done: Toggle task completion             │
+│    - on flag: Toggle task flag                   │
+│    - on blank area: toggle focus                 │
+│                                                  │
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
 │   :help - Show this help message                 │
@@ -29,18 +42,6 @@ help_msg =  '''
 │   :color blue|red|yellow|green                   │
 │    - Change background color of current task     │
 │   :st on|off - toggle strikethrough effect       │
-│                                                  │
-│   Other key bindings:                            │
-│   Tab - Toggle focus bewteen tasks and sidebar   │
-│   Double Backspace - delete task                 │
-│   ESC - quit adding/editing task                 │
-│   Enter - finish adding/editing task             │
-│   Up/Down Arrow Keys - navigate through tasks    │
-│   Mouse Click:                                   │
-│    - on task: Select task                        │
-│    - on category: Select category                │
-│    - on done: Toggle task completion             │
-│    - on flag: Toggle task flag                   │
 │                                                  │
 └──────────────────────────────────────────────────┘
 '''

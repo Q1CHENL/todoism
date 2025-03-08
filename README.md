@@ -33,6 +33,7 @@ A simple and easy-to-use todo TUI
 │    - on category: Select category                │
 │    - on done: Toggle task completion             │
 │    - on flag: Toggle task flag                   │
+│    - on blank area: toggle focus                 │
 │                                                  │
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
