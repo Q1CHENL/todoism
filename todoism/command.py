@@ -109,17 +109,8 @@ def execute_command(
         if len(parts) > 1 and parts[1].isdigit():
             task_id = int(parts[1])
             if 1 <= task_id <= len(task_list):
-                # Get the task's UUID before deleting
                 task_uuid = task_list[task_id - 1].get('uuid')
-                if task_uuid:
-                    # Use UUID-based deletion
-                    task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                else:
-                    # Fallback for legacy tasks without UUID
-                    del task_list[task_id - 1]
-                    tsk.reassign_task_ids(task_list)
-                    tsk.save_tasks(task_list, tsk.tasks_file_path)
-                
+                task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
                 # Update current_id, current_row, start, end after deletion
                 current_id, current_row, start, end = nv.post_deletion_update(
                     current_id, current_row, start, end, len(task_list), max_capacity
@@ -130,14 +121,9 @@ def execute_command(
             max_capacity = stdscr.getmaxyx()[0] - 1    
             edit_id = int(task_id)
             
-            # Replace obsolete repaint call
-            # Load current categories for sidebar rendering
             categories = cat.load_categories()
-            done_cnt = tsk.done_count(task_list)
-            
+            done_cnt = tsk.done_count(task_list)            
             current_category_id = 0
-            
-            # Render the main view with sidebar
             pr.print_main_view_with_sidebar(
                 stdscr,
                 done_cnt,
@@ -176,14 +162,9 @@ def execute_command(
         elif option == "off":
             st.set_strikethrough(False)
         
-        # Replace obsolete repaint call
-        # Load current categories for sidebar rendering
         categories = cat.load_categories()
         done_cnt = tsk.done_count(task_list)
-        
         current_category_id = 0
-        
-        # Render the main view with sidebar
         pr.print_main_view_with_sidebar(
             stdscr,
             done_cnt,
@@ -196,8 +177,7 @@ def execute_command(
             current_category_id,
             0,  # Start at first category 
             False  # Tasks have focus
-        )
-    
+        )    
 
     return task_list, done_list, current_id, current_row, start, end
 
