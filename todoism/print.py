@@ -9,9 +9,9 @@ help_msg =  '''
 ┌──────────────────────────────────────────────────┐
 │                                                  │
 │   Short commands:                                │
-│   a - Create new task                            │
+│   a - Create new task/category                   │
 │   d - Mark task as done                          │
-│   e - Edit task                                  │
+│   e - Edit task/category                         │
 │   f - Mark task as flagged                       │
 │   q - Quit this help message/todoism             │
 │                                                  │
@@ -36,8 +36,9 @@ help_msg =  '''
 │   ESC - quit adding/editing task                 │
 │   Enter - finish adding/editing task             │
 │   Up/Down Arrow Keys - navigate through tasks    │
-│    Mouse Click:                                  │
+│   Mouse Click:                                   │
 │    - on task: Select task                        │
+│    - on category: Select category                │
 │    - on done: Toggle task completion             │
 │    - on flag: Toggle task flag                   │
 │                                                  │
@@ -47,7 +48,7 @@ help_msg =  '''
 empty_msg = f'''
 ┌──────────────────────────────────────────────────────┐
 │       Hmm, it seems there are no active tasks        │
-│ Take a break, or create some new ones to get busy :) │
+│     Take a break, or create some to get busy :)      │
 └──────────────────────────────────────────────────────┘
 '''
 
