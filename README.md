@@ -4,7 +4,7 @@ A simple and easy-to-use todo TUI
 
 ## Screenshot
 
-![UI](./assets/screenshot-v1.21.1.png)
+![UI](./assets/screenshot-v1.21.2.png)
 
 ## Install and use
 
