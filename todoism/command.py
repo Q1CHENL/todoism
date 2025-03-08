@@ -217,7 +217,7 @@ def execute_command(
         stdscr.attroff(curses.color_pair(4) | curses.A_BOLD)
         stdscr.refresh()
         
-        time.sleep(2)
+        time.sleep(1.35)
         
         # Clear the error message
         stdscr.move(max_capacity, sidebar_width)
