@@ -460,7 +460,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             stdscr.move(y, new_x)
             
         # Try multiple common key code patterns for Ctrl+Shift+Right
-        elif ch in [560, 562, 444, 556, 86, 570]:
+        elif ch in [560, 562, 444, 556, 570]:
             if cursor_pos_in_text >= len(task['description']):
                 continue
                 
