@@ -4,6 +4,7 @@ import time
 import todoism.print as pr
 import todoism.message as msg
 import todoism.task as tsk
+import todoism.preference as pref
 
 def wait_for_enter(stdscr):
     """Wait for user to press Enter key, ignore other keys"""
@@ -61,7 +62,7 @@ def record_key_codes(stdscr):
             restart = True
             pr.print_msg_center(stdscr, msg.keycode_restart_msg, 3)
             time.sleep(1)
-            break
+            continue
         elif ch == ord('q'):
             return False  # Quit without saving
         key_codes['ctrl+right'] = ch
@@ -75,7 +76,7 @@ def record_key_codes(stdscr):
             restart = True
             pr.print_msg_center(stdscr, msg.keycode_restart_msg, 3)
             time.sleep(1)
-            break
+            continue
         elif ch == ord('q'):
             return False  # Quit without saving
         key_codes['ctrl+shift+left'] = ch
@@ -89,7 +90,7 @@ def record_key_codes(stdscr):
             restart = True
             pr.print_msg_center(stdscr, msg.keycode_restart_msg, 3)
             time.sleep(1)
-            break
+            continue
         elif ch == ord('q'):
             return False  # Quit without saving
         key_codes['ctrl+shift+right'] = ch
@@ -99,22 +100,12 @@ def record_key_codes(stdscr):
         if restart:
             continue
 
-        # Show summary with actual key codes
-        pr.print_msg_center(stdscr, msg.keycode_completion_msg, 2)
-        ch = stdscr.getch()
-
-        if ch == ord('r'):
-            continue  # Restart the whole process
-
-        # Save all key codes
         for key, code in key_codes.items():
             save_key_code(key, code)
 
-        # Show completion message
         pr.print_msg_center(stdscr, msg.keycode_completion_msg, 2)
-        time.sleep(1.5)
+        time.sleep(1)
         return True
-
 
 def need_key_recording():
     """Check if we need to record key codes (all keys are 0)"""
@@ -126,7 +117,7 @@ def need_key_recording():
                     settings.get('ctrl+left', 0) == 0 and
                     settings.get('ctrl+right', 0) == 0)
     except FileNotFoundError:
-        setup_default_settings()
+        pref.setup_default_settings()
         return True
 
 
@@ -140,7 +131,7 @@ def save_key_code(key_name, code):
             json.dump(settings, settings_file, indent=4)
             settings_file.truncate()
     except FileNotFoundError:
-        setup_default_settings()
+        pref.setup_default_settings()
 
 
 def get_key_codes():
@@ -155,5 +146,5 @@ def get_key_codes():
                 'ctrl+shift+right': settings.get('ctrl+shift+right', 0)
             }
     except FileNotFoundError:
-        setup_default_settings()
+        pref.setup_default_settings()
         return {'ctrl+left': 0, 'ctrl+right': 0, 'ctrl+shift+left': 0, 'ctrl+shift+right': 0}
