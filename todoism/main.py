@@ -310,20 +310,20 @@ def main(stdscr):
                         if start <= clicked_task_id <= end:
                             task_index = clicked_task_id - 1
                             
-                            status_x_start = sidebar_width + 3
-                            status_x_end = status_x_start + 1 
+                            flag_x_start = sidebar_width + 3
+                            flag_x_end = flag_x_start + 1 
                             
-                            flag_x_start = sidebar_width + 5
-                            flag_x_end = flag_x_start + 1
+                            status_x_start = sidebar_width + 5
+                            status_x_end = status_x_start + 1
 
-                            if status_x_start <= mouse_x <= status_x_end:
+                            if flag_x_start <= mouse_x <= flag_x_end:
+                                if filtered_tasks:
+                                    filtered_tasks[task_index]['flagged'] = not filtered_tasks[task_index]['flagged']
+                                    tsk.save_tasks(task_list, pref.tasks_file_path)
+                            elif status_x_start <= mouse_x <= status_x_end:
                                 if filtered_tasks:
                                     done_list.append(filtered_tasks[task_index])
                                     filtered_tasks[task_index]['status'] = not filtered_tasks[task_index]['status']
-                                    tsk.save_tasks(task_list, pref.tasks_file_path)
-                            elif flag_x_start <= mouse_x <= flag_x_end:
-                                if filtered_tasks:
-                                    filtered_tasks[task_index]['flagged'] = not filtered_tasks[task_index]['flagged']
                                     tsk.save_tasks(task_list, pref.tasks_file_path)
                             else:
                                 current_task_id = clicked_task_id

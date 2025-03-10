@@ -105,33 +105,18 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
 def print_version():
     print("todoism version 1.21.2")
 
-def print_task_symbols(stdscr, task, y, status_x=3, flag_x=5, use_colors=True, is_selected=False):
-    """Print task status and flag symbols with appropriate colors
+def print_task_symbols(stdscr, task, y, flag_x=3, status_x=5, use_colors=True, is_selected=False):
+    """Print task flag and status symbols with appropriate colors
     
     Args:
         stdscr: The curses window
         task: The task data dictionary
         y: The row position
-        status_x: X position for status symbol (default: 3)
-        flag_x: X position for flag symbol (default: 5)
+        flag_x: X position for flag symbol (default: 3)
+        status_x: X position for status symbol (default: 5)
         use_colors: Whether to apply color formatting (default: True)
         is_selected: Whether the task is selected (affects coloring) (default: False)
     """
-    # Print status indicator
-    if task.get('status', False):
-        if use_colors and not is_selected:
-            stdscr.attron(curses.color_pair(6))  # Green
-            stdscr.addstr(y, status_x, '✓')
-            stdscr.attroff(curses.color_pair(6))
-        else:
-            stdscr.addstr(y, status_x, '✓')
-    else:
-        stdscr.addstr(y, status_x, ' ')
-    
-    # Add space between status and flag
-    stdscr.addstr(y, status_x + 1, ' ')
-    
-    # Print flag indicator
     if task.get('flagged', False):
         if use_colors and not is_selected:
             stdscr.attron(curses.color_pair(7))  # Orange/Yellow
@@ -142,8 +127,21 @@ def print_task_symbols(stdscr, task, y, status_x=3, flag_x=5, use_colors=True, i
     else:
         stdscr.addstr(y, flag_x, ' ')
     
-    # Add space after flag
+    # Add space between flag and status
     stdscr.addstr(y, flag_x + 1, ' ')
+    
+    # Print status indicator second
+    if task.get('status', False):
+        if use_colors and not is_selected:
+            stdscr.attron(curses.color_pair(6))  # Green
+            stdscr.addstr(y, status_x, '✓')
+            stdscr.attroff(curses.color_pair(6))
+        else:
+            stdscr.addstr(y, status_x, '✓')
+    else:
+        stdscr.addstr(y, status_x, ' ')
+    
+    stdscr.addstr(y, status_x + 1, ' ')
 
 def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0, 
                cursor_pos=None, is_edit_mode=False, is_sidebar=False):
@@ -519,10 +517,10 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
     # Print task ID
     stdscr.addstr(row, x_offset, f"{id_to_show:2d} ")
     
-    # Print task symbols
+    # Print task symbols with swapped positions
     print_task_symbols(stdscr, task, row, 
-                      status_x=x_offset + 3, 
-                      flag_x=x_offset + 5,
+                      flag_x=x_offset + 3, 
+                      status_x=x_offset + 5,
                       use_colors=not is_selected,
                       is_selected=is_selected)
     
