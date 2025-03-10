@@ -226,15 +226,18 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
                 strikethrough_desc += (char + "\u0336")
             visible_text = strikethrough_desc
     
+    highlight_trailing_blank_space = 0
     # Display text at calculated position
     if task.get('status', False) and not is_selected and not is_edit_mode:
         stdscr.attron(curses.A_DIM)
         stdscr.addstr(y, text_start_pos, visible_text)
         stdscr.attroff(curses.A_DIM)
+        highlight_trailing_blank_space = available_width - len(visible_text)
     else:
+        highlight_trailing_blank_space = available_width - len(visible_text) + 1
         stdscr.addstr(y, text_start_pos, visible_text)
     
-    for i in range(available_width - len(visible_text)):
+    for i in range(highlight_trailing_blank_space):
         stdscr.addstr(' ')
     
     # Print date with exactly one character gap to right
