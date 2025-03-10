@@ -45,7 +45,7 @@ def execute_command(
         filtered_tasks,
         done_list, 
         purged_list,
-        current_id,
+        current_task_id,
         start,
         end,
         current_row,
@@ -82,7 +82,7 @@ def execute_command(
         # change current id to 1 if some tasks were purged
         if len(task_list) < original_cnt:
             # temporary solution: back to top
-            current_id = 1
+            current_task_id = 1
             current_row = 1
             start = 1
             if len(task_list) > displayed_task_cnt:
@@ -124,7 +124,7 @@ def execute_command(
             if ch == ord('q') or ch == 27:  # 'q' or ESC
                 break
         stdscr.timeout(old_timeout)
-        return task_list, done_list, current_id, current_row, start, end
+        return task_list, done_list, current_task_id, current_row, start, end
     elif command.startswith("del "):
         parts = command.split()
         if len(parts) > 1 and parts[1].isdigit():
@@ -132,9 +132,9 @@ def execute_command(
             if 1 <= task_id <= len(task_list):
                 task_uuid = task_list[task_id - 1].get('uuid')
                 task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                # Update current_id, current_row, start, end after deletion
-                current_id, current_row, start, end = nv.post_deletion_update(
-                    current_id, current_row, start, end, len(task_list), max_capacity
+                # Update current_task_id, current_row, start, end after deletion
+                current_task_id, current_row, start, end = nv.post_deletion_update(
+                    current_task_id, current_row, start, end, len(task_list), max_capacity
                 )
         command_recognized = True
     elif command.startswith("edit "):
@@ -164,7 +164,7 @@ def execute_command(
             curses.curs_set(1)
             current_row = edit_id - start + 1
             if len(task_list) and edit_id >= start and edit_id <= end:
-                current_id, current_row, start, end = ed.edit_and_save(
+                current_task_id, current_row, start, end = ed.edit_and_save(
                     stdscr, 
                     task_list, 
                     edit_id,
@@ -193,7 +193,7 @@ def execute_command(
             done_cnt,
             len(task_list),
             task_list,
-            current_id,
+            current_task_id,
             start,
             end,
             categories,
@@ -228,7 +228,7 @@ def execute_command(
                     current_category_id = 0
                     
                     # Reset view
-                    current_id = 1
+                    current_task_id = 1
                     current_row = 1
                     start = 1
                     end = min(len(task_list), max_capacity)
@@ -248,7 +248,7 @@ def execute_command(
                     stdscr.clrtoeol()
                     
                     # Return updated categories and category ID
-                    return task_list, done_list, current_id, current_row, start, end, categories, current_category_id
+                    return task_list, done_list, current_task_id, current_row, start, end, categories, current_category_id
         except ImportError:
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
@@ -291,7 +291,7 @@ def execute_command(
                     current_category_id = 0
                     
                     # Reset view
-                    current_id = 1 if len(task_list) > 0 else 0
+                    current_task_id = 1 if len(task_list) > 0 else 0
                     current_row = 1 if len(task_list) > 0 else 0
                     start = 1 if len(task_list) > 0 else 0
                     end = min(len(task_list), max_capacity) if len(task_list) > 0 else 0
@@ -311,7 +311,7 @@ def execute_command(
                     stdscr.clrtoeol()
                     
                     # Return updated categories and category ID
-                    return task_list, done_list, current_id, current_row, start, end, categories, current_category_id
+                    return task_list, done_list, current_task_id, current_row, start, end, categories, current_category_id
         except ImportError:
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
@@ -352,7 +352,7 @@ def execute_command(
         stdscr.clrtoeol()
         stdscr.refresh()
     
-    return task_list, done_list, current_id, current_row, start, end
+    return task_list, done_list, current_task_id, current_row, start, end
 
 def execute_category_command(
         stdscr,

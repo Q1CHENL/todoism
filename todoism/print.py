@@ -445,7 +445,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
         stdscr.attroff(curses.color_pair(8))
         stdscr.attroff(curses.A_BOLD)
 
-def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_id, 
+def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_task_id, 
                                start, end, categories, current_category_id, 
                                category_start_index, sidebar_has_focus):
     """Print the complete UI with sidebar and task list"""
@@ -470,10 +470,10 @@ def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_id,
         # Print empty message with highlighting when task area has focus
         print_msg(stdscr, msg.empty_msg, 16, highlight=(not sidebar_has_focus))
     else:
-        print_tasks_with_offset(stdscr, tasks, current_id, start, end, 16)
+        print_tasks_with_offset(stdscr, tasks, current_task_id, start, end, 16)
     
 
-def print_tasks_with_offset(stdscr, task_list, current_id, start, end, x_offset=0):
+def print_tasks_with_offset(stdscr, task_list, current_task_id, start, end, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
     max_y, max_x = stdscr.getmaxyx()
     
@@ -488,7 +488,7 @@ def print_tasks_with_offset(stdscr, task_list, current_id, start, end, x_offset=
             row = i + 1  # +1 due to status bar
             display_id = i + start  # Sequential display ID (1, 2, 3, etc.)
             
-            if i + start == current_id:
+            if i + start == current_task_id:
                 # Selected task
                 print_task_selected_with_offset(stdscr, task, row, x_offset, display_id)
             else:

@@ -63,14 +63,14 @@ class SidebarScroller:
             self.start_index = max(0, self.total_items - self.visible_height)
         return self.start_index
 
-def keydown_update(start, end, current_id, row, task_cnt, max_capacity, should_repaint):
+def keydown_update(start, end, current_task_id, row, task_cnt, max_capacity, should_repaint):
     """Scroll one line down with improved edge case handling"""
     # Don't do anything if we're already at the last task
-    if current_id == task_cnt:
-        return start, end, current_id, row, False
+    if current_task_id == task_cnt:
+        return start, end, current_task_id, row, False
         
     # Move selection down one task
-    current_id += 1
+    current_task_id += 1
     
     # Handle scrolling if needed
     if task_cnt > max_capacity and row == max_capacity:
@@ -86,19 +86,19 @@ def keydown_update(start, end, current_id, row, task_cnt, max_capacity, should_r
         end = task_cnt
         start = max(1, end - max_capacity + 1)
         
-    # Make sure row is consistent with current_id and start
-    row = current_id - start + 1
+    # Make sure row is consistent with current_task_id and start
+    row = current_task_id - start + 1
     
-    return start, end, current_id, row, should_repaint
+    return start, end, current_task_id, row, should_repaint
                 
-def keyup_update(start, end, current_id, row, task_cnt, max_capacity, should_repaint):
+def keyup_update(start, end, current_task_id, row, task_cnt, max_capacity, should_repaint):
     """Scroll one line up with improved edge case handling"""
     # Don't do anything if we're already at the first task
-    if current_id == 1:
-        return start, end, current_id, row, False
+    if current_task_id == 1:
+        return start, end, current_task_id, row, False
         
     # Move selection up one task
-    current_id -= 1
+    current_task_id -= 1
     
     # Handle scrolling if needed
     if task_cnt >= max_capacity and start > 1 and row == 1:
@@ -114,13 +114,13 @@ def keyup_update(start, end, current_id, row, task_cnt, max_capacity, should_rep
         start = 1
         end = min(start + max_capacity - 1, task_cnt)
         
-    # Make sure row is consistent with current_id and start
-    row = current_id - start + 1
+    # Make sure row is consistent with current_task_id and start
+    row = current_task_id - start + 1
     
-    return start, end, current_id, row, should_repaint
+    return start, end, current_task_id, row, should_repaint
 
 
-def post_deletion_update(current_id, current_row, start, end, prev_task_cnt, max_capacity):
+def post_deletion_update(current_task_id, current_row, start, end, prev_task_cnt, max_capacity):
     """
     Update the current view after deletion: 
     1. 2x Backspaces
@@ -151,24 +151,24 @@ def post_deletion_update(current_id, current_row, start, end, prev_task_cnt, max
         # Senarios 1
         if prev_task_cnt == max_capacity:
             # delete the last task, otherwise the row and id both remains unchanged
-            if current_id == end:
+            if current_task_id == end:
                 current_row = current_row - 1
-                current_id = current_id - 1
+                current_task_id = current_task_id - 1
             end = end - 1
         # Senario 2
         elif prev_task_cnt == end and prev_task_cnt > max_capacity:
             start = start - 1
             end = end - 1
-            current_id = current_id - 1
+            current_task_id = current_task_id - 1
         # Senario 3 and 4 does not lead to any change
     
     # Senario 5
     else:
         end = end - 1
-        if current_id == prev_task_cnt:
+        if current_task_id == prev_task_cnt:
             current_row = current_row - 1
-            current_id = current_id - 1
-    return current_id, current_row, start, end
+            current_task_id = current_task_id - 1
+    return current_task_id, current_row, start, end
 
 def is_view_fully_packed(start, end, capacity):
     """indicates whether the current view is completely filled with tasks"""
