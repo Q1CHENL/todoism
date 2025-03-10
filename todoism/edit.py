@@ -264,6 +264,10 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         if selection_active:
             highlight_selection(stdscr, task, y, selection_start, cursor_pos_in_text, scroll_offset, is_sidebar)
         
+        # Redraw the separator
+        if is_sidebar:
+            stdscr.addstr(y, 15, "│")
+        
         # Position cursor
         stdscr.move(y, target_x)
         
