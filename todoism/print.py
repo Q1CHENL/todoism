@@ -209,12 +209,15 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         visible_end = min(text_length, scroll_offset + available_width)
         visible_text = task['description'][visible_start:visible_end]
     else:
-        # In view mode: truncate if too long
         if text_length > available_width:
-            visible_text = task['description'][:available_width]
+            visible_start = scroll_offset
+            visible_end = min(text_length, scroll_offset + available_width)
+            if visible_end == text_length:
+                visible_text = task['description'][text_length - available_width:]
+            else:
+                visible_text = task['description'][visible_start:visible_end]
         else:
             visible_text = task['description']
-            
         import todoism.strikethrough as st
         # Apply strike-through for completed tasks in view mode
         if task.get('status', False) and st.get_strikethrough() and not is_edit_mode:

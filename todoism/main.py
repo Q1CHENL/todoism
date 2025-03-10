@@ -90,6 +90,7 @@ def main(stdscr):
     
     # Sidebar width
     sidebar_width = 16  # 15 for sidebar + 1 for separator
+    task_scroll_offset = 0
     
     while True:
         # Get filtered tasks for current category
@@ -335,6 +336,7 @@ def main(stdscr):
             
         elif focus_manager.is_sidebar_focused():
             if key == curses.KEY_UP:
+                task_scroll_offset = 0
                 sidebar_scroller.scroll_up()
                 if len(categories) > 0:
                     current_category_id = categories[sidebar_scroller.current_index]['id']
@@ -350,6 +352,7 @@ def main(stdscr):
                 should_repaint = True
                 
             elif key == curses.KEY_DOWN:
+                task_scroll_offset = 0
                 sidebar_scroller.scroll_down()
                 if len(categories) > 0:
                     current_category_id = categories[sidebar_scroller.current_index]['id']
@@ -830,7 +833,12 @@ def main(stdscr):
                     filtered_tasks[task_idx]['flagged'] = not filtered_tasks[task_idx]['flagged']
                     tsk.save_tasks(task_list, pref.tasks_file_path)
                     should_repaint = True
-                
+            elif key == curses.KEY_RIGHT:
+                task_scroll_offset += 1
+                pr.render_task(stdscr, filtered_tasks[current_task_id - 1], current_row, True, task_scroll_offset) 
+            elif key == curses.KEY_LEFT:
+                task_scroll_offset = max(0, task_scroll_offset - 1)
+                pr.render_task(stdscr, filtered_tasks[current_task_id - 1], current_row, True, task_scroll_offset)
             elif key == ord('q'):
                 # Try to restore data if in test mode, but don't fail if test module isn't available
                 try:
@@ -899,12 +907,14 @@ def main(stdscr):
                 command_line = ""
                 
             elif key == curses.KEY_UP:
+                task_scroll_offset = 0
                 if task_cnt > 0:
                     start, end, current_task_id, current_row, should_repaint = nv.keyup_update(
                         start, end, current_task_id, current_row, task_cnt, max_capacity, True
                     )
                 
             elif key == curses.KEY_DOWN:
+                task_scroll_offset = 0
                 if task_cnt > 0:
                     start, end, current_task_id, current_row, should_repaint = nv.keydown_update(
                         start, end, current_task_id, current_row, task_cnt, max_capacity, True
