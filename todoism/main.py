@@ -19,10 +19,8 @@ def main(stdscr):
     stdscr.clear()
     stdscr.refresh()
     
-    # Check if we need to record key codes (first time startup)
     if kc.need_key_recording():
         if not kc.record_key_codes(stdscr):
-            # User chose to quit during key recording
             return
     
     # Enable mouse support
@@ -87,7 +85,6 @@ def main(stdscr):
     # Track when we last updated the time
     last_time_update = time.time()
     
-    # Initialize key to avoid UnboundLocalError
     key = 0
     
     # Sidebar width
@@ -118,8 +115,7 @@ def main(stdscr):
                 if is_growing:
                     # WINDOW GROWING: Show maximum possible tasks while keeping current selection visible
                     # Calculate how much more space we have
-                    extra_capacity = max_capacity - old_capacity
-
+                    
                     # Step 1: First attempt to fill from bottom
                     # Calculate how many more tasks we could show with new size
                     potential_end = min(task_cnt, start + max_capacity - 1)
@@ -212,7 +208,6 @@ def main(stdscr):
             curses.init_pair(1, curses.COLOR_BLACK, color_selected)
             tsk.reassign_task_ids(filtered_tasks)
             if focus_manager.is_tasks_focused():
-                # Update task view using existing scrolling logic
                 if task_cnt > 0:
                     if current_id > task_cnt:
                         current_id = task_cnt
@@ -276,7 +271,6 @@ def main(stdscr):
             try:
                 mouse_id, mouse_x, mouse_y, mouse_z, button_state = curses.getmouse()
                 
-                # Check if clicked in sidebar area (including blank areas)
                 if mouse_x < sidebar_width:
                     if not focus_manager.is_sidebar_focused():
                         focus_manager.toggle_focus()
@@ -736,12 +730,9 @@ def main(stdscr):
                     
                     # Override the current task row y-position to account for sidebar
                     edit_row = current_row  # Row is correct, it's relative to visible area
-                    
-                    # Call edit_and_save with adjusted parameters for sidebar offset
                     stdscr.erase()
                     pr.print_status_bar(stdscr, done_cnt, len(filtered_tasks))
                     
-                    # Display sidebar
                     pr.print_sidebar(
                         stdscr,
                         categories,
@@ -757,14 +748,12 @@ def main(stdscr):
                     stdscr.move(edit_row, sidebar_width + ed.indent)
                     stdscr.refresh()
                     
-                    # Use regular edit, but with the task offset in the interface
                     filtered_tasks[task_idx]['description'] = ed.edit(
                         stdscr, 
                         filtered_tasks[task_idx], 
                         pr.edit_mode
                     )
                     
-                    # Handle task deletion if description is empty
                     if filtered_tasks[task_idx]['description'] == "":
                         task_uuid = filtered_tasks[task_idx]['uuid']
                         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
