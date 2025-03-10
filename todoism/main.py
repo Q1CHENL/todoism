@@ -1,5 +1,4 @@
 import time
-import uuid
 import curses
 import todoism.edit as ed
 import todoism.task as tsk
@@ -326,11 +325,11 @@ def main(stdscr):
                                 if filtered_tasks:
                                     done_list.append(filtered_tasks[task_index])
                                     filtered_tasks[task_index]['status'] = not filtered_tasks[task_index]['status']
-                                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                                    tsk.save_tasks(task_list, pref.tasks_file_path)
                             elif flag_x_start <= mouse_x <= flag_x_end:
                                 if filtered_tasks:
                                     filtered_tasks[task_index]['flagged'] = not filtered_tasks[task_index]['flagged']
-                                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                                    tsk.save_tasks(task_list, pref.tasks_file_path)
                             else:
                                 current_id = clicked_task_id
                                 current_row = clicked_task_row
@@ -548,7 +547,7 @@ def main(stdscr):
                         # Handle tasks in this category
                         task_list = [task for task in task_list if task.get('category_id', 0) != current_category_id]
                         tsk.reassign_task_ids(task_list)
-                        tsk.save_tasks(task_list, tsk.tasks_file_path)
+                        tsk.save_tasks(task_list, pref.tasks_file_path)
                         cat.delete_category(current_category_id)
                         categories = cat.reassign_category_ids()
                         
@@ -726,7 +725,7 @@ def main(stdscr):
                     task_idx = current_id - 1
                     done_list.append(filtered_tasks[task_idx])
                     filtered_tasks[task_idx]['status'] = not filtered_tasks[task_idx]['status']
-                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                    tsk.save_tasks(task_list, pref.tasks_file_path)
                     should_repaint = True
                     
             elif key == ord('e'):
@@ -829,7 +828,7 @@ def main(stdscr):
                         pr.print_status_bar(stdscr, done_cnt, task_cnt)
                         stdscr.refresh()
                     
-                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                    tsk.save_tasks(task_list, pref.tasks_file_path)
                     should_repaint = True
                     
                 curses.curs_set(0)
@@ -839,7 +838,7 @@ def main(stdscr):
                 if filtered_tasks and current_id > 0:
                     task_idx = current_id - 1
                     filtered_tasks[task_idx]['flagged'] = not filtered_tasks[task_idx]['flagged']
-                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                    tsk.save_tasks(task_list, pref.tasks_file_path)
                     should_repaint = True
                 
             elif key == ord('q'):
@@ -940,7 +939,7 @@ def main(stdscr):
                             task_cnt + 1,
                             max_capacity
                         )
-                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                    tsk.save_tasks(task_list, pref.tasks_file_path)
                     should_repaint = True
 
 

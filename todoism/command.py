@@ -22,7 +22,7 @@ def purge(task_list, purged_list):
         else:
             purged_list.append(t)
     tsk.reassign_task_ids(remained)
-    tsk.save_tasks(purged_list, tsk.purged_file_path)
+    tsk.save_tasks(purged_list, pref.purged_file_path)
     return remained, []
 
 
@@ -77,7 +77,7 @@ def execute_command(
         original_cnt = len(task_list)
         displayed_task_cnt = end - start + 1
         task_list, done_list = purge(task_list, purged_list)
-        tsk.save_tasks(task_list, tsk.tasks_file_path)
+        tsk.save_tasks(task_list, pref.tasks_file_path)
         # change current id to 1 if some tasks were purged
         if len(task_list) < original_cnt:
             # temporary solution: back to top
@@ -91,7 +91,7 @@ def execute_command(
         command_recognized = True
     elif command == "purge all":
         task_list = []
-        tsk.save_tasks(task_list, tsk.tasks_file_path)
+        tsk.save_tasks(task_list, pref.tasks_file_path)
         command_recognized = True
     elif command.startswith("sort "):
         category = command[5:]
@@ -395,7 +395,7 @@ def execute_category_command(
                     
                     # Reload categories
                     categories = cat.load_categories()
-                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                    tsk.save_tasks(task_list, pref.tasks_file_path)
     elif command.startswith("cedit "):
         # Parse category ID and new name
         parts = command.split()

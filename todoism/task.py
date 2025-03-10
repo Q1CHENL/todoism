@@ -4,14 +4,6 @@ import todoism.edit as ed
 from datetime import datetime
 import uuid
 
-home_dir = os.path.expanduser("~")
-config_dir = os.path.join(home_dir, ".todoism")
-os.makedirs(config_dir, exist_ok=True)
-tasks_file_path = os.path.join(config_dir, "tasks.json")
-purged_file_path = os.path.join(config_dir, "purged.json")
-test_file_path = os.path.join(config_dir, "test.json")
-settings_path = os.path.join(config_dir, "settings.json")
-
 def done_count(task_list):
     count = 0
     for t in task_list:

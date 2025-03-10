@@ -2,6 +2,7 @@ import curses
 import todoism.print as pr
 import todoism.task as tsk
 import todoism.navigate as nv
+import todoism.preference as pref
 
 indent = 7
 max_task_count = 99
@@ -835,6 +836,6 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
         id, row, start, end = nv.post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
     
     # Save changes
-    tsk.save_tasks(task_list, tsk.tasks_file_path)
+    tsk.save_tasks(task_list, pref.tasks_file_path)
     return id, row, start, end
 

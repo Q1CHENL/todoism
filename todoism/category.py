@@ -5,7 +5,7 @@ from datetime import datetime
 # Reuse the configuration directory from task.py
 import todoism.task as tsk
 
-categories_file_path = os.path.join(tsk.config_dir, "categories.json")
+categories_file_path = os.path.join(pref.config_dir, "categories.json")
 
 # Maximum allowed length for category names
 MAX_CATEGORY_NAME_LENGTH = 12
