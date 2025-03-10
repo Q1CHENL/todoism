@@ -3,7 +3,6 @@ import uuid
 import os
 import shutil
 from datetime import datetime
-import todoism.task as tsk
 import todoism.preference as pref
 
 # Backup file paths for saving the actual data
@@ -114,8 +113,8 @@ def backup_data():
             success = False
             
         # Backup categories if they exist
-        if os.path.exists(cat.categories_file_path):
-            shutil.copy2(cat.categories_file_path, backup_categories_path)
+        if os.path.exists(pref.categories_file_path):
+            shutil.copy2(pref.categories_file_path, backup_categories_path)
         else:
             success = False
             
@@ -144,7 +143,7 @@ def restore_data():
             
         # Restore categories if backup exists
         if os.path.exists(backup_categories_path):
-            shutil.copy2(backup_categories_path, cat.categories_file_path)
+            shutil.copy2(backup_categories_path, pref.categories_file_path)
             # Clean up backup file
             os.remove(backup_categories_path)
         else:
@@ -176,7 +175,7 @@ def load_test_mode():
     
     # Clear any existing categories first to ensure isolation
     # Use the exact replacement approach - write only our test categories
-    with open(cat.categories_file_path, 'w') as file:
+    with open(pref.categories_file_path, 'w') as file:
         json.dump(test_categories, file, indent=4)
     
     # Save tasks in both locations
