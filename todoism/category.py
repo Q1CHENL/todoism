@@ -1,7 +1,5 @@
-import os
 import json
 from datetime import datetime
-import todoism.task as tsk
 import todoism.preference as pref
 
 # Maximum allowed length for category names

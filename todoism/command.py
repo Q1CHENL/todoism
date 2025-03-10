@@ -7,9 +7,9 @@ import todoism.edit as ed
 import todoism.print as pr
 import todoism.message as msg
 import todoism.preference as pref
-import todoism.category as cat
 import todoism.navigate as nv
 import todoism.color as clr
+import todoism.strikethrough as st
 
 
 def purge(task_list, purged_list):
@@ -179,12 +179,12 @@ def execute_command(
             curses.noecho()      
         command_recognized = True
     elif command.startswith("st "):
-        option = command[4:]
+        option = command[3:]
         if option == "on":
-            pref.set_strikethrough(True)
+            st.set_strikethrough(True)
         elif option == "off":
-            pref.set_strikethrough(False)
-        
+            st.set_strikethrough(False)
+        import todoism.category as cat
         categories = cat.load_categories()
         done_cnt = tsk.done_count(task_list)
         current_category_id = 0
