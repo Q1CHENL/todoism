@@ -11,7 +11,7 @@ A simple and easy-to-use todo TUI
 - Install: `pip install todoism`
 - Run: `todoism` or `todo`
 - Update: `pip install todoism --upgrade`
-
+- Use: Invoke help message using command `:help` to see commonly used operations and commands
 ```txt
 ┌──────────────────────────────────────────────────┐
 │                                                  │
@@ -55,6 +55,8 @@ A simple and easy-to-use todo TUI
 
 > [!NOTE]
 > Some terminal does not support mouse click or strike through effect.
+> E.g **Ptyxis** (new default terminal for GNOME 47) does not fully support strikethrough effect.
+> You can turn it off use command `:st off`, as specified in the help message.
 
 ## ToDos
 
