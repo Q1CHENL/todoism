@@ -9,6 +9,8 @@ import todoism.command as cmd
 import todoism.cli as cli
 import todoism.category as cat
 import todoism.navigate as nv
+import todoism.message as msg
+import todoism.keycode as kc
 from datetime import datetime
 
 def main(stdscr):
@@ -17,6 +19,12 @@ def main(stdscr):
     curses.curs_set(1)
     stdscr.clear()
     stdscr.refresh()
+    
+    # Check if we need to record key codes (first time startup)
+    if kc.need_key_recording():
+        if not kc.record_key_codes(stdscr):
+            # User chose to quit during key recording
+            return
     
     # Enable mouse support
     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
@@ -236,7 +244,7 @@ def main(stdscr):
                         max_capacity,
                         has_focus=False
                     )
-                    pr.print_msg(stdscr, pr.empty_msg, 16, highlight=True)
+                    pr.print_msg(stdscr, msg.empty_msg, 16, highlight=True)
             else:
                 pr.print_main_view_with_sidebar(
                     stdscr,
@@ -421,7 +429,7 @@ def main(stdscr):
                 if task_cnt > 0:
                     pr.print_tasks_with_offset(stdscr, filtered_tasks, 0, start, end, sidebar_width)
                 else:
-                    pr.print_msg(stdscr, pr.empty_msg, sidebar_width)
+                    pr.print_msg(stdscr, msg.empty_msg, sidebar_width)
                 
                 # Print new category placeholder
                 stdscr.addstr(new_cat_row, 0, f"{new_cat_id:2d} ")
@@ -639,7 +647,7 @@ def main(stdscr):
             # Handle user input for tasks
             if key == ord('a'):
                 if task_cnt == ed.max_task_count:
-                    pr.print_msg(stdscr, pr.limit_msg)
+                    pr.print_msg(stdscr, msg.limit_msg)
                     stdscr.refresh()
                     time.sleep(1.2)
                     continue
@@ -777,7 +785,7 @@ def main(stdscr):
                             for i in range(1, max_capacity + 1):
                                 stdscr.move(i, sidebar_width)
                                 stdscr.clrtoeol()
-                            pr.print_msg(stdscr, pr.empty_msg)
+                            pr.print_msg(stdscr, msg.empty_msg)
                         else:
                             # Keep the same visual position if possible
                             if current_id > task_cnt:

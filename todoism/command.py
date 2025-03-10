@@ -5,6 +5,7 @@ import time
 import todoism.task as tsk
 import todoism.edit as ed
 import todoism.print as pr
+import todoism.message as msg
 import todoism.settings as st
 import todoism.category as cat
 import todoism.navigate as nv
@@ -109,7 +110,7 @@ def execute_command(
         command_recognized = True
     elif command == "help":
         max_y, max_x = stdscr.getmaxyx()
-        pr.print_msg(stdscr, pr.help_msg)
+        pr.print_msg(stdscr, msg.help_msg)
         hint = "┤Press 'q' to close help├"
         hint_pos_x = (max_x - 15) // 2 + 15 - len(hint) // 2
         stdscr.addstr(max_y - 1, hint_pos_x, hint)

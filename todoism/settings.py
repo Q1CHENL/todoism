@@ -52,6 +52,10 @@ def setup_default_settings():
         "autosort_d": False,
         "selected_color": "blue",
         "strikethrough": True,
+        "ctrl+shift+left": 0,
+        "ctrl+shift+right": 0,
+        "ctrl+left": 0,
+        "ctrl+right": 0
     }
     with open(tsk.settings_path, "w") as file:
         json.dump(default_settings, file, indent=4)

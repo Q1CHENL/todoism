@@ -1,64 +1,29 @@
 import curses
 import todoism.settings as st
+import todoism.message as msg
 from datetime import datetime
 
 add_mode  = 0
 edit_mode = 1
 
-help_msg =  '''
-┌──────────────────────────────────────────────────┐
-│                                                  │
-│   Short commands:                                │
-│   a - Create new task/category                   │
-│   d - Mark task as done                          │
-│   e - Edit task/category                         │
-│   f - Mark task as flagged                       │
-│   q - Quit this help message/todoism             │
-│                                                  │
-│   Key bindings:                                  │
-│   Tab - Toggle focus bewteen tasks and sidebar   │
-│   Double Backspace - delete task                 │
-│   ESC - quit adding/editing task                 │
-│   Enter - finish adding/editing task             │
-│   Up/Down Arrow Keys - navigate through tasks    │
-│   Mouse Click:                                   │
-│    - on task: Select task                        │
-│    - on category: Select category                │
-│    - on done: Toggle task completion             │
-│    - on flag: Toggle task flag                   │
-│    - on blank area: toggle focus                 │
-│                                                  │
-│   Vim-like long commands:                        │
-│   (:<command> [args])                            │
-│   :help - Show this help message                 │
-│   :del [task_id] - Delete task                   │
-│   :edit [task_id] - Edit task                    │
-│   :done [task_id] - Mark task as done            |
-│   :purge - Purge all done tasks                  │
-│   :sort f - Sort flagged tasks to top            │
-│   :sort d - Sort done tasks to bottom            │
-│   :autosort f on|off                             │
-│   :autosort d on|off                             │
-│   :color blue|red|yellow|green                   │
-│    - Change background color of current task     │
-│   :st on|off - toggle strikethrough effect       │
-│                                                  │
-└──────────────────────────────────────────────────┘
-'''
-
-empty_msg = f'''
-┌──────────────────────────────────────────────────────┐
-│       Hmm, it seems there are no active tasks        │
-│     Take a break, or create some to get busy :)      │
-└──────────────────────────────────────────────────────┘
-'''
-
-limit_msg = f'''
-┌────────────────────────────────────────┐
-│   You already have 99 tasks in hand.   │
-│  Maybe try to deal with them first :)  │
-└────────────────────────────────────────┘
-'''
+# Function to display centered messages
+def print_msg_center(stdscr, message, color_pair=0, highlight_line=-1):
+    stdscr.clear()
+    max_y, max_x = stdscr.getmaxyx()
+    lines = message.strip().split("\n")
+    start_y = max(0, (max_y - len(lines)) // 2)
+    
+    for i, line in enumerate(lines):
+        if line.strip():  # Only print non-empty lines
+            start_x = max(0, (max_x - len(line)) // 2)
+            if i == highlight_line and color_pair > 0:
+                stdscr.attron(curses.color_pair(color_pair))
+                stdscr.addstr(start_y + i, start_x, line)
+                stdscr.attroff(curses.color_pair(color_pair))
+            else:
+                stdscr.addstr(start_y + i, start_x, line)
+    
+    stdscr.refresh()
 
 def print_msg(stdscr, msg, x_offset=16, highlight=False):
     """Print a message box with proper centering in the task area with optional highlighting"""
@@ -124,7 +89,7 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
             stdscr.addstr(max_y - 1, x_offset - 1, "┴")
             # Draw horizontal line only if there's space
             remaining_width = max_x - x_offset - 1
-            if remaining_width > 0:
+            if (remaining_width > 0):
                 for x in range(x_offset, max_x - 2):
                     stdscr.addstr(max_y - 1, x, "─")
                 stdscr.addstr(max_y - 1, max_x - 2, "┘")
@@ -503,7 +468,7 @@ def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_id,
             stdscr.move(y, 16)
             stdscr.clrtoeol()
         # Print empty message with highlighting when task area has focus
-        print_msg(stdscr, empty_msg, 16, highlight=(not sidebar_has_focus))
+        print_msg(stdscr, msg.empty_msg, 16, highlight=(not sidebar_has_focus))
     else:
         print_tasks_with_offset(stdscr, tasks, current_id, start, end, 16)
     
