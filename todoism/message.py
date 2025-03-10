@@ -66,9 +66,9 @@ keycode_msg = '''
 │ - Ctrl + Shift + Left                                     │
 │ - Ctrl + Shift + Right                                    │
 │                                                           │
-│ This takes just a few seconds and saves your settings!    │
+│ This takes just a few seconds!                            │
 │                                                           │
-│ Press Enter key to start...                               │
+│ Press Enter to start...                                   │
 └───────────────────────────────────────────────────────────┘
 '''
 
@@ -161,6 +161,5 @@ keycode_completion_msg = '''
 keycode_restart_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Restarting key recording...                       │
-│                                                   │
 └───────────────────────────────────────────────────┘
 '''

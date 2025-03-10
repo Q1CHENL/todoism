@@ -37,7 +37,6 @@ def record_key_codes(stdscr):
 
     while True:
         restart = False
-        # Reset key codes if restarting
         for key in key_codes:
             key_codes[key] = 0
 
@@ -50,7 +49,7 @@ def record_key_codes(stdscr):
             time.sleep(1)
             continue
         elif ch == ord('q'):
-            return False  # Quit without saving
+            return False
         key_codes['ctrl+left'] = ch
         pr.print_msg_center(stdscr, msg.keycode_feedback_ctrl_left_msg, 2)
         wait_for_enter(stdscr)
@@ -64,7 +63,7 @@ def record_key_codes(stdscr):
             time.sleep(1)
             continue
         elif ch == ord('q'):
-            return False  # Quit without saving
+            return False
         key_codes['ctrl+right'] = ch
         pr.print_msg_center(stdscr, msg.keycode_feedback_ctrl_right_msg, 2)
         wait_for_enter(stdscr)
@@ -78,7 +77,7 @@ def record_key_codes(stdscr):
             time.sleep(1)
             continue
         elif ch == ord('q'):
-            return False  # Quit without saving
+            return False
         key_codes['ctrl+shift+left'] = ch
         pr.print_msg_center(stdscr, msg.keycode_feedback_ctrl_shift_left_msg, 2)
         wait_for_enter(stdscr)
@@ -92,7 +91,7 @@ def record_key_codes(stdscr):
             time.sleep(1)
             continue
         elif ch == ord('q'):
-            return False  # Quit without saving
+            return False
         key_codes['ctrl+shift+right'] = ch
         pr.print_msg_center(stdscr, msg.keycode_feedback_ctrl_shift_right_msg, 2)
         wait_for_enter(stdscr)

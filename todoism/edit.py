@@ -295,9 +295,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # Only unlock scrolling after stabilize period
             if stabilize_count == 0:
                 lock_scrolling = False
-        
-        # REMOVED: No more automatic scrolling logic here
-        
+                
         # Handle key presses
         if ch == 4:  # Toggle debug mode with Ctrl+D
             debug_keys = not debug_keys
