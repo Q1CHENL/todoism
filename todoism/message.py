@@ -1,4 +1,6 @@
-help_msg =  '''
+# This file contains all message templates for the application
+
+help_msg = '''
 ┌──────────────────────────────────────────────────┐
 │                                                  │
 │   Short commands:                                │
@@ -39,21 +41,21 @@ help_msg =  '''
 └──────────────────────────────────────────────────┘
 '''
 
-empty_msg = f'''
+empty_msg = '''
 ┌──────────────────────────────────────────────────────┐
 │       Hmm, it seems there are no active tasks        │
 │     Take a break, or create some to get busy :)      │
 └──────────────────────────────────────────────────────┘
 '''
 
-limit_msg = f'''
+limit_msg = '''
 ┌────────────────────────────────────────┐
 │   You already have 99 tasks in hand.   │
 │  Maybe try to deal with them first :)  │
 └────────────────────────────────────────┘
 '''
 
-keycode_msg = f'''
+keycode_msg = '''
 ┌───────────────────────────────────────────────────────────┐
 │ Welcome!                                                  │
 │ Let's set up keycodes for todoism to work properly!       │
@@ -70,6 +72,7 @@ keycode_msg = f'''
 └───────────────────────────────────────────────────────────┘
 '''
 
+# Key recording message templates - fixed indentation and formatting
 keycode_recording_ctrl_left_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Keycode Recording (1/4)                           │
@@ -119,7 +122,7 @@ keycode_feedback_ctrl_left_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Left                             │
 │                                                   │
-│ Press any key to continue...                      │
+│ Press Enter to continue...                        │
 └───────────────────────────────────────────────────┘
 '''
 
@@ -127,7 +130,7 @@ keycode_feedback_ctrl_right_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Right                            │
 │                                                   │
-│ Press any key to continue...                      │
+│ Press Enter to continue...                        │
 └───────────────────────────────────────────────────┘
 '''
 
@@ -135,7 +138,7 @@ keycode_feedback_ctrl_shift_left_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Shift + Left                     │
 │                                                   │
-│ Press any key to continue...                      │
+│ Press Enter to continue...                        │
 └───────────────────────────────────────────────────┘
 '''
 
@@ -143,19 +146,8 @@ keycode_feedback_ctrl_shift_right_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Shift + Right                    │
 │                                                   │
-│ Press any key to continue...                      │
+│ Press Enter to continue...                        │
 └───────────────────────────────────────────────────┘
-'''
-
-keycode_summary_msg = '''
-┌───────────────────────────────────────────────────────┐
-│ Key Recording Summary                                 │
-│                                                       │
-│ Key codes have been recorded successfully.            │
-│                                                       │
-│ Press Enter to save these settings                    │
-│ Press 'r' to restart the recording process            │
-└───────────────────────────────────────────────────────┘
 '''
 
 keycode_completion_msg = '''

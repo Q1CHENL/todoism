@@ -5,14 +5,20 @@ import todoism.print as pr
 import todoism.message as msg
 import todoism.task as tsk
 
+def wait_for_enter(stdscr):
+    """Wait for user to press Enter key, ignore other keys"""
+    while True:
+        ch = stdscr.getch()
+        if ch == 10:
+            return
+
 def record_key_codes(stdscr):
     """Record key codes for special key combinations"""
-    # Set up colors
     curses.start_color()
     curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
-
+    curses.curs_set(0)
     key_codes = {
         'ctrl+left': 0,
         'ctrl+right': 0,
@@ -24,7 +30,7 @@ def record_key_codes(stdscr):
     stdscr.timeout(-1)
 
     pr.print_msg_center(stdscr, msg.keycode_msg)
-    stdscr.getch()
+    wait_for_enter(stdscr)
 
     restart = False
 
@@ -46,7 +52,7 @@ def record_key_codes(stdscr):
             return False  # Quit without saving
         key_codes['ctrl+left'] = ch
         pr.print_msg_center(stdscr, msg.keycode_feedback_ctrl_left_msg, 2)
-        stdscr.getch()
+        wait_for_enter(stdscr)
 
         # Step 2: Ctrl+Right
         pr.print_msg_center(stdscr, msg.keycode_recording_ctrl_right_msg, 3, 3)
@@ -60,7 +66,7 @@ def record_key_codes(stdscr):
             return False  # Quit without saving
         key_codes['ctrl+right'] = ch
         pr.print_msg_center(stdscr, msg.keycode_feedback_ctrl_right_msg, 2)
-        stdscr.getch()
+        wait_for_enter(stdscr)
 
         # Step 3: Ctrl+Shift+Left
         pr.print_msg_center(stdscr, msg.keycode_recording_ctrl_shift_left_msg, 3, 3)
@@ -74,7 +80,7 @@ def record_key_codes(stdscr):
             return False  # Quit without saving
         key_codes['ctrl+shift+left'] = ch
         pr.print_msg_center(stdscr, msg.keycode_feedback_ctrl_shift_left_msg, 2)
-        stdscr.getch()
+        wait_for_enter(stdscr)
 
         # Step 4: Ctrl+Shift+Right
         pr.print_msg_center(stdscr, msg.keycode_recording_ctrl_shift_right_msg, 3, 3)
@@ -88,13 +94,13 @@ def record_key_codes(stdscr):
             return False  # Quit without saving
         key_codes['ctrl+shift+right'] = ch
         pr.print_msg_center(stdscr, msg.keycode_feedback_ctrl_shift_right_msg, 2)
-        stdscr.getch()
+        wait_for_enter(stdscr)
 
         if restart:
             continue
 
         # Show summary with actual key codes
-        pr.print_msg_center(stdscr, msg.keycode_summary_msg)
+        pr.print_msg_center(stdscr, msg.keycode_completion_msg, 2)
         ch = stdscr.getch()
 
         if ch == ord('r'):
