@@ -9,6 +9,7 @@ import todoism.message as msg
 import todoism.preference as pref
 import todoism.category as cat
 import todoism.navigate as nv
+import todoism.color as clr
 
 
 def purge(task_list, purged_list):
@@ -106,7 +107,7 @@ def execute_command(
     elif command == "group":
         command_recognized = True
     elif command.startswith("color "):
-        pref.set_color_selected(command[6:])
+        clr.set_color_selected(command[6:])
         command_recognized = True
     elif command == "help":
         max_y, max_x = stdscr.getmaxyx()

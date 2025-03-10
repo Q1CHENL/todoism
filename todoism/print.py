@@ -1,6 +1,7 @@
 import curses
 import todoism.preference as pref
 import todoism.message as msg
+import todoism.color as clr
 from datetime import datetime
 
 add_mode  = 0
@@ -409,7 +410,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     if is_selected and has_focus:
         stdscr.attron(curses.color_pair(1))  # Use the same highlight as tasks
     elif is_selected and not has_focus:
-        curses.init_pair(8, pref.get_color_selected(), curses.COLOR_BLACK)
+        curses.init_pair(8, clr.get_color_selected(), curses.COLOR_BLACK)
         stdscr.attron(curses.color_pair(8))
         stdscr.attron(curses.A_BOLD)
     

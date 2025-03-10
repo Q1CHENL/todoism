@@ -1,11 +1,8 @@
 import os
 import json
 from datetime import datetime
-
-# Reuse the configuration directory from task.py
 import todoism.task as tsk
-
-categories_file_path = os.path.join(pref.config_dir, "categories.json")
+import todoism.preference as pref
 
 # Maximum allowed length for category names
 MAX_CATEGORY_NAME_LENGTH = 12
@@ -13,7 +10,7 @@ MAX_CATEGORY_NAME_LENGTH = 12
 def load_categories():
     """Load categories from the categories.json file"""
     try:
-        with open(categories_file_path, 'r') as file:
+        with open(pref.categories_file_path, 'r') as file:
             category_list = json.load(file)
     except FileNotFoundError:
         # Create default "All" category if no categories exist
@@ -30,7 +27,7 @@ def load_categories():
 
 def save_categories(category_list):
     """Save categories to the categories.json file"""
-    with open(categories_file_path, 'w') as file:
+    with open(pref.categories_file_path, 'w') as file:
         json.dump(category_list, file, indent=4)
 
 def create_category(name, color="blue"):

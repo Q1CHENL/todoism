@@ -10,6 +10,7 @@ import todoism.category as cat
 import todoism.navigate as nv
 import todoism.message as msg
 import todoism.keycode as kc
+import todoism.color as clr
 from datetime import datetime
 
 def main(stdscr):
@@ -204,7 +205,7 @@ def main(stdscr):
             
         if should_repaint:
             stdscr.erase()
-            color_selected = pref.get_color_selected()
+            color_selected = clr.get_color_selected()
             curses.init_pair(1, curses.COLOR_BLACK, color_selected)
             tsk.reassign_task_ids(filtered_tasks)
             if focus_manager.is_tasks_focused():
