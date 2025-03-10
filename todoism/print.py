@@ -216,10 +216,10 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         else:
             visible_text = task['description']
             
-        import todoism.settings as settings
+        import todoism.preference as pref
         
         # Apply strike-through for completed tasks in view mode
-        if task.get('status', False) and settings.get_strikethrough() and not is_edit_mode:
+        if task.get('status', False) and pref.get_strikethrough() and not is_edit_mode:
             strikethrough_desc = ""
             for char in visible_text:
                 strikethrough_desc += (char + "\u0336")
@@ -409,7 +409,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     if is_selected and has_focus:
         stdscr.attron(curses.color_pair(1))  # Use the same highlight as tasks
     elif is_selected and not has_focus:
-        curses.init_pair(8, st.get_color_selected(), curses.COLOR_BLACK)
+        curses.init_pair(8, pref.get_color_selected(), curses.COLOR_BLACK)
         stdscr.attron(curses.color_pair(8))
         stdscr.attron(curses.A_BOLD)
     
@@ -544,8 +544,8 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
         visible_text = text
         
     # Apply strikethrough if needed
-    import todoism.settings as settings
-    if task.get('status', False) and settings.get_strikethrough() and not is_selected:
+    import todoism.preference as pref
+    if task.get('status', False) and pref.get_strikethrough() and not is_selected:
         strikethrough_desc = ""
         for char in visible_text:
             strikethrough_desc += (char + "\u0336")
