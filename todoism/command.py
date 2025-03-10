@@ -6,7 +6,7 @@ import todoism.task as tsk
 import todoism.edit as ed
 import todoism.print as pr
 import todoism.message as msg
-import todoism.settings as st
+import todoism.preference as pref
 import todoism.category as cat
 import todoism.navigate as nv
 
@@ -106,7 +106,7 @@ def execute_command(
     elif command == "group":
         command_recognized = True
     elif command.startswith("color "):
-        st.set_color_selected(command[6:])
+        pref.set_color_selected(command[6:])
         command_recognized = True
     elif command == "help":
         max_y, max_x = stdscr.getmaxyx()
@@ -180,9 +180,9 @@ def execute_command(
     elif command.startswith("st "):
         option = command[4:]
         if option == "on":
-            st.set_strikethrough(True)
+            pref.set_strikethrough(True)
         elif option == "off":
-            st.set_strikethrough(False)
+            pref.set_strikethrough(False)
         
         categories = cat.load_categories()
         done_cnt = tsk.done_count(task_list)

@@ -1,5 +1,5 @@
 import curses
-import todoism.settings as st
+import todoism.preference as pref
 import todoism.message as msg
 from datetime import datetime
 

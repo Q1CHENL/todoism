@@ -4,7 +4,7 @@ import curses
 import todoism.edit as ed
 import todoism.task as tsk
 import todoism.print as pr
-import todoism.settings as st
+import todoism.preference as pref
 import todoism.command as cmd
 import todoism.cli as cli
 import todoism.category as cat
@@ -209,7 +209,7 @@ def main(stdscr):
             
         if should_repaint:
             stdscr.erase()
-            color_selected = st.get_color_selected()
+            color_selected = pref.get_color_selected()
             curses.init_pair(1, curses.COLOR_BLACK, color_selected)
             tsk.reassign_task_ids(filtered_tasks)
             if focus_manager.is_tasks_focused():
