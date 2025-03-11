@@ -956,7 +956,3 @@ def run():
         pr.print_version()
     else:
         curses.wrapper(main)
-
-
-if __name__ == "__main__":
-    run()

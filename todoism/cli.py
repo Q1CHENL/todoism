@@ -1,5 +1,9 @@
 import re
 import argparse
+import curses
+import todoism.task as tsk
+import todoism.print as pr
+import todoism.main as main
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -24,3 +28,17 @@ def validate_text(arg):
     if not re.match(r"^\w+", arg):
         raise argparse.ArgumentTypeError(f"invalid todo text: {arg!r}")
     return arg
+
+def run():
+    args = parse_args()
+    if args.add:
+        tsk.add_new_task_cli(args.add, args.flag)
+    elif args.delete:
+        tsk.remove_task_cli(args.delete)
+    elif args.print_all:
+        todos = tsk.load_tasks()
+        pr.print_all_cli(todos)
+    elif args.version:
+        pr.print_version()
+    else:
+        curses.wrapper(main.main)
