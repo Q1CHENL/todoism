@@ -433,7 +433,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             stdscr.move(y, new_x)
             
-        elif ch in kc.CTRL_SHIFT_LEFT:
+        elif ch == kc.CTRL_SHIFT_LEFT:
             if cursor_pos_in_text <= 0:
                 continue
                 
@@ -460,7 +460,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             stdscr.move(y, new_x)
             
-        elif ch in kc.CTRL_SHIFT_RIGHT:
+        elif ch == kc.CTRL_SHIFT_RIGHT:
             if cursor_pos_in_text >= len(task['description']):
                 continue
                 
