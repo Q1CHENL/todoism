@@ -3,7 +3,6 @@ import curses
 import time
 import todoism.print as pr
 import todoism.message as msg
-import todoism.task as tsk
 import todoism.preference as pref
 
 def wait_for_enter(stdscr):
@@ -147,3 +146,9 @@ def get_key_codes():
     except FileNotFoundError:
         pref.setup_default_settings()
         return {'ctrl+left': 0, 'ctrl+right': 0, 'ctrl+shift+left': 0, 'ctrl+shift+right': 0}
+
+keycodes = get_key_codes()
+CTRL_LEFT = keycodes['ctrl+left']
+CTRL_RIGHT = keycodes['ctrl+right']
+CTRL_SHIFT_LEFT = keycodes['ctrl+shift+left']
+CTRL_SHIFT_RIGHT = keycodes['ctrl+shift+right']

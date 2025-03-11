@@ -3,6 +3,7 @@ import todoism.print as pr
 import todoism.task as tsk
 import todoism.navigate as nv
 import todoism.preference as pref
+import todoism.keycode as kc
 
 indent = 7
 max_task_count = 99
@@ -374,8 +375,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             stdscr.move(y, new_x)
         
-        # Ctrl+Left to move to previous word (without selection)
-        elif ch == 554:
+        elif ch == kc.CTRL_LEFT:
             if cursor_pos_in_text <= 0:
                 continue
                 
@@ -404,8 +404,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             stdscr.move(y, new_x)
          
-        # Ctrl+Right to move to next word (without selection)
-        elif ch == 569:
+        elif ch == kc.CTRL_RIGHT:
             # Don't do anything if already at the end of text
             if cursor_pos_in_text >= len(task['description']):
                 # KEY FIX: Explicitly stabilize position at the end
@@ -434,8 +433,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             stdscr.move(y, new_x)
             
-        # Try multiple common key code patterns for Ctrl+Shift+Left
-        elif ch in [545, 547, 443, 541, 71, 555]:
+        elif ch in kc.CTRL_SHIFT_LEFT:
             if cursor_pos_in_text <= 0:
                 continue
                 
@@ -462,8 +460,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             stdscr.move(y, new_x)
             
-        # Try multiple common key code patterns for Ctrl+Shift+Right
-        elif ch in [560, 562, 444, 556, 570]:
+        elif ch in kc.CTRL_SHIFT_RIGHT:
             if cursor_pos_in_text >= len(task['description']):
                 continue
                 
