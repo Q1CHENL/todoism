@@ -9,7 +9,7 @@ A simple and easy-to-use todo TUI
 ## Install and use
 
 - Install: `pip install todoism`
-- Run: `todoism` or `todo`
+- Run: `todoism` or `todo` (or `python -m todoism` locally)
 - Update: `pip install todoism --upgrade`
 - Use: Invoke help message using command `:help` to see commonly used operations and commands
 
