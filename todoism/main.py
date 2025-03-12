@@ -107,8 +107,8 @@ def main(stdscr):
         done_cnt = tsk.done_count(filtered_tasks)
         
         # Handling window resizing
-        new_max_y, max_x = stdscr.getmaxyx()
-        new_max_capacity = new_max_y - 2
+        max_y, max_x = stdscr.getmaxyx()
+        new_max_capacity = max_y - 2
         
         # In case of window height change
         if new_max_capacity != max_capacity:
@@ -203,7 +203,7 @@ def main(stdscr):
             should_repaint = True
             
             # Ensure separator is visible after resize
-            pr.ensure_separator_visible(stdscr, new_max_y)
+            pr.ensure_separator_visible(stdscr, max_y)
         
         # Check if we need to update the time (every second)
         current_time = time.time()
@@ -866,14 +866,14 @@ def main(stdscr):
                 stdscr.timeout(-1)
                 
                 # Clear the bottom line
-                stdscr.move(max_capacity, 0)
+                stdscr.move(new_max_capacity, 0)
                 stdscr.clrtoeol()
                 # Keep frames visible
                 stdscr.addstr(max_y - 2, 0, "│")
                 stdscr.addstr(max_y - 2, 15, "│")
                 stdscr.addstr(max_y - 2, max_x - 1, "│")
                 
-                stdscr.addstr(max_capacity, sidebar_width, ":")
+                stdscr.addstr(new_max_capacity, sidebar_width, ":")
                 stdscr.refresh()
                 command_line = stdscr.getstr().decode('utf-8')
                 stdscr.timeout(500)
@@ -892,7 +892,7 @@ def main(stdscr):
                     start,
                     end,
                     current_row,
-                    max_capacity
+                    new_max_capacity
                 )
 
                 # Check if we have categories in the result (special case for test/restore)
