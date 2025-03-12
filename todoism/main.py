@@ -32,6 +32,8 @@ def main(stdscr):
     kc.ALT_LEFT = keycodes['alt+left']
     kc.ALT_RIGHT = keycodes['alt+right']
     
+    pref.update_preferences()
+    
     # Enable mouse support
     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
     

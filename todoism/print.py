@@ -3,6 +3,7 @@ import todoism.strikethrough as st
 import todoism.message as msg
 import todoism.color as clr
 import todoism.category as cat
+import todoism.preference as pref
 from datetime import datetime
 
 add_mode  = 0
@@ -219,7 +220,6 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
                 visible_text = task['description'][visible_start:visible_end]
         else:
             visible_text = task['description']
-        import todoism.strikethrough as st
         # Apply strike-through for completed tasks in view mode
         if task.get('status', False) and st.get_strikethrough() and not is_edit_mode:
             strikethrough_desc = ""
@@ -554,8 +554,6 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
     else:
         visible_text = text
         
-    # Apply strikethrough if needed
-    import todoism.strikethrough as st
     if task.get('status', False) and st.get_strikethrough() and not is_selected:
         strikethrough_desc = ""
         for char in visible_text:
