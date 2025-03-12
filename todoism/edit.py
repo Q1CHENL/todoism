@@ -2,6 +2,8 @@ import curses
 import todoism.print as pr
 import todoism.task as tsk
 import todoism.navigate as nv
+import todoism.preference as pref
+import todoism.keycode as kc
 
 indent = 7
 max_task_count = 99
@@ -263,6 +265,10 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         if selection_active:
             highlight_selection(stdscr, task, y, selection_start, cursor_pos_in_text, scroll_offset, is_sidebar)
         
+        # Redraw the separator
+        if is_sidebar:
+            stdscr.addstr(y, 15, "│")
+        
         # Position cursor
         stdscr.move(y, target_x)
         
@@ -295,9 +301,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # Only unlock scrolling after stabilize period
             if stabilize_count == 0:
                 lock_scrolling = False
-        
-        # REMOVED: No more automatic scrolling logic here
-        
+                
         # Handle key presses
         if ch == 4:  # Toggle debug mode with Ctrl+D
             debug_keys = not debug_keys
@@ -307,9 +311,9 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
                 stdscr.addstr(0, 0, ' ' * max_x)
                 stdscr.move(current_y, current_x)
             continue
-        elif ch == 10:  # Enter to complete
+        elif ch == kc.ENTER:  # Enter to complete
             break
-        elif ch == 27:  # ESC
+        elif ch == kc.ESC:
             if mode == pr.add_mode:
                 return ""
             else:
@@ -371,8 +375,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             stdscr.move(y, new_x)
         
-        # Ctrl+Left to move to previous word (without selection)
-        elif ch == 554:
+        elif ch == kc.CTRL_LEFT:
             if cursor_pos_in_text <= 0:
                 continue
                 
@@ -401,8 +404,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             stdscr.move(y, new_x)
          
-        # Ctrl+Right to move to next word (without selection)
-        elif ch == 569:
+        elif ch == kc.CTRL_RIGHT:
             # Don't do anything if already at the end of text
             if cursor_pos_in_text >= len(task['description']):
                 # KEY FIX: Explicitly stabilize position at the end
@@ -431,8 +433,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             stdscr.move(y, new_x)
             
-        # Try multiple common key code patterns for Ctrl+Shift+Left
-        elif ch in [545, 547, 443, 541, 71, 555]:
+        elif ch == kc.CTRL_SHIFT_LEFT:
             if cursor_pos_in_text <= 0:
                 continue
                 
@@ -459,8 +460,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             stdscr.move(y, new_x)
             
-        # Try multiple common key code patterns for Ctrl+Shift+Right
-        elif ch in [560, 562, 444, 556, 86, 570]:
+        elif ch == kc.CTRL_SHIFT_RIGHT:
             if cursor_pos_in_text >= len(task['description']):
                 continue
                 
@@ -528,7 +528,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             selection_active = False
             selection_start = -1
             
-        elif ch == curses.KEY_BACKSPACE or ch == 127:  # Backspace
+        elif ch == curses.KEY_BACKSPACE or ch == kc.BACKSPACE:  # Backspace
             # Clear selection if active
             if selection_active:
                 # Delete the selected text
@@ -694,10 +694,10 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
                 new_x = min(new_x, 14)
                 stdscr.move(y, new_x)
         
-        # Alt+Left to jump to beginning of text (handle various terminal key codes)
-        elif ch in [537, 543, 27, 542, 451, 552]:  # Various codes for Alt+Left
+        # Alt+Left to jump to beginning of text (handle recorded keycode)
+        elif ch == kc.ALT_LEFT:
             # If ESC (27), need to check if it's followed by proper sequence
-            if ch == 27:
+            if ch == kc.ESC:
                 # Check for ESC sequence
                 next_ch = stdscr.getch()
                 if next_ch != ord('[') and next_ch != 91:  # Check for '[' character
@@ -733,10 +733,10 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # Position cursor at beginning
             stdscr.move(y, text_start_pos)
             
-        # Alt+Right to jump to end of text (handle various terminal key codes)
-        elif ch in [552, 558, 402, 500, 567]:  # Various codes for Alt+Right
+        # Alt+Right to jump to end of text (handle recorded keycode)
+        elif ch == kc.ALT_RIGHT:  # Various codes for Alt+Right
             # If ESC (27), need to check if it's followed by proper sequence
-            if ch == 27:
+            if ch == kc.ESC:
                 # Check for ESC sequence
                 next_ch = stdscr.getch()
                 if next_ch != ord('[') and next_ch != 91:  # Check for '[' character
@@ -837,6 +837,6 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
         id, row, start, end = nv.post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
     
     # Save changes
-    tsk.save_tasks(task_list, tsk.tasks_file_path)
+    tsk.save_tasks(task_list, pref.tasks_file_path)
     return id, row, start, end
 

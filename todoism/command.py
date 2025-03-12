@@ -5,9 +5,11 @@ import time
 import todoism.task as tsk
 import todoism.edit as ed
 import todoism.print as pr
-import todoism.settings as st
-import todoism.category as cat
+import todoism.message as msg
+import todoism.preference as pref
 import todoism.navigate as nv
+import todoism.color as clr
+import todoism.strikethrough as st
 
 
 def purge(task_list, purged_list):
@@ -21,7 +23,7 @@ def purge(task_list, purged_list):
         else:
             purged_list.append(t)
     tsk.reassign_task_ids(remained)
-    tsk.save_tasks(purged_list, tsk.purged_file_path)
+    tsk.save_tasks(purged_list, pref.purged_file_path)
     return remained, []
 
 
@@ -43,7 +45,7 @@ def execute_command(
         filtered_tasks,
         done_list, 
         purged_list,
-        current_id,
+        current_task_id,
         start,
         end,
         current_row,
@@ -76,11 +78,11 @@ def execute_command(
         original_cnt = len(task_list)
         displayed_task_cnt = end - start + 1
         task_list, done_list = purge(task_list, purged_list)
-        tsk.save_tasks(task_list, tsk.tasks_file_path)
+        tsk.save_tasks(task_list, pref.tasks_file_path)
         # change current id to 1 if some tasks were purged
         if len(task_list) < original_cnt:
             # temporary solution: back to top
-            current_id = 1
+            current_task_id = 1
             current_row = 1
             start = 1
             if len(task_list) > displayed_task_cnt:
@@ -90,7 +92,7 @@ def execute_command(
         command_recognized = True
     elif command == "purge all":
         task_list = []
-        tsk.save_tasks(task_list, tsk.tasks_file_path)
+        tsk.save_tasks(task_list, pref.tasks_file_path)
         command_recognized = True
     elif command.startswith("sort "):
         category = command[5:]
@@ -105,11 +107,11 @@ def execute_command(
     elif command == "group":
         command_recognized = True
     elif command.startswith("color "):
-        st.set_color_selected(command[6:])
+        clr.set_color_selected(command[6:])
         command_recognized = True
     elif command == "help":
         max_y, max_x = stdscr.getmaxyx()
-        pr.print_msg(stdscr, pr.help_msg)
+        pr.print_msg(stdscr, msg.help_msg)
         hint = "┤Press 'q' to close help├"
         hint_pos_x = (max_x - 15) // 2 + 15 - len(hint) // 2
         stdscr.addstr(max_y - 1, hint_pos_x, hint)
@@ -122,7 +124,7 @@ def execute_command(
             if ch == ord('q') or ch == 27:  # 'q' or ESC
                 break
         stdscr.timeout(old_timeout)
-        return task_list, done_list, current_id, current_row, start, end
+        return task_list, done_list, current_task_id, current_row, start, end
     elif command.startswith("del "):
         parts = command.split()
         if len(parts) > 1 and parts[1].isdigit():
@@ -130,9 +132,9 @@ def execute_command(
             if 1 <= task_id <= len(task_list):
                 task_uuid = task_list[task_id - 1].get('uuid')
                 task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                # Update current_id, current_row, start, end after deletion
-                current_id, current_row, start, end = nv.post_deletion_update(
-                    current_id, current_row, start, end, len(task_list), max_capacity
+                # Update current_task_id, current_row, start, end after deletion
+                current_task_id, current_row, start, end = nv.post_deletion_update(
+                    current_task_id, current_row, start, end, len(task_list), max_capacity
                 )
         command_recognized = True
     elif command.startswith("edit "):
@@ -162,7 +164,7 @@ def execute_command(
             curses.curs_set(1)
             current_row = edit_id - start + 1
             if len(task_list) and edit_id >= start and edit_id <= end:
-                current_id, current_row, start, end = ed.edit_and_save(
+                current_task_id, current_row, start, end = ed.edit_and_save(
                     stdscr, 
                     task_list, 
                     edit_id,
@@ -177,12 +179,12 @@ def execute_command(
             curses.noecho()      
         command_recognized = True
     elif command.startswith("st "):
-        option = command[4:]
+        option = command[3:]
         if option == "on":
             st.set_strikethrough(True)
         elif option == "off":
             st.set_strikethrough(False)
-        
+        import todoism.category as cat
         categories = cat.load_categories()
         done_cnt = tsk.done_count(task_list)
         current_category_id = 0
@@ -191,7 +193,7 @@ def execute_command(
             done_cnt,
             len(task_list),
             task_list,
-            current_id,
+            current_task_id,
             start,
             end,
             categories,
@@ -226,7 +228,7 @@ def execute_command(
                     current_category_id = 0
                     
                     # Reset view
-                    current_id = 1
+                    current_task_id = 1
                     current_row = 1
                     start = 1
                     end = min(len(task_list), max_capacity)
@@ -246,7 +248,7 @@ def execute_command(
                     stdscr.clrtoeol()
                     
                     # Return updated categories and category ID
-                    return task_list, done_list, current_id, current_row, start, end, categories, current_category_id
+                    return task_list, done_list, current_task_id, current_row, start, end, categories, current_category_id
         except ImportError:
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
@@ -289,7 +291,7 @@ def execute_command(
                     current_category_id = 0
                     
                     # Reset view
-                    current_id = 1 if len(task_list) > 0 else 0
+                    current_task_id = 1 if len(task_list) > 0 else 0
                     current_row = 1 if len(task_list) > 0 else 0
                     start = 1 if len(task_list) > 0 else 0
                     end = min(len(task_list), max_capacity) if len(task_list) > 0 else 0
@@ -309,7 +311,7 @@ def execute_command(
                     stdscr.clrtoeol()
                     
                     # Return updated categories and category ID
-                    return task_list, done_list, current_id, current_row, start, end, categories, current_category_id
+                    return task_list, done_list, current_task_id, current_row, start, end, categories, current_category_id
         except ImportError:
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
@@ -350,7 +352,7 @@ def execute_command(
         stdscr.clrtoeol()
         stdscr.refresh()
     
-    return task_list, done_list, current_id, current_row, start, end
+    return task_list, done_list, current_task_id, current_row, start, end
 
 def execute_category_command(
         stdscr,
@@ -394,7 +396,7 @@ def execute_category_command(
                     
                     # Reload categories
                     categories = cat.load_categories()
-                    tsk.save_tasks(task_list, tsk.tasks_file_path)
+                    tsk.save_tasks(task_list, pref.tasks_file_path)
     elif command.startswith("cedit "):
         # Parse category ID and new name
         parts = command.split()

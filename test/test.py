@@ -3,14 +3,14 @@ import uuid
 import os
 import shutil
 from datetime import datetime
-import todoism.task as tsk
+import todoism.preference as pref
 
 # Backup file paths for saving the actual data
-backup_file_path = os.path.join(tsk.config_dir, "tasks_backup.json")
-backup_categories_path = os.path.join(tsk.config_dir, "categories_backup.json")
+backup_file_path = os.path.join(pref.config_dir, "tasks_backup.json")
+backup_categories_path = os.path.join(pref.config_dir, "categories_backup.json")
 
 # Flag file to mark that we're in test mode
-test_mode_flag_path = os.path.join(tsk.config_dir, "test_mode_active")
+test_mode_flag_path = os.path.join(pref.config_dir, "test_mode_active")
 
 def generate_test_tasks():
     """Generate a fresh set of test tasks with proper UUIDs and category_id"""
@@ -107,14 +107,14 @@ def backup_data():
         success = True
         
         # Backup tasks if they exist
-        if os.path.exists(tsk.tasks_file_path):
-            shutil.copy2(tsk.tasks_file_path, backup_file_path)
+        if os.path.exists(pref.tasks_file_path):
+            shutil.copy2(pref.tasks_file_path, backup_file_path)
         else:
             success = False
             
         # Backup categories if they exist
-        if os.path.exists(cat.categories_file_path):
-            shutil.copy2(cat.categories_file_path, backup_categories_path)
+        if os.path.exists(pref.categories_file_path):
+            shutil.copy2(pref.categories_file_path, backup_categories_path)
         else:
             success = False
             
@@ -135,7 +135,7 @@ def restore_data():
         
         # Restore tasks if backup exists
         if os.path.exists(backup_file_path):
-            shutil.copy2(backup_file_path, tsk.tasks_file_path)
+            shutil.copy2(backup_file_path, pref.tasks_file_path)
             # Clean up backup file
             os.remove(backup_file_path)
         else:
@@ -143,7 +143,7 @@ def restore_data():
             
         # Restore categories if backup exists
         if os.path.exists(backup_categories_path):
-            shutil.copy2(backup_categories_path, cat.categories_file_path)
+            shutil.copy2(backup_categories_path, pref.categories_file_path)
             # Clean up backup file
             os.remove(backup_categories_path)
         else:
@@ -154,8 +154,8 @@ def restore_data():
             os.remove(test_mode_flag_path)
             
         # Clean up test file if it exists
-        if os.path.exists(tsk.test_file_path):
-            os.remove(tsk.test_file_path)
+        if os.path.exists(pref.test_file_path):
+            os.remove(pref.test_file_path)
             
         return success
     except Exception as e:
@@ -175,14 +175,14 @@ def load_test_mode():
     
     # Clear any existing categories first to ensure isolation
     # Use the exact replacement approach - write only our test categories
-    with open(cat.categories_file_path, 'w') as file:
+    with open(pref.categories_file_path, 'w') as file:
         json.dump(test_categories, file, indent=4)
     
     # Save tasks in both locations
-    with open(tsk.test_file_path, 'w') as file:
+    with open(pref.test_file_path, 'w') as file:
         json.dump(test_tasks, file, indent=4)
     
-    with open(tsk.tasks_file_path, 'w') as file:
+    with open(pref.tasks_file_path, 'w') as file:
         json.dump(test_tasks, file, indent=4)
     
     return True

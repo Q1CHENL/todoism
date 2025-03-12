@@ -1,63 +1,30 @@
 import curses
-import todoism.settings as st
+import todoism.strikethrough as st
+import todoism.message as msg
+import todoism.color as clr
 from datetime import datetime
 
 add_mode  = 0
 edit_mode = 1
 
-help_msg =  '''
-┌──────────────────────────────────────────────────┐
-│                                                  │
-│   Short commands:                                │
-│   a - Create new task/category                   │
-│   d - Mark task as done                          │
-│   e - Edit task/category                         │
-│   f - Mark task as flagged                       │
-│   q - Quit this help message/todoism             │
-│                                                  │
-│   Vim-like long commands:                        │
-│   (:<command> [args])                            │
-│   :help - Show this help message                 │
-│   :del [task_id] - Delete task                   │
-│   :edit [task_id] - Edit task                    │
-│   :done [task_id] - Mark task as done            |
-│   :purge - Purge all done tasks                  │
-│   :sort f - Sort flagged tasks to top            │
-│   :sort d - Sort done tasks to bottom            │
-│   :autosort f on|off                             │
-│   :autosort d on|off                             │
-│   :color blue|red|yellow|green                   │
-│    - Change background color of current task     │
-│   :st on|off - toggle strikethrough effect       │
-│                                                  │
-│   Other key bindings:                            │
-│   Tab - Toggle focus bewteen tasks and sidebar   │
-│   Double Backspace - delete task                 │
-│   ESC - quit adding/editing task                 │
-│   Enter - finish adding/editing task             │
-│   Up/Down Arrow Keys - navigate through tasks    │
-│   Mouse Click:                                   │
-│    - on task: Select task                        │
-│    - on category: Select category                │
-│    - on done: Toggle task completion             │
-│    - on flag: Toggle task flag                   │
-│                                                  │
-└──────────────────────────────────────────────────┘
-'''
-
-empty_msg = f'''
-┌──────────────────────────────────────────────────────┐
-│       Hmm, it seems there are no active tasks        │
-│     Take a break, or create some to get busy :)      │
-└──────────────────────────────────────────────────────┘
-'''
-
-limit_msg = f'''
-┌────────────────────────────────────────┐
-│   You already have 99 tasks in hand.   │
-│  Maybe try to deal with them first :)  │
-└────────────────────────────────────────┘
-'''
+# Function to display centered messages
+def print_msg_center(stdscr, message, color_pair=0, highlight_line=-1):
+    stdscr.clear()
+    max_y, max_x = stdscr.getmaxyx()
+    lines = message.strip().split("\n")
+    start_y = max(0, (max_y - len(lines)) // 2)
+    
+    for i, line in enumerate(lines):
+        if line.strip():  # Only print non-empty lines
+            start_x = max(0, (max_x - len(line)) // 2)
+            if i == highlight_line and color_pair > 0:
+                stdscr.attron(curses.color_pair(color_pair))
+                stdscr.addstr(start_y + i, start_x, line)
+                stdscr.attroff(curses.color_pair(color_pair))
+            else:
+                stdscr.addstr(start_y + i, start_x, line)
+    
+    stdscr.refresh()
 
 def print_msg(stdscr, msg, x_offset=16, highlight=False):
     """Print a message box with proper centering in the task area with optional highlighting"""
@@ -123,7 +90,7 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
             stdscr.addstr(max_y - 1, x_offset - 1, "┴")
             # Draw horizontal line only if there's space
             remaining_width = max_x - x_offset - 1
-            if remaining_width > 0:
+            if (remaining_width > 0):
                 for x in range(x_offset, max_x - 2):
                     stdscr.addstr(max_y - 1, x, "─")
                 stdscr.addstr(max_y - 1, max_x - 2, "┘")
@@ -136,35 +103,20 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
     curses.doupdate()
 
 def print_version():
-    print("todoism version 1.21.2")
+    print("todoism version 1.21.3")
 
-def print_task_symbols(stdscr, task, y, status_x=3, flag_x=5, use_colors=True, is_selected=False):
-    """Print task status and flag symbols with appropriate colors
+def print_task_symbols(stdscr, task, y, flag_x=3, status_x=5, use_colors=True, is_selected=False):
+    """Print task flag and status symbols with appropriate colors
     
     Args:
         stdscr: The curses window
         task: The task data dictionary
         y: The row position
-        status_x: X position for status symbol (default: 3)
-        flag_x: X position for flag symbol (default: 5)
+        flag_x: X position for flag symbol (default: 3)
+        status_x: X position for status symbol (default: 5)
         use_colors: Whether to apply color formatting (default: True)
         is_selected: Whether the task is selected (affects coloring) (default: False)
     """
-    # Print status indicator
-    if task.get('status', False):
-        if use_colors and not is_selected:
-            stdscr.attron(curses.color_pair(6))  # Green
-            stdscr.addstr(y, status_x, '✓')
-            stdscr.attroff(curses.color_pair(6))
-        else:
-            stdscr.addstr(y, status_x, '✓')
-    else:
-        stdscr.addstr(y, status_x, ' ')
-    
-    # Add space between status and flag
-    stdscr.addstr(y, status_x + 1, ' ')
-    
-    # Print flag indicator
     if task.get('flagged', False):
         if use_colors and not is_selected:
             stdscr.attron(curses.color_pair(7))  # Orange/Yellow
@@ -175,8 +127,21 @@ def print_task_symbols(stdscr, task, y, status_x=3, flag_x=5, use_colors=True, i
     else:
         stdscr.addstr(y, flag_x, ' ')
     
-    # Add space after flag
+    # Add space between flag and status
     stdscr.addstr(y, flag_x + 1, ' ')
+    
+    # Print status indicator second
+    if task.get('status', False):
+        if use_colors and not is_selected:
+            stdscr.attron(curses.color_pair(6))  # Green
+            stdscr.addstr(y, status_x, '✓')
+            stdscr.attroff(curses.color_pair(6))
+        else:
+            stdscr.addstr(y, status_x, '✓')
+    else:
+        stdscr.addstr(y, status_x, ' ')
+    
+    stdscr.addstr(y, status_x + 1, ' ')
 
 def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0, 
                cursor_pos=None, is_edit_mode=False, is_sidebar=False):
@@ -244,30 +209,35 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         visible_end = min(text_length, scroll_offset + available_width)
         visible_text = task['description'][visible_start:visible_end]
     else:
-        # In view mode: truncate if too long
         if text_length > available_width:
-            visible_text = task['description'][:available_width]
+            visible_start = scroll_offset
+            visible_end = min(text_length, scroll_offset + available_width)
+            if visible_end == text_length:
+                visible_text = task['description'][text_length - available_width:]
+            else:
+                visible_text = task['description'][visible_start:visible_end]
         else:
             visible_text = task['description']
-            
-        import todoism.settings as settings
-        
+        import todoism.strikethrough as st
         # Apply strike-through for completed tasks in view mode
-        if task.get('status', False) and settings.get_strikethrough() and not is_edit_mode:
+        if task.get('status', False) and st.get_strikethrough() and not is_edit_mode:
             strikethrough_desc = ""
             for char in visible_text:
                 strikethrough_desc += (char + "\u0336")
             visible_text = strikethrough_desc
     
+    highlight_trailing_blank_space = 0
     # Display text at calculated position
     if task.get('status', False) and not is_selected and not is_edit_mode:
         stdscr.attron(curses.A_DIM)
         stdscr.addstr(y, text_start_pos, visible_text)
         stdscr.attroff(curses.A_DIM)
+        highlight_trailing_blank_space = available_width - len(visible_text)
     else:
+        highlight_trailing_blank_space = available_width - len(visible_text) + 1
         stdscr.addstr(y, text_start_pos, visible_text)
     
-    for i in range(available_width - len(visible_text)):
+    for i in range(highlight_trailing_blank_space):
         stdscr.addstr(' ')
     
     # Print date with exactly one character gap to right
@@ -443,7 +413,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     if is_selected and has_focus:
         stdscr.attron(curses.color_pair(1))  # Use the same highlight as tasks
     elif is_selected and not has_focus:
-        curses.init_pair(8, st.get_color_selected(), curses.COLOR_BLACK)
+        curses.init_pair(8, clr.get_color_selected(), curses.COLOR_BLACK)
         stdscr.attron(curses.color_pair(8))
         stdscr.attron(curses.A_BOLD)
     
@@ -479,7 +449,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
         stdscr.attroff(curses.color_pair(8))
         stdscr.attroff(curses.A_BOLD)
 
-def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_id, 
+def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_task_id, 
                                start, end, categories, current_category_id, 
                                category_start_index, sidebar_has_focus):
     """Print the complete UI with sidebar and task list"""
@@ -502,12 +472,12 @@ def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_id,
             stdscr.move(y, 16)
             stdscr.clrtoeol()
         # Print empty message with highlighting when task area has focus
-        print_msg(stdscr, empty_msg, 16, highlight=(not sidebar_has_focus))
+        print_msg(stdscr, msg.empty_msg, 16, highlight=(not sidebar_has_focus))
     else:
-        print_tasks_with_offset(stdscr, tasks, current_id, start, end, 16)
+        print_tasks_with_offset(stdscr, tasks, current_task_id, start, end, 16)
     
 
-def print_tasks_with_offset(stdscr, task_list, current_id, start, end, x_offset=0):
+def print_tasks_with_offset(stdscr, task_list, current_task_id, start, end, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
     max_y, max_x = stdscr.getmaxyx()
     
@@ -522,7 +492,7 @@ def print_tasks_with_offset(stdscr, task_list, current_id, start, end, x_offset=
             row = i + 1  # +1 due to status bar
             display_id = i + start  # Sequential display ID (1, 2, 3, etc.)
             
-            if i + start == current_id:
+            if i + start == current_task_id:
                 # Selected task
                 print_task_selected_with_offset(stdscr, task, row, x_offset, display_id)
             else:
@@ -553,10 +523,10 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
     # Print task ID
     stdscr.addstr(row, x_offset, f"{id_to_show:2d} ")
     
-    # Print task symbols
+    # Print task symbols with swapped positions
     print_task_symbols(stdscr, task, row, 
-                      status_x=x_offset + 3, 
-                      flag_x=x_offset + 5,
+                      flag_x=x_offset + 3, 
+                      status_x=x_offset + 5,
                       use_colors=not is_selected,
                       is_selected=is_selected)
     
@@ -578,8 +548,8 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
         visible_text = text
         
     # Apply strikethrough if needed
-    import todoism.settings as settings
-    if task.get('status', False) and settings.get_strikethrough() and not is_selected:
+    import todoism.strikethrough as st
+    if task.get('status', False) and st.get_strikethrough() and not is_selected:
         strikethrough_desc = ""
         for char in visible_text:
             strikethrough_desc += (char + "\u0336")

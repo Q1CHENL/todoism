@@ -4,13 +4,14 @@ A simple and easy-to-use todo TUI
 
 ## Screenshot
 
-![UI](./assets/screenshot-v1.21.2.png)
+![UI](./assets/screenshot-v1.21.3.png)
 
 ## Install and use
 
 - Install: `pip install todoism`
-- Run: `todoism` or `todo`
+- Run: `todoism` or `todo` (or `python -m todoism` locally)
 - Update: `pip install todoism --upgrade`
+- Use: Invoke help message using command `:help` to see commonly used operations and commands
 
 ```txt
 ┌──────────────────────────────────────────────────┐
@@ -33,6 +34,7 @@ A simple and easy-to-use todo TUI
 │    - on category: Select category                │
 │    - on done: Toggle task completion             │
 │    - on flag: Toggle task flag                   │
+│    - on blank area: toggle focus                 │
 │                                                  │
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
@@ -54,26 +56,23 @@ A simple and easy-to-use todo TUI
 
 > [!NOTE]
 > Some terminal does not support mouse click or strike through effect.
+> E.g **Ptyxis** (new default terminal for GNOME 47) does not fully support strikethrough effect.
+> You can turn it off use command `:st off`, as specified in the help message.
 
-## ToDos
+> [!CAUTION]
+> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions is not yet implemented. Please backup your data (located in `~/.todoism/`) when needed.
 
-- properly display completed tasks
-- maybe make autosort flag and done default
-- grey background when adding new task using 'a'
-- make status bar prettier: wrap it as a block
-- add multi language support
-- make no-task message more helpful
-- command autosort
-- emulate the popup menu when right click on task
-- esc to quit exit() too slow
-- command: date ymd, dmy
-- custom theme
-- wrap a setup func for e.g paths
-- ctl + shift to select multiple tasks to delete/done
-- group different kinds of tasks
-- simplify print args
-- history total done count in maybe settings
-- sound
+
+### Keycode recording
+
+When you first start todoism, you'll be prompted to record key combinations for text navigation.
+
+- CTRL + LEFT: Move cursor one word left when editing text
+- CTRL + RIGHT: Move cursor one word right when editing text
+- CTRL + SHIFT + LEFT: Select text from cursor position to one word left
+- CTRL + SHIFT + RIGHT: Select text from cursor position to one word right
+- ALT + LEFT: Move cursor to the beginning of the text
+- ALT + RIGHT: Move cursor to the end of the text
 
 ## Contribute
 
