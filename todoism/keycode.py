@@ -5,12 +5,14 @@ import todoism.print as pr
 import todoism.message as msg
 import todoism.preference as pref
 
+
 def wait_for_enter(stdscr):
     """Wait for user to press Enter key, ignore other keys"""
     while True:
         ch = stdscr.getch()
         if ch == ENTER:
             return
+
 
 def record_key_codes(stdscr):
     """Record key codes for special key combinations"""
@@ -23,7 +25,9 @@ def record_key_codes(stdscr):
         'ctrl+left': 0,
         'ctrl+right': 0,
         'ctrl+shift+left': 0,
-        'ctrl+shift+right': 0
+        'ctrl+shift+right': 0,
+        'alt+left': 0,
+        'alt+right': 0
     }
 
     # Set timeout to non-blocking
@@ -68,7 +72,8 @@ def record_key_codes(stdscr):
         wait_for_enter(stdscr)
 
         # Step 3: Ctrl+Shift+Left
-        pr.print_msg_center(stdscr, msg.keycode_recording_ctrl_shift_left_msg, 3, 3)
+        pr.print_msg_center(
+            stdscr, msg.keycode_recording_ctrl_shift_left_msg, 3, 3)
         ch = stdscr.getch()
         if ch == ord('r'):
             restart = True
@@ -78,11 +83,13 @@ def record_key_codes(stdscr):
         elif ch == ord('q'):
             return False
         key_codes['ctrl+shift+left'] = ch
-        pr.print_msg_center(stdscr, msg.keycode_feedback_ctrl_shift_left_msg, 2)
+        pr.print_msg_center(
+            stdscr, msg.keycode_feedback_ctrl_shift_left_msg, 2)
         wait_for_enter(stdscr)
 
         # Step 4: Ctrl+Shift+Right
-        pr.print_msg_center(stdscr, msg.keycode_recording_ctrl_shift_right_msg, 3, 3)
+        pr.print_msg_center(
+            stdscr, msg.keycode_recording_ctrl_shift_right_msg, 3, 3)
         ch = stdscr.getch()
         if ch == ord('r'):
             restart = True
@@ -92,7 +99,36 @@ def record_key_codes(stdscr):
         elif ch == ord('q'):
             return False
         key_codes['ctrl+shift+right'] = ch
-        pr.print_msg_center(stdscr, msg.keycode_feedback_ctrl_shift_right_msg, 2)
+        pr.print_msg_center(
+            stdscr, msg.keycode_feedback_ctrl_shift_right_msg, 2)
+        wait_for_enter(stdscr)
+
+        # Step 5: Alt+Left
+        pr.print_msg_center(stdscr, msg.keycode_recording_alt_left_msg, 3, 3)
+        ch = stdscr.getch()
+        if ch == ord('r'):
+            restart = True
+            pr.print_msg_center(stdscr, msg.keycode_restart_msg, 3)
+            time.sleep(1)
+            continue
+        elif ch == ord('q'):
+            return False
+        key_codes['alt+left'] = ch
+        pr.print_msg_center(stdscr, msg.keycode_feedback_alt_left_msg, 2)
+        wait_for_enter(stdscr)
+
+        # Step 6: Alt+Right
+        pr.print_msg_center(stdscr, msg.keycode_recording_alt_right_msg, 3, 3)
+        ch = stdscr.getch()
+        if ch == ord('r'):
+            restart = True
+            pr.print_msg_center(stdscr, msg.keycode_restart_msg, 3)
+            time.sleep(1)
+            continue
+        elif ch == ord('q'):
+            return False
+        key_codes['alt+right'] = ch
+        pr.print_msg_center(stdscr, msg.keycode_feedback_alt_right_msg, 2)
         wait_for_enter(stdscr)
 
         if restart:
@@ -105,6 +141,7 @@ def record_key_codes(stdscr):
         time.sleep(1)
         return True
 
+
 def need_key_recording():
     """Check if we need to record key codes (all keys are 0)"""
     try:
@@ -113,7 +150,9 @@ def need_key_recording():
             return (settings.get('ctrl+shift+left', 0) == 0 and
                     settings.get('ctrl+shift+right', 0) == 0 and
                     settings.get('ctrl+left', 0) == 0 and
-                    settings.get('ctrl+right', 0) == 0)
+                    settings.get('ctrl+right', 0) == 0 and
+                    settings.get('alt+left', 0) == 0 and
+                    settings.get('alt+right', 0) == 0)
     except FileNotFoundError:
         pref.setup_default_settings()
         return True
@@ -141,17 +180,28 @@ def get_key_codes():
                 'ctrl+left': settings.get('ctrl+left', 0),
                 'ctrl+right': settings.get('ctrl+right', 0),
                 'ctrl+shift+left': settings.get('ctrl+shift+left', 0),
-                'ctrl+shift+right': settings.get('ctrl+shift+right', 0)
+                'ctrl+shift+right': settings.get('ctrl+shift+right', 0),
+                'alt+left': settings.get('alt+left', 0),
+                'alt+right': settings.get('alt+right', 0)
             }
     except FileNotFoundError:
         pref.setup_default_settings()
-        return {'ctrl+left': 0, 'ctrl+right': 0, 'ctrl+shift+left': 0, 'ctrl+shift+right': 0}
+        return {
+            'ctrl+left': 0,
+            'ctrl+right': 0,
+            'ctrl+shift+left': 0,
+            'ctrl+shift+right': 0,
+            'alt+left': 0,
+            'alt+right': 0
+        }
 
-keycodes = get_key_codes()
-CTRL_LEFT = keycodes['ctrl+left']
-CTRL_RIGHT = keycodes['ctrl+right']
-CTRL_SHIFT_LEFT = keycodes['ctrl+shift+left']
-CTRL_SHIFT_RIGHT = keycodes['ctrl+shift+right']
+
+CTRL_LEFT = 0
+CTRL_RIGHT = 0
+CTRL_SHIFT_LEFT = 0
+CTRL_SHIFT_RIGHT = 0
+ALT_LEFT = 0
+ALT_RIGHT = 0
 BACKSPACE = 127
 ESC = 27
 ENTER = 10

@@ -694,10 +694,10 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
                 new_x = min(new_x, 14)
                 stdscr.move(y, new_x)
         
-        # Alt+Left to jump to beginning of text (handle various terminal key codes)
-        elif ch in [537, 543, 27, 542, 451, 552]:  # Various codes for Alt+Left
+        # Alt+Left to jump to beginning of text (handle recorded keycode)
+        elif ch == kc.ALT_LEFT:
             # If ESC (27), need to check if it's followed by proper sequence
-            if ch == 27:
+            if ch == kc.ESC:
                 # Check for ESC sequence
                 next_ch = stdscr.getch()
                 if next_ch != ord('[') and next_ch != 91:  # Check for '[' character
@@ -733,10 +733,10 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # Position cursor at beginning
             stdscr.move(y, text_start_pos)
             
-        # Alt+Right to jump to end of text (handle various terminal key codes)
-        elif ch in [552, 558, 402, 500, 567]:  # Various codes for Alt+Right
+        # Alt+Right to jump to end of text (handle recorded keycode)
+        elif ch == kc.ALT_RIGHT:  # Various codes for Alt+Right
             # If ESC (27), need to check if it's followed by proper sequence
-            if ch == 27:
+            if ch == kc.ESC:
                 # Check for ESC sequence
                 next_ch = stdscr.getch()
                 if next_ch != ord('[') and next_ch != 91:  # Check for '[' character

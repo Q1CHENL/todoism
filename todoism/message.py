@@ -65,6 +65,8 @@ keycode_msg = '''
 │ - Ctrl + Right                                            │
 │ - Ctrl + Shift + Left                                     │
 │ - Ctrl + Shift + Right                                    │
+│ - Alt + Left                                              │
+│ - Alt + Right                                             │
 │                                                           │
 │ This takes just a few seconds!                            │
 │                                                           │
@@ -117,6 +119,28 @@ keycode_recording_ctrl_shift_right_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
+keycode_recording_alt_left_msg = '''
+┌───────────────────────────────────────────────────┐
+│ Keycode Recording (5/6)                           │
+│                                                   │
+│ Press Alt + Left key combination                  │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
+└───────────────────────────────────────────────────┘
+'''
+
+keycode_recording_alt_right_msg = '''
+┌───────────────────────────────────────────────────┐
+│ Keycode Recording (6/6)                           │
+│                                                   │
+│ Press Alt + Right key combination                 │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
+└───────────────────────────────────────────────────┘
+'''
+
 # Replace formatting placeholders with static text
 keycode_feedback_ctrl_left_msg = '''
 ┌───────────────────────────────────────────────────┐
@@ -145,6 +169,22 @@ keycode_feedback_ctrl_shift_left_msg = '''
 keycode_feedback_ctrl_shift_right_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Shift + Right                    │
+│                                                   │
+│ Press Enter to continue...                        │
+└───────────────────────────────────────────────────┘
+'''
+
+keycode_feedback_alt_left_msg = '''
+┌───────────────────────────────────────────────────┐
+│ Recorded: Alt + Left                              │
+│                                                   │
+│ Press Enter to continue...                        │
+└───────────────────────────────────────────────────┘
+'''
+
+keycode_feedback_alt_right_msg = '''
+┌───────────────────────────────────────────────────┐
+│ Recorded: Alt + Right                             │
 │                                                   │
 │ Press Enter to continue...                        │
 └───────────────────────────────────────────────────┘

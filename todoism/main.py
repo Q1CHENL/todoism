@@ -23,6 +23,14 @@ def main(stdscr):
     if kc.need_key_recording():
         if not kc.record_key_codes(stdscr):
             return
+        else:
+            keycodes = kc.get_key_codes()
+            kc.CTRL_LEFT = keycodes['ctrl+left']
+            kc.CTRL_RIGHT = keycodes['ctrl+right']
+            kc.CTRL_SHIFT_LEFT = keycodes['ctrl+shift+left']
+            kc.CTRL_SHIFT_RIGHT = keycodes['ctrl+shift+right']
+            kc.ALT_LEFT = keycodes['alt+left']
+            kc.ALT_RIGHT = keycodes['alt+right']
     
     # Enable mouse support
     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
