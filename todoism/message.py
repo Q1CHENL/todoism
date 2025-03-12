@@ -32,8 +32,6 @@ help_msg = '''
 │   :purge - Purge all done tasks                  │
 │   :sort f - Sort flagged tasks to top            │
 │   :sort d - Sort done tasks to bottom            │
-│   :autosort f on|off                             │
-│   :autosort d on|off                             │
 │   :color blue|red|yellow|green                   │
 │    - Change background color of current task     │
 │   :st on|off - toggle strikethrough effect       │
