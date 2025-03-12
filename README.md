@@ -39,17 +39,18 @@ A simple and easy-to-use todo TUI
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
 │   :help - Show this help message                 │
-│   :del [task_id] - Delete task                   │
-│   :edit [task_id] - Edit task                    │
-│   :done [task_id] - Mark task as done            |
+│   :del <task_id> - Delete task                   │
+│   :edit <task_id> - Edit task                    │
+│   :done <task_id> - Mark task as done            |
 │   :purge - Purge all done tasks                  │
 │   :sort f - Sort flagged tasks to top            │
 │   :sort d - Sort done tasks to bottom            │
-│   :autosort f on|off                             │
-│   :autosort d on|off                             │
 │   :color blue|red|yellow|green                   │
 │    - Change background color of current task     │
 │   :st on|off - toggle strikethrough effect       │
+│   :tag on|off - toggle [tag] display All Tasks   │
+│   :autosort f on|off                             │
+│   :autosort d on|off                             │
 │                                                  │
 └──────────────────────────────────────────────────┘
 ```
@@ -61,7 +62,6 @@ A simple and easy-to-use todo TUI
 
 > [!CAUTION]
 > Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions is not yet implemented. Please backup your data (located in `~/.todoism/`) when needed.
-
 
 ### Keycode recording
 
