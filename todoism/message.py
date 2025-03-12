@@ -37,6 +37,9 @@ help_msg = '''
 │   :color blue|red|yellow|green                   │
 │    - Change background color of current task     │
 │   :st on|off - toggle strikethrough effect       │
+│   :tag on|off - toggle [tag] display All Tasks   │
+│   :autosort f on|off                             │
+│   :autosort d on|off                             │
 │                                                  │
 └──────────────────────────────────────────────────┘
 '''
