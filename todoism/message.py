@@ -70,7 +70,8 @@ keycode_msg = '''
 │                                                           │
 │ This takes just a few seconds!                            │
 │                                                           │
-│ Press Enter to start...                                   │
+│ Press Enter to start                                      │
+│ Press 'q' to quit (your settings won't be saved)          │
 └───────────────────────────────────────────────────────────┘
 '''
 
@@ -146,7 +147,10 @@ keycode_feedback_ctrl_left_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Left                             │
 │                                                   │
-│ Press Enter to continue...                        │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
 '''
 
@@ -154,7 +158,10 @@ keycode_feedback_ctrl_right_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Right                            │
 │                                                   │
-│ Press Enter to continue...                        │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
 '''
 
@@ -162,7 +169,10 @@ keycode_feedback_ctrl_shift_left_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Shift + Left                     │
 │                                                   │
-│ Press Enter to continue...                        │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
 '''
 
@@ -170,7 +180,10 @@ keycode_feedback_ctrl_shift_right_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Shift + Right                    │
 │                                                   │
-│ Press Enter to continue...                        │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
 '''
 
@@ -178,7 +191,10 @@ keycode_feedback_alt_left_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Alt + Left                              │
 │                                                   │
-│ Press Enter to continue...                        │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
 '''
 
@@ -186,7 +202,10 @@ keycode_feedback_alt_right_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Alt + Right                             │
 │                                                   │
-│ Press Enter to continue...                        │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
 '''
 
