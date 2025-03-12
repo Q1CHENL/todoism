@@ -311,9 +311,9 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
                 stdscr.addstr(0, 0, ' ' * max_x)
                 stdscr.move(current_y, current_x)
             continue
-        elif ch == 10:  # Enter to complete
+        elif ch == kc.ENTER:  # Enter to complete
             break
-        elif ch == 27:  # ESC
+        elif ch == kc.ESC:
             if mode == pr.add_mode:
                 return ""
             else:
@@ -528,7 +528,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             selection_active = False
             selection_start = -1
             
-        elif ch == curses.KEY_BACKSPACE or ch == 127:  # Backspace
+        elif ch == curses.KEY_BACKSPACE or ch == kc.BACKSPACE:  # Backspace
             # Clear selection if active
             if selection_active:
                 # Delete the selected text

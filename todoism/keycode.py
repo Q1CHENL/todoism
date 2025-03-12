@@ -9,7 +9,7 @@ def wait_for_enter(stdscr):
     """Wait for user to press Enter key, ignore other keys"""
     while True:
         ch = stdscr.getch()
-        if ch == 10:
+        if ch == ENTER:
             return
 
 def record_key_codes(stdscr):
@@ -152,3 +152,6 @@ CTRL_LEFT = keycodes['ctrl+left']
 CTRL_RIGHT = keycodes['ctrl+right']
 CTRL_SHIFT_LEFT = keycodes['ctrl+shift+left']
 CTRL_SHIFT_RIGHT = keycodes['ctrl+shift+right']
+BACKSPACE = 127
+ESC = 27
+ENTER = 10

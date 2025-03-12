@@ -531,7 +531,7 @@ def main(stdscr):
                     curses.noecho()
                     should_repaint = True
             
-            elif key == curses.KEY_BACKSPACE or key == 127:
+            elif key == curses.KEY_BACKSPACE or key == kc.BACKSPACE:
                 # Delete selected category (with double backspace confirmation)
                 if len(categories) > 0 and current_category_id != 0:
                     # Wait for second backspace
@@ -540,7 +540,7 @@ def main(stdscr):
                     
                     # Wait for confirmation
                     k = stdscr.getch()
-                    if k == curses.KEY_BACKSPACE or k == 127:
+                    if k == curses.KEY_BACKSPACE or k == kc.BACKSPACE:
                         
                         # Handle tasks in this category
                         task_list = [task for task in task_list if task.get('category_id', 0) != current_category_id]
@@ -920,10 +920,10 @@ def main(stdscr):
                         start, end, current_task_id, current_row, task_cnt, max_capacity, True
                     )
                 
-            elif key == curses.KEY_BACKSPACE or key == 127:
+            elif key == curses.KEY_BACKSPACE or key == kc.BACKSPACE:
                 # Double backspace to delete a task
                 k = stdscr.getch()
-                if k == curses.KEY_BACKSPACE or k == 127:
+                if k == curses.KEY_BACKSPACE or k == kc.BACKSPACE:
                     if len(filtered_tasks) > 0:
                         if filtered_tasks[current_task_id - 1]['status'] is True:
                             done_cnt = done_cnt - 1
