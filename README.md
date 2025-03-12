@@ -59,6 +59,21 @@ A simple and easy-to-use todo TUI
 > E.g **Ptyxis** (new default terminal for GNOME 47) does not fully support strikethrough effect.
 > You can turn it off use command `:st off`, as specified in the help message.
 
+> [!CAUTION]
+> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions is not yet implemented. Please backup your data (located in `~/.todoism/`) when needed.
+
+
+### Keycode recording
+
+When you first start todoism, you'll be prompted to record key combinations for text navigation.
+
+- CTRL + LEFT: Move cursor one word left when editing text
+- CTRL + RIGHT: Move cursor one word right when editing text
+- CTRL + SHIFT + LEFT: Select text from cursor position to one word left
+- CTRL + SHIFT + RIGHT: Select text from cursor position to one word right
+- ALT + LEFT: Move cursor to the beginning of the text
+- ALT + RIGHT: Move cursor to the end of the text
+
 ## Contribute
 
 Issues and PRs are welcome! todoism uses curses library as its main tech stack. Please refer to the library [docs](https://docs.python.org/3/library/curses.html#module-curses) and [how-to](https://docs.python.org/3/howto/curses.html) to get started.
