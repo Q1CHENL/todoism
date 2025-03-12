@@ -103,7 +103,7 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
     curses.doupdate()
 
 def print_version():
-    print("todoism version 1.21.2")
+    print("todoism version 1.21.3")
 
 def print_task_symbols(stdscr, task, y, flag_x=3, status_x=5, use_colors=True, is_selected=False):
     """Print task flag and status symbols with appropriate colors
