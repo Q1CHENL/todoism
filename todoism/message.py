@@ -26,9 +26,9 @@ help_msg = '''
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
 │   :help - Show this help message                 │
-│   :del [task_id] - Delete task                   │
-│   :edit [task_id] - Edit task                    │
-│   :done [task_id] - Mark task as done            |
+│   :del <task_id> - Delete task                   │
+│   :edit <task_id> - Edit task                    │
+│   :done <task_id> - Mark task as done            |
 │   :purge - Purge all done tasks                  │
 │   :sort f - Sort flagged tasks to top            │
 │   :sort d - Sort done tasks to bottom            │
