@@ -544,7 +544,7 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
     # Handle text display
     text = task['description']
     # Add tag if not in All Tasks
-    if current_category_id == 0:
+    if current_category_id == 0 and pref.get_tag():
         cat_id_of_current_task = task["category_id"]
         if cat_id_of_current_task != 0:
             text = "[" + cat.get_category_by_id(cat_id_of_current_task)["name"] +  "] " + text
