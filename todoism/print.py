@@ -46,12 +46,7 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
     center_offset = max(0, (available_width - width) // 2)
     
     # Clear the task area before printing
-    for i in range(1, max_y - 1):  # Leave the bottom row for bottom frame
-        try:
-            stdscr.move(i, x_offset)
-            stdscr.clrtoeol()
-        except curses.error:
-            continue
+    clear_task_panel(stdscr, max_y)
     
     # Apply highlighting if requested
     if highlight:
@@ -80,11 +75,7 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
         stdscr.attroff(curses.color_pair(1))
     
     # Draw the right frame for each line
-    for y in range(1, max_y - 1):
-        try:
-            stdscr.addstr(y, max_x - 1, '│')
-        except curses.error:
-            continue
+    draw_right_frame(stdscr, max_y, max_x)
     
     # Draw the bottom frame if there's enough space
     if max_y > 2:
@@ -599,9 +590,9 @@ def print_task_selected_with_offset(stdscr, task, row, x_offset=0, display_id=No
 
 def ensure_separator_visible(stdscr, max_height=None):
     """Ensure the vertical separator is visible across the entire height"""
-    if max_height is None:
-        max_y, _ = stdscr.getmaxyx()
-        max_height = max_y
+
+    max_y, max_x = stdscr.getmaxyx()
+    max_height = max_y
     
     # Draw left frame
     for y in range(max_height):
@@ -622,13 +613,7 @@ def ensure_separator_visible(stdscr, max_height=None):
             pass
     
     # Draw right frame
-    for y in range(max_height):
-        try:
-            # Use corner for top row, vertical bar for others
-            char = '┐' if y == 0 else '│'
-            stdscr.addstr(y, stdscr.getmaxyx()[1] - 1, char)
-        except curses.error:
-            pass
+    draw_right_frame(stdscr, max_height, max_x)
     
     # Force immediate refresh for the separator
     stdscr.noutrefresh()
@@ -637,29 +622,152 @@ def ensure_separator_visible(stdscr, max_height=None):
 def print_pref_panel(stdscr, current_selection_index=0):
     """
     Print the preference panel centered in the task area with ">" marker for selected preference
+    and colored active options
     
     Args:
         stdscr: The curses window
         current_selection_index: Index of the currently selected preference (default: 0)
     """
     import todoism.message as msg
+    import todoism.strikethrough as st
+    import todoism.color as clr
+    import todoism.preference as pref
     
     # Get preference panel content
-    pref_content = msg.pref_panel.strip().split("\n")
+    pref_content_lines = msg.pref_panel.strip().split("\n")
     
-    # Format with ">" for selected item
+    # Setup color pairs for the available colors
+    curses.init_pair(9, curses.COLOR_BLUE, curses.COLOR_BLACK)
+    curses.init_pair(10, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(12, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        
+    # Calculate dimensions and position
+    max_y, max_x = stdscr.getmaxyx()
+    width = len(pref_content_lines[0])  # Use first line for width calculation
+    available_width = max(0, max_x - 16)
+    center_offset_x = max(0, (available_width - width) // 2)
+    center_offset_y = max(0, (max_y - len(pref_content_lines)) // 2)
+    
+    clear_task_panel(stdscr, max_y)
+    
+    # Get current preference values for coloring
+    theme_color = clr.get_color_selected()
+    tag_enabled = pref.get_tag()
+    strikethrough_enabled = st.get_strikethrough()
+    current_color = clr.get_color_selected_str()
+    current_date_format = pref.get_date_format()
+    color_map = {"blue": 9, "red": 10, "yellow": 11, "green": 12}
+    
+    # Format each line with ">" for selected item
     formatted_content = []
-    for i, line in enumerate(pref_content):
-        if i == current_selection_index + 2:
+    for i, line in enumerate(pref_content_lines):
+        if i == current_selection_index + 2:  # +2 because one pref every 2 lines
             formatted_content.append(f"  {line[0:2]}>{line[3:]}")
         else:
             formatted_content.append(f"  {line}")
     
-    # Join into a single string
-    pref_panel = "\n".join(formatted_content)
+    # Print each line of the panel with appropriate formatting
+    for y in range(0, min(len(formatted_content), max_y - 2)):
+        line = formatted_content[y]
+        
+        # Draw the top frame (first line)
+        if y == 0:
+            stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
+            continue
+            
+        # Process and draw content lines
+        if "Tag:" in line:
+            value = "on" if tag_enabled else "off"
+            pos = line.find(value)
+            print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
+                
+        elif "Strikethrough:" in line:
+            value = "on" if strikethrough_enabled else "off"
+            pos = line.find(value)
+            print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value)                
+                
+        elif "Color:" in line:
+            pos = line.find(current_color)
+            if pos > 0:
+                # Print the first part (before the value)
+                prefix = line[:pos]
+                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, prefix)
+                
+                # Print the value with color-specific highlighting
+                color_pair = color_map.get(current_color, 9)
+                stdscr.attron(curses.color_pair(color_pair))
+                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos, current_color)
+                stdscr.attroff(curses.color_pair(color_pair))
+                
+                # Print the suffix (after the value)
+                suffix = line[pos + len(current_color):]
+                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos + len(current_color), suffix)
+            else:
+                # Fallback if value not found
+                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
+                
+        elif "Date format:" in line:
+            pos = line.find(current_date_format)
+            if pos > 0:
+                # Print the first part (before the value)
+                prefix = line[:pos]
+                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, prefix)
+                
+                # UPDATED: Use the same color pair as the selected color
+                color_pair = color_map.get(current_color, 9)
+                stdscr.attron(curses.color_pair(color_pair))
+                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos, current_date_format)
+                stdscr.attroff(curses.color_pair(color_pair))
+                
+                # Print the suffix (after the value)
+                suffix = line[pos + len(current_date_format):]
+                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos + len(current_date_format), suffix)
+            else:
+                # Fallback if value not found
+                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
+        else:
+            # Print other lines without special formatting
+            stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
     
-    # Display centered in task area
-    print_msg(stdscr, pref_panel, x_offset=16, highlight=False)
+    draw_right_frame(stdscr, max_y, max_x)
+    
+def print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value):
+    if pos > 0:
+        # Print the first part (before the value)
+        prefix = line[:pos]
+        stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, prefix)
+        
+        # Print the value with fixed color (green for "on", red for "off")
+        if value == "on":
+            stdscr.attron(curses.color_pair(2))  # Green
+            stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos, value)
+            stdscr.attroff(curses.color_pair(2))
+        else:  # "off"
+            stdscr.attron(curses.color_pair(4))  # Red
+            stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos, value)
+            stdscr.attroff(curses.color_pair(4))
+        
+        # Print the suffix (after the value)
+        suffix = line[pos + len(value):]
+        stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos + len(value), suffix)
+    else:
+        # Fallback if value not found
+        stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
 
+def draw_right_frame(stdscr, screen_height, screen_width):
+    for y in range(screen_height - 1):
+        try:
+            # Use corner for top row, vertical bar for others
+            char = '┐' if y == 0 else '│'
+            stdscr.addstr(y, screen_width - 1, char)
+        except curses.error:
+            pass
 
-
+def clear_task_panel(stdscr, max_y):
+    for i in range(1, max_y - 1):
+        try:
+            stdscr.move(i, 16)
+            stdscr.clrtoeol()
+        except curses.error:
+            continue
