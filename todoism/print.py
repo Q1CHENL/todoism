@@ -596,8 +596,8 @@ def print_pref_panel(stdscr, current_selection_index=0):
     max_y, max_x = stdscr.getmaxyx()
     width = len(pref_content_lines[0])  # Use first line for width calculation
     available_width = max(0, max_x - 16)
-    center_offset_x = max(0, (available_width - width) // 2)
-    center_offset_y = max(0, (max_y - len(pref_content_lines)) // 2)
+    center_offset_x = max(0, (available_width - width) // 2) - 1
+    center_offset_y = max(0, (max_y - len(pref_content_lines)) // 2) - 1
     
     clear_task_panel(stdscr, max_y)
     
