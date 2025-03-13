@@ -41,6 +41,25 @@ help_msg = '''
 └──────────────────────────────────────────────────┘
 '''
 
+pref_panel = '''
+┌────────────────────────────────────┐
+│                                    │
+│   Tag: on|off                      │
+│                                    │
+│   Strikethrough: on|off            │
+│                                    │
+│   Color: blue|red|yellow|green     │
+│                                    │
+│   Date format: Y-M-D|D-M-Y|M-D-Y   │
+│                                    │
+│   Autosort flagged: on|off         │
+│                                    │
+│   Autosort done: on|off            │
+│                                    │
+└────────────────────────────────────┘
+
+'''
+
 empty_msg = '''
 ┌──────────────────────────────────────────────────────┐
 │       Hmm, it seems there are no active tasks        │

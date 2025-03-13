@@ -628,3 +628,33 @@ def ensure_separator_visible(stdscr, max_height=None):
     # Force immediate refresh for the separator
     stdscr.noutrefresh()
     curses.doupdate()
+
+def print_pref_panel(stdscr, current_selection_index=0):
+    """
+    Print the preference panel centered in the task area with ">" marker for selected preference
+    
+    Args:
+        stdscr: The curses window
+        current_selection_index: Index of the currently selected preference (default: 0)
+    """
+    import todoism.message as msg
+    
+    # Get preference panel content
+    pref_content = msg.pref_panel.strip().split("\n")
+    
+    # Format with ">" for selected item
+    formatted_content = []
+    for i, line in enumerate(pref_content):
+        if i == current_selection_index + 2:
+            formatted_content.append(f"  {line[0:2]}>{line[3:]}")
+        else:
+            formatted_content.append(f"  {line}")
+    
+    # Join into a single string
+    pref_panel = "\n".join(formatted_content)
+    
+    # Display centered in task area
+    print_msg(stdscr, pref_panel, x_offset=16, highlight=False)
+
+
+

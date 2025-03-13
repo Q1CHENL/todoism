@@ -10,6 +10,7 @@ import todoism.preference as pref
 import todoism.navigate as nv
 import todoism.color as clr
 import todoism.strikethrough as st
+import todoism.keycode as kc
 
 
 def purge(task_list, purged_list):
@@ -202,6 +203,65 @@ def execute_command(
             False  # Tasks have focus
         )
         command_recognized = True
+    elif command == "pref":
+        selection_index = 0
+        command_recognized = True
+        old_timeout = 500
+        stdscr.timeout(-1)
+        quit = False
+        while True:
+            if quit:
+                break
+            if selection_index > 10:
+                selection_index = 10
+            elif selection_index < 0:
+                selection_index = 0
+            
+            pr.print_pref_panel(stdscr, selection_index)
+            line = msg.pref_panel.strip().split('\n')[selection_index + 2].strip().split(':')
+            if line[0] == "│   Color":
+                color_index = 0
+                while True:
+                    ch = stdscr.getch()
+                    if ch == kc.TAB:
+                        color_index = (color_index + 1) % 3
+                        clr.set_color_selected(line[1].strip().split('|')[color_index])
+                    elif ch == curses.KEY_UP:
+                        selection_index -= 2
+                        break
+                    elif ch == curses.KEY_DOWN:
+                        selection_index += 2
+                        break
+                    elif ch == ord('q') or ch == 27:
+                        quit = True
+                        break
+            elif line[0] == "│   Strikethrough":
+                while True:
+                    ch = stdscr.getch()
+                    if ch == kc.TAB:
+                        st.set_strikethrough(not st.get_strikethrough())
+                    elif ch == curses.KEY_UP:
+                        selection_index -= 2
+                        break
+                    elif ch == curses.KEY_DOWN:
+                        selection_index += 2
+                        break
+                    elif ch == ord('q') or ch == 27:
+                        quit = True
+                        break
+            elif line[0] == "│   Tag":
+                    ch = stdscr.getch()
+                    if ch == curses.KEY_UP:
+                        selection_index -= 2
+                        continue
+                    elif ch == curses.KEY_DOWN:
+                        selection_index += 2
+                        continue
+                    elif ch == ord('q') or ch == 27:
+                        quit = True
+                        break
+             
+        stdscr.timeout(old_timeout)
     elif command == "test":
         # Hidden command for developers - load test data
         try:
