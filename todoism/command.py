@@ -121,7 +121,7 @@ def execute_command(
         stdscr.timeout(-1)
         while True:
             ch = stdscr.getch()
-            if ch == ord('q') or ch == kc.ESC:  # 'q' or ESC
+            if ch == ord('q'):
                 break
         stdscr.timeout(old_timeout)
         return task_list, done_list, current_task_id, current_row, start, end
@@ -237,7 +237,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
+                elif ch == ord('q'):
                     quit = True
             
             elif preference_type == "│   Strikethrough":
@@ -251,7 +251,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
+                elif ch == ord('q'):
                     quit = True
             
             elif preference_type == "│   Color":
@@ -291,7 +291,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
+                elif ch == ord('q'):
                     quit = True
             
             # Skip implementation for autosort options but keep them navigable
@@ -301,7 +301,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
+                elif ch == ord('q'):
                     quit = True
             
             # Handle any other preference types or empty lines
@@ -311,7 +311,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
+                elif ch == ord('q'):
                     quit = True
         
         # Restore original timeout
