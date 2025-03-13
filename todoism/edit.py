@@ -255,9 +255,6 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         # Calculate cursor position in text with bounds checking
         cursor_pos_in_text = max(0, min(x - text_start_pos + scroll_offset, len(task['description'])))
         
-        # Check if text has changed
-        text_modified = task['description'] != original_text
-        
         # Render the edit line with current scroll offset
         target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text, is_sidebar)
         
@@ -833,7 +830,7 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     # Handle task deletion if description is empty
     if task_list[id - 1]['description'] == "":
         del task_list[id - 1]
-        reassign_task_ids(task_list)
+        tsk.reassign_task_ids(task_list)
         id, row, start, end = nv.post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
     
     # Save changes

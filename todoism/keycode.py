@@ -5,6 +5,17 @@ import todoism.print as pr
 import todoism.message as msg
 import todoism.preference as pref
 
+CTRL_LEFT = 0
+CTRL_RIGHT = 0
+CTRL_SHIFT_LEFT = 0
+CTRL_SHIFT_RIGHT = 0
+ALT_LEFT = 0
+ALT_RIGHT = 0
+BACKSPACE = 127
+ESC = 27
+ENTER = 10
+TAB = 9
+
 def record_key_codes(stdscr):
     """Record key codes for special key combinations"""
     curses.curs_set(0)
@@ -173,15 +184,3 @@ def get_key_codes():
             'alt+left': 0,
             'alt+right': 0
         }
-
-
-CTRL_LEFT = 0
-CTRL_RIGHT = 0
-CTRL_SHIFT_LEFT = 0
-CTRL_SHIFT_RIGHT = 0
-ALT_LEFT = 0
-ALT_RIGHT = 0
-BACKSPACE = 127
-ESC = 27
-ENTER = 10
-TAB = 9

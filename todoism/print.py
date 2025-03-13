@@ -648,7 +648,6 @@ def print_pref_panel(stdscr, current_selection_index=0):
     strikethrough_enabled = st.get_strikethrough()
     current_color = clr.get_color_selected_str()
     current_date_format = pref.get_date_format()
-    color_map = {"blue": 9, "red": 10, "yellow": 11, "green": 12}
     
     # Format each line with ">" for selected item
     formatted_content = []

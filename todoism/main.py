@@ -111,7 +111,6 @@ def main(stdscr):
         if new_max_capacity != max_capacity:
             # Store if we're getting more or less space
             is_growing = new_max_capacity > max_capacity
-            old_capacity = max_capacity
             max_capacity = new_max_capacity
             
             # Update sidebar view
