@@ -206,61 +206,114 @@ def execute_command(
     elif command == "pref":
         selection_index = 0
         command_recognized = True
-        old_timeout = 500
+        old_timeout = 500  
         stdscr.timeout(-1)
         quit = False
+        
         while True:
             if quit:
-                break
+                break                
+            # Keep selection index in valid range
             if selection_index > 10:
-                selection_index = 10
+                selection_index = 0  # Wrap around to the top
             elif selection_index < 0:
-                selection_index = 0
+                selection_index = 10  # Wrap around to the bottom
             
+            # Display the preference panel with current selection
             pr.print_pref_panel(stdscr, selection_index)
+            
+            # Get the current preference item
             line = msg.pref_panel.strip().split('\n')[selection_index + 2].strip().split(':')
-            if line[0] == "│   Color":
-                color_index = 0
-                while True:
-                    ch = stdscr.getch()
-                    if ch == kc.TAB:
-                        color_index = (color_index + 1) % 3
-                        clr.set_color_selected(line[1].strip().split('|')[color_index])
-                    elif ch == curses.KEY_UP:
-                        selection_index -= 2
-                        break
-                    elif ch == curses.KEY_DOWN:
-                        selection_index += 2
-                        break
-                    elif ch == ord('q') or ch == 27:
-                        quit = True
-                        break
-            elif line[0] == "│   Strikethrough":
-                while True:
-                    ch = stdscr.getch()
-                    if ch == kc.TAB:
-                        st.set_strikethrough(not st.get_strikethrough())
-                    elif ch == curses.KEY_UP:
-                        selection_index -= 2
-                        break
-                    elif ch == curses.KEY_DOWN:
-                        selection_index += 2
-                        break
-                    elif ch == ord('q') or ch == 27:
-                        quit = True
-                        break
-            elif line[0] == "│   Tag":
-                    ch = stdscr.getch()
-                    if ch == curses.KEY_UP:
-                        selection_index -= 2
-                        continue
-                    elif ch == curses.KEY_DOWN:
-                        selection_index += 2
-                        continue
-                    elif ch == ord('q') or ch == 27:
-                        quit = True
-                        break
-             
+            preference_type = line[0].strip()
+            
+            # Handle different preference types
+            if preference_type == "│   Tag":
+                ch = stdscr.getch()
+                if ch == kc.TAB:
+                    # Toggle Tag setting
+                    pref.set_tag(not pref.get_tag())
+                    # Refresh to show the change
+                    pr.print_pref_panel(stdscr, selection_index)
+                elif ch == curses.KEY_UP:
+                    selection_index -= 2
+                elif ch == curses.KEY_DOWN:
+                    selection_index += 2
+                elif ch == ord('q') or ch == 27:  # q or ESC
+                    quit = True
+            
+            elif preference_type == "│   Strikethrough":
+                ch = stdscr.getch()
+                if ch == kc.TAB:
+                    # Toggle strikethrough setting
+                    st.set_strikethrough(not st.get_strikethrough())
+                    # Refresh to show the change
+                    pr.print_pref_panel(stdscr, selection_index)
+                elif ch == curses.KEY_UP:
+                    selection_index -= 2
+                elif ch == curses.KEY_DOWN:
+                    selection_index += 2
+                elif ch == ord('q') or ch == 27:  # q or ESC
+                    quit = True
+            
+            elif preference_type == "│   Color":
+                # Get currently selected color
+                colors = ["blue", "red", "yellow", "green"]
+                current_color = clr.get_color_selected_str()
+                color_index = colors.index(current_color) if current_color in colors else 0
+                
+                ch = stdscr.getch()
+                if ch == kc.TAB:
+                    # Cycle through colors
+                    color_index = (color_index + 1) % len(colors)
+                    clr.set_color_selected(colors[color_index])
+                    # Refresh to show the change
+                    pr.print_pref_panel(stdscr, selection_index)
+                elif ch == curses.KEY_UP:
+                    selection_index -= 2
+                elif ch == curses.KEY_DOWN:
+                    selection_index += 2
+                elif ch == ord('q') or ch == 27:  # q or ESC
+                    quit = True
+            
+            elif preference_type == "│   Date format":
+                ch = stdscr.getch()
+                if ch == kc.TAB:
+                    # Get current date format and cycle through options
+                    date_formats = ["Y-M-D", "D-M-Y", "M-D-Y"]
+                    current_format = pref.get_date_format()
+                    date_index = date_formats.index(current_format) if current_format in date_formats else 0
+                    date_index = (date_index + 1) % len(date_formats)
+                    pref.set_date_format(date_formats[date_index])
+                    # Refresh to show the change
+                    pr.print_pref_panel(stdscr, selection_index)
+                elif ch == curses.KEY_UP:
+                    selection_index -= 2
+                elif ch == curses.KEY_DOWN:
+                    selection_index += 2
+                elif ch == ord('q') or ch == 27:  # q or ESC
+                    quit = True
+            
+            # Skip implementation for autosort options but keep them navigable
+            elif preference_type.startswith("│   Autosort"):
+                ch = stdscr.getch()
+                if ch == curses.KEY_UP:
+                    selection_index -= 2
+                elif ch == curses.KEY_DOWN:
+                    selection_index += 2
+                elif ch == ord('q') or ch == 27:  # q or ESC
+                    quit = True
+            
+            # Handle any other preference types or empty lines
+            else:
+                ch = stdscr.getch()
+                if ch == curses.KEY_UP:
+                    selection_index -= 2
+                elif ch == curses.KEY_DOWN:
+                    selection_index += 2
+                elif ch == ord('q') or ch == 27:  # q or ESC
+                    quit = True
+        
+        # Restore original timeout
         stdscr.timeout(old_timeout)
     elif command.startswith("tag "):
         tag = command[4:]
