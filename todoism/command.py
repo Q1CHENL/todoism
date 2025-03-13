@@ -215,9 +215,9 @@ def execute_command(
                 break                
             # Keep selection index in valid range
             if selection_index > 10:
-                selection_index = 0  # Wrap around to the top
+                selection_index = 10
             elif selection_index < 0:
-                selection_index = 10  # Wrap around to the bottom
+                selection_index = 0
             
             # Display the preference panel with current selection
             pr.print_pref_panel(stdscr, selection_index)
