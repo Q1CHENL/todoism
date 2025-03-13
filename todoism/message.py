@@ -57,6 +57,8 @@ pref_panel = '''
 │                                    │
 │   Autosort done: on|off            │
 │                                    │
+│   (Press Tab to toggle options)    │
+│                                    │
 └────────────────────────────────────┘
 
 '''
