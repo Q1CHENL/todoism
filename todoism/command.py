@@ -265,11 +265,13 @@ def execute_command(
                     clr.set_color_selected(colors[color_index])
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
+                    # Update color pair for selection
+                    curses.init_pair(9, curses.COLOR_BLACK, clr.get_color_selected_curses())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == 27:  # q or ESC
+                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
                     quit = True
             
             elif preference_type == "│   Date format":
@@ -287,7 +289,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == 27:  # q or ESC
+                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
                     quit = True
             
             # Skip implementation for autosort options but keep them navigable
@@ -297,7 +299,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == 27:  # q or ESC
+                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
                     quit = True
             
             # Handle any other preference types or empty lines
@@ -307,7 +309,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == 27:  # q or ESC
+                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
                     quit = True
         
         # Restore original timeout
@@ -332,9 +334,10 @@ def execute_command(
                 warning_msg = "Already in test mode!"
                 stdscr.move(max_capacity, sidebar_width)
                 stdscr.clrtoeol()
-                stdscr.attron(curses.color_pair(3) | curses.A_BOLD)  # Yellow
+                yellow_pair_num = clr.get_color_pair_num_by_str("yellow")
+                stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
                 stdscr.addstr(max_capacity, sidebar_width, warning_msg)
-                stdscr.attroff(curses.color_pair(3) | curses.A_BOLD)
+                stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
                 stdscr.refresh()
                 time.sleep(1)
                 stdscr.move(max_capacity, sidebar_width)
@@ -357,9 +360,10 @@ def execute_command(
                     success_msg = "Test mode enabled. Test tasks and categories loaded. Will auto-restore on exit."
                     stdscr.move(max_capacity, sidebar_width)
                     stdscr.clrtoeol()
-                    stdscr.attron(curses.color_pair(2) | curses.A_BOLD)  # Green
+                    green_pair_num = clr.get_color_pair_num_by_str("green")
+                    stdscr.attron(curses.color_pair(green_pair_num) | curses.A_BOLD)
                     stdscr.addstr(max_capacity, sidebar_width, success_msg)
-                    stdscr.attroff(curses.color_pair(2) | curses.A_BOLD)
+                    stdscr.attroff(curses.color_pair(green_pair_num) | curses.A_BOLD)
                     stdscr.refresh()
                     time.sleep(1.5)
                     stdscr.move(max_capacity, sidebar_width)
@@ -374,9 +378,10 @@ def execute_command(
             warning_msg = "Test mode not available in installation"
             stdscr.move(max_capacity, sidebar_width)
             stdscr.clrtoeol()
-            stdscr.attron(curses.color_pair(3) | curses.A_BOLD)
+            yellow_pair_num = clr.get_color_pair_num_by_str("yellow")
+            stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
             stdscr.addstr(max_capacity, sidebar_width, warning_msg)
-            stdscr.attroff(curses.color_pair(3) | curses.A_BOLD)
+            stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
             stdscr.refresh()
             time.sleep(1.5)
             stdscr.move(max_capacity, sidebar_width)
@@ -395,9 +400,10 @@ def execute_command(
                 warning_msg = "Not in test mode - nothing to restore!"
                 stdscr.move(max_capacity, sidebar_width)
                 stdscr.clrtoeol()
-                stdscr.attron(curses.color_pair(3) | curses.A_BOLD)  # Yellow
+                yellow_pair_num = clr.get_color_pair_num_by_str("yellow")
+                stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
                 stdscr.addstr(max_capacity, sidebar_width, warning_msg)
-                stdscr.attroff(curses.color_pair(3) | curses.A_BOLD)
+                stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
                 stdscr.refresh()
                 time.sleep(1)
                 stdscr.move(max_capacity, sidebar_width)
@@ -420,9 +426,10 @@ def execute_command(
                     success_msg = "Test mode disabled. Original tasks and categories restored."
                     stdscr.move(max_capacity, sidebar_width)
                     stdscr.clrtoeol()
-                    stdscr.attron(curses.color_pair(2) | curses.A_BOLD)  # Green
+                    green_pair_num = clr.get_color_pair_num_by_str("green")
+                    stdscr.attron(curses.color_pair(green_pair_num) | curses.A_BOLD)
                     stdscr.addstr(max_capacity, sidebar_width, success_msg)
-                    stdscr.attroff(curses.color_pair(2) | curses.A_BOLD)
+                    stdscr.attroff(curses.color_pair(green_pair_num) | curses.A_BOLD)
                     stdscr.refresh()
                     time.sleep(1.5)
                     stdscr.move(max_capacity, sidebar_width)
@@ -437,9 +444,10 @@ def execute_command(
             warning_msg = "Test mode not available in installation"
             stdscr.move(max_capacity, sidebar_width)
             stdscr.clrtoeol()
-            stdscr.attron(curses.color_pair(3) | curses.A_BOLD)  # Yellow
+            yellow_pair_num = clr.get_color_pair_num_by_str("yellow")
+            stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
             stdscr.addstr(max_capacity, sidebar_width, warning_msg)
-            stdscr.attroff(curses.color_pair(3) | curses.A_BOLD)
+            stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
             stdscr.refresh()
             time.sleep(1.5)
             stdscr.move(max_capacity, sidebar_width)
@@ -458,9 +466,10 @@ def execute_command(
         stdscr.move(max_capacity, sidebar_width)
         stdscr.clrtoeol()
         
-        stdscr.attron(curses.color_pair(4) | curses.A_BOLD)
+        red_pair_num = clr.get_color_pair_num_by_str("red")
+        stdscr.attron(curses.color_pair(red_pair_num) | curses.A_BOLD)
         stdscr.addstr(max_capacity, sidebar_width, error_msg)
-        stdscr.attroff(curses.color_pair(4) | curses.A_BOLD)
+        stdscr.attroff(curses.color_pair(red_pair_num) | curses.A_BOLD)
         stdscr.refresh()
         
         time.sleep(1.35)

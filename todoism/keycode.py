@@ -7,10 +7,6 @@ import todoism.preference as pref
 
 def record_key_codes(stdscr):
     """Record key codes for special key combinations"""
-    curses.start_color()
-    curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.curs_set(0)
     key_codes = {
         'ctrl+left': 0,

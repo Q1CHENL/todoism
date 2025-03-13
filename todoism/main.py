@@ -20,6 +20,9 @@ def main(stdscr):
     stdscr.clear()
     stdscr.refresh()
     
+    curses.start_color()
+    clr.setup_color_pairs()
+    
     if kc.need_key_recording():
         if not kc.record_key_codes(stdscr):
             return
@@ -36,14 +39,6 @@ def main(stdscr):
     
     # Enable mouse support
     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
-    
-    curses.start_color()
-    curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
-    curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    curses.init_pair(6, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    curses.init_pair(7, curses.COLOR_RED, curses.COLOR_BLACK)
 
     # Set up the screen
     curses.curs_set(0)
@@ -216,8 +211,8 @@ def main(stdscr):
             
         if should_repaint:
             stdscr.erase()
-            color_selected = clr.get_color_selected()
-            curses.init_pair(1, curses.COLOR_BLACK, color_selected)
+            color_selected = clr.get_color_selected_curses()
+            # curses.init_pair(1, curses.COLOR_BLACK, clr.get_color_selected_curses())
             tsk.reassign_task_ids(filtered_tasks)
             if focus_manager.is_tasks_focused():
                 if task_cnt > 0:
@@ -508,7 +503,7 @@ def main(stdscr):
                     # Draw tasks area
                     pr.print_tasks_with_offset(stdscr, filtered_tasks, 0, current_category_id, start, end, sidebar_width)
                     
-                    stdscr.attron(curses.color_pair(1))
+                    stdscr.attron(curses.color_pair(clr.get_current_color_pair_number()))
                     stdscr.move(row, 0)
                     
                     # Append spaces
@@ -516,7 +511,7 @@ def main(stdscr):
                         stdscr.addch(row, j, ' ')
                         
                     # Redraw the separator
-                    stdscr.attroff(curses.color_pair(1))
+                    stdscr.attroff(curses.color_pair(clr.get_current_color_pair_number()))
                     stdscr.addstr(row, 15, '│')
                     
                     # Position cursor at start of category name (1 char indent)
