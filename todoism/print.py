@@ -75,7 +75,7 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
         stdscr.attroff(curses.color_pair(clr.selection_color_pair_num))
     
     # Draw the right frame for each line
-    draw_right_frame(stdscr, max_y, max_x)
+    print_right_frame(stdscr, max_y, max_x)
     
     # Draw the bottom frame if there's enough space
     if max_y > 2:
@@ -311,25 +311,10 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     stdscr.move(0, 0)
     stdscr.clrtoeol()
     
-    # Draw horizontal frame across entire top line
-    for x in range(max_x - 1):  # Stop one char before the end
-        # Skip position 0 (will be ┌) and position 15 (will be ┬)
-        if x != 0 and x != 15:
-            try:
-                stdscr.addstr(0, x, "─")
-            except curses.error:
-                pass
-    
-    # Add the corners and junctions without highlight
-    try:
-        # Left corner
-        stdscr.addstr(0, 0, "┌")
-        # T-junction at position (0, 15) where vertical meets horizontal
-        stdscr.addstr(0, 15, "┬")
-        # Right corner
-        stdscr.addstr(0, max_x - 1, "┐")
-    except curses.error:
-        pass
+    print_top_left_corner(stdscr)
+    print_top_frame(stdscr, max_x)
+    print_seperator_connector_top(stdscr)
+    print_top_right_corner(stdscr, max_x)
     
     # Print centered status with colored percentage and datetime
     stdscr.addstr(0, start_pos, status_prefix)
@@ -371,13 +356,8 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
         stdscr.move(y, 0)
         stdscr.clrtoeol()  # Use clrtoeol() for consistent clearing
     
-    # Add left vertical frame for each row
-    for y in range(1, max_y - 1):
-        try:
-            stdscr.addstr(y, 0, "│")
-        except curses.error:
-            pass
-    stdscr.addstr(max_y - 1, 0, "└")
+    print_left_frame(stdscr, max_y)
+    print_bottom_left_corner(stdscr, max_y)
     
     for x in range(1, sidebar_width):
         stdscr.addstr(max_y - 1, x, "─")
@@ -388,15 +368,10 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
         row = i + 1  # Start from row 1 (row 0 is for status bar)
         is_selected = category['id'] == current_category_id
         print_category(stdscr, category, row, is_selected, has_focus)
-    
-    # Print vertical separator
-    for y in range(0, max_y - 1):
-        # Use T-junction for top row
-        char = '┬' if y == 0 else '│'
-        stdscr.addstr(y, sidebar_width, char)
-    
-    # draw bottom frame
-    stdscr.addstr(max_y - 1, sidebar_width, "┴")
+
+    print_seperator_connector_top(stdscr)
+    print_sidebar_task_panel_separator(stdscr, max_y)
+    print_seperator_connector_bottom(stdscr, max_y)
     
     for x in range(sidebar_width + 1, max_x - 2):
         stdscr.addstr(max_y - 1, x, "─")
@@ -497,8 +472,8 @@ def print_tasks_with_offset(stdscr, task_list, current_task_id, current_category
         stdscr.addstr(y, max_x - 1, "│")
     # https://stackoverflow.com/questions/7063128/last-character-of-a-window-in-python-curses
     # Special trick for last char error in cursor window
-    stdscr.addstr(max_y-1, max_x - 2, "┘")
-    stdscr.insstr(max_y-1, max_x - 2, "─")
+    stdscr.addstr(max_y - 1, max_x - 2, "┘")
+    stdscr.insstr(max_y - 1, max_x - 2, "─")
 
     
     
@@ -594,27 +569,11 @@ def ensure_separator_visible(stdscr, max_height=None):
 
     max_y, max_x = stdscr.getmaxyx()
     max_height = max_y
-    
-    # Draw left frame
-    for y in range(max_height):
-        try:
-            # Use corner for top row, vertical bar for others
-            char = '┌' if y == 0 else '│'
-            stdscr.addstr(y, 0, char)
-        except curses.error:
-            pass
-    
-    # Draw right separator (between sidebar and main area)
-    for y in range(max_height):
-        try:
-            # Use T-junction character for the top row, vertical bar for others
-            char = '┬' if y == 0 else '│'
-            stdscr.addstr(y, 15, char)
-        except curses.error:
-            pass
-    
-    # Draw right frame
-    draw_right_frame(stdscr, max_height, max_x)
+
+    print_sidebar_task_panel_separator(stdscr, max_y)
+    print_top_left_corner(stdscr)
+    print_left_frame(stdscr, max_y)
+    print_right_frame(stdscr, max_y, max_x)
     
     # Force immediate refresh for the separator
     stdscr.noutrefresh()
@@ -717,7 +676,7 @@ def print_pref_panel(stdscr, current_selection_index=0):
             # Print other lines without special formatting
             stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
     
-    draw_right_frame(stdscr, max_y, max_x)
+    print_right_frame(stdscr, max_y, max_x)
     print_q_to_close(stdscr, "preferences", max_x, max_y)
     
 def print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value):
@@ -745,14 +704,6 @@ def print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_
         # Fallback if value not found
         stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
 
-def draw_right_frame(stdscr, screen_height, screen_width):
-    for y in range(screen_height - 1):
-        try:
-            # Use corner for top row, vertical bar for others
-            char = '┐' if y == 0 else '│'
-            stdscr.addstr(y, screen_width - 1, char)
-        except curses.error:
-            pass
 
 def clear_task_panel(stdscr, max_y):
     for i in range(1, max_y - 1):
@@ -766,3 +717,42 @@ def print_q_to_close(stdscr, page, max_x, max_y):
     hint = f"┤Press 'q' to close {page}├"
     hint_pos_x = (max_x - 15) // 2 + 15 - len(hint) // 2
     stdscr.addstr(max_y - 1, hint_pos_x, hint)
+
+# Functions for drawing frames and separators
+def print_right_frame(stdscr, max_y, max_x):
+    for y in range(1, max_y - 1):
+        stdscr.addstr(y, max_x - 1, "│")
+
+def print_left_frame(stdscr, max_y):
+    for y in range(1, max_y - 1):
+        stdscr.addstr(y, 0, '│')
+        
+def print_top_frame(stdscr, max_x):
+    for x in range(1, max_x):
+        stdscr.addstr(0, x, '─')
+
+def print_bottom_frame(stdscr, max_x):
+    for x in range(1, max_x):
+        stdscr.addstr(max_y - 1, x, '─')
+
+def print_top_right_corner(stdscr, max_x):
+    stdscr.addstr(0, max_x - 1, "┐")
+
+def print_top_left_corner(stdscr):
+    stdscr.addstr(0, 0, "┌")
+    
+def print_bottom_right_corner(stdscr, max_x, max_y):
+    stdscr.addstr(max_y - 1, max_x - 1, "┘")
+
+def print_bottom_left_corner(stdscr, max_y):
+    stdscr.addstr(max_y - 1, 0, "└")
+    
+def print_sidebar_task_panel_separator(stdscr, max_y):
+    for y in range(1, max_y - 1):
+        stdscr.addstr(y, 15, "│")
+
+def print_seperator_connector_top(stdscr):
+    stdscr.addstr(0, 15, "┬")
+
+def print_seperator_connector_bottom(stdscr, max_y):
+    stdscr.addstr(max_y - 1, 15, "┴")
