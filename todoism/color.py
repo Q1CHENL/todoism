@@ -1,5 +1,6 @@
 import json
 import curses
+import random
 import todoism.preference as pref
 
 color_set = {
@@ -13,7 +14,6 @@ color_set = {
 }
 
 def set_color_selected(color: str):
-    # invalid color
     if color not in color_set and color != "random":
         return
     try:
@@ -24,7 +24,7 @@ def set_color_selected(color: str):
             json.dump(settings, settings_file, indent=4)
             settings_file.truncate()
     except FileNotFoundError:
-        setup_default_settings()
+        pref.setup_default_settings()
 
 
 def get_color_selected():
@@ -35,6 +35,7 @@ def get_color_selected():
             if color == "random":
                 return random.choice(list(color_set.values()))
             return color_set[color]
-    except FileNotFoundError:
-        setup_default_settings()
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
+        return pref.setup_default_settings()['selected_color']
+    except Exception:
         return curses.COLOR_BLUE

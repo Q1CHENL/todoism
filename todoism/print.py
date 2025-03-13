@@ -2,6 +2,8 @@ import curses
 import todoism.strikethrough as st
 import todoism.message as msg
 import todoism.color as clr
+import todoism.category as cat
+import todoism.preference as pref
 from datetime import datetime
 
 add_mode  = 0
@@ -218,7 +220,6 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
                 visible_text = task['description'][visible_start:visible_end]
         else:
             visible_text = task['description']
-        import todoism.strikethrough as st
         # Apply strike-through for completed tasks in view mode
         if task.get('status', False) and st.get_strikethrough() and not is_edit_mode:
             strikethrough_desc = ""
@@ -474,10 +475,10 @@ def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_task
         # Print empty message with highlighting when task area has focus
         print_msg(stdscr, msg.empty_msg, 16, highlight=(not sidebar_has_focus))
     else:
-        print_tasks_with_offset(stdscr, tasks, current_task_id, start, end, 16)
+        print_tasks_with_offset(stdscr, tasks, current_task_id, current_category_id, start, end, 16)
     
 
-def print_tasks_with_offset(stdscr, task_list, current_task_id, start, end, x_offset=0):
+def print_tasks_with_offset(stdscr, task_list, current_task_id, current_category_id, start, end, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
     max_y, max_x = stdscr.getmaxyx()
     
@@ -494,10 +495,10 @@ def print_tasks_with_offset(stdscr, task_list, current_task_id, start, end, x_of
             
             if i + start == current_task_id:
                 # Selected task
-                print_task_selected_with_offset(stdscr, task, row, x_offset, display_id)
+                print_task_selected_with_offset(stdscr, task, row, x_offset, display_id, current_category_id)
             else:
                 # Normal task
-                print_task_with_offset(stdscr, task, row, False, x_offset, display_id)
+                print_task_with_offset(stdscr, task, row, False, x_offset, display_id, current_category_id)
     
     max_y, max_x = stdscr.getmaxyx()
     for y in range(len(task_list) if len(task_list) > 0 else 1, max_y - 1):
@@ -509,7 +510,7 @@ def print_tasks_with_offset(stdscr, task_list, current_task_id, start, end, x_of
 
     
     
-def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_id=None):
+def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_id=None, current_category_id=0):
     """Print a task with horizontal offset and optional display ID override"""
     # Calculate available width for text
     max_y, max_x = stdscr.getmaxyx()
@@ -542,13 +543,17 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
     
     # Handle text display
     text = task['description']
+    # Add tag if not in All Tasks
+    if current_category_id == 0 and pref.get_tag():
+        cat_id_of_current_task = task["category_id"]
+        if cat_id_of_current_task != 0:
+            text = "[" + cat.get_category_by_id(cat_id_of_current_task)["name"] +  "] " + text
+
     if len(text) > available_width:
         visible_text = text[:available_width]
     else:
         visible_text = text
         
-    # Apply strikethrough if needed
-    import todoism.strikethrough as st
     if task.get('status', False) and st.get_strikethrough() and not is_selected:
         strikethrough_desc = ""
         for char in visible_text:
@@ -586,10 +591,10 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
         pass
 
 
-def print_task_selected_with_offset(stdscr, task, row, x_offset=0, display_id=None):
+def print_task_selected_with_offset(stdscr, task, row, x_offset=0, display_id=None, current_category_id=0):
     """Print a selected task with offset"""
     stdscr.attron(curses.color_pair(1))
-    print_task_with_offset(stdscr, task, row, True, x_offset, display_id)
+    print_task_with_offset(stdscr, task, row, True, x_offset, display_id, current_category_id)
     stdscr.attroff(curses.color_pair(1))
 
 def ensure_separator_visible(stdscr, max_height=None):

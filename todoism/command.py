@@ -262,6 +262,14 @@ def execute_command(
                         break
              
         stdscr.timeout(old_timeout)
+    elif command.startswith("tag "):
+        tag = command[4:]
+        if tag == "on":
+            pref.set_tag(True)
+            command_recognized = True
+        elif tag == "off":
+            pref.set_tag(False)
+            command_recognized = True
     elif command == "test":
         # Hidden command for developers - load test data
         try:
