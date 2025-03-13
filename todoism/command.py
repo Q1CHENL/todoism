@@ -108,8 +108,10 @@ def execute_command(
     elif command == "group":
         command_recognized = True
     elif command.startswith("color "):
-        clr.set_color_selected(command[6:])
-        command_recognized = True
+        if command[6:] in clr.color_set:
+            clr.set_color_selected(command[6:])
+            curses.init_pair(clr.selection_color_pair_num, curses.COLOR_BLACK, clr.get_color_selected_curses())
+            command_recognized = True
     elif command == "help":
         max_y, max_x = stdscr.getmaxyx()
         pr.print_msg(stdscr, msg.help_msg)
