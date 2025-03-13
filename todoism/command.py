@@ -119,7 +119,7 @@ def execute_command(
         stdscr.timeout(-1)
         while True:
             ch = stdscr.getch()
-            if ch == ord('q') or ch == 27:  # 'q' or ESC
+            if ch == ord('q') or ch == kc.ESC:  # 'q' or ESC
                 break
         stdscr.timeout(old_timeout)
         return task_list, done_list, current_task_id, current_row, start, end
@@ -235,7 +235,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == 27:  # q or ESC
+                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
                     quit = True
             
             elif preference_type == "│   Strikethrough":
@@ -249,7 +249,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == 27:  # q or ESC
+                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
                     quit = True
             
             elif preference_type == "│   Color":
