@@ -108,3 +108,31 @@ def set_tag(enabled):
             
     except FileNotFoundError:
         setup_default_settings()
+
+def get_date_format():
+    """Get date format setting"""
+    try:
+        with open(settings_path, "r") as settings_file:
+            settings = json.load(settings_file)
+            return settings.get('date_format', "Y-M-D")  # Default to Y-M-D if not found
+    except FileNotFoundError:
+        setup_default_settings()
+        return "Y-M-D"
+
+def set_date_format(format_string):
+    """Set date format setting"""
+    if format_string not in ["Y-M-D", "D-M-Y", "M-D-Y"]:
+        format_string = "Y-M-D"  # Default if invalid
+        
+    try:
+        with open(settings_path, "r") as settings_file:
+            settings = json.load(settings_file)
+        
+        settings['date_format'] = format_string
+        
+        # Write the entire file at once to avoid corruption
+        with open(settings_path, "w") as settings_file:
+            json.dump(settings, settings_file, indent=4)
+            
+    except FileNotFoundError:
+        setup_default_settings()
