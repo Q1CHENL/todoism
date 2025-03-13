@@ -113,10 +113,7 @@ def execute_command(
     elif command == "help":
         max_y, max_x = stdscr.getmaxyx()
         pr.print_msg(stdscr, msg.help_msg)
-        hint = "┤Press 'q' to close help├"
-        hint_pos_x = (max_x - 15) // 2 + 15 - len(hint) // 2
-        stdscr.addstr(max_y - 1, hint_pos_x, hint)
-        stdscr.refresh()
+        pr.print_q_to_close(stdscr, "help", max_x, max_y)
         
         old_timeout = 500
         stdscr.timeout(-1)

@@ -731,6 +731,7 @@ def print_pref_panel(stdscr, current_selection_index=0):
             stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
     
     draw_right_frame(stdscr, max_y, max_x)
+    print_q_to_close(stdscr, "preferences", max_x, max_y)
     
 def print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value):
     if pos > 0:
@@ -771,3 +772,8 @@ def clear_task_panel(stdscr, max_y):
             stdscr.clrtoeol()
         except curses.error:
             continue
+        
+def print_q_to_close(stdscr, page, max_x, max_y):
+    hint = f"┤Press 'q' to close {page}├"
+    hint_pos_x = (max_x - 15) // 2 + 15 - len(hint) // 2
+    stdscr.addstr(max_y - 1, hint_pos_x, hint)
