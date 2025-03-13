@@ -39,6 +39,7 @@ A simple and easy-to-use todo TUI
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
 │   :help - Show this help message                 │
+│   :pref - Show and customize preferences         │
 │   :del <task_id> - Delete task                   │
 │   :edit <task_id> - Edit task                    │
 │   :done <task_id> - Mark task as done            |
