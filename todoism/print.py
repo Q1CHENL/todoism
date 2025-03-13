@@ -297,9 +297,16 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     # Split the status into parts for coloring
     status_prefix = f"┤Done: {done_cnt}/{task_cnt} "
     
-    # Format current date and time
+    current_date_format = pref.get_date_format()
     current_datetime = datetime.now()
-    date_str = current_datetime.strftime("%Y-%m-%d")
+    date_str = ""
+    if current_date_format == "Y-M-D":
+        date_str = current_datetime.strftime("%Y-%m-%d")
+    elif current_date_format == "D-M-Y":
+        date_str = current_datetime.strftime("%d-%m-%Y")
+    elif current_date_format == "M-D-Y":
+        date_str = current_datetime.strftime("%m-%d-%Y")
+    
     time_str = current_datetime.strftime("%H:%M")
     datetime_str = f"{date_str} {time_str}├"
     
