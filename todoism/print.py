@@ -614,6 +614,8 @@ def print_pref_panel(stdscr, current_selection_index=0):
     strikethrough_enabled = st.get_strikethrough()
     current_color = clr.get_color_selected_str()
     current_date_format = pref.get_date_format()
+    autosort_flagged = pref.get_autosort_flagged()
+    autosort_done = pref.get_autosort_done()
     
     # Format each line with ">" for selected item
     formatted_content = []
@@ -679,6 +681,14 @@ def print_pref_panel(stdscr, current_selection_index=0):
             else:
                 # Fallback if value not found
                 stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
+        elif "Autosort flagged:" in line:
+            value = "on" if autosort_flagged else "off"
+            pos = line.find(value)
+            print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
+        elif "Autosort done:" in line:
+            value = "on" if autosort_done else "off"
+            pos = line.rfind(value) # reverse find because done contains "on" as well
+            print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
         else:
             # Print other lines without special formatting
             stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)

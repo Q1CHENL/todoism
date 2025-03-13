@@ -136,3 +136,53 @@ def set_date_format(format_string):
             
     except FileNotFoundError:
         setup_default_settings()
+
+def get_autosort_flagged():
+    """Get autosort flagged tasks setting"""
+    try:
+        with open(settings_path, "r") as settings_file:
+            settings = json.load(settings_file)
+            return settings.get('autosort_f', False)
+    except FileNotFoundError:
+        setup_default_settings()
+        return False
+
+def set_autosort_flagged(enabled):
+    """Set autosort flagged tasks setting"""
+    try:
+        with open(settings_path, "r") as settings_file:
+            settings = json.load(settings_file)
+        
+        settings['autosort_f'] = enabled
+        
+        # Write the entire file at once to avoid corruption
+        with open(settings_path, "w") as settings_file:
+            json.dump(settings, settings_file, indent=4)
+            
+    except FileNotFoundError:
+        setup_default_settings()
+    
+def get_autosort_done():
+    """Get autosort done tasks setting"""
+    try:
+        with open(settings_path, "r") as settings_file:
+            settings = json.load(settings_file)
+            return settings.get('autosort_d', False)
+    except FileNotFoundError:
+        setup_default_settings()
+        return False
+    
+def set_autosort_done(enabled):
+    """Set autosort done tasks setting"""
+    try:
+        with open(settings_path, "r") as settings_file:
+            settings = json.load(settings_file)
+        
+        settings['autosort_d'] = enabled
+        
+        # Write the entire file at once to avoid corruption
+        with open(settings_path, "w") as settings_file:
+            json.dump(settings, settings_file, indent=4)
+            
+    except FileNotFoundError:
+        setup_default_settings()

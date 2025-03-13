@@ -273,7 +273,7 @@ def execute_command(
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
-                elif ch == ord('q') or ch == kc.ESC:  # q or ESC
+                elif ch == ord('q'):
                     quit = True
             
             elif preference_type == "│   Date format":
@@ -287,6 +287,7 @@ def execute_command(
                     pref.set_date_format(date_formats[date_index])
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
+                    tsk.update_all_task_date_format(task_list, current_format)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -295,15 +296,26 @@ def execute_command(
                     quit = True
             
             # Skip implementation for autosort options but keep them navigable
-            elif preference_type.startswith("│   Autosort"):
+            elif preference_type.startswith("│   Autosort flagged"):
                 ch = stdscr.getch()
-                if ch == curses.KEY_UP:
+                if ch == kc.TAB:
+                    pref.set_autosort_flagged(not pref.get_autosort_flagged())
+                elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
                 elif ch == ord('q'):
                     quit = True
-            
+            elif preference_type.startswith("│   Autosort done"):
+                ch = stdscr.getch()
+                if ch == kc.TAB:
+                    pref.set_autosort_done(not pref.get_autosort_done())
+                elif ch == curses.KEY_UP:
+                    selection_index -= 2
+                elif ch == curses.KEY_DOWN:
+                    selection_index += 2
+                elif ch == ord('q'):
+                    quit = True
             # Handle any other preference types or empty lines
             else:
                 ch = stdscr.getch()
