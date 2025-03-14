@@ -197,9 +197,6 @@ def main(stdscr):
             
             # Force a repaint after window resize
             should_repaint = True
-            
-            # Ensure separator is visible after resize
-            pr.ensure_separator_visible(stdscr, max_y)
         
         # Check if we need to update the time (every second)
         current_time = time.time()
@@ -485,8 +482,6 @@ def main(stdscr):
                     current_cat = categories[sidebar_scroller.current_index]
                     row = sidebar_scroller.current_index - sidebar_scroller.start_index + 1
                     
-                    # Clear and redraw to show edit mode
-                    stdscr.erase()
                     pr.print_status_bar(stdscr, done_cnt, task_cnt)
                     
                     # Draw all categories
@@ -738,7 +733,6 @@ def main(stdscr):
                     
                     # Override the current task row y-position to account for sidebar
                     edit_row = current_row  # Row is correct, it's relative to visible area
-                    stdscr.erase()
                     pr.print_status_bar(stdscr, done_cnt, len(filtered_tasks))
                     
                     pr.print_sidebar(

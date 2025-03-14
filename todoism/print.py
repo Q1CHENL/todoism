@@ -76,22 +76,9 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
     
     # Draw the right frame for each line
     print_right_frame(stdscr, max_y, max_x)
-    
-    # Draw the bottom frame if there's enough space
-    if max_y > 2:
-        try:
-            stdscr.addstr(max_y - 1, x_offset - 1, "┴")
-            # Draw horizontal line only if there's space
-            remaining_width = max_x - x_offset - 1
-            if (remaining_width > 0):
-                for x in range(x_offset, max_x - 2):
-                    stdscr.addstr(max_y - 1, x, "─")
-                stdscr.addstr(max_y - 1, max_x - 2, "┘")
-                stdscr.insstr(max_y - 1, max_x - 2, "─")
-        except curses.error:
-            pass
-    
-    # Update specific areas instead of full refresh
+
+    # Use noutrefresh() instead of refresh() for better performance
+    # when multiple updates happen in sequence
     stdscr.noutrefresh()
     curses.doupdate()
 
@@ -154,9 +141,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         stdscr.move(y, 0)
         # Draw left frame
         stdscr.addstr(y, 0, "│")
-        
-        # No ID display anymore
-        
+
         text_start_pos = base_indent
         total_indent = base_indent
         date_str = ""
@@ -174,8 +159,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         # Turn off highlight before drawing frame
         if is_selected:
             stdscr.attroff(curses.color_pair(clr.selection_color_pair_num))
-        char = '┬' if y == 0 else '│'
-        stdscr.addstr(y, 15, char)
+        stdscr.addstr(y, 15, '│')
         if is_selected:
             stdscr.attron(curses.color_pair(clr.selection_color_pair_num))
         
@@ -451,6 +435,9 @@ def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_task
     else:
         print_tasks_with_offset(stdscr, tasks, current_task_id, current_category_id, start, end, 16)
     
+    # Use a single refresh at the end instead of multiple refreshes in each function
+    stdscr.noutrefresh()
+    curses.doupdate()
 
 def print_tasks_with_offset(stdscr, task_list, current_task_id, current_category_id, start, end, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
@@ -571,21 +558,6 @@ def print_task_selected_with_offset(stdscr, task, row, x_offset=0, display_id=No
     print_task_with_offset(stdscr, task, row, True, x_offset, display_id, current_category_id)
     stdscr.attroff(curses.color_pair(clr.selection_color_pair_num))
 
-def ensure_separator_visible(stdscr, max_height=None):
-    """Ensure the vertical separator is visible across the entire height"""
-
-    max_y, max_x = stdscr.getmaxyx()
-    max_height = max_y
-
-    print_sidebar_task_panel_separator(stdscr, max_y)
-    print_top_left_corner(stdscr)
-    print_left_frame(stdscr, max_y)
-    print_right_frame(stdscr, max_y, max_x)
-    
-    # Force immediate refresh for the separator
-    stdscr.noutrefresh()
-    curses.doupdate()
-
 def print_pref_panel(stdscr, current_selection_index=0):
     """
     Print the preference panel centered in the task area with ">" marker for selected preference
@@ -609,7 +581,6 @@ def print_pref_panel(stdscr, current_selection_index=0):
     clear_task_panel(stdscr, max_y)
     
     # Get current preference values for coloring
-    theme_color = clr.get_color_selected_curses()
     tag_enabled = pref.get_tag()
     strikethrough_enabled = st.get_strikethrough()
     current_color = clr.get_color_selected_str()
@@ -748,7 +719,7 @@ def print_top_frame(stdscr, max_x):
     for x in range(1, max_x):
         stdscr.addstr(0, x, '─')
 
-def print_bottom_frame(stdscr, max_x):
+def print_bottom_frame(stdscr, max_y, max_x):
     for x in range(1, max_x):
         stdscr.addstr(max_y - 1, x, '─')
 
@@ -773,3 +744,17 @@ def print_seperator_connector_top(stdscr):
 
 def print_seperator_connector_bottom(stdscr, max_y):
     stdscr.addstr(max_y - 1, 15, "┴")
+    
+def print_frame_all(stdscr):
+    max_y, max_x = stdscr.getmaxyx()
+    print_top_left_corner(stdscr)
+    print_top_frame(stdscr, max_x)
+    print_top_right_corner(stdscr, max_x)
+    print_bottom_left_corner(stdscr, max_y)
+    print_bottom_frame(stdscr, max_y, max_x)
+    print_bottom_right_corner(stdscr, max_x, max_y)
+    print_right_frame(stdscr, max_y, max_x)
+    print_left_frame(stdscr, max_y)
+    print_seperator_connector_top(stdscr)
+    print_seperator_connector_bottom(stdscr, max_y)
+    print_sidebar_task_panel_separator(stdscr, max_y)
