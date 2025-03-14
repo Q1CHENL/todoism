@@ -100,6 +100,16 @@ def main(stdscr):
     while True:
         # Get filtered tasks for current category
         filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
+        tsk.reassign_task_ids(filtered_tasks)
+        
+        current_task = filtered_tasks[current_task_id - 1]
+        if pref.get_autosort_done():
+            filtered_tasks = cmd.sort(filtered_tasks, 'status')
+            tsk.reassign_task_ids(filtered_tasks)
+        if pref.get_autosort_flagged():
+            filtered_tasks = cmd.sort(filtered_tasks, 'flagged')
+            tsk.reassign_task_ids(filtered_tasks)
+        
         task_cnt = len(filtered_tasks)
         done_cnt = tsk.done_count(filtered_tasks)
         
