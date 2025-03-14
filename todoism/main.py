@@ -229,8 +229,7 @@ def main(stdscr):
                     )
                 else:
                     # No tasks in current category
-                    pr.print_status_bar(stdscr, done_cnt, task_cnt)
-                    pr.print_sidebar(
+                    pr.print_category_entries(
                         stdscr,
                         categories,
                         current_category_id,
@@ -238,6 +237,7 @@ def main(stdscr):
                         max_capacity,
                         has_focus=False
                     )
+                    pr.print_frame_all(stdscr)
                     pr.print_msg(stdscr, msg.empty_msg, 16, highlight=True)
             else:
                 pr.print_whole_view(
@@ -410,7 +410,7 @@ def main(stdscr):
                     stdscr.addch(i, 15, '│')
                 
                 # Redraw all categories in the sidebar with updated start_index
-                pr.print_sidebar(
+                pr.print_category_entries(
                     stdscr,
                     categories,
                     current_category_id,
@@ -418,6 +418,10 @@ def main(stdscr):
                     max_capacity,
                     has_focus=True
                 )
+                
+                pr.print_left_frame(stdscr, max_y)
+                pr.print_sidebar_task_panel_separator(stdscr, max_y)
+                
                 stdscr.refresh()
 
                 # Redraw all tasks to ensure they're visible
@@ -482,7 +486,7 @@ def main(stdscr):
                     pr.print_status_bar(stdscr, done_cnt, task_cnt)
                     
                     # Draw all categories
-                    pr.print_sidebar(
+                    pr.print_category_entries(
                         stdscr,
                         categories,
                         current_category_id,
@@ -659,7 +663,7 @@ def main(stdscr):
                         start = task_cnt - (end - start - 1)
                         end = task_cnt
 
-                pr.print_sidebar(
+                pr.print_category_entries(
                     stdscr,
                     categories,
                     current_category_id,
@@ -667,6 +671,9 @@ def main(stdscr):
                     max_capacity,
                     False
                 )
+                
+                pr.print_left_frame(stdscr, max_y)
+                pr.print_sidebar_task_panel_separator(stdscr, max_y)
 
                 # Print existing tasks with offset (crucial: pass sidebar_width to offset tasks)
                 pr.print_tasks_with_offset(stdscr, filtered_tasks, 0, current_category_id, start, end, sidebar_width)
@@ -732,7 +739,7 @@ def main(stdscr):
                     edit_row = current_row  # Row is correct, it's relative to visible area
                     pr.print_status_bar(stdscr, done_cnt, len(filtered_tasks))
                     
-                    pr.print_sidebar(
+                    pr.print_category_entries(
                         stdscr,
                         categories,
                         current_category_id,

@@ -304,7 +304,7 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
     
     print_top_left_corner(stdscr)
     print_top_frame(stdscr, max_x)
-    print_seperator_connector_top(stdscr)
+    print_separator_connector_top(stdscr)
     print_top_right_corner(stdscr, max_x)
     
     # Print centered status with colored percentage and datetime
@@ -336,7 +336,7 @@ def print_all_cli(todos):
         text += todo_line + "\n"
     print(text, end="")
 
-def print_sidebar(stdscr, categories, current_category_id, start_index, max_height, has_focus):
+def print_category_entries(stdscr, categories, current_category_id, start_index, max_height, has_focus):
     """Print the category sidebar"""
     # Set sidebar width
     sidebar_width = 15
@@ -346,26 +346,13 @@ def print_sidebar(stdscr, categories, current_category_id, start_index, max_heig
     for y in range(1, max_height + 1):
         stdscr.move(y, 0)
         stdscr.clrtoeol()  # Use clrtoeol() for consistent clearing
-    
-    print_left_frame(stdscr, max_y)
-    print_bottom_left_corner(stdscr, max_y)
-    
-    for x in range(1, sidebar_width):
-        stdscr.addstr(max_y - 1, x, "─")
-    
+        
     # Print visible categories
     visible_categories = categories[start_index:start_index + max_height]
     for i, category in enumerate(visible_categories):
         row = i + 1  # Start from row 1 (row 0 is for status bar)
         is_selected = category['id'] == current_category_id
         print_category(stdscr, category, row, is_selected, has_focus)
-
-    print_seperator_connector_top(stdscr)
-    print_sidebar_task_panel_separator(stdscr, max_y)
-    print_seperator_connector_bottom(stdscr, max_y)
-    
-    for x in range(sidebar_width + 1, max_x - 2):
-        stdscr.addstr(max_y - 1, x, "─")
 
 def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     """Print a single category in the sidebar with fixed width"""
@@ -414,12 +401,27 @@ def print_whole_view(stdscr, done_cnt, task_cnt, tasks, current_task_id,
     # Reduce max_height by 1 to account for bottom frame
     max_height = max_y - 2  # -1 for status bar, -1 for bottom frame
     
+    print_frame_all(stdscr)
     # Print status bar first
     print_status_bar(stdscr, done_cnt, task_cnt)
     
-    # Print sidebar
-    print_sidebar(stdscr, categories, current_category_id, 
-                 category_start_index, max_height, sidebar_has_focus)
+    sidebar_width = 15
+    max_y, max_x = stdscr.getmaxyx()
+    
+    # Clear sidebar area
+    for y in range(1, max_height + 1):
+        stdscr.move(y, 0)
+        stdscr.clrtoeol()  # Use clrtoeol() for consistent clearing
+        
+    # Print visible categories
+    visible_categories = categories[category_start_index:category_start_index + max_height]
+    for i, category in enumerate(visible_categories):
+        row = i + 1  # Start from row 1 (row 0 is for status bar)
+        is_selected = category['id'] == current_category_id
+        print_category(stdscr, category, row, is_selected, sidebar_has_focus)
+    
+    print_left_frame(stdscr, max_y)
+    print_sidebar_task_panel_separator(stdscr, max_y)
     
     # Print tasks or empty message
     if task_cnt == 0:
@@ -465,8 +467,7 @@ def print_tasks_with_offset(stdscr, task_list, current_task_id, current_category
     # Special trick for last char error in cursor window
     stdscr.addstr(max_y - 1, max_x - 2, "┘")
     stdscr.insstr(max_y - 1, max_x - 2, "─")
-
-    
+    # print_bottom_right_corner(stdscr, max_y, max_x)    
     
 def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_id=None, current_category_id=0):
     """Print a task with horizontal offset and optional display ID override"""
@@ -713,11 +714,11 @@ def print_left_frame(stdscr, max_y):
         stdscr.addstr(y, 0, '│')
         
 def print_top_frame(stdscr, max_x):
-    for x in range(1, max_x):
+    for x in range(1, max_x - 1):
         stdscr.addstr(0, x, '─')
 
 def print_bottom_frame(stdscr, max_y, max_x):
-    for x in range(1, max_x):
+    for x in range(1, max_x - 2):
         stdscr.addstr(max_y - 1, x, '─')
 
 def print_top_right_corner(stdscr, max_x):
@@ -727,7 +728,9 @@ def print_top_left_corner(stdscr):
     stdscr.addstr(0, 0, "┌")
     
 def print_bottom_right_corner(stdscr, max_x, max_y):
-    stdscr.addstr(max_y - 1, max_x - 1, "┘")
+    # stdscr.addstr(max_y - 1, max_x - 1, "┘")
+    stdscr.addstr(max_y - 1, max_x - 2, "┘")
+    stdscr.insstr(max_y - 1, max_x - 2, "─")
 
 def print_bottom_left_corner(stdscr, max_y):
     stdscr.addstr(max_y - 1, 0, "└")
@@ -736,22 +739,26 @@ def print_sidebar_task_panel_separator(stdscr, max_y):
     for y in range(1, max_y - 1):
         stdscr.addstr(y, 15, "│")
 
-def print_seperator_connector_top(stdscr):
+def print_separator_connector_top(stdscr):
     stdscr.addstr(0, 15, "┬")
 
-def print_seperator_connector_bottom(stdscr, max_y):
+def print_separator_connector_bottom(stdscr, max_y):
     stdscr.addstr(max_y - 1, 15, "┴")
     
 def print_frame_all(stdscr):
     max_y, max_x = stdscr.getmaxyx()
     print_top_left_corner(stdscr)
-    print_top_frame(stdscr, max_x)
-    print_top_right_corner(stdscr, max_x)
     print_bottom_left_corner(stdscr, max_y)
-    print_bottom_frame(stdscr, max_y, max_x)
-    print_bottom_right_corner(stdscr, max_x, max_y)
-    print_right_frame(stdscr, max_y, max_x)
     print_left_frame(stdscr, max_y)
-    print_seperator_connector_top(stdscr)
-    print_seperator_connector_bottom(stdscr, max_y)
+    
+    print_top_right_corner(stdscr, max_x)
+    print_top_frame(stdscr, max_x)
+    
+    # print_bottom_right_corner(stdscr, max_y, max_x)
+    print_right_frame(stdscr, max_y, max_x)
+    
+    print_bottom_frame(stdscr, max_y, max_x)
+    
+    print_separator_connector_top(stdscr)
+    print_separator_connector_bottom(stdscr, max_y)
     print_sidebar_task_panel_separator(stdscr, max_y)
