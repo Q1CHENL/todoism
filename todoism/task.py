@@ -1,7 +1,7 @@
 import os
 import json
-from datetime import datetime
 import uuid
+from datetime import datetime
 import todoism.edit as ed
 import todoism.preference as pref
 
@@ -28,7 +28,7 @@ def create_new_task(task_id, task_description="", flagged=False, category_id=0):
         'uuid': str(uuid.uuid4()),
         'id': task_id,
         'description': task_description,
-        'date': datetime.now().strftime("%Y-%m-%d %H:%M"),
+        'date': formatted_datetime_now(),
         'status': False,
         'flagged': flagged,
         'category_id': category_id

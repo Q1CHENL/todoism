@@ -1,6 +1,6 @@
+import os
 import json
 import uuid
-import os
 import shutil
 from datetime import datetime
 import todoism.preference as pref

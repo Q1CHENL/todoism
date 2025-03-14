@@ -11,7 +11,6 @@ import todoism.navigate as nv
 import todoism.message as msg
 import todoism.keycode as kc
 import todoism.color as clr
-from datetime import datetime
 
 def main(stdscr):
     stdscr.keypad(True)  # enable e.g arrow keys

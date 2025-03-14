@@ -1,4 +1,5 @@
 import curses
+from datetime import datetime
 import todoism.strikethrough as st
 import todoism.message as msg
 import todoism.color as clr
@@ -6,7 +7,6 @@ import todoism.category as cat
 import todoism.preference as pref
 import todoism.command as cmd
 import todoism.task as tsk
-from datetime import datetime
 
 add_mode  = 0
 edit_mode = 1
