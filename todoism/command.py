@@ -146,7 +146,7 @@ def execute_command(
             categories = cat.load_categories()
             done_cnt = tsk.done_count(task_list)            
             current_category_id = 0
-            pr.print_main_view_with_sidebar(
+            pr.print_whole_view(
                 stdscr,
                 done_cnt,
                 len(task_list),
@@ -188,7 +188,7 @@ def execute_command(
         categories = cat.load_categories()
         done_cnt = tsk.done_count(task_list)
         current_category_id = 0
-        pr.print_main_view_with_sidebar(
+        pr.print_whole_view(
             stdscr,
             done_cnt,
             len(task_list),

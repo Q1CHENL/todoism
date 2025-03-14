@@ -206,9 +206,6 @@ def main(stdscr):
             last_time_update = current_time
             
         if should_repaint:
-            stdscr.erase()
-            color_selected = clr.get_color_selected_curses()
-            # curses.init_pair(1, curses.COLOR_BLACK, clr.get_color_selected_curses())
             tsk.reassign_task_ids(filtered_tasks)
             if focus_manager.is_tasks_focused():
                 if task_cnt > 0:
@@ -217,7 +214,7 @@ def main(stdscr):
                         current_row = min(current_row, max_capacity)
                     
                     # Render the main view with sidebar
-                    pr.print_main_view_with_sidebar(
+                    pr.print_whole_view(
                         stdscr,
                         done_cnt,
                         task_cnt,
@@ -243,7 +240,7 @@ def main(stdscr):
                     )
                     pr.print_msg(stdscr, msg.empty_msg, 16, highlight=True)
             else:
-                pr.print_main_view_with_sidebar(
+                pr.print_whole_view(
                     stdscr,
                     done_cnt,
                     task_cnt,

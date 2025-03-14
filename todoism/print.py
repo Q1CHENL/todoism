@@ -376,9 +376,6 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
         stdscr.attron(curses.color_pair(clr.get_current_color_pair_number()))
         stdscr.attron(curses.A_BOLD)
     
-    # Import the max category name length
-    import todoism.category as cat
-    
     # Calculate available width for category name
     sidebar_width = 15
     name_width = sidebar_width - 2  # 2 spaces for indentation (1 for left border + 1 for spacing)
@@ -408,7 +405,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
         stdscr.attroff(curses.color_pair(clr.selection_color_pair_num))
         stdscr.attroff(curses.A_BOLD)
 
-def print_main_view_with_sidebar(stdscr, done_cnt, task_cnt, tasks, current_task_id, 
+def print_whole_view(stdscr, done_cnt, task_cnt, tasks, current_task_id, 
                                start, end, categories, current_category_id, 
                                category_start_index, sidebar_has_focus):
     """Print the complete UI with sidebar and task list"""
