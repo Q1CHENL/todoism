@@ -607,10 +607,16 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             at_end_of_text = cursor_pos_in_text == len(task['description'])
             
             # Recalculate screen boundaries with exactly 1 space gap
-            date_length = len(task['date'])
-            date_pos = right_frame_pos - date_length - 1  # Position where date starts (with 1 char gap)
-            max_visible_width = date_pos - (text_start_pos)  # Total spaces available for text
-            right_limit = date_pos - 1  # Position of the 1 char gap
+            if not is_sidebar:
+                date_length = len(task['date'])
+                date_pos = right_frame_pos - date_length - 1  # Position where date starts (with 1 char gap)
+                max_visible_width = date_pos - (text_start_pos)  # Total spaces available for text
+                right_limit = date_pos - 1  # Position of the 1 char gap
+            else:
+                date_length = 0
+                date_pos = 15
+                max_visible_width = date_pos - base_indent
+                 
             
             if at_end_of_text:
                 # When we're at the end of text and need to scroll:

@@ -39,9 +39,7 @@ def create_category(name, color="blue"):
         
     new_category = {
         'id': new_id,
-        'name': name,
-        'color': color,
-        'date': datetime.now().strftime("%Y-%m-%d %H:%M")
+        'name': name
     }
     
     return new_category
