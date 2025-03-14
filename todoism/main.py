@@ -726,7 +726,6 @@ def main(stdscr):
                     curses.noecho()
                     continue
                     
-                pr.print_task_entries(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, sidebar_width)
                 stdscr.refresh()
                 curses.curs_set(0)
                 curses.noecho()

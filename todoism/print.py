@@ -440,7 +440,7 @@ def print_whole_view(stdscr, done_cnt, task_cnt, filtered_tasks, current_task_id
     stdscr.noutrefresh()
     curses.doupdate()
 
-def print_task_entries(stdscr, task_list, current_task_id, current_category_id, start, end, x_offset=0):
+def print_task_entries(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
     max_y, max_x = stdscr.getmaxyx()
     
@@ -450,8 +450,8 @@ def print_task_entries(stdscr, task_list, current_task_id, current_category_id, 
         stdscr.clrtoeol()
 
     # Only print if we have tasks and a valid start index
-    if task_list and start > 0:
-        for i, task in enumerate(task_list[start - 1:end]):
+    if filtered_tasks and start > 0:
+        for i, task in enumerate(filtered_tasks[start - 1:end]):
             row = i + 1  # +1 due to status bar
             display_id = i + start  # Sequential display ID (1, 2, 3, etc.)
             
@@ -463,7 +463,7 @@ def print_task_entries(stdscr, task_list, current_task_id, current_category_id, 
                 print_task_entry(stdscr, task, row, False, x_offset, display_id, current_category_id)
     
     max_y, max_x = stdscr.getmaxyx()
-    for y in range(len(task_list) if len(task_list) > 0 else 1, max_y - 1):
+    for y in range(len(filtered_tasks) if len(filtered_tasks) > 0 else 1, max_y - 1):
         stdscr.addstr(y, max_x - 1, "│")
     
     # Reset all attributes before drawing bottom right corner
