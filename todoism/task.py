@@ -34,6 +34,15 @@ def create_new_task(task_id, task_description="", flagged=False, category_id=0):
         'category_id': category_id
     }
 
+def formatted_datetime_now():
+    current_format = pref.get_date_format()
+    if current_format == "Y-M-D":
+        return datetime.now().strftime("%Y-%m-%d %H:%M")
+    elif current_format == "D-M-Y":
+        return datetime.now().strftime("%d-%m-%Y %H:%M")
+    else:  # "M-D-Y"
+        return datetime.now().strftime("%m-%d-%Y %H:%M")
+
 def update_task_date_format(task, old_format):
     """Update task date format to match settings"""
     current_datetime = task["date"]
