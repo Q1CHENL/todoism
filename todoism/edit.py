@@ -160,23 +160,19 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         date_pos = right_frame_pos - date_length - 1  # Only 1 char gap from right frame
         max_visible_width = date_pos - text_start_pos - 1
     
-    original_text = task['description']
     y = stdscr.getyx()[0]
     
     # Initial render with proper offset
     target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text, is_sidebar)
     stdscr.move(y, target_x)
     stdscr.refresh()
-    
-    lock_scrolling = True 
-    stabilize_count = 3
-    
+        
     while True:
         # Get current position
         y, x = stdscr.getyx()
         max_y, max_x = stdscr.getmaxyx()
         
-        # CRITICAL FIX: Ensure cursor never appears beyond sidebar for sidebar editing
+        # Ensure cursor never appears beyond sidebar for sidebar editing
         if is_sidebar and x > 14:
             # Force cursor back into valid sidebar region if it somehow gets displaced
             x = min(14, text_start_pos + len(task['description']))
@@ -219,7 +215,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             stdscr.move(y, 16)  # Position just after separator
             stdscr.clrtoeol()
             
-            # Redraw vertical separator (critical fix)
+            # Redraw vertical separator
             stdscr.addstr(y, 15, '│')
             
             # Redraw task ID
@@ -227,7 +223,6 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             # Task symbol area needs redrawing too
             if 'status' in task or 'flagged' in task:
-                import todoism.print as pr
                 pr.print_task_symbols(
                     stdscr, 
                     task, 
@@ -264,7 +259,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         
         # Redraw the separator
         if is_sidebar:
-            stdscr.addstr(y, 15, "│")
+            stdscr.addstr(y, 15, '│')
         
         # Position cursor
         stdscr.move(y, target_x)
@@ -291,13 +286,6 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             stdscr.attroff(curses.color_pair(4))
             # Restore cursor position
             stdscr.move(current_y, current_x)
-        
-        # Only decrement stabilize_count on actual keystrokes (not for -1 or timeout)
-        if ch != -1 and stabilize_count > 0:
-            stabilize_count -= 1
-            # Only unlock scrolling after stabilize period
-            if stabilize_count == 0:
-                lock_scrolling = False
                 
         # Handle key presses
         if ch == 4:  # Toggle debug mode with Ctrl+D
@@ -513,7 +501,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
                 stdscr.move(y, text_start_pos)
                 continue
             
-            # CRITICAL FIX: Save the text length before deletion
+            # Save the text length before deletion
             old_length = len(task['description'])
             
             # Verify cursor position is valid before deletion
@@ -594,9 +582,6 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             # Keep track of whether we're at the end of text before insertion
             at_end_of_text = cursor_pos_in_text == len(task['description'])
-            
-            # Record length before insertion to detect pastes
-            original_length = len(task['description'])
             
             # Insert character at the correct position
             task['description'] = task['description'][:cursor_pos_in_text] + chr(ch) + task['description'][cursor_pos_in_text:]
@@ -760,7 +745,7 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     date_pos = max_x - date_length - 1  # -1 for exactly one character gap before date
     available_width = date_pos - (indent + 16) - 1  # -1 ensures the gap is preserved
     
-    # NEW BEHAVIOR: Always initialize with scroll_offset = 0 to show beginning of text
+    # Always initialize with scroll_offset = 0 to show beginning of text
     scroll_offset = 0
     
     # Position cursor differently based on text length:
@@ -776,9 +761,6 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     
     # Calculate cursor position in text
     cursor_pos_in_text = cursor_x - (indent + 16) + scroll_offset
-    
-    # Render once with fixed parameters before entering edit mode
-    render_edit_line(stdscr, task_list[id - 1], y, scroll_offset, available_width, cursor_pos_in_text)
     
     # Set cursor at the calculated position
     stdscr.move(y, cursor_x)

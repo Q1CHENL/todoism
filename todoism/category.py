@@ -15,9 +15,7 @@ def load_categories():
         category_list = [
             {
                 'id': 0,
-                'name': 'All Tasks',
-                'color': 'blue',
-                'date': datetime.now().strftime("%Y-%m-%d %H:%M")
+                'name': 'All Tasks'
             }
         ]
         save_categories(category_list)

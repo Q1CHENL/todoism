@@ -432,13 +432,13 @@ def print_whole_view(stdscr, done_cnt, task_cnt, tasks, current_task_id,
         # Print empty message with highlighting when task area has focus
         print_msg(stdscr, msg.empty_msg, 16, highlight=(not sidebar_has_focus))
     else:
-        print_tasks_with_offset(stdscr, tasks, current_task_id, current_category_id, start, end, 16)
+        print_task_entries(stdscr, tasks, current_task_id, current_category_id, start, end, 16)
     
     # Use a single refresh at the end instead of multiple refreshes in each function
     stdscr.noutrefresh()
     curses.doupdate()
 
-def print_tasks_with_offset(stdscr, task_list, current_task_id, current_category_id, start, end, x_offset=0):
+def print_task_entries(stdscr, task_list, current_task_id, current_category_id, start, end, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
     max_y, max_x = stdscr.getmaxyx()
     
@@ -455,21 +455,25 @@ def print_tasks_with_offset(stdscr, task_list, current_task_id, current_category
             
             if i + start == current_task_id:
                 # Selected task
-                print_task_selected_with_offset(stdscr, task, row, x_offset, display_id, current_category_id)
+                print_task_entry_selected(stdscr, task, row, x_offset, display_id, current_category_id)
             else:
                 # Normal task
-                print_task_with_offset(stdscr, task, row, False, x_offset, display_id, current_category_id)
+                print_task_entry(stdscr, task, row, False, x_offset, display_id, current_category_id)
     
     max_y, max_x = stdscr.getmaxyx()
     for y in range(len(task_list) if len(task_list) > 0 else 1, max_y - 1):
         stdscr.addstr(y, max_x - 1, "│")
-    # https://stackoverflow.com/questions/7063128/last-character-of-a-window-in-python-curses
+    
+    # Reset all attributes before drawing bottom right corner
+    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.A_REVERSE | curses.A_BLINK | 
+                  curses.A_UNDERLINE | curses.color_pair(clr.selection_color_pair_num))
+    
     # Special trick for last char error in cursor window
     stdscr.addstr(max_y - 1, max_x - 2, "┘")
     stdscr.insstr(max_y - 1, max_x - 2, "─")
     # print_bottom_right_corner(stdscr, max_y, max_x)    
     
-def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_id=None, current_category_id=0):
+def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None, current_category_id=0):
     """Print a task with horizontal offset and optional display ID override"""
     # Calculate available width for text
     max_y, max_x = stdscr.getmaxyx()
@@ -550,10 +554,10 @@ def print_task_with_offset(stdscr, task, row, is_selected, x_offset=0, display_i
         pass
 
 
-def print_task_selected_with_offset(stdscr, task, row, x_offset=0, display_id=None, current_category_id=0):
+def print_task_entry_selected(stdscr, task, row, x_offset=0, display_id=None, current_category_id=0):
     """Print a selected task with offset"""
     stdscr.attron(curses.color_pair(clr.selection_color_pair_num))
-    print_task_with_offset(stdscr, task, row, True, x_offset, display_id, current_category_id)
+    print_task_entry(stdscr, task, row, True, x_offset, display_id, current_category_id)
     stdscr.attroff(curses.color_pair(clr.selection_color_pair_num))
 
 def print_pref_panel(stdscr, current_selection_index=0):
@@ -717,7 +721,7 @@ def print_top_frame(stdscr, max_x):
     for x in range(1, max_x - 1):
         stdscr.addstr(0, x, '─')
 
-def print_bottom_frame(stdscr, max_y, max_x):
+def print_bottom_frame(stdscr, max_y, max_x):    
     for x in range(1, max_x - 2):
         stdscr.addstr(max_y - 1, x, '─')
 
@@ -733,6 +737,7 @@ def print_bottom_right_corner(stdscr, max_x, max_y):
     stdscr.insstr(max_y - 1, max_x - 2, "─")
 
 def print_bottom_left_corner(stdscr, max_y):
+    # Reset attributes before drawing corner to prevent highlighting
     stdscr.addstr(max_y - 1, 0, "└")
     
 def print_sidebar_task_panel_separator(stdscr, max_y):
@@ -747,6 +752,8 @@ def print_separator_connector_bottom(stdscr, max_y):
     
 def print_frame_all(stdscr):
     max_y, max_x = stdscr.getmaxyx()
+    # Reset all attributes before drawing any frame elements to prevent inheritance
+    turnoff_attributes(stdscr)
     print_top_left_corner(stdscr)
     print_bottom_left_corner(stdscr, max_y)
     print_left_frame(stdscr, max_y)
@@ -762,3 +769,7 @@ def print_frame_all(stdscr):
     print_separator_connector_top(stdscr)
     print_separator_connector_bottom(stdscr, max_y)
     print_sidebar_task_panel_separator(stdscr, max_y)
+    
+def turnoff_attributes(stdscr):
+    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.A_REVERSE | curses.A_BLINK | 
+                  curses.A_UNDERLINE | curses.color_pair(clr.selection_color_pair_num))

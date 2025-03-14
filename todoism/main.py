@@ -396,9 +396,7 @@ def main(stdscr):
                 # Create a temporary category for editing
                 temp_category = {
                     'id': new_cat_id, 
-                    'name': '',
-                    'color': 'blue',
-                    'date': datetime.now().strftime("%Y-%m-%d %H:%M")
+                    'name': ''
                 }
                 
                 for i in range(0, max_capacity + 1):
@@ -426,7 +424,7 @@ def main(stdscr):
 
                 # Redraw all tasks to ensure they're visible
                 if task_cnt > 0:
-                    pr.print_tasks_with_offset(stdscr, filtered_tasks, 0, current_category_id, start, end, sidebar_width)
+                    pr.print_task_entries(stdscr, filtered_tasks, 0, current_category_id, start, end, sidebar_width)
                 else:
                     pr.print_msg(stdscr, msg.empty_msg, sidebar_width)
                 
@@ -495,8 +493,10 @@ def main(stdscr):
                         True
                     )
                     
+                    pr.print_left_frame(stdscr, max_y)
+                    pr.print_sidebar_task_panel_separator(stdscr, max_y)
                     # Draw tasks area
-                    pr.print_tasks_with_offset(stdscr, filtered_tasks, 0, current_category_id, start, end, sidebar_width)
+                    pr.print_task_entries(stdscr, filtered_tasks, 0, current_category_id, start, end, sidebar_width)
                     
                     stdscr.attron(curses.color_pair(clr.get_current_color_pair_number()))
                     stdscr.move(row, 0)
@@ -525,7 +525,7 @@ def main(stdscr):
                             new_name = new_name[:cat.MAX_CATEGORY_NAME_LENGTH]
                         cat.update_category_name(current_category_id, new_name)
                         categories = cat.load_categories()
-                    pr.print_tasks_with_offset(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, sidebar_width)
+                    pr.print_task_entries(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, sidebar_width)
                     
                     curses.curs_set(0)
                     curses.noecho()
@@ -676,7 +676,7 @@ def main(stdscr):
                 pr.print_sidebar_task_panel_separator(stdscr, max_y)
 
                 # Print existing tasks with offset (crucial: pass sidebar_width to offset tasks)
-                pr.print_tasks_with_offset(stdscr, filtered_tasks, 0, current_category_id, start, end, sidebar_width)
+                pr.print_task_entries(stdscr, filtered_tasks, 0, current_category_id, start, end, sidebar_width)
 
                 # Add a new task with proper indentation
                 new_task_num = f"{task_cnt + 1:2d}"
@@ -715,7 +715,7 @@ def main(stdscr):
                     curses.noecho()
                     continue
                     
-                pr.print_tasks_with_offset(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, sidebar_width)
+                pr.print_task_entries(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, sidebar_width)
                 stdscr.refresh()
                 curses.curs_set(0)
                 curses.noecho()
@@ -747,8 +747,9 @@ def main(stdscr):
                         max_capacity,
                         False
                     )
-                    
-                    pr.print_tasks_with_offset(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, sidebar_width)
+                    pr.print_left_frame(stdscr, max_y)
+                    pr.print_sidebar_task_panel_separator(stdscr, max_y)
+                    pr.print_task_entries(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, sidebar_width)
                     
                     # Move cursor to edit position
                     stdscr.move(edit_row, sidebar_width + ed.indent)
