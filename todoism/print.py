@@ -394,7 +394,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
         stdscr.attroff(curses.color_pair(clr.selection_color_pair_num))
         stdscr.attroff(curses.A_BOLD)
 
-def print_whole_view(stdscr, done_cnt, task_cnt, tasks, current_task_id, 
+def print_whole_view(stdscr, done_cnt, task_cnt, filtered_tasks, current_task_id, 
                                start, end, categories, current_category_id, 
                                category_start_index, sidebar_has_focus):
     """Print the complete UI with sidebar and task list"""
@@ -434,7 +434,7 @@ def print_whole_view(stdscr, done_cnt, task_cnt, tasks, current_task_id,
         # Print empty message with highlighting when task area has focus
         print_msg(stdscr, msg.empty_msg, 16, highlight=(not sidebar_has_focus))
     else:
-        print_task_entries(stdscr, tasks, current_task_id, current_category_id, start, end, 16)
+        print_task_entries(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, 16)
     
     # Use a single refresh at the end instead of multiple refreshes in each function
     stdscr.noutrefresh()
@@ -448,15 +448,7 @@ def print_task_entries(stdscr, task_list, current_task_id, current_category_id, 
     for y in range(1, min(end - start + 2, max_y)):
         stdscr.move(y, x_offset)
         stdscr.clrtoeol()
-    
-    if pref.get_autosort_done():
-        task_list = cmd.sort(task_list, 'status')
-        tsk.reassign_task_ids(task_list)
-    
-    if pref.get_autosort_flagged():
-        task_list = cmd.sort(task_list, 'flagged')
-        tsk.reassign_task_ids(task_list)
-    
+
     # Only print if we have tasks and a valid start index
     if task_list and start > 0:
         for i, task in enumerate(task_list[start - 1:end]):

@@ -341,8 +341,9 @@ def main(stdscr):
             except curses.error:
                 # getmouse() can raise an exception if the terminal doesn't support mouse
                 pass
-            
-        elif focus_manager.is_sidebar_focused():
+            continue
+        
+        if focus_manager.is_sidebar_focused():
             if key == curses.KEY_UP:
                 task_scroll_offset = 0
                 sidebar_scroller.scroll_up()
@@ -775,9 +776,6 @@ def main(stdscr):
                         task_uuid = filtered_tasks[task_idx]['uuid']
                         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
                         filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
-                        task_cnt = len(filtered_tasks)
-                        
-                        tsk.reassign_task_ids(task_list)
                         task_cnt = len(filtered_tasks)
                         
                         # Adjust selection after deletion
