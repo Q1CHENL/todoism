@@ -1,8 +1,5 @@
 import os
 import json
-import curses
-import random
-import todoism.task as tsk
 
 home_dir = os.path.expanduser("~")
 config_dir = os.path.join(home_dir, ".todoism")

@@ -130,19 +130,18 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         base_indent = 2
         text_start_pos = base_indent
         import todoism.category as cat
-        MAX_LENGTH = cat.MAX_CATEGORY_NAME_LENGTH
+        MAX_DESCRIPTION_LENGTH = cat.MAX_CATEGORY_NAME_LENGTH
     else:
         sidebar_width = 16
         base_indent = 7
         text_start_pos = sidebar_width + base_indent
-        MAX_LENGTH = 500
+        MAX_DESCRIPTION_LENGTH = tsk.MAX_TASK_DESCRIPTION_LENGTH
     
     # Selection state variables
     selection_active = False
     selection_start = -1
     debug_keys = False
     scroll_offset = initial_scroll
-    MAX_DESCRIPTION_LENGTH = 500
     
     # Initialize cursor position
     if initial_cursor_pos is not None:
@@ -220,18 +219,6 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             
             # Redraw task ID
             stdscr.addstr(y, sidebar_width, f"{task['id']:2d} ")
-            
-            # Task symbol area needs redrawing too
-            if 'status' in task or 'flagged' in task:
-                pr.print_task_symbols(
-                    stdscr, 
-                    task, 
-                    y, 
-                    sidebar_width + 3, 
-                    sidebar_width + 5, 
-                    True, 
-                    True
-                )
         
         # Recalculate with current screen dimensions
         if is_sidebar:
@@ -537,12 +524,12 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         elif 32 <= ch < 127:  # Printable char
             # IMPROVED CHECK: For sidebar (categories), enforce strict character limit 
             # to prevent visual glitches when the limit is reached
-            if is_sidebar and len(task['description']) >= MAX_LENGTH:
+            if is_sidebar and len(task['description']) >= MAX_DESCRIPTION_LENGTH:
                 # Skip character completely - no visual feedback
                 continue
                 
             # Check maximum length for regular tasks
-            if len(task['description']) >= MAX_LENGTH and not selection_active:
+            if len(task['description']) >= MAX_DESCRIPTION_LENGTH and not selection_active:
                 continue
                 
             # If a selection is active, replace it with the typed character

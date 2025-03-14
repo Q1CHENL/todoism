@@ -2,9 +2,10 @@ import os
 import json
 from datetime import datetime
 import uuid
-
 import todoism.edit as ed
 import todoism.preference as pref
+
+MAX_TASK_DESCRIPTION_LENGTH = 256
 
 def done_count(task_list):
     count = 0
