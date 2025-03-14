@@ -102,7 +102,6 @@ def main(stdscr):
         filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
         tsk.reassign_task_ids(filtered_tasks)
         
-        current_task = filtered_tasks[current_task_id - 1]
         if pref.get_autosort_done():
             filtered_tasks = cmd.sort(filtered_tasks, 'status')
             tsk.reassign_task_ids(filtered_tasks)
@@ -433,12 +432,6 @@ def main(stdscr):
                 
                 stdscr.refresh()
 
-                # Redraw all tasks to ensure they're visible
-                if task_cnt > 0:
-                    pr.print_task_entries(stdscr, filtered_tasks, 0, current_category_id, start, end, sidebar_width)
-                else:
-                    pr.print_msg(stdscr, msg.empty_msg, sidebar_width)
-                
                 # Print new category placeholder
                 stdscr.addstr(new_cat_row, 0, f"{new_cat_id:2d} ")
                 
@@ -787,7 +780,6 @@ def main(stdscr):
                             for i in range(1, max_capacity + 1):
                                 stdscr.move(i, sidebar_width)
                                 stdscr.clrtoeol()
-                            pr.print_msg(stdscr, msg.empty_msg)
                         else:
                             # Keep the same visual position if possible
                             if current_task_id > task_cnt:
