@@ -447,6 +447,14 @@ def print_task_entries(stdscr, task_list, current_task_id, current_category_id, 
         stdscr.move(y, x_offset)
         stdscr.clrtoeol()
     
+    if pref.get_autosort_done():
+        task_list = cmd.sort(task_list, 'status')
+        tsk.reassign_task_ids(task_list)
+    
+    if pref.get_autosort_flagged():
+        task_list = cmd.sort(task_list, 'flagged')
+        tsk.reassign_task_ids(task_list)
+    
     # Only print if we have tasks and a valid start index
     if task_list and start > 0:
         for i, task in enumerate(task_list[start - 1:end]):
