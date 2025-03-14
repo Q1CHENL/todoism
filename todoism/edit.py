@@ -483,48 +483,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
                 new_x = min(new_x, right_limit)
             
             stdscr.move(y, new_x)
-            
-        # Try multiple common key code patterns for Ctrl+Shift+Backspace or Ctrl+W
-        elif ch in [523, 527, 23, 127]:
-            if cursor_pos_in_text <= 0:
-                continue
-                
-            # Find the start of the previous word
-            new_pos = move_by_word(task['description'], cursor_pos_in_text, -1)
-            
-            # Delete characters from new position to current position
-            task['description'] = task['description'][:new_pos] + task['description'][cursor_pos_in_text:]
-            
-            # Adjust scroll if needed
-            if new_pos < scroll_offset + 5:
-                scroll_offset = max(0, new_pos - 5)
-            
-            # Calculate new safe screen position
-            new_x = text_start_pos + (new_pos - scroll_offset)
-            if new_x >= max_x - 23:
-                new_x = max_x - 23
-            
-            # Clear selection state
-            selection_active = False
-            selection_start = -1
-            
-            stdscr.move(y, new_x)
-            
-        # Try multiple common key code patterns for Ctrl+Shift+Delete or Ctrl+Alt+D
-        elif ch in [524, 528, 127, 4]:
-            if cursor_pos_in_text >= len(task['description']):
-                continue
-                
-            # Find the end of the next word
-            new_pos = move_by_word(task['description'], cursor_pos_in_text, 1)
-            
-            # Delete characters from current position to new position
-            task['description'] = task['description'][:cursor_pos_in_text] + task['description'][new_pos:]
-            
-            # Clear selection state
-            selection_active = False
-            selection_start = -1
-            
+        
         elif ch == curses.KEY_BACKSPACE or ch == kc.BACKSPACE:  # Backspace
             # Clear selection if active
             if selection_active:
