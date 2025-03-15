@@ -391,11 +391,7 @@ def restore_data():
         # Remove test mode flag
         if os.path.exists(test_mode_flag_path):
             os.remove(test_mode_flag_path)
-            
-        # Clean up test file if it exists
-        if os.path.exists(pref.test_file_path):
-            os.remove(pref.test_file_path)
-            
+        
         return success
     except Exception as e:
         print(f"Error restoring data: {e}")
@@ -412,16 +408,12 @@ def load_test_mode():
     
     import todoism.category as cat
     
-    # Clear any existing categories first to ensure isolation
-    # Use the exact replacement approach - write only our test categories
-    with open(pref.categories_file_path, 'w') as file:
+    # Save test categories
+    with open(pref.test_categories_file_path, 'w') as file:
         json.dump(test_categories, file, indent=4)
     
-    # Save tasks in both locations
-    with open(pref.test_file_path, 'w') as file:
-        json.dump(test_tasks, file, indent=4)
-    
-    with open(pref.tasks_file_path, 'w') as file:
+    # Save test tasks - only write to the test file path
+    with open(pref.test_tasks_file_path, 'w') as file:
         json.dump(test_tasks, file, indent=4)
     
     return True

@@ -768,6 +768,6 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
         id, row, start, end = nv.post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
     
     # Save changes
-    tsk.save_tasks(task_list, pref.tasks_file_path)
+    tsk.save_tasks(task_list)
     return id, row, start, end
 

@@ -1,8 +1,6 @@
-import os
 import json
 import uuid
 from datetime import datetime
-import todoism.edit as ed
 import todoism.preference as pref
 
 MAX_TASK_DESCRIPTION_LENGTH = 256
@@ -13,14 +11,24 @@ def done_count(task_list):
         if t['status'] is True:
             count = count + 1
     return count        
-            
-def load_tasks(arg=''):
+
+def get_tasks_file_path():
+    """Get the correct tasks file path based on whether test mode is active"""
     try:
-        with open(pref.test_file_path if arg == '-t' else pref.tasks_file_path, 'r') as file:
-            task_list = json.load(file)
-    except FileNotFoundError:
-        task_list = []
-    return task_list
+        import test.test as test
+        if test.is_test_mode_active():
+            return pref.test_tasks_file_path
+        return pref.tasks_file_path
+    except ImportError:
+        return pref.tasks_file_path
+
+def load_tasks():
+    """Load tasks from file"""
+    try:
+        with open(get_tasks_file_path(), "r") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
 
 def create_new_task(task_id, task_description="", flagged=False, category_id=0):
     """Create a new task with UUID and optional category assignment"""
@@ -70,10 +78,16 @@ def update_task_date_format(task, old_format):
 def update_all_task_date_format(task_list, old_format):
     for task in task_list:
         update_task_date_format(task, old_format)
-    save_tasks(task_list, pref.tasks_file_path)
+    save_tasks(task_list)  # Use save_tasks without explicit path
 
-def save_tasks(task_list, path):
-    with open(path, 'w') as file:
+def save_tasks(task_list, custom_path=None):
+    """Save tasks to file"""
+    if custom_path:
+        file_path = custom_path
+    else:
+        file_path = get_tasks_file_path()
+    
+    with open(file_path, "w") as file:
         json.dump(task_list, file, indent=4)
 
 def add_new_task_cli(task_description, flagged=False):
@@ -81,7 +95,7 @@ def add_new_task_cli(task_description, flagged=False):
     task_id = len(task_list) + 1
     new_task = create_new_task(task_id, task_description, flagged)
     task_list.append(new_task)
-    save_tasks(task_list, pref.tasks_file_path)
+    save_tasks(task_list)  # Use save_tasks without explicit path
     return task_id
 
 def remove_task_cli(task_id):
@@ -95,7 +109,7 @@ def remove_task_cli(task_id):
             # Fallback for legacy tasks
             del task_list[task_id - 1]
             reassign_task_ids(task_list)
-            save_tasks(task_list, pref.tasks_file_path)
+            save_tasks(task_list)  # Use save_tasks without explicit path
         return True
     return False
 
@@ -103,7 +117,7 @@ def add_new_task(task_list, task_id, task_description, flagged=False, category_i
     """Create, append and save a new task with category support"""
     new_task = create_new_task(task_id, task_description, flagged, category_id)
     task_list.append(new_task)
-    save_tasks(task_list, pref.tasks_file_path)
+    save_tasks(task_list)  # Use save_tasks without explicit path
     return task_list
 
 def get_tasks_by_category(task_list, category_id):
@@ -133,7 +147,7 @@ def update_existing_tasks():
             modified = True
     
     if modified:
-        save_tasks(task_list, pref.tasks_file_path)
+        save_tasks(task_list)  # Use save_tasks without explicit path
     
     return task_list
 
@@ -146,7 +160,7 @@ def delete_task_by_uuid(task_list, task_uuid):
     """Delete task by UUID and return updated list"""
     task_list = [task for task in task_list if task.get('uuid') != task_uuid]
     reassign_task_ids(task_list)
-    save_tasks(task_list, pref.tasks_file_path)
+    save_tasks(task_list)  # Use save_tasks without explicit path
     return task_list
 
 def done_task_by_uuid(task_list, task_uuid):
@@ -154,7 +168,7 @@ def done_task_by_uuid(task_list, task_uuid):
     for task in task_list:
         if task.get('uuid') == task_uuid:
             task['status'] = True
-            save_tasks(task_list, pref.tasks_file_path)
+            save_tasks(task_list)  # Use save_tasks without explicit path
             return task_list
     return task_list
 
@@ -163,6 +177,6 @@ def flag_task_by_uuid(task_list, task_uuid):
     for task in task_list:
         if task.get('uuid') == task_uuid:
             task['flagged'] = not task.get('flagged', False)
-            save_tasks(task_list, pref.tasks_file_path)
+            save_tasks(task_list)  # Use save_tasks without explicit path
             return task_list
     return task_list

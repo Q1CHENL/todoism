@@ -79,7 +79,8 @@ def execute_command(
         original_cnt = len(task_list)
         displayed_task_cnt = end - start + 1
         task_list, done_list = purge(task_list, purged_list)
-        tsk.save_tasks(task_list, pref.tasks_file_path)
+        # Use save_tasks without explicit path to respect test mode
+        tsk.save_tasks(task_list)
         # change current id to 1 if some tasks were purged
         if len(task_list) < original_cnt:
             # temporary solution: back to top
@@ -93,7 +94,8 @@ def execute_command(
         command_recognized = True
     elif command == "purge all":
         task_list = []
-        tsk.save_tasks(task_list, pref.tasks_file_path)
+        # Use save_tasks without explicit path to respect test mode
+        tsk.save_tasks(task_list)
         command_recognized = True
     elif command.startswith("sort "):
         category = command[5:]
@@ -306,7 +308,6 @@ def execute_command(
         # Hidden command for developers - load test data
         try:
             import test.test as test_module
-            import todoism.category as cat
             
             if test_module.is_test_mode_active():
                 max_y, max_x = stdscr.getmaxyx()
@@ -355,7 +356,7 @@ def execute_command(
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
             sidebar_width = 16
-            warning_msg = "Test mode not available in installation"
+            warning_msg = "Test mode not available in installation."
             stdscr.move(max_capacity, sidebar_width)
             stdscr.clrtoeol()
             yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
@@ -372,7 +373,6 @@ def execute_command(
         # Hidden command for developers - restore real data
         try:
             import test.test as test_module
-            import todoism.category as cat
             
             if not test_module.is_test_mode_active():
                 max_y, max_x = stdscr.getmaxyx()
@@ -390,6 +390,7 @@ def execute_command(
                 stdscr.clrtoeol()
             else:
                 if test_module.exit_test_mode():
+                    # After disabling test mode, load tasks from regular file
                     task_list = tsk.load_tasks()
                     categories = cat.load_categories()
                     current_category_id = 0
@@ -503,7 +504,7 @@ def execute_category_command(
                     
                     # Reload categories
                     categories = cat.load_categories()
-                    tsk.save_tasks(task_list, pref.tasks_file_path)
+                    tsk.save_tasks(task_list)
     elif command.startswith("cedit "):
         # Parse category ID and new name
         parts = command.split()
