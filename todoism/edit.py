@@ -2,7 +2,6 @@ import curses
 import todoism.print as pr
 import todoism.task as tsk
 import todoism.navigate as nv
-import todoism.preference as pref
 import todoism.keycode as kc
 import todoism.state as st
 
