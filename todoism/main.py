@@ -111,6 +111,7 @@ def main(stdscr):
         task_cnt = len(filtered_tasks)
         done_cnt = tsk.done_count(filtered_tasks)
         
+        old_max_x = max_x
         # Handling window resizing
         max_y, max_x = stdscr.getmaxyx()
         new_max_capacity = max_y - 2
@@ -202,9 +203,11 @@ def main(stdscr):
                     elif current_task_id > end:
                         end = current_task_id
                         start = max(1, end - max_capacity + 1)
-            
-            # Force a repaint after window resize
+        
+        # Window was resized
+        if old_max_x != max_x or new_max_capacity != max_capacity: 
             should_repaint = True
+            continue
         
         # Check if we need to update the time (every second)
         current_time = time.time()
