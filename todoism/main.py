@@ -561,6 +561,11 @@ def main(stdscr):
                         cat.delete_category(st.current_category_id)
                         categories = cat.reassign_category_ids()
                         
+                        for task in task_list:
+                            if task['category_id'] > st.current_category_id:
+                                task['category_id'] -= 1
+                        tsk.save_tasks(task_list)
+                        
                         # Update task category references to match new category IDs
                         # This is only necessary if we're renumbering categories
                         if len(categories) > 1:
@@ -570,14 +575,11 @@ def main(stdscr):
                         # Update sidebar scroller with new category count
                         sidebar_scroller.update_total(len(categories))
                         
-                        # Select appropriate category after deletion
-                        if len(categories) > 1:
-                            new_index = len(categories) - 1
+                        # Only category id if the last category was deleted
+                        if len(categories) == st.current_category_id:
+                            new_index = st.current_category_id - 1
                             sidebar_scroller.current_index = new_index
                             st.current_category_id = categories[new_index]['id']
-                        else:
-                            sidebar_scroller.current_index = 0
-                            st.current_category_id = 0
 
                         filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
                         task_cnt = len(filtered_tasks)
