@@ -3,7 +3,7 @@ import curses
 import random
 import todoism.preference as pref
 
-selection_color_pair_num = 9
+backgournd_color_pair_num = 9
 
 # Rainbow order
 color_set = {
@@ -20,10 +20,12 @@ color_set = {
 
 def setup_color_pairs():
     for color in color_set.values():
+        # For text
         curses.init_pair(color[0], color[1], curses.COLOR_BLACK)
-    curses.init_pair(selection_color_pair_num, curses.COLOR_BLACK, get_color_selected_curses())
+    # For selection background
+    curses.init_pair(backgournd_color_pair_num, curses.COLOR_BLACK, get_theme_color_curses())
 
-def set_color_selected(color: str):
+def set_theme_color(color: str):
     if color not in color_set and color != "random":
         return
     try:
@@ -37,7 +39,7 @@ def set_color_selected(color: str):
         pref.setup_default_settings()
 
 
-def get_color_selected_curses() -> int:
+def get_theme_color_curses() -> int:
     try:
         with open(pref.settings_path, "r") as settings_file:
             settings = json.load(settings_file)
@@ -51,7 +53,7 @@ def get_color_selected_curses() -> int:
         return curses.COLOR_BLUE
 
 
-def get_color_selected_str() -> str:
+def get_theme_color_str() -> str:
     try:
         with open(pref.settings_path, "r") as settings_file:
             settings = json.load(settings_file)
@@ -63,8 +65,8 @@ def get_color_selected_str() -> str:
         pref.setup_default_settings()
         return curses.COLOR_BLUE
 
-def get_current_color_pair_number() -> int:
-    return color_set[get_color_selected_str()][0]
+def get_theme_color_pair_num_text() -> int:
+    return color_set[get_theme_color_str()][0]
     
-def get_color_pair_num_by_str(color: str) -> int:
+def get_color_pair_num_by_str_text(color: str) -> int:
     return color_set[color][0]

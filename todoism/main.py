@@ -501,7 +501,7 @@ def main(stdscr):
                     # Draw tasks area
                     pr.print_task_entries(stdscr, filtered_tasks, 0, current_category_id, start, end, sidebar_width)
                     
-                    stdscr.attron(curses.color_pair(clr.get_current_color_pair_number()))
+                    stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
                     stdscr.move(row, 0)
                     
                     # Append spaces
@@ -509,7 +509,7 @@ def main(stdscr):
                         stdscr.addch(row, j, ' ')
                         
                     # Redraw the separator
-                    stdscr.attroff(curses.color_pair(clr.get_current_color_pair_number()))
+                    stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
                     stdscr.addstr(row, 15, '│')
                     
                     # Position cursor at start of category name (1 char indent)
