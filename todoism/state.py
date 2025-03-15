@@ -22,3 +22,6 @@ editing_task = False
 
 # Current row in task panel
 current_row = 1
+
+task_cnt = 0
+done_cnt = 0
