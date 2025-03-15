@@ -88,41 +88,6 @@ def execute_command(
             else:
                 st.end_task_id = len(task_list)
         command_recognized = True
-    elif command == "purge all":
-        task_list = []
-        # Use save_tasks without explicit path to respect test mode
-        tsk.save_tasks(task_list)
-        command_recognized = True
-    elif command.startswith("sort "):
-        category = command[5:]
-        if category == 'f':
-            task_list = sort(task_list, "flagged")
-            tsk.reassign_task_ids(task_list)
-            command_recognized = True
-        elif category == 'd':
-            task_list = sort(task_list, "status")
-            tsk.reassign_task_ids(task_list)
-            command_recognized = True
-    elif command == "group":
-        command_recognized = True
-    elif command.startswith("color "):
-        if command[6:] in clr.color_set:
-            clr.set_theme_color(command[6:])
-            curses.init_pair(clr.backgournd_color_pair_num, curses.COLOR_BLACK, clr.get_theme_color_curses())
-            command_recognized = True
-    elif command == "help":
-        max_y, max_x = stdscr.getmaxyx()
-        pr.print_msg(stdscr, msg.help_msg)
-        pr.print_q_to_close(stdscr, "help", max_x, max_y)
-        
-        old_timeout = 500
-        stdscr.timeout(-1)
-        while True:
-            ch = stdscr.getch()
-            if ch == ord('q'):
-                break
-        stdscr.timeout(old_timeout)
-        return task_list, done_list
     elif command.startswith("del "):
         parts = command.split()
         if len(parts) > 1 and parts[1].isdigit():
@@ -157,13 +122,19 @@ def execute_command(
             curses.curs_set(0)
             curses.noecho()      
         command_recognized = True
-    elif command.startswith("st "):
-        option = command[3:]
-        if option == "on":
-            stk.set_strikethrough(True)
-        elif option == "off":
-            stk.set_strikethrough(False)
-        command_recognized = True
+    elif command == "help":
+        max_y, max_x = stdscr.getmaxyx()
+        pr.print_msg(stdscr, msg.help_msg)
+        pr.print_q_to_close(stdscr, "help", max_x, max_y)
+        
+        old_timeout = 500
+        stdscr.timeout(-1)
+        while True:
+            ch = stdscr.getch()
+            if ch == ord('q'):
+                break
+        stdscr.timeout(old_timeout)
+        return task_list, done_list
     elif command == "pref":
         selection_index = 0
         command_recognized = True
@@ -257,21 +228,20 @@ def execute_command(
                 elif ch == ord('q'):
                     quit = True
             
-            # Skip implementation for autosort options but keep them navigable
-            elif preference_type.startswith("│   Autosort flagged"):
+            elif preference_type.startswith("│   Sort by flagged"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    pref.set_autosort_flagged(not pref.get_autosort_flagged())
+                    pref.set_sort_flagged(not pref.get_sort_flagged())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
                     selection_index += 2
                 elif ch == ord('q'):
                     quit = True
-            elif preference_type.startswith("│   Autosort done"):
+            elif preference_type.startswith("│   Sort by done"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    pref.set_autosort_done(not pref.get_autosort_done())
+                    pref.set_sort_done(not pref.get_sort_done())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:

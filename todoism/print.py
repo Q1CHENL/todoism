@@ -591,8 +591,8 @@ def print_pref_panel(stdscr, current_selection_index=0):
     strikethrough_enabled = stk.get_strikethrough()
     current_color = clr.get_theme_color_str()
     current_date_format = pref.get_date_format()
-    autosort_flagged = pref.get_autosort_flagged()
-    autosort_done = pref.get_autosort_done()
+    sort_flagged = pref.get_sort_flagged()
+    sort_done = pref.get_sort_done()
     
     # Format each line with ">" for selected item
     formatted_content = []
@@ -658,12 +658,12 @@ def print_pref_panel(stdscr, current_selection_index=0):
             else:
                 # Fallback if value not found
                 stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
-        elif "Autosort flagged:" in line:
-            value = "on" if autosort_flagged else "off"
+        elif "Sort by flagged:" in line:
+            value = "on" if sort_flagged else "off"
             pos = line.find(value)
             print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
-        elif "Autosort done:" in line:
-            value = "on" if autosort_done else "off"
+        elif "Sort by done:" in line:
+            value = "on" if sort_done else "off"
             pos = line.rfind(value) # reverse find because done contains "on" as well
             print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
         else:

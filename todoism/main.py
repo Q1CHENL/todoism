@@ -115,10 +115,10 @@ def main(stdscr):
         filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
         tsk.reassign_task_ids(filtered_tasks)
         
-        if pref.get_autosort_done():
+        if pref.get_sort_done():
             filtered_tasks = cmd.sort(filtered_tasks, 'status')
             tsk.reassign_task_ids(filtered_tasks)
-        if pref.get_autosort_flagged():
+        if pref.get_sort_flagged():
             filtered_tasks = cmd.sort(filtered_tasks, 'flagged')
             tsk.reassign_task_ids(filtered_tasks)
         

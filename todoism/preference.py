@@ -22,8 +22,8 @@ def setup_default_settings():
     default_settings = {
         "date_format": "Y-M-D",
         "scroll": True,
-        "autosort_f": False,
-        "autosort_d": False,
+        "sort_by_flagged": False,
+        "sort_by_done": False,
         "selected_color": "blue",
         "strikethrough": True,
         "tag": True,
@@ -48,8 +48,8 @@ def update_preferences():
         default_settings = {
             "date_format": "Y-M-D",
             "scroll": True,
-            "autosort_f": False,
-            "autosort_d": False,
+            "sort_by_flagged": False,
+            "sort_by_done": False,
             "selected_color": "blue",
             "strikethrough": True,
             "tag": True,
@@ -139,23 +139,23 @@ def set_date_format(format_string):
     except FileNotFoundError:
         setup_default_settings()
 
-def get_autosort_flagged():
-    """Get autosort flagged tasks setting"""
+def get_sort_flagged():
+    """Get sort flagged tasks setting"""
     try:
         with open(settings_path, "r") as settings_file:
             settings = json.load(settings_file)
-            return settings.get('autosort_f', False)
+            return settings.get('sort_by_flagged', False)
     except FileNotFoundError:
         setup_default_settings()
         return False
 
-def set_autosort_flagged(enabled):
-    """Set autosort flagged tasks setting"""
+def set_sort_flagged(enabled):
+    """Set sort flagged tasks setting"""
     try:
         with open(settings_path, "r") as settings_file:
             settings = json.load(settings_file)
         
-        settings['autosort_f'] = enabled
+        settings['sort_by_flagged'] = enabled
         
         # Write the entire file at once to avoid corruption
         with open(settings_path, "w") as settings_file:
@@ -164,23 +164,23 @@ def set_autosort_flagged(enabled):
     except FileNotFoundError:
         setup_default_settings()
     
-def get_autosort_done():
-    """Get autosort done tasks setting"""
+def get_sort_done():
+    """Get sort done tasks setting"""
     try:
         with open(settings_path, "r") as settings_file:
             settings = json.load(settings_file)
-            return settings.get('autosort_d', False)
+            return settings.get('sort_by_done', False)
     except FileNotFoundError:
         setup_default_settings()
         return False
     
-def set_autosort_done(enabled):
-    """Set autosort done tasks setting"""
+def set_sort_done(enabled):
+    """Set sort done tasks setting"""
     try:
         with open(settings_path, "r") as settings_file:
             settings = json.load(settings_file)
         
-        settings['autosort_d'] = enabled
+        settings['sort_by_done'] = enabled
         
         # Write the entire file at once to avoid corruption
         with open(settings_path, "w") as settings_file:

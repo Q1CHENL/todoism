@@ -8,7 +8,7 @@ help_msg = '''
 │   d - Mark task as done                          │
 │   e - Edit task/category                         │
 │   f - Mark task as flagged                       │
-│   q - Quit this help message/todoism             │
+│   q - Quit this help message/pref panel/todoism  │
 │                                                  │
 │   Key bindings:                                  │
 │   Tab - Toggle focus bewteen tasks and sidebar   │
@@ -26,18 +26,11 @@ help_msg = '''
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
 │   :help - Show this help message                 │
+│   :pref - Open preference panel                  │
 │   :del <task_id> - Delete task                   │
 │   :edit <task_id> - Edit task                    │
 │   :done <task_id> - Mark task as done            |
 │   :purge - Purge all done tasks                  │
-│   :sort f - Sort flagged tasks to top            │
-│   :sort d - Sort done tasks to bottom            │
-│   :color blue|red|yellow|green                   │
-│    - Change background color of current task     │
-│   :st on|off - toggle strikethrough effect       │
-│   :tag on|off - toggle [tag] display All Tasks   │
-│   :autosort f on|off                             │
-│   :autosort d on|off                             │
 │                                                  │
 └──────────────────────────────────────────────────┘
 '''
@@ -53,9 +46,9 @@ pref_panel = '''
 │                                    │
 │   Date format: Y-M-D|D-M-Y|M-D-Y   │
 │                                    │
-│   Autosort flagged: on|off         │
+│   Sort by flagged: on|off          │
 │                                    │
-│   Autosort done: on|off            │
+│   Sort by done: on|off             │
 │                                    │
 │   (Press Tab to toggle options)    │
 │                                    │
