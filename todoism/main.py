@@ -135,8 +135,6 @@ def main(stdscr):
         if st.latest_max_capacity != st.old_max_capacity:
             # Store if we're getting more or less space
             is_growing = st.latest_max_capacity > st.old_max_capacity
-            st.old_max_capacity = st.latest_max_capacity
-            # max_capacity = new_max_capacity
             
             # Update sidebar view
             sidebar_scroller.update_visible_height(st.latest_max_capacity)
@@ -221,7 +219,8 @@ def main(stdscr):
                         st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
         
         # Window was resized
-        if st.old_max_x != st.latest_max_x or st.latest_max_capacity != st.old_max_capacity: 
+        if st.old_max_x != st.latest_max_x or st.latest_max_capacity != st.old_max_capacity:
+            st.old_max_capacity = st.latest_max_capacity
             should_repaint = True
             continue
         
