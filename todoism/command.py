@@ -9,7 +9,7 @@ import todoism.message as msg
 import todoism.preference as pref
 import todoism.navigate as nv
 import todoism.color as clr
-import todoism.strikethrough as st
+import todoism.strikethrough as stk
 import todoism.keycode as kc
 import todoism.category as cat
 
