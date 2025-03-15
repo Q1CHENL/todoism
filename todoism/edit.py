@@ -4,6 +4,7 @@ import todoism.task as tsk
 import todoism.navigate as nv
 import todoism.preference as pref
 import todoism.keycode as kc
+import todoism.state as st
 
 indent = 7
 max_task_count = 99
@@ -720,7 +721,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
     return task['description']
 
 def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
-    """Edit task with improved cursor positioning and scrolling behavior"""
+    """Edit task or category with improved cursor positioning and scrolling behavior"""
     # Get screen dimensions
     max_y, max_x = stdscr.getmaxyx()
     
@@ -765,7 +766,7 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     if task_list[id - 1]['description'] == "":
         del task_list[id - 1]
         tsk.reassign_task_ids(task_list)
-        id, row, start, end = nv.post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
+        nv.post_deletion_update(len(task_list) + 1)
     
     # Save changes
     tsk.save_tasks(task_list)

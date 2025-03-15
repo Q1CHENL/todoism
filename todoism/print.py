@@ -5,8 +5,7 @@ import todoism.message as msg
 import todoism.color as clr
 import todoism.category as cat
 import todoism.preference as pref
-import todoism.command as cmd
-import todoism.task as tsk
+import todoism.state as st
 
 add_mode  = 0
 edit_mode = 1
@@ -338,22 +337,22 @@ def print_all_cli(todos):
         text += todo_line + "\n"
     print(text, end="")
 
-def print_category_entries(stdscr, categories, current_category_id, start_index, max_height, has_focus):
+def print_category_entries(stdscr, categories, start_index, has_focus):
     """Print the category sidebar"""
     # Set sidebar width
     sidebar_width = 15
     max_y, max_x = stdscr.getmaxyx()
     
     # Clear sidebar area
-    for y in range(1, max_height + 1):
+    for y in range(1, st.latest_max_capacity + 1):
         stdscr.move(y, 0)
         stdscr.clrtoeol()  # Use clrtoeol() for consistent clearing
         
     # Print visible categories
-    visible_categories = categories[start_index:start_index + max_height]
+    visible_categories = categories[start_index:start_index + st.latest_max_capacity]
     for i, category in enumerate(visible_categories):
         row = i + 1  # Start from row 1 (row 0 is for status bar)
-        is_selected = category['id'] == current_category_id
+        is_selected = category['id'] == st.current_category_id
         print_category(stdscr, category, row, is_selected, has_focus)
 
 def print_category(stdscr, category, y, is_selected=False, has_focus=False):
@@ -397,8 +396,8 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
         stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
         stdscr.attroff(curses.A_BOLD)
 
-def print_whole_view(stdscr, done_cnt, task_cnt, filtered_tasks, current_task_id, 
-                               start, end, categories, current_category_id, 
+def print_whole_view(stdscr, done_cnt, task_cnt, filtered_tasks, 
+                               categories, 
                                category_start_index, sidebar_has_focus):
     """Print the complete UI with sidebar and task list"""
     # Get max visible height
@@ -422,7 +421,7 @@ def print_whole_view(stdscr, done_cnt, task_cnt, filtered_tasks, current_task_id
     visible_categories = categories[category_start_index:category_start_index + max_height]
     for i, category in enumerate(visible_categories):
         row = i + 1  # Start from row 1 (row 0 is for status bar)
-        is_selected = category['id'] == current_category_id
+        is_selected = category['id'] == st.current_category_id
         print_category(stdscr, category, row, is_selected, sidebar_has_focus)
     
     print_left_frame(stdscr, max_y)
@@ -437,33 +436,33 @@ def print_whole_view(stdscr, done_cnt, task_cnt, filtered_tasks, current_task_id
         # Print empty message with highlighting when task area has focus
         print_msg(stdscr, msg.empty_msg, 16, highlight=(not sidebar_has_focus))
     else:
-        print_task_entries(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, 16)
+        print_task_entries(stdscr, filtered_tasks, 16, sidebar_has_focus)
     
     # Use a single refresh at the end instead of multiple refreshes in each function
     stdscr.noutrefresh()
     curses.doupdate()
 
-def print_task_entries(stdscr, filtered_tasks, current_task_id, current_category_id, start, end, x_offset=0):
+def print_task_entries(stdscr, filtered_tasks, x_offset=0, sidebar_has_focus=False):
     """Print tasks with horizontal offset to accommodate sidebar"""
     max_y, max_x = stdscr.getmaxyx()
     
     # Clear task area first
-    for y in range(1, min(end - start + 2, max_y)):
+    for y in range(1, min(st.end_task_id - st.start_task_id + 2, max_y)):
         stdscr.move(y, x_offset)
         stdscr.clrtoeol()
 
     # Only print if we have tasks and a valid start index
-    if filtered_tasks and start > 0:
-        for i, task in enumerate(filtered_tasks[start - 1:end]):
+    if filtered_tasks and st.start_task_id > 0:
+        for i, task in enumerate(filtered_tasks[st.start_task_id - 1:st.end_task_id]):
             row = i + 1  # +1 due to status bar
-            display_id = i + start  # Sequential display ID (1, 2, 3, etc.)
+            display_id = i + st.start_task_id  # Sequential display ID (1, 2, 3, etc.)
             
-            if i + start == current_task_id:
+            if st.start_task_id + i == st.current_task_id and not sidebar_has_focus and not st.adding_task:
                 # Selected task
-                print_task_entry_selected(stdscr, task, row, x_offset, display_id, current_category_id)
+                print_task_entry_selected(stdscr, task, row, x_offset, display_id)
             else:
                 # Normal task
-                print_task_entry(stdscr, task, row, False, x_offset, display_id, current_category_id)
+                print_task_entry(stdscr, task, row, False, x_offset, display_id)
     
     max_y, max_x = stdscr.getmaxyx()
     for y in range(len(filtered_tasks) if len(filtered_tasks) > 0 else 1, max_y - 1):
@@ -478,7 +477,7 @@ def print_task_entries(stdscr, filtered_tasks, current_task_id, current_category
     stdscr.insstr(max_y - 1, max_x - 2, "─")
     # print_bottom_right_corner(stdscr, max_y, max_x)    
     
-def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None, current_category_id=0):
+def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None):
     """Print a task with horizontal offset and optional display ID override"""
     # Calculate available width for text
     max_y, max_x = stdscr.getmaxyx()
@@ -512,7 +511,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     # Handle text display
     text = task['description']
     # Add tag if not in All Tasks
-    if current_category_id == 0 and pref.get_tag():
+    if st.current_category_id == 0 and pref.get_tag():
         cat_id_of_current_task = task["category_id"]
         if cat_id_of_current_task != 0:
             text = "[" + cat.get_category_by_id(cat_id_of_current_task)["name"] +  "] " + text
@@ -559,10 +558,10 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
         pass
 
 
-def print_task_entry_selected(stdscr, task, row, x_offset=0, display_id=None, current_category_id=0):
+def print_task_entry_selected(stdscr, task, row, x_offset=0, display_id=None):
     """Print a selected task with offset"""
     stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
-    print_task_entry(stdscr, task, row, True, x_offset, display_id, current_category_id)
+    print_task_entry(stdscr, task, row, True, x_offset, display_id)
     stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
 
 def print_pref_panel(stdscr, current_selection_index=0):
