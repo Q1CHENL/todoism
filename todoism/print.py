@@ -44,7 +44,8 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=16, highlight=False):
     
     # Calculate center position within the available task area
     # Ensure center_offset is never negative
-    center_offset = max(0, (available_width - width) // 2)
+    center_offset_x = max(0, (available_width - width) // 2)
+    center_offset_y = max(0, (max_y - len(lines)) // 2)
     
     # Clear the task area before printing
     clear_task_panel(stdscr, max_y)
@@ -59,11 +60,11 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=16, highlight=False):
         if y < max_y - 1 and line.strip():  # Only print non-empty lines and check bounds
             try:
                 # Position cursor at sidebar edge + centering offset
-                stdscr.move(y, x_offset + center_offset)
+                stdscr.move(y + center_offset_y, x_offset + center_offset_x)
                 # Print the line directly, truncating if necessary
-                if x_offset + center_offset + len(line) > max_x:
+                if x_offset + center_offset_x + len(line) > max_x:
                     # Truncate line to fit available space
-                    available_space = max_x - (x_offset + center_offset)
+                    available_space = max_x - (x_offset + center_offset_x)
                     if available_space > 0:
                         stdscr.addstr(line[:available_space])
                 else:
@@ -479,7 +480,8 @@ def print_whole_view(stdscr, filtered_tasks,
             stdscr.move(y, 16)
             stdscr.clrtoeol()
         # Print empty message with highlighting when task area has focus
-        print_msg(stdscr, msg.empty_msg, 16, highlight=(not sidebar_has_focus))
+        print_msg_in_task_panel(stdscr, msg.empty_msg, 16, highlight=False)
+        print_right_frame(stdscr, max_y, max_x)
     else:
         print_task_entries(stdscr, filtered_tasks, 16, sidebar_has_focus)
     
