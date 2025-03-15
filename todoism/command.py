@@ -166,9 +166,9 @@ def execute_command(
     elif command.startswith("st "):
         option = command[3:]
         if option == "on":
-            st.set_strikethrough(True)
+            stk.set_strikethrough(True)
         elif option == "off":
-            st.set_strikethrough(False)
+            stk.set_strikethrough(False)
         command_recognized = True
     elif command == "pref":
         selection_index = 0
@@ -212,7 +212,7 @@ def execute_command(
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     # Toggle strikethrough setting
-                    st.set_strikethrough(not st.get_strikethrough())
+                    stk.set_strikethrough(not stk.get_strikethrough())
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:

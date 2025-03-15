@@ -200,7 +200,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         else:
             visible_text = task['description']
         # Apply strike-through for completed tasks in view mode
-        if task.get('status', False) and st.get_strikethrough() and not is_edit_mode:
+        if task.get('status', False) and stk.get_strikethrough() and not is_edit_mode:
             strikethrough_desc = ""
             for char in visible_text:
                 strikethrough_desc += (char + "\u0336")
@@ -522,7 +522,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     else:
         visible_text = text
         
-    if task.get('status', False) and st.get_strikethrough() and not is_selected:
+    if task.get('status', False) and stk.get_strikethrough() and not is_selected:
         strikethrough_desc = ""
         for char in visible_text:
             strikethrough_desc += (char + "\u0336")
@@ -589,7 +589,7 @@ def print_pref_panel(stdscr, current_selection_index=0):
     
     # Get current preference values for coloring
     tag_enabled = pref.get_tag()
-    strikethrough_enabled = st.get_strikethrough()
+    strikethrough_enabled = stk.get_strikethrough()
     current_color = clr.get_theme_color_str()
     current_date_format = pref.get_date_format()
     autosort_flagged = pref.get_autosort_flagged()
