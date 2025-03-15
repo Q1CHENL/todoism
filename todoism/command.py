@@ -123,13 +123,18 @@ def execute_command(
             curses.noecho()      
         command_recognized = True
     elif command == "help":
-        max_y, max_x = stdscr.getmaxyx()
-        pr.print_msg(stdscr, msg.help_msg)
-        pr.print_q_to_close(stdscr, "help", max_x, max_y)
-        
+        open_help_page(stdscr)
+        st.old_max_x = st.latest_max_x
+        st.old_max_y = st.latest_max_y
         old_timeout = 500
         stdscr.timeout(-1)
         while True:
+            st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
+            if st.latest_max_x != st.old_max_x or st.latest_max_y != st.old_max_y:
+                st.old_max_x = st.latest_max_x
+                st.old_max_y = st.latest_max_y
+                open_help_page(stdscr)
+
             ch = stdscr.getch()
             if ch == ord('q'):
                 break
@@ -137,10 +142,14 @@ def execute_command(
         return task_list, done_list
     elif command == "pref":
         selection_index = 0
+        open_pref_panel(stdscr, selection_index)
         command_recognized = True
         old_timeout = 500  
         stdscr.timeout(-1)
         quit = False
+        
+        st.old_max_x = st.latest_max_x
+        st.old_max_y = st.latest_max_y
         
         while True:
             if quit:
@@ -150,7 +159,12 @@ def execute_command(
                 selection_index = 10
             elif selection_index < 0:
                 selection_index = 0
-            
+            st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
+            if st.latest_max_x != st.old_max_x or st.latest_max_y != st.old_max_y:
+                st.old_max_x = st.latest_max_x
+                st.old_max_y = st.latest_max_y
+                open_pref_panel(stdscr, selection_index)
+                        
             # Display the preference panel with current selection
             pr.print_pref_panel(stdscr, selection_index)
             
@@ -426,4 +440,14 @@ def execute_command(
     
     return task_list, done_list
 
+def open_help_page(stdscr):
+    stdscr.clear()
+    pr.print_outer_frame(stdscr)
+    pr.print_msg(stdscr, msg.help_msg)
+    pr.print_q_to_close(stdscr, "help", st.latest_max_x, st.latest_max_y)
 
+def open_pref_panel(stdscr, selection_index):
+    stdscr.clear()
+    pr.print_pref_panel(stdscr, selection_index)
+    pr.print_outer_frame(stdscr)
+    pr.print_q_to_close(stdscr, "preferences", st.latest_max_x, st.latest_max_y)

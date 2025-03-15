@@ -12,7 +12,7 @@ edit_mode = 1
 
 # Function to display centered messages
 def print_msg_center(stdscr, message, color_pair=0, highlight_line=-1):
-    stdscr.clear()
+    # stdscr.clear()
     max_y, max_x = stdscr.getmaxyx()
     lines = message.strip().split("\n")
     start_y = max(0, (max_y - len(lines)) // 2)
@@ -29,7 +29,7 @@ def print_msg_center(stdscr, message, color_pair=0, highlight_line=-1):
     
     stdscr.refresh()
 
-def print_msg(stdscr, msg, x_offset=16, highlight=False):
+def print_msg_in_task_panel(stdscr, msg, x_offset=16, highlight=False):
     """Print a message box with proper centering in the task area with optional highlighting"""
     lines = msg.split('\n')
     width = len(lines[1])
@@ -80,6 +80,51 @@ def print_msg(stdscr, msg, x_offset=16, highlight=False):
 
     # Use noutrefresh() instead of refresh() for better performance
     # when multiple updates happen in sequence
+    stdscr.noutrefresh()
+    curses.doupdate()
+    
+
+def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
+    """Print a message box with proper centering in the task area with optional highlighting"""
+    lines = msg.split('\n')
+    width = len(lines[1])
+    max_y, max_x = stdscr.getmaxyx()
+    
+    # Ensure we have minimum required space
+    if max_y < 2 or max_x < x_offset + 1:
+        return
+    
+    # Calculate available width for task area (total width minus sidebar)
+    available_width = max(0, max_x - x_offset)
+    center_offset_x = max(0, (available_width - width) // 2)
+    center_offset_y = max(0, (max_y - len(lines)) // 2)
+    
+    # Apply highlighting if requested
+    if highlight:
+        stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
+    
+    # Print each line separately at the calculated position
+    for i, line in enumerate(lines):
+        y = i + 1  # Start at row 1 (row 0 is status bar)
+        if y < max_y - 1 and line.strip():  # Only print non-empty lines and check bounds
+            try:
+                # Position cursor at sidebar edge + centering offset
+                stdscr.move(y + center_offset_y, x_offset + center_offset_x)
+                # Print the line directly, truncating if necessary
+                if x_offset + center_offset_x + len(line) > max_x:
+                    # Truncate line to fit available space
+                    available_space = max_x - (x_offset + center_offset_x)
+                    if available_space > 0:
+                        stdscr.addstr(line[:available_space])
+                else:
+                    stdscr.addstr(line)
+            except curses.error:
+                continue
+    
+    # Remove highlighting if it was applied
+    if highlight:
+        stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+
     stdscr.noutrefresh()
     curses.doupdate()
 
@@ -259,7 +304,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     return None
 
 
-def print_status_bar(stdscr, done_cnt, task_cnt):
+def print_status_bar(stdscr):
     """Print centered status bar with progress, percentage, date and time"""
     max_y, max_x = stdscr.getmaxyx()
     
@@ -268,7 +313,7 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
                    curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
     
     # Calculate percentage
-    percent_value = (done_cnt/task_cnt)*100 if task_cnt > 0 else 0
+    percent_value = (st.done_cnt/st.task_cnt)*100 if st.task_cnt > 0 else 0
     percent_text = f"({percent_value:.0f}%)"
     
     # Choose color based on percentage range
@@ -280,7 +325,7 @@ def print_status_bar(stdscr, done_cnt, task_cnt):
         color_pair = clr.get_color_pair_num_by_str_text("green")
     
     # Split the status into parts for coloring
-    status_prefix = f"┤Done: {done_cnt}/{task_cnt} "
+    status_prefix = f"┤Done: {st.done_cnt}/{st.task_cnt} "
     
     current_date_format = pref.get_date_format()
     current_datetime = datetime.now()
@@ -396,7 +441,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
         stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
         stdscr.attroff(curses.A_BOLD)
 
-def print_whole_view(stdscr, done_cnt, task_cnt, filtered_tasks, 
+def print_whole_view(stdscr, filtered_tasks, 
                                categories, 
                                category_start_index, sidebar_has_focus):
     """Print the complete UI with sidebar and task list"""
@@ -407,7 +452,7 @@ def print_whole_view(stdscr, done_cnt, task_cnt, filtered_tasks,
     
     print_frame_all(stdscr)
     # Print status bar first
-    print_status_bar(stdscr, done_cnt, task_cnt)
+    print_status_bar(stdscr)
     
     sidebar_width = 15
     max_y, max_x = stdscr.getmaxyx()
@@ -428,7 +473,7 @@ def print_whole_view(stdscr, done_cnt, task_cnt, filtered_tasks,
     print_sidebar_task_panel_separator(stdscr, max_y)
     
     # Print tasks or empty message
-    if task_cnt == 0:
+    if st.task_cnt == 0:
         # Clear task area
         for y in range(1, max_height + 1):
             stdscr.move(y, 16)
@@ -579,12 +624,15 @@ def print_pref_panel(stdscr, current_selection_index=0):
 
     # Calculate dimensions and position
     max_y, max_x = stdscr.getmaxyx()
-    width = len(pref_content_lines[0])  # Use first line for width calculation
-    available_width = max(0, max_x - 16)
-    center_offset_x = max(0, (available_width - width) // 2) - 1
-    center_offset_y = max(0, (max_y - len(pref_content_lines)) // 2) - 1
     
-    clear_task_panel(stdscr, max_y)
+    # Calculate available width - adapt to screen size
+    original_width = len(pref_content_lines[0]) if pref_content_lines else 0
+    # Make sure panel is at least 20 chars wide or as wide as possible
+    available_width = min(original_width, max(20, max_x - 4))
+    
+    # Calculate center offsets (similar to print_msg)
+    center_offset_x = max(0, (max_x - available_width) // 2)
+    center_offset_y = max(0, (max_y - len(pref_content_lines)) // 2) - 1
     
     # Get current preference values for coloring
     tag_enabled = pref.get_tag()
@@ -595,109 +643,135 @@ def print_pref_panel(stdscr, current_selection_index=0):
     sort_done = pref.get_sort_done()
     
     # Format each line with ">" for selected item
+    # Adapt line width to available space
     formatted_content = []
     for i, line in enumerate(pref_content_lines):
+        # Truncate line if needed
+        if len(line) > available_width:
+            line = line[:available_width]
+            
         if i == current_selection_index + 2:  # +2 because one pref every 2 lines
-            formatted_content.append(f"  {line[0:2]}>{line[3:]}")
+            # Handle selection marker
+            if len(line) >= 3:
+                formatted_content.append(f"{line[0:2]}>{line[3:]}")
+            else:
+                formatted_content.append(line)
         else:
-            formatted_content.append(f"  {line}")
+            formatted_content.append(line)
     
     # Print each line of the panel with appropriate formatting
     for y in range(0, min(len(formatted_content), max_y - 2)):
-        line = formatted_content[y]
-        
-        # Draw the top frame (first line)
-        if y == 0:
-            stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
-            continue
+        try:
+            line = formatted_content[y]
             
-        # Process and draw content lines
-        if "Tag:" in line:
-            value = "on" if tag_enabled else "off"
-            pos = line.find(value)
-            print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
+            # Draw the top frame (first line)
+            if y == 0:
+                stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:max_x-center_offset_x-1])
+                continue
+            
+            # Process and draw content lines
+            if "Tag:" in line:
+                value = "on" if tag_enabled else "off"
+                pos = line.find(value)
+                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, max_x)
+                    
+            elif "Strikethrough:" in line:
+                value = "on" if strikethrough_enabled else "off"
+                pos = line.find(value)
+                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, max_x)                
+                    
+            elif "Color:" in line and current_color in line:
+                pos = line.find(current_color)
+                print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, 
+                                             current_color, clr.get_theme_color_pair_num_text(), max_x)
+                    
+            elif "Date format:" in line and current_date_format in line:
+                pos = line.find(current_date_format)
+                print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, 
+                                             current_date_format, clr.get_theme_color_pair_num_text(), max_x)
                 
-        elif "Strikethrough:" in line:
-            value = "on" if strikethrough_enabled else "off"
-            pos = line.find(value)
-            print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value)                
+            elif "Sort by flagged:" in line:
+                value = "on" if sort_flagged else "off"
+                pos = line.find(value)
+                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, max_x)
                 
-        elif "Color:" in line:
-            pos = line.find(current_color)
-            if pos > 0:
-                # Print the first part (before the value)
-                prefix = line[:pos]
-                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, prefix)
+            elif "Sort by done:" in line:
+                value = "on" if sort_done else "off"
+                pos = line.rfind(value)  # reverse find because done contains "on" as well
+                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, max_x)
                 
-                # Print the value with color-specific highlighting
-                stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
-                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos, current_color)
-                stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
-                
-                # Print the suffix (after the value)
-                suffix = line[pos + len(current_color):]
-                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos + len(current_color), suffix)
             else:
-                # Fallback if value not found
-                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
-                
-        elif "Date format:" in line:
-            pos = line.find(current_date_format)
-            if pos > 0:
-                # Print the first part (before the value)
-                prefix = line[:pos]
-                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, prefix)
-                
-                stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
-                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos, current_date_format)
-                stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
-                
-                # Print the suffix (after the value)
-                suffix = line[pos + len(current_date_format):]
-                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos + len(current_date_format), suffix)
-            else:
-                # Fallback if value not found
-                stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
-        elif "Sort by flagged:" in line:
-            value = "on" if sort_flagged else "off"
-            pos = line.find(value)
-            print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
-        elif "Sort by done:" in line:
-            value = "on" if sort_done else "off"
-            pos = line.rfind(value) # reverse find because done contains "on" as well
-            print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
-        else:
-            # Print other lines without special formatting
-            stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
-    
-    print_right_frame(stdscr, max_y, max_x)
-    print_q_to_close(stdscr, "preferences", max_x, max_y)
-    
-def print_pref_line_on_off(stdscr, y, pos, line, center_offset_x, center_offset_y, value):
-    if pos > 0:
-        # Print the first part (before the value)
+                # Print other lines without special formatting
+                stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:max_x-center_offset_x-1])
+        except curses.error:
+            continue
+
+def print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, max_x):
+    """Safely print a preference line with on/off value highlighted"""
+    try:
+        if pos <= 0:
+            # Value not found, print the whole line
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:max_x-center_offset_x-1])
+            return
+            
+        # Print the prefix (part before the value)
         prefix = line[:pos]
-        stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, prefix)
+        if center_offset_x + len(prefix) < max_x:
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x, prefix[:max_x-center_offset_x-1])
         
-        # Print the value with fixed color (green for "on", red for "off")
+        # Determine if there's space for the value
+        if center_offset_x + pos + len(value) > max_x:
+            return
+            
+        # Print the value with appropriate color
         if value == "on":
             green_pair_num = clr.get_color_pair_num_by_str_text("green")
             stdscr.attron(curses.color_pair(green_pair_num))
-            stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos, value)
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x + pos, value[:max_x-(center_offset_x+pos)-1])
             stdscr.attroff(curses.color_pair(green_pair_num))
         else:  # "off"
             red_pair_num = clr.get_color_pair_num_by_str_text("red")
             stdscr.attron(curses.color_pair(red_pair_num))
-            stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos, value)
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x + pos, value[:max_x-(center_offset_x+pos)-1])
             stdscr.attroff(curses.color_pair(red_pair_num))
         
-        # Print the suffix (after the value)
+        # Print the suffix (part after the value) if it fits
         suffix = line[pos + len(value):]
-        stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x + pos + len(value), suffix)
-    else:
-        # Fallback if value not found
-        stdscr.addstr(y + center_offset_y + 1, 16 + center_offset_x, line)
+        suffix_pos = center_offset_x + pos + len(value)
+        if suffix_pos < max_x and len(suffix) > 0:
+            stdscr.addstr(y + center_offset_y + 1, suffix_pos, suffix[:max_x-suffix_pos-1])
+    except curses.error:
+        pass
 
+def print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, value, color_pair, max_x):
+    """Safely print a preference line with a highlighted value using specified color pair"""
+    try:
+        if pos <= 0:
+            # Value not found, print the whole line
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:max_x-center_offset_x-1])
+            return
+            
+        # Print the prefix (part before the value)
+        prefix = line[:pos]
+        if center_offset_x + len(prefix) < max_x:
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x, prefix[:max_x-center_offset_x-1])
+        
+        # Determine if there's space for the value
+        if center_offset_x + pos + len(value) > max_x:
+            return
+            
+        # Print the value with specified color
+        stdscr.attron(curses.color_pair(color_pair))
+        stdscr.addstr(y + center_offset_y + 1, center_offset_x + pos, value[:max_x-(center_offset_x+pos)-1])
+        stdscr.attroff(curses.color_pair(color_pair))
+        
+        # Print the suffix (part after the value) if it fits
+        suffix = line[pos + len(value):]
+        suffix_pos = center_offset_x + pos + len(value)
+        if suffix_pos < max_x and len(suffix) > 0:
+            stdscr.addstr(y + center_offset_y + 1, suffix_pos, suffix[:max_x-suffix_pos-1])
+    except curses.error:
+        pass
 
 def clear_task_panel(stdscr, max_y):
     for i in range(1, max_y - 1):
@@ -709,7 +783,7 @@ def clear_task_panel(stdscr, max_y):
         
 def print_q_to_close(stdscr, page, max_x, max_y):
     hint = f"┤Press 'q' to close {page}├"
-    hint_pos_x = (max_x - 15) // 2 + 15 - len(hint) // 2
+    hint_pos_x = (max_x - len(hint)) // 2 
     stdscr.addstr(max_y - 1, hint_pos_x, hint)
 
 # Functions for drawing frames and separators
@@ -756,7 +830,6 @@ def print_separator_connector_bottom(stdscr, max_y):
     
 def print_frame_all(stdscr):
     max_y, max_x = stdscr.getmaxyx()
-    # Reset all attributes before drawing any frame elements to prevent inheritance
     turnoff_all_attributes(stdscr)
     print_top_left_corner(stdscr)
     print_bottom_left_corner(stdscr, max_y)
@@ -765,7 +838,6 @@ def print_frame_all(stdscr):
     print_top_right_corner(stdscr, max_x)
     print_top_frame(stdscr, max_x)
     
-    # print_bottom_right_corner(stdscr, max_y, max_x)
     print_right_frame(stdscr, max_y, max_x)
     
     print_bottom_frame(stdscr, max_y, max_x)
@@ -773,6 +845,29 @@ def print_frame_all(stdscr):
     print_separator_connector_top(stdscr)
     print_separator_connector_bottom(stdscr, max_y)
     print_sidebar_task_panel_separator(stdscr, max_y)
+    
+    # Trick for last char (bottom right) error in cursor window    
+    stdscr.addstr(max_y - 1, max_x - 2, "┘")
+    stdscr.insstr(max_y - 1, max_x - 2, "─")
+    
+def print_outer_frame(stdscr):
+    max_y, max_x = stdscr.getmaxyx()
+    turnoff_all_attributes(stdscr)
+    print_top_left_corner(stdscr)
+    print_bottom_left_corner(stdscr, max_y)
+    print_left_frame(stdscr, max_y)
+    
+    print_top_right_corner(stdscr, max_x)
+    print_top_frame(stdscr, max_x)
+    
+    print_right_frame(stdscr, max_y, max_x)
+    
+    print_bottom_frame(stdscr, max_y, max_x)
+    
+    # Trick for last char (bottom right) error in cursor window
+    stdscr.addstr(max_y - 1, max_x - 2, "┘")
+    stdscr.insstr(max_y - 1, max_x - 2, "─")
+
     
 def turnoff_all_attributes(stdscr):
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.A_REVERSE | curses.A_BLINK | 
