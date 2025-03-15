@@ -378,11 +378,16 @@ def main(stdscr):
                 should_repaint = True
             
             elif key == ord('q'):
-                # Try to restore data if in test mode, but don't fail if test module isn't available
+                # Always backup normal data on exit
+                import todoism.backup as backup
+                backup.backup_normal_data()
+                
+                # If in test mode, remove the flag but don't restore data
+                # This ensures test data is preserved for future use
                 try:
                     import test.test as test_module
                     if test_module.is_test_mode_active():
-                        test_module.restore_data()
+                        test_module.exit_test_mode()
                 except ImportError:
                     # No test module found (PyPI installation), continue with normal exit
                     pass
@@ -844,11 +849,15 @@ def main(stdscr):
                 task_scroll_offset = max(0, task_scroll_offset - 1)
                 pr.render_task(stdscr, filtered_tasks[current_task_id - 1], current_row, True, task_scroll_offset)
             elif key == ord('q'):
-                # Try to restore data if in test mode, but don't fail if test module isn't available
+                # Always backup normal data on exit
+                import todoism.backup as backup
+                backup.backup_normal_data()
+                
+                # If in test mode, remove the flag but don't restore data
                 try:
                     import test.test as test_module
                     if test_module.is_test_mode_active():
-                        test_module.restore_data()
+                        test_module.exit_test_mode()
                 except ImportError:
                     # No test module found (PyPI installation), continue with normal exit
                     pass

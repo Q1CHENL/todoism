@@ -1,13 +1,8 @@
 import os
 import json
 import uuid
-import shutil
 import todoism.preference as pref
 import todoism.task as tsk
-
-# Backup file paths for saving the actual data
-backup_file_path = os.path.join(pref.config_dir, "tasks_backup.json")
-backup_categories_path = os.path.join(pref.config_dir, "categories_backup.json")
 
 # Flag file to mark that we're in test mode
 test_mode_flag_path = os.path.join(pref.config_dir, "test_mode_active")
@@ -339,68 +334,9 @@ def is_test_mode_active():
     """Check if test mode is currently active"""
     return os.path.exists(test_mode_flag_path)
 
-def backup_data():
-    """Backup current tasks and categories before loading test data"""
-    try:
-        import todoism.category as cat
-        success = True
-        
-        # Backup tasks if they exist
-        if os.path.exists(pref.tasks_file_path):
-            shutil.copy2(pref.tasks_file_path, backup_file_path)
-        else:
-            success = False
-            
-        # Backup categories if they exist
-        if os.path.exists(pref.categories_file_path):
-            shutil.copy2(pref.categories_file_path, backup_categories_path)
-        else:
-            success = False
-            
-        # Create a flag file to indicate test mode is active
-        with open(test_mode_flag_path, 'w') as f:
-            f.write('1')
-            
-        return success
-    except Exception as e:
-        print(f"Error backing up data: {e}")
-        return False
-
-def restore_data():
-    """Restore tasks and categories from backup"""
-    try:
-        import todoism.category as cat
-        success = True
-        
-        # Restore tasks if backup exists
-        if os.path.exists(backup_file_path):
-            shutil.copy2(backup_file_path, pref.tasks_file_path)
-            # Clean up backup file
-            os.remove(backup_file_path)
-        else:
-            success = False
-            
-        # Restore categories if backup exists
-        if os.path.exists(backup_categories_path):
-            shutil.copy2(backup_categories_path, pref.categories_file_path)
-            # Clean up backup file
-            os.remove(backup_categories_path)
-        else:
-            success = False
-            
-        # Remove test mode flag
-        if os.path.exists(test_mode_flag_path):
-            os.remove(test_mode_flag_path)
-        
-        return success
-    except Exception as e:
-        print(f"Error restoring data: {e}")
-        return False
-
 def load_test_mode():
     """Load test tasks and categories"""
-    # Backup current data
-    backup_data()
+    create_test_mode_flag()
     
     # Generate test data
     test_tasks = generate_test_tasks()
@@ -419,8 +355,32 @@ def load_test_mode():
     return True
 
 def exit_test_mode():
-    """Exit test mode by restoring original data"""
-    return restore_data()
+    """Exit test mode - just remove the flag, no restoration"""
+    # Just remove the test mode flag
+    remove_test_mode_flag()
+    return True
+
+def create_test_mode_flag():
+    """Create the test mode flag file"""
+    test_mode_flag_path = os.path.join(pref.config_dir, "test_mode_active")
+    try:
+        with open(test_mode_flag_path, 'w') as f:
+            f.write('1')
+        return True
+    except Exception as e:
+        print(f"Error creating test mode flag: {e}")
+        return False
+
+def remove_test_mode_flag():
+    """Remove the test mode flag file"""
+    test_mode_flag_path = os.path.join(pref.config_dir, "test_mode_active")
+    try:
+        if os.path.exists(test_mode_flag_path):
+            os.remove(test_mode_flag_path)
+        return True
+    except Exception as e:
+        print(f"Error removing test mode flag: {e}")
+        return False
 
 if __name__ == "__main__":
     # When run directly, generate and save test data
