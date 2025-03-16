@@ -538,9 +538,8 @@ def main(stdscr):
                         sidebar_scroller.start_index,
                     )
                     
-                    pr.print_left_frame(stdscr, max_y)
-                    pr.print_sidebar_task_panel_separator(stdscr, max_y)
-                    # Draw tasks area
+                    pr.print_left_frame(stdscr, st.latest_max_y)
+                    pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
                     pr.print_task_entries(stdscr, sidebar_width)
                     
                     stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
@@ -638,9 +637,9 @@ def main(stdscr):
                 stdscr.move(st.latest_max_capacity, 0)
                 stdscr.clrtoeol()
                 # Keep frames visible
-                stdscr.addstr(max_y - 2, 0, "│")
-                stdscr.addstr(max_y - 2, 15, "│")
-                stdscr.addstr(max_y - 2, max_x - 1, "│")
+                stdscr.addstr(st.latest_max_y - 2, 0, "│")
+                stdscr.addstr(st.latest_max_y - 2, 15, "│")
+                stdscr.addstr(st.latest_max_y - 2, st.latest_max_x - 1, "│")
                 
                 # Place the command input at the bottom of the screen, after the sidebar
                 stdscr.addstr(st.latest_max_capacity, sidebar_width, ":")
@@ -710,8 +709,8 @@ def main(stdscr):
                     sidebar_scroller.start_index,
                 )
                 
-                pr.print_left_frame(stdscr, max_y)
-                pr.print_sidebar_task_panel_separator(stdscr, max_y)
+                pr.print_left_frame(stdscr, st.latest_max_y)
+                pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
                 
                 st.adding_task = True
                 # Print existing tasks with offset (crucial: pass sidebar_width to offset tasks)
@@ -785,8 +784,8 @@ def main(stdscr):
                         categories,
                         sidebar_scroller.start_index,
                     )
-                    pr.print_left_frame(stdscr, max_y)
-                    pr.print_sidebar_task_panel_separator(stdscr, max_y)
+                    pr.print_left_frame(stdscr, st.latest_max_y)
+                    pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
                     pr.print_task_entries(stdscr, sidebar_width)
                     
                     # Move cursor to edit position
@@ -900,9 +899,9 @@ def main(stdscr):
                 stdscr.move(st.latest_max_capacity, 0)
                 stdscr.clrtoeol()
                 # Keep frames visible
-                stdscr.addstr(max_y - 2, 0, "│")
-                stdscr.addstr(max_y - 2, 15, "│")
-                stdscr.addstr(max_y - 2, max_x - 1, "│")
+                stdscr.addstr(st.latest_max_y - 2, 0, "│")
+                stdscr.addstr(st.latest_max_y - 2, 15, "│")
+                stdscr.addstr(st.latest_max_y - 2, st.latest_max_x - 1, "│")
                 
                 stdscr.addstr(st.latest_max_capacity, sidebar_width, ":")
                 stdscr.refresh()
