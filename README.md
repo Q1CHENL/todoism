@@ -2,7 +2,7 @@
 
 A powerful yet easy-to-use todo TUI
 
-## Screenshot
+## Screenshots
 
 ![UI](./assets/screenshot-v1.21.4.png)
 ![UI](./assets/screenshot-v1.21.4-pref-panel.png)
@@ -10,9 +10,14 @@ A powerful yet easy-to-use todo TUI
 ## Install and use
 
 - Install: `pip install todoism`
-- Run: `todoism` or `todo` (or `python -m todoism` locally)
+- Run: `todoism` or `todo` 
 - Update: `pip install todoism --upgrade`
 - Use: Invoke help message using command `:help` to see commonly used operations and commands
+
+## Develop
+
+- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode, not available in pip installation)
+- Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in pip installation.
 
 ```txt
 ┌──────────────────────────────────────────────────┐
