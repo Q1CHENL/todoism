@@ -19,7 +19,7 @@ setup(
     install_requires=[],
     author='Qichen Liu',
     author_email='liuqichne@email.com',
-    description='A simple and easy-to-use todo TUI',
+    description='A powerful yet easy-to-use todo TUI',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/Q1CHENL/todoism',

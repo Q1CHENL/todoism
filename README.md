@@ -1,6 +1,6 @@
 # todoism
 
-A simple and easy-to-use todo TUI
+A powerful yet easy-to-use todo TUI
 
 ## Screenshot
 
