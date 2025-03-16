@@ -29,7 +29,7 @@ help_msg = '''
 │   :pref - Open preference panel                  │
 │   :del <task_id> - Delete task                   │
 │   :edit <task_id> - Edit task                    │
-│   :done <task_id> - Mark task as done            |
+│   :done <task_id> - Mark task as done            │
 │   :purge - Purge all done tasks                  │
 │                                                  │
 └──────────────────────────────────────────────────┘
