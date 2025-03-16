@@ -658,7 +658,6 @@ def main(stdscr):
                     stdscr,
                     command_line,
                     task_list,
-                    st.filtered_tasks,
                     done_list,
                     purged_list,
                 )
@@ -687,7 +686,7 @@ def main(stdscr):
         elif st.focus_manager.is_tasks_focused():
             # Handle user input for tasks
             if key == ord('a'):
-                if st.task_cnt == ed.max_task_count:
+                if st.task_cnt == tsk.MAX_TASK_COUNT:
                     pr.print_msg(stdscr, msg.limit_msg)
                     stdscr.refresh()
                     time.sleep(1.2)
@@ -726,7 +725,7 @@ def main(stdscr):
                 stdscr.addstr(y_pos, sidebar_width, f"{new_task_num} ")
 
                 # Move cursor to the correct position after task number
-                stdscr.move(y_pos, sidebar_width + ed.indent)
+                stdscr.move(y_pos, sidebar_width + tsk.TASK_INDENT_IN_TASK_PANEL)
                 stdscr.refresh()
 
                 new_task = tsk.create_new_task(st.task_cnt + 1)
@@ -793,7 +792,7 @@ def main(stdscr):
                     pr.print_task_entries(stdscr, sidebar_width)
                     
                     # Move cursor to edit position
-                    stdscr.move(edit_row, sidebar_width + ed.indent)
+                    stdscr.move(edit_row, sidebar_width + tsk.TASK_INDENT_IN_TASK_PANEL)
                     stdscr.refresh()
                     
                     st.filtered_tasks[task_idx]['description'] = ed.edit(
@@ -921,7 +920,6 @@ def main(stdscr):
                     stdscr,
                     command_line,
                     task_list,
-                    st.filtered_tasks,
                     done_list,
                     purged_list,
                 )

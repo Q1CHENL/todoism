@@ -44,7 +44,6 @@ def execute_command(
         stdscr, 
         command, 
         task_list, 
-        filtered_tasks,
         done_list, 
         purged_list,
         ):
@@ -58,7 +57,7 @@ def execute_command(
                     index_to_done = int(id_to_done) - 1
                     if 0 <= index_to_done < len(task_list):
                         done_list.append(copy.copy(task_list[index_to_done]))
-                        task_uuid = filtered_tasks[index_to_done].get('uuid')
+                        task_uuid = st.filtered_tasks[index_to_done].get('uuid')
                         tsk.done_task_by_uuid(task_list, task_uuid)
         command_recognized = True
     elif command.startswith("flag "):
@@ -116,7 +115,7 @@ def execute_command(
                     st.start_task_id,
                     st.end_task_id,
                     edit_id - st.start_task_id + 1,
-                    len(task_list[edit_id - 1]['description']) + ed.indent,
+                    len(task_list[edit_id - 1]['description']) + tsk.TASK_INDENT_IN_TASK_PANEL,
                     st.latest_max_capacity
                 )
             curses.curs_set(0)
