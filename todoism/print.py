@@ -167,13 +167,13 @@ def print_task_symbols(stdscr, task, y, flag_x=3, status_x=5, use_colors=True, i
     stdscr.addstr(y, status_x + 1, ' ')
 
 def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0, 
-               cursor_pos=None, is_edit_mode=False, is_sidebar=False):
+               cursor_pos=None, is_edit_mode=False):
     """Render a task with proper formatting and positioning"""
     if max_x == 0:
         max_x = stdscr.getmaxyx()[1]
     
     # Determine position calculations based on sidebar mode
-    if is_sidebar:
+    if st.focus_manager.is_sidebar_focused():
         # Sidebar positioning - no offset
         sidebar_width = 0  # No sidebar offset needed
         base_indent = 2    # Changed from 1 to 2 spaces (1 for left border + 1 for spacing)
@@ -219,7 +219,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         total_indent = text_start_pos
     
     # Calculate available width for text
-    available_width = date_pos - total_indent - (0 if is_sidebar else 1)
+    available_width = date_pos - total_indent - (0 if st.focus_manager.is_sidebar_focused() else 1)
     
     # In view mode, we just show what fits; in edit mode, we scroll
     text_length = len(task['description'])
@@ -260,13 +260,13 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         stdscr.addstr(' ')
     
     # Print date with exactly one character gap to right
-    if not is_sidebar and date_str:
+    if not st.focus_manager.is_sidebar_focused() and date_str:
         stdscr.addstr(y, date_pos, date_str)
         if is_selected:
             stdscr.addstr(y, date_pos + len(date_str), ' ')
     
     # Print right frame without highlight
-    if not is_sidebar:
+    if not st.focus_manager.is_sidebar_focused():
         if is_selected:
             stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
         try:
@@ -287,12 +287,12 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         else:
             target_x = text_start_pos + len(visible_text)
         
-        if is_sidebar:
+        if st.focus_manager.is_sidebar_focused():
             # Hard limit for sidebar - never allow cursor beyond column 14
             target_x = min(target_x, 14)
         else:
             # Normal limit for task area
-            target_x = min(target_x, date_pos - (0 if is_sidebar else 1))
+            target_x = min(target_x, date_pos - (0 if st.focus_manager.is_sidebar_focused() else 1))
         
         return target_x
     
@@ -380,7 +380,7 @@ def print_all_cli(todos):
         text += todo_line + "\n"
     print(text, end="")
 
-def print_category_entries(stdscr, categories, start_index, has_focus):
+def print_category_entries(stdscr, categories, start_index):
     """Print the category sidebar"""
     # Set sidebar width
     sidebar_width = 15
@@ -396,14 +396,14 @@ def print_category_entries(stdscr, categories, start_index, has_focus):
     for i, category in enumerate(visible_categories):
         row = i + 1  # Start from row 1 (row 0 is for status bar)
         is_selected = category['id'] == st.current_category_id
-        print_category(stdscr, category, row, is_selected, has_focus)
+        print_category(stdscr, category, row, is_selected)
 
-def print_category(stdscr, category, y, is_selected=False, has_focus=False):
+def print_category(stdscr, category, y, is_selected=False):
     """Print a single category in the sidebar with fixed width"""
     # Set format based on selection and focus
-    if is_selected and has_focus:
+    if is_selected and st.focus_manager.is_sidebar_focused():
         stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))  # Use the same highlight as tasks
-    elif not has_focus:
+    elif not st.focus_manager.is_sidebar_focused():
         if is_selected:
             stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
             stdscr.attron(curses.A_BOLD)
@@ -435,15 +435,13 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
         pass
     
     # Reset attributes
-    if is_selected and has_focus:
+    if is_selected and st.focus_manager.is_sidebar_focused():
         stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
-    elif is_selected and not has_focus:
+    elif is_selected and not st.focus_manager.is_sidebar_focused():
         stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
         stdscr.attroff(curses.A_BOLD)
 
-def print_whole_view(stdscr, 
-                               categories, 
-                               category_start_index, sidebar_has_focus):
+def print_whole_view(stdscr, categories, category_start_index):
     """Print the complete UI with sidebar and task list"""
     # Get max visible height
     max_y, _ = stdscr.getmaxyx()
@@ -467,7 +465,7 @@ def print_whole_view(stdscr,
     for i, category in enumerate(visible_categories):
         row = i + 1  # Start from row 1 (row 0 is for status bar)
         is_selected = category['id'] == st.current_category_id
-        print_category(stdscr, category, row, is_selected, sidebar_has_focus)
+        print_category(stdscr, category, row, is_selected)
     
     print_left_frame(stdscr, max_y)
     print_sidebar_task_panel_separator(stdscr, max_y)
@@ -482,13 +480,13 @@ def print_whole_view(stdscr,
         print_msg_in_task_panel(stdscr, msg.empty_msg, 16, highlight=False)
         print_right_frame(stdscr, max_y, max_x)
     else:
-        print_task_entries(stdscr, 16, sidebar_has_focus)
+        print_task_entries(stdscr, 16)
     
     # Use a single refresh at the end instead of multiple refreshes in each function
     stdscr.noutrefresh()
     curses.doupdate()
 
-def print_task_entries(stdscr, x_offset=0, sidebar_has_focus=False):
+def print_task_entries(stdscr, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
     max_y, max_x = stdscr.getmaxyx()
     
@@ -503,7 +501,7 @@ def print_task_entries(stdscr, x_offset=0, sidebar_has_focus=False):
             row = i + 1  # +1 due to status bar
             display_id = i + st.start_task_id  # Sequential display ID (1, 2, 3, etc.)
             
-            if st.start_task_id + i == st.current_task_id and not sidebar_has_focus and not st.adding_task:
+            if st.start_task_id + i == st.current_task_id and not st.focus_manager.is_sidebar_focused() and not st.adding_task:
                 # Selected task
                 print_task_entry_selected(stdscr, task, row, x_offset, display_id)
             else:

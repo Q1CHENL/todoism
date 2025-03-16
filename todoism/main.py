@@ -83,7 +83,7 @@ def main(stdscr):
     categories = cat.load_categories()
     
     # Initialize focus manager
-    focus_manager = nv.FocusManager()
+    st.focus_manager = nv.FocusManager()
     
     current_category_id = 0  # Start with "All" category
     
@@ -270,7 +270,7 @@ def main(stdscr):
             
         if should_repaint:
             tsk.reassign_task_ids(st.filtered_tasks)
-            if focus_manager.is_tasks_focused():
+            if st.focus_manager.is_tasks_focused():
                 if st.task_cnt > 0:
                     if st.current_task_id > st.task_cnt:
                         st.current_task_id = st.task_cnt
@@ -281,7 +281,6 @@ def main(stdscr):
                         stdscr,
                         categories,
                         sidebar_scroller.start_index,
-                        sidebar_has_focus=False
                     )
                 else:
                     # No tasks in current category
@@ -289,7 +288,6 @@ def main(stdscr):
                         stdscr,
                         categories,
                         sidebar_scroller.start_index,
-                        has_focus=False
                     )
                     pr.print_frame_all(stdscr)
                     pr.print_msg_in_task_panel(stdscr, msg.empty_msg, 16, highlight=True)
@@ -300,7 +298,6 @@ def main(stdscr):
                     stdscr,
                     categories,
                     sidebar_scroller.start_index,
-                    True  # Sidebar has focus
                 )
 
             should_repaint = False
@@ -312,7 +309,7 @@ def main(stdscr):
             continue
             
         if key == 9:  # Tab key for switching focus
-            focus_manager.toggle_focus()
+            st.focus_manager.toggle_focus()
             should_repaint = True
             continue
             
@@ -321,8 +318,8 @@ def main(stdscr):
                 mouse_id, mouse_x, mouse_y, mouse_z, button_state = curses.getmouse()
                 
                 if mouse_x < sidebar_width:
-                    if not focus_manager.is_sidebar_focused():
-                        focus_manager.toggle_focus()
+                    if not st.focus_manager.is_sidebar_focused():
+                        st.focus_manager.toggle_focus()
                         should_repaint = True
                     
                     # Only handle category selection if clicked on a valid category
@@ -346,8 +343,8 @@ def main(stdscr):
                 
                 # Handle clicks in task area (including blank areas)
                 if mouse_x >= sidebar_width:
-                    if not focus_manager.is_tasks_focused():
-                        focus_manager.toggle_focus()
+                    if not st.focus_manager.is_tasks_focused():
+                        st.focus_manager.toggle_focus()
                         should_repaint = True
                     
                     # Only handle task selection if clicked on a valid task row
@@ -382,7 +379,7 @@ def main(stdscr):
                 pass
             continue
         
-        if focus_manager.is_sidebar_focused():
+        if st.focus_manager.is_sidebar_focused():
             if key == curses.KEY_UP:
                 task_scroll_offset = 0
                 sidebar_scroller.scroll_up()
@@ -467,14 +464,13 @@ def main(stdscr):
                     stdscr,
                     categories,
                     sidebar_scroller.start_index,
-                    has_focus=True
                 )
                 
                 pr.print_left_frame(stdscr, st.latest_max_y)
                 pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
                 pr.print_right_frame(stdscr, st.latest_max_y, st.latest_max_x)
                 if st.task_cnt > 0:
-                    pr.print_task_entries(stdscr, 16, True)
+                    pr.print_task_entries(stdscr, 16)
                 else: 
                     pr.print_msg_in_task_panel(stdscr, msg.empty_msg, 16, highlight=False)
                 pr.print_status_bar(stdscr)
@@ -490,7 +486,7 @@ def main(stdscr):
                 
                 # Use the same edit function as for tasks, but adapt for sidebar position
                 temp_category['description'] = ''  # Add this field for edit function compatibility
-                new_cat_name = ed.edit(stdscr, temp_category, pr.add_mode, 0, 0, is_sidebar=True)
+                new_cat_name = ed.edit(stdscr, temp_category, pr.add_mode, 0, 0)
                 temp_category['name'] = new_cat_name  # Store result in name field
                 
                 if new_cat_name:
@@ -542,13 +538,12 @@ def main(stdscr):
                         stdscr,
                         categories,
                         sidebar_scroller.start_index,
-                        True
                     )
                     
                     pr.print_left_frame(stdscr, max_y)
                     pr.print_sidebar_task_panel_separator(stdscr, max_y)
                     # Draw tasks area
-                    pr.print_task_entries(stdscr, sidebar_width, True)
+                    pr.print_task_entries(stdscr, sidebar_width)
                     
                     stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
                     stdscr.move(row, 0)
@@ -569,7 +564,7 @@ def main(stdscr):
                     edit_cat = current_cat.copy()
                     edit_cat['description'] = current_cat['name']  # Map name to description for edit function
                     
-                    new_name = ed.edit(stdscr, edit_cat, pr.edit_mode, 0, len(current_cat['name']), is_sidebar=True)
+                    new_name = ed.edit(stdscr, edit_cat, pr.edit_mode, 0, len(current_cat['name']))
                     
                     if new_name:
                         # Enforce maximum length for category name
@@ -577,7 +572,7 @@ def main(stdscr):
                             new_name = new_name[:cat.MAX_CATEGORY_NAME_LENGTH]
                         cat.update_category_name(st.current_category_id, new_name)
                         categories = cat.load_categories()
-                    pr.print_task_entries(stdscr, sidebar_width, True)
+                    pr.print_task_entries(stdscr, sidebar_width)
                     
                     curses.curs_set(0)
                     curses.noecho()
@@ -689,7 +684,7 @@ def main(stdscr):
                 command_line = ""
                 
         # Handle task navigation and actions when task area is focused
-        elif focus_manager.is_tasks_focused():
+        elif st.focus_manager.is_tasks_focused():
             # Handle user input for tasks
             if key == ord('a'):
                 if st.task_cnt == ed.max_task_count:
@@ -716,7 +711,6 @@ def main(stdscr):
                     stdscr,
                     categories,
                     sidebar_scroller.start_index,
-                    False
                 )
                 
                 pr.print_left_frame(stdscr, max_y)
@@ -724,7 +718,7 @@ def main(stdscr):
                 
                 st.adding_task = True
                 # Print existing tasks with offset (crucial: pass sidebar_width to offset tasks)
-                pr.print_task_entries(stdscr, sidebar_width, False)
+                pr.print_task_entries(stdscr, sidebar_width)
 
                 # Add a new task with proper indentation
                 new_task_num = f"{st.task_cnt + 1:2d}"
@@ -793,11 +787,10 @@ def main(stdscr):
                         stdscr,
                         categories,
                         sidebar_scroller.start_index,
-                        False
                     )
                     pr.print_left_frame(stdscr, max_y)
                     pr.print_sidebar_task_panel_separator(stdscr, max_y)
-                    pr.print_task_entries(stdscr, sidebar_width, False)
+                    pr.print_task_entries(stdscr, sidebar_width)
                     
                     # Move cursor to edit position
                     stdscr.move(edit_row, sidebar_width + ed.indent)
