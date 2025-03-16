@@ -14,13 +14,6 @@ A powerful yet easy-to-use todo TUI
 - Update: `pip install todoism --upgrade`
 - Use: Invoke help message using command `:help` to see commonly used operations and commands
 
-## Develop
-
-- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode, not available in pip installation)
-- Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in pip installation.
-- Installation is at `~/.local/bin/todoism` and `~/.local/bin/todo`
-- Tasks, settings, backups and test files are stored in `~/.todoism/`
-
 ```txt
 ┌──────────────────────────────────────────────────┐
 │                                                  │
@@ -61,19 +54,26 @@ A powerful yet easy-to-use todo TUI
 > E.g **Ptyxis** (new default terminal for GNOME 47) does not fully support strikethrough effect.
 > You can turn it off in **preference panel** (open with `:pref`).
 
-> [!CAUTION]
-> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions is not yet implemented. **v1.21 and ealier versions are perticularly deprecated.**
-
 ### Keycode recording
 
 When you first start todoism, you'll be prompted to record key combinations for text navigation.
 
-- CTRL + LEFT: Move cursor one word left when editing text
-- CTRL + RIGHT: Move cursor one word right when editing text
-- CTRL + SHIFT + LEFT: Select text from cursor position to one word left
-- CTRL + SHIFT + RIGHT: Select text from cursor position to one word right
-- ALT + LEFT: Move cursor to the beginning of the text
-- ALT + RIGHT: Move cursor to the end of the text
+- **CTRL + LEFT**: Move cursor one word left when editing text
+- **CTRL + RIGHT**: Move cursor one word right when editing text
+- **CTRL + SHIFT + LEFT**: Select text from cursor position to one word left
+- **CTRL + SHIFT + RIGHT**: Select text from cursor position to one word right
+- **ALT + LEFT**: Move cursor to the beginning of the text
+- **ALT + RIGHT**: Move cursor to the end of the text
+
+## Develop
+
+- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode, not available in pip installation)
+- Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in pip installation.
+- Installation is at `~/.local/bin/todoism` and `~/.local/bin/todo`
+- Tasks, settings, backups and test files are stored in `~/.todoism/`
+
+> [!CAUTION]
+> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions is not yet implemented. **v1.21 and ealier versions are perticularly deprecated.**
 
 ## Contribute
 
