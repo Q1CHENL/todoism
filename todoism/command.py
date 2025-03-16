@@ -74,7 +74,6 @@ def execute_command(
         original_cnt = len(task_list)
         displayed_task_cnt = st.end_task_id - st.start_task_id + 1
         task_list, done_list = purge(task_list, purged_list)
-        # Use save_tasks without explicit path to respect test mode
         tsk.save_tasks(task_list)
         # change current id to 1 if some tasks were purged
         if len(task_list) < original_cnt:
@@ -281,15 +280,15 @@ def execute_command(
         elif tag == "off":
             pref.set_tag(False)
             command_recognized = True
-    elif command == "test":
+    elif command == 'dev':
         # Hidden command for developers - load test data
         try:
             import test.test as test_module
             
-            if test_module.is_test_mode_active():
+            if test_module.is_dev_mode_active():
                 max_y, max_x = stdscr.getmaxyx()
                 sidebar_width = 16
-                warning_msg = "Already in test mode!"
+                warning_msg = "Already in dev mode!"
                 stdscr.move(st.latest_max_capacity, sidebar_width)
                 stdscr.clrtoeol()
                 yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
@@ -301,7 +300,7 @@ def execute_command(
                 stdscr.move(st.latest_max_capacity, sidebar_width)
                 stdscr.clrtoeol()
             else:
-                if test_module.load_test_mode():
+                if test_module.load_dev_mode():
                     task_list = tsk.load_tasks()
                     categories = cat.load_categories()
                     st.current_category_id = 0
@@ -315,7 +314,7 @@ def execute_command(
                     # Show success message
                     max_y, max_x = stdscr.getmaxyx()
                     sidebar_width = 16
-                    success_msg = "Test mode enabled. Test tasks and categories loaded. Will auto-restore on exit."
+                    success_msg = "Dev mode enabled. Test tasks and categories loaded. Will auto-restore on exit."
                     stdscr.move(st.latest_max_capacity, sidebar_width)
                     stdscr.clrtoeol()
                     green_pair_num = clr.get_color_pair_num_by_str_text("green")
@@ -333,7 +332,7 @@ def execute_command(
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
             sidebar_width = 16
-            warning_msg = "Test mode not available in installation."
+            warning_msg = "Dev mode not available in installation."
             stdscr.move(st.latest_max_capacity, sidebar_width)
             stdscr.clrtoeol()
             yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
@@ -351,10 +350,10 @@ def execute_command(
         try:
             import test.test as test_module
             
-            if not test_module.is_test_mode_active():
+            if not test_module.is_dev_mode_active():
                 max_y, max_x = stdscr.getmaxyx()
                 sidebar_width = 16
-                warning_msg = "Not in test mode - nothing to restore!"
+                warning_msg = "Not in dev mode - nothing to restore!"
                 stdscr.move(st.latest_max_capacity, sidebar_width)
                 stdscr.clrtoeol()
                 yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
@@ -366,8 +365,7 @@ def execute_command(
                 stdscr.move(st.latest_max_capacity, sidebar_width)
                 stdscr.clrtoeol()
             else:
-                if test_module.exit_test_mode():
-                    # After disabling test mode, load tasks from regular file
+                if test_module.exit_dev_mode():
                     task_list = tsk.load_tasks()
                     categories = cat.load_categories()
                     st.current_category_id = 0
@@ -381,7 +379,7 @@ def execute_command(
                     # Show success message
                     max_y, max_x = stdscr.getmaxyx()
                     sidebar_width = 16
-                    success_msg = "Test mode disabled. Original tasks and categories restored."
+                    success_msg = "Dev mode disabled. Original tasks and categories restored."
                     stdscr.move(st.latest_max_capacity, sidebar_width)
                     stdscr.clrtoeol()
                     green_pair_num = clr.get_color_pair_num_by_str_text("green")
@@ -399,7 +397,7 @@ def execute_command(
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
             sidebar_width = 16
-            warning_msg = "Test mode not available in installation"
+            warning_msg = "Dev mode not available in installation"
             stdscr.move(st.latest_max_capacity, sidebar_width)
             stdscr.clrtoeol()
             yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
@@ -430,7 +428,7 @@ def execute_command(
         stdscr.attroff(curses.color_pair(red_pair_num) | curses.A_BOLD)
         stdscr.refresh()
         
-        time.sleep(1.35)
+        time.sleep(1.5)
         
         # Clear the error message
         stdscr.move(st.latest_max_capacity, sidebar_width)

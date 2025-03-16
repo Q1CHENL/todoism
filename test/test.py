@@ -4,8 +4,8 @@ import uuid
 import todoism.preference as pref
 import todoism.task as tsk
 
-# Flag file to mark that we're in test mode
-test_mode_flag_path = os.path.join(pref.config_dir, "test_mode_active")
+# Flag file to mark that we're in dev mode
+dev_mode_flag_path = os.path.join(pref.config_dir, "dev_mode_active")
 
 def generate_test_tasks():
     """Generate a fresh set of test tasks with proper UUIDs and category_id"""
@@ -13,7 +13,7 @@ def generate_test_tasks():
         {
             "id": 1,
             "uuid": str(uuid.uuid4()),
-            "description": "Implement test mode",
+            "description": "Implement dev mode",
             "date": tsk.formatted_datetime_now(),
             "status": False,
             "flagged": True,
@@ -330,13 +330,13 @@ def generate_test_categories():
     ]
     return test_categories
 
-def is_test_mode_active():
-    """Check if test mode is currently active"""
-    return os.path.exists(test_mode_flag_path)
+def is_dev_mode_active():
+    """Check if dev mode is currently active"""
+    return os.path.exists(dev_mode_flag_path)
 
-def load_test_mode():
+def load_dev_mode():
     """Load test tasks and categories"""
-    create_test_mode_flag()
+    create_dev_mode_flag()
     
     # Generate test data
     test_tasks = generate_test_tasks()
@@ -354,36 +354,36 @@ def load_test_mode():
     
     return True
 
-def exit_test_mode():
-    """Exit test mode - just remove the flag, no restoration"""
-    # Just remove the test mode flag
-    remove_test_mode_flag()
+def exit_dev_mode():
+    """Exit dev mode - just remove the flag, no restoration"""
+    # Just remove the dev mode flag
+    remove_dev_mode_flag()
     return True
 
-def create_test_mode_flag():
-    """Create the test mode flag file"""
-    test_mode_flag_path = os.path.join(pref.config_dir, "test_mode_active")
+def create_dev_mode_flag():
+    """Create the dev mode flag file"""
+    dev_mode_flag_path = os.path.join(pref.config_dir, "dev_mode_active")
     try:
-        with open(test_mode_flag_path, 'w') as f:
+        with open(dev_mode_flag_path, 'w') as f:
             f.write('1')
         return True
     except Exception as e:
-        print(f"Error creating test mode flag: {e}")
+        print(f"Error creating dev mode flag: {e}")
         return False
 
-def remove_test_mode_flag():
-    """Remove the test mode flag file"""
-    test_mode_flag_path = os.path.join(pref.config_dir, "test_mode_active")
+def remove_dev_mode_flag():
+    """Remove the dev mode flag file"""
+    dev_mode_flag_path = os.path.join(pref.config_dir, "dev_mode_active")
     try:
-        if os.path.exists(test_mode_flag_path):
-            os.remove(test_mode_flag_path)
+        if os.path.exists(dev_mode_flag_path):
+            os.remove(dev_mode_flag_path)
         return True
     except Exception as e:
-        print(f"Error removing test mode flag: {e}")
+        print(f"Error removing dev mode flag: {e}")
         return False
 
 if __name__ == "__main__":
     # When run directly, generate and save test data
-    load_test_mode()
-    print("Test mode enabled. Test tasks and categories created.")
+    load_dev_mode()
+    print("Dev mode enabled. Test tasks and categories created.")
 

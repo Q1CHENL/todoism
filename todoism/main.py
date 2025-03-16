@@ -417,12 +417,10 @@ def main(stdscr):
                 import todoism.backup as backup
                 backup.backup_normal_data()
                 
-                # If in test mode, remove the flag but don't restore data
-                # This ensures test data is preserved for future use
                 try:
                     import test.test as test_module
-                    if test_module.is_test_mode_active():
-                        test_module.exit_test_mode()
+                    if test_module.is_dev_mode_active():
+                        test_module.exit_dev_mode()
                 except ImportError:
                     # No test module found (PyPI installation), continue with normal exit
                     pass
@@ -882,12 +880,10 @@ def main(stdscr):
                 # Always backup normal data on exit
                 import todoism.backup as backup
                 backup.backup_normal_data()
-                
-                # If in test mode, remove the flag but don't restore data
                 try:
                     import test.test as test_module
-                    if test_module.is_test_mode_active():
-                        test_module.exit_test_mode()
+                    if test_module.is_dev_mode_active():
+                        test_module.exit_dev_mode()
                 except ImportError:
                     # No test module found (PyPI installation), continue with normal exit
                     pass

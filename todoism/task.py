@@ -15,10 +15,10 @@ def done_count(task_list):
     return count        
 
 def get_tasks_file_path():
-    """Get the correct tasks file path based on whether test mode is active"""
+    """Get the correct tasks file path based on whether dev mode is active"""
     try:
         import test.test as test
-        if test.is_test_mode_active():
+        if test.is_dev_mode_active():
             return pref.test_tasks_file_path
         return pref.tasks_file_path
     except ImportError:

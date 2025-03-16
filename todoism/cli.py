@@ -43,7 +43,7 @@ def run():
     elif args.version:
         pr.print_version()
     elif args.dev:
-        ts.load_test_mode()
+        ts.load_dev_mode()
         curses.wrapper(main.main)
     else:
         curses.wrapper(main.main)

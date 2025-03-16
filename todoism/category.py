@@ -6,10 +6,10 @@ MAX_CATEGORY_NAME_LENGTH = 12
 MAX_CATEGORY_COUNT = 128
 
 def get_categories_file_path():
-    """Get the correct categories file path based on whether test mode is active"""
+    """Get the correct categories file path based on whether dev mode is active"""
     try:
         import test.test as test
-        if test.is_test_mode_active():
+        if test.is_dev_mode_active():
             return pref.test_categories_file_path
         return pref.categories_file_path
     except ImportError:
