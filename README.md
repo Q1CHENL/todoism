@@ -18,6 +18,8 @@ A powerful yet easy-to-use todo TUI
 
 - Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode, not available in pip installation)
 - Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in pip installation.
+- Installation is at `~/.local/bin/todoism` and `~/.local/bin/todo`
+- Tasks, settings, backups and test files are stored in `~/.todoism/`
 
 ```txt
 ┌──────────────────────────────────────────────────┐
