@@ -50,7 +50,7 @@ A powerful yet easy-to-use todo TUI
 │   :pref - Open preference panel                  │
 │   :del <task_id> - Delete task                   │
 │   :edit <task_id> - Edit task                    │
-│   :done <task_id> - Mark task as done            |
+│   :done <task_id> - Mark task as done            │
 │   :purge - Purge all done tasks                  │
 │                                                  │
 └──────────────────────────────────────────────────┘
@@ -59,7 +59,7 @@ A powerful yet easy-to-use todo TUI
 > [!NOTE]
 > Some terminal does not support mouse click or strike through effect.
 > E.g **Ptyxis** (new default terminal for GNOME 47) does not fully support strikethrough effect.
-> You can turn it off use command `:st off`, as specified in the help message.
+> You can turn it off in **preference panel** (open with `:pref`).
 
 > [!CAUTION]
 > Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions is not yet implemented. **v1.21 and ealier versions are perticularly deprecated.**
