@@ -131,6 +131,10 @@ def main(stdscr):
         st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
         st.latest_max_capacity = st.latest_max_y - 2
         
+        # Prevent error when window is vertically too small
+        if st.latest_max_capacity < 0:
+            st.latest_max_capacity = 0
+        
         # In case of window height change
         if st.latest_max_capacity != st.old_max_capacity:
             # Store if we're getting more or less space

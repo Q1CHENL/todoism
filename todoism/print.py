@@ -355,11 +355,14 @@ def print_status_bar(stdscr):
     print_top_right_corner(stdscr, max_x)
     
     # Print centered status with colored percentage and datetime
-    stdscr.addstr(0, start_pos, status_prefix)
-    stdscr.attron(curses.color_pair(color_pair))
-    stdscr.addstr(0, start_pos + len(status_prefix), percent_text)
-    stdscr.attroff(curses.color_pair(color_pair))
-    stdscr.addstr(0, start_pos + len(status_prefix) + len(percent_text) + 2, datetime_str)
+    try:
+        stdscr.addstr(0, start_pos, status_prefix)
+        stdscr.attron(curses.color_pair(color_pair))
+        stdscr.addstr(0, start_pos + len(status_prefix), percent_text)
+        stdscr.attroff(curses.color_pair(color_pair))
+        stdscr.addstr(0, start_pos + len(status_prefix) + len(percent_text) + 2, datetime_str)
+    except curses.error:
+        pass
     
     # Ensure all attributes are reset at the end
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(clr.backgournd_color_pair_num) | 
@@ -416,24 +419,26 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
     # Calculate available width for category name
     sidebar_width = 15
     name_width = sidebar_width - 2  # 2 spaces for indentation (1 for left border + 1 for spacing)
-    
-    if is_selected:
-        stdscr.addstr(y, 1, ' ')
-    
-    # Always show the full name (it's already limited by MAX_CATEGORY_NAME_LENGTH)
-    # If it's somehow longer, truncate it with an ellipsis
-    if len(category['name']) > name_width:
-        display_name = category['name'][:name_width-1] + "…"
-    else:
-        display_name = category['name']
-    
-    # Display name with fixed width - now at position 2 (after the left frame)
-    stdscr.addstr(y, 2, display_name)
-    
-    # Fill remaining space with spaces to ensure fixed width
-    padding = name_width - len(display_name)
-    if padding > 0:
-        stdscr.addstr(' ' * padding)
+    try:
+        if is_selected:
+            stdscr.addstr(y, 1, ' ')
+
+        # Always show the full name (it's already limited by MAX_CATEGORY_NAME_LENGTH)
+        # If it's somehow longer, truncate it with an ellipsis
+        if len(category['name']) > name_width:
+            display_name = category['name'][:name_width-1] + "…"
+        else:
+            display_name = category['name']
+
+        # Display name with fixed width - now at position 2 (after the left frame)
+        stdscr.addstr(y, 2, display_name)
+
+        # Fill remaining space with spaces to ensure fixed width
+        padding = name_width - len(display_name)
+        if padding > 0:
+            stdscr.addstr(' ' * padding)
+    except curses.error:
+        pass
     
     # Reset attributes
     if is_selected and has_focus:
@@ -574,28 +579,29 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
             strikethrough_desc += (char + "\u0336")
         visible_text = strikethrough_desc
     
-    # Display text at calculated position with proper styling
-    if is_selected:
-        stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
-        stdscr.addstr(row, total_indent, visible_text)
-        # Fill remaining space with spaces
-        for i in range(available_width - len(visible_text) + 1):
-            stdscr.addstr(' ')
-        stdscr.addstr(row, date_pos, date_str)
-        stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
-    else:
-        if task.get('status', False):
-            stdscr.attron(curses.A_DIM)
-        stdscr.addstr(row, total_indent, visible_text)
-        # Fill remaining space with spaces
-        for i in range(available_width - len(visible_text)):
-            stdscr.addstr(' ')
-        # Print date
-        stdscr.addstr(row, date_pos, date_str)
-        if task.get('status', False):
-            stdscr.attroff(curses.A_DIM)
-    
     try:
+    # Display text at calculated position with proper styling
+        if is_selected:
+            stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
+            stdscr.addstr(row, total_indent, visible_text)
+            # Fill remaining space with spaces
+            for i in range(available_width - len(visible_text) + 1):
+                stdscr.addstr(' ')
+            stdscr.addstr(row, date_pos, date_str)
+            stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+        else:
+            if task.get('status', False):
+                stdscr.attron(curses.A_DIM)
+            stdscr.addstr(row, total_indent, visible_text)
+            # Fill remaining space with spaces
+            for i in range(available_width - len(visible_text)):
+                stdscr.addstr(' ')
+            # Print date
+            stdscr.addstr(row, date_pos, date_str)
+            if task.get('status', False):
+                stdscr.attroff(curses.A_DIM)
+    
+    
         if is_selected:
             stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
             stdscr.addstr(row, right_frame_pos - 1, ' ')
@@ -794,9 +800,12 @@ def clear_inner_content(stdscr):
             continue
         
 def print_q_to_close(stdscr, page, max_x, max_y):
-    hint = f"┤Press 'q' to close {page}├"
-    hint_pos_x = (max_x - len(hint)) // 2 
-    stdscr.addstr(max_y - 1, hint_pos_x, hint)
+    try:
+        hint = f"┤Press 'q' to close {page}├"
+        hint_pos_x = (max_x - len(hint)) // 2 
+        stdscr.addstr(max_y - 1, hint_pos_x, hint)
+    except curses.error:
+        pass
 
 # Functions for drawing frames and separators
 def print_right_frame(stdscr, max_y, max_x):
