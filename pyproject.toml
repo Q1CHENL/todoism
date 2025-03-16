@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "todoism"
+version = "1.21.4.post1"
+description = "A powerful yet easy-to-use todo TUI"
+authors = [
+    { name = "Qichen Liu", email = "liuqichne@email.com" }
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.6"
+dependencies = []
+# Corrected classifiers format - must be an array of strings
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent", 
+    "Environment :: Console",
+    "Topic :: Utilities"
+]
+
+[project.urls]
+Homepage = "https://github.com/Q1CHENL/todoism"
+BugTracker = "https://github.com/Q1CHENL/todoism/issues"
+
+[project.scripts]
+todo = "todoism.main:run"
+todoism = "todoism.main:run"
+
+[tool.setuptools]
+
+[tool.setuptools.packages.find]
+include = ["todoism*"]  # Use include instead
+exclude = ["test*"]
+
+[tool.setuptools.package-dir]
+"todoism" = "todoism"
+
+[tool.setuptools.dynamic]
+readme = { file = "README.md" }

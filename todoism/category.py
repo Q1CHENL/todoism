@@ -1,47 +1,47 @@
 import json
-from datetime import datetime
 import todoism.preference as pref
 
 # Maximum allowed length for category names
 MAX_CATEGORY_NAME_LENGTH = 12
+MAX_CATEGORY_COUNT = 128
+
+def get_categories_file_path():
+    """Get the correct categories file path based on whether dev mode is active"""
+    try:
+        import test.test as test
+        if test.is_dev_mode_active():
+            return pref.test_categories_file_path
+        return pref.categories_file_path
+    except ImportError:
+        return pref.categories_file_path
 
 def load_categories():
-    """Load categories from the categories.json file"""
+    """Load categories from file"""
     try:
-        with open(pref.categories_file_path, 'r') as file:
-            category_list = json.load(file)
-    except FileNotFoundError:
-        # Create default "All" category if no categories exist
-        category_list = [
-            {
-                'id': 0,
-                'name': 'All Tasks',
-                'color': 'blue',
-                'date': datetime.now().strftime("%Y-%m-%d %H:%M")
-            }
-        ]
-        save_categories(category_list)
-    return category_list
+        with open(get_categories_file_path(), "r") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        # If categories file doesn't exist, create it with default "All Tasks"
+        default_categories = [{"id": 0, "name": "All Tasks"}]
+        save_categories(default_categories)
+        return default_categories
 
 def save_categories(category_list):
     """Save categories to the categories.json file"""
-    with open(pref.categories_file_path, 'w') as file:
+    with open(get_categories_file_path(), 'w') as file:
         json.dump(category_list, file, indent=4)
 
 def create_category(name, color="blue"):
     """Create a new category object"""
     categories = load_categories()
     new_id = max([cat['id'] for cat in categories], default=-1) + 1
-    
-    # Limit to 99 categories
-    if new_id > 99:
+
+    if new_id > MAX_CATEGORY_COUNT:
         return None
         
     new_category = {
         'id': new_id,
-        'name': name,
-        'color': color,
-        'date': datetime.now().strftime("%Y-%m-%d %H:%M")
+        'name': name
     }
     
     return new_category

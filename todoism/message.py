@@ -8,7 +8,7 @@ help_msg = '''
 │   d - Mark task as done                          │
 │   e - Edit task/category                         │
 │   f - Mark task as flagged                       │
-│   q - Quit this help message/todoism             │
+│   q - Quit this help message/pref panel/todoism  │
 │                                                  │
 │   Key bindings:                                  │
 │   Tab - Toggle focus bewteen tasks and sidebar   │
@@ -26,19 +26,34 @@ help_msg = '''
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
 │   :help - Show this help message                 │
-│   :del [task_id] - Delete task                   │
-│   :edit [task_id] - Edit task                    │
-│   :done [task_id] - Mark task as done            |
+│   :pref - Open preference panel                  │
+│   :del <task_id> - Delete task                   │
+│   :edit <task_id> - Edit task                    │
+│   :done <task_id> - Mark task as done            |
 │   :purge - Purge all done tasks                  │
-│   :sort f - Sort flagged tasks to top            │
-│   :sort d - Sort done tasks to bottom            │
-│   :autosort f on|off                             │
-│   :autosort d on|off                             │
-│   :color blue|red|yellow|green                   │
-│    - Change background color of current task     │
-│   :st on|off - toggle strikethrough effect       │
 │                                                  │
 └──────────────────────────────────────────────────┘
+'''
+
+pref_panel = '''
+┌────────────────────────────────────┐
+│                                    │
+│   Tag: on|off                      │
+│                                    │
+│   Strikethrough: on|off            │
+│                                    │
+│   Color: blue|red|yellow|green     │
+│                                    │
+│   Date format: Y-M-D|D-M-Y|M-D-Y   │
+│                                    │
+│   Sort by flagged: on|off          │
+│                                    │
+│   Sort by done: on|off             │
+│                                    │
+│   (Press Tab to toggle options)    │
+│                                    │
+└────────────────────────────────────┘
+
 '''
 
 empty_msg = '''
@@ -50,7 +65,7 @@ empty_msg = '''
 
 limit_msg = '''
 ┌────────────────────────────────────────┐
-│   You already have 99 tasks in hand.   │
+│  You already have 1024 tasks in hand.  │
 │  Maybe try to deal with them first :)  │
 └────────────────────────────────────────┘
 '''

@@ -1,17 +1,23 @@
 # todoism
 
-A simple and easy-to-use todo TUI
+A powerful yet easy-to-use todo TUI
 
-## Screenshot
+## Screenshots
 
-![UI](./assets/screenshot-v1.21.3.png)
+![UI](./assets/screenshot-v1.21.4.png)
+![UI](./assets/screenshot-v1.21.4-pref-panel.png)
 
 ## Install and use
 
 - Install: `pip install todoism`
-- Run: `todoism` or `todo` (or `python -m todoism` locally)
+- Run: `todoism` or `todo` 
 - Update: `pip install todoism --upgrade`
 - Use: Invoke help message using command `:help` to see commonly used operations and commands
+
+## Develop
+
+- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode, not available in pip installation)
+- Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in pip installation.
 
 ```txt
 ┌──────────────────────────────────────────────────┐
@@ -21,7 +27,7 @@ A simple and easy-to-use todo TUI
 │   d - Mark task as done                          │
 │   e - Edit task/category                         │
 │   f - Mark task as flagged                       │
-│   q - Quit this help message/todoism             │
+│   q - Quit this help message/pref panel/todoism  │
 │                                                  │
 │   Key bindings:                                  │
 │   Tab - Toggle focus bewteen tasks and sidebar   │
@@ -39,17 +45,11 @@ A simple and easy-to-use todo TUI
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
 │   :help - Show this help message                 │
-│   :del [task_id] - Delete task                   │
-│   :edit [task_id] - Edit task                    │
-│   :done [task_id] - Mark task as done            |
+│   :pref - Open preference panel                  │
+│   :del <task_id> - Delete task                   │
+│   :edit <task_id> - Edit task                    │
+│   :done <task_id> - Mark task as done            |
 │   :purge - Purge all done tasks                  │
-│   :sort f - Sort flagged tasks to top            │
-│   :sort d - Sort done tasks to bottom            │
-│   :autosort f on|off                             │
-│   :autosort d on|off                             │
-│   :color blue|red|yellow|green                   │
-│    - Change background color of current task     │
-│   :st on|off - toggle strikethrough effect       │
 │                                                  │
 └──────────────────────────────────────────────────┘
 ```
@@ -61,7 +61,6 @@ A simple and easy-to-use todo TUI
 
 > [!CAUTION]
 > Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions is not yet implemented. Please backup your data (located in `~/.todoism/`) when needed.
-
 
 ### Keycode recording
 
