@@ -19,8 +19,8 @@ def _sort_by_tag(categories):
         if _not_marked(task):
             marked = st.filtered_tasks[:i]
             break
-    if not _not_marked(st.filtered_tasks[len(st.filtered_tasks) - 1]):
-        marked = st.filtered_tasks
+    if len(st.filtered_tasks) > 0 and not _not_marked(st.filtered_tasks[len(st.filtered_tasks) - 1]):
+            marked = st.filtered_tasks
     tsk.reassign_task_ids(marked)
     not_marked = []
     for c in categories:
