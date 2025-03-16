@@ -1,3 +1,5 @@
+import todoism.state as st
+
 class FocusManager:
     """Manages focus between sidebar and task list"""
     SIDEBAR = 0
@@ -63,64 +65,64 @@ class SidebarScroller:
             self.start_index = max(0, self.total_items - self.visible_height)
         return self.start_index
 
-def keydown_update(start, end, current_task_id, row, task_cnt, max_capacity, should_repaint):
+def keydown_update(task_cnt, should_repaint):
     """Scroll one line down with improved edge case handling"""
     # Don't do anything if we're already at the last task
-    if current_task_id == task_cnt:
-        return start, end, current_task_id, row, False
+    if st.current_task_id == task_cnt:
+        return False
         
     # Move selection down one task
-    current_task_id += 1
+    st.current_task_id += 1
     
     # Handle scrolling if needed
-    if task_cnt > max_capacity and row == max_capacity:
+    if task_cnt > st.latest_max_capacity and st.current_task_row == st.latest_max_capacity:
         # We need to scroll the view down
-        start = start + 1
-        end = end + 1
+        st.start_task_id += 1
+        st.end_task_id += 1
     else:
         # Just move the highlight down
-        row = row + 1
+        st.current_task_row += 1
     
     # Double-check that everything is in bounds after scrolling
-    if end > task_cnt:
-        end = task_cnt
-        start = max(1, end - max_capacity + 1)
+    if st.end_task_id > task_cnt:
+        st.end_task_id = task_cnt
+        st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
         
     # Make sure row is consistent with current_task_id and start
-    row = current_task_id - start + 1
+    st.current_task_row = st.current_task_id - st.start_task_id + 1
     
-    return start, end, current_task_id, row, should_repaint
+    return should_repaint
                 
-def keyup_update(start, end, current_task_id, row, task_cnt, max_capacity, should_repaint):
+def keyup_update(task_cnt, should_repaint):
     """Scroll one line up with improved edge case handling"""
     # Don't do anything if we're already at the first task
-    if current_task_id == 1:
-        return start, end, current_task_id, row, False
+    if st.current_task_id == 1:
+        return False
         
     # Move selection up one task
-    current_task_id -= 1
+    st.current_task_id -= 1
     
     # Handle scrolling if needed
-    if task_cnt >= max_capacity and start > 1 and row == 1:
+    if task_cnt >= st.latest_max_capacity and st.start_task_id > 1 and st.current_task_row == 1:
         # We need to scroll the view up
-        start = start - 1
-        end = end - 1
+        st.start_task_id = st.start_task_id - 1
+        st.end_task_id = st.end_task_id - 1
     else:
         # Just move the highlight up
-        row = row - 1
+        st.current_task_row = st.current_task_row - 1
     
     # Double-check that everything is in bounds after scrolling
-    if start < 1:
-        start = 1
-        end = min(start + max_capacity - 1, task_cnt)
+    if st.start_task_id < 1:
+        st.start_task_id = 1
+        st.end_task_id = min(st.start_task_id + st.latest_max_capacity - 1, task_cnt)
         
     # Make sure row is consistent with current_task_id and start
-    row = current_task_id - start + 1
+    st.current_task_row =  st.current_task_id - st.start_task_id + 1
     
-    return start, end, current_task_id, row, should_repaint
+    return should_repaint
 
 
-def post_deletion_update(current_task_id, current_row, start, end, prev_task_cnt, max_capacity):
+def post_deletion_update(prev_task_cnt):
     """
     Update the current view after deletion: 
     1. 2x Backspaces
@@ -147,29 +149,28 @@ def post_deletion_update(current_task_id, current_row, start, end, prev_task_cnt
                │       │
                └───────┘
     """
-    if is_view_fully_packed(start, end, max_capacity):
+    if _is_view_fully_packed():
         # Senarios 1
-        if prev_task_cnt == max_capacity:
+        if prev_task_cnt == st.latest_max_capacity:
             # delete the last task, otherwise the row and id both remains unchanged
-            if current_task_id == end:
-                current_row = current_row - 1
-                current_task_id = current_task_id - 1
-            end = end - 1
+            if st.current_task_id == st.end_task_id:
+                st.current_task_row = st.current_task_row - 1
+                st.current_task_id = st.current_task_id - 1
+            st.end_task_id = st.end_task_id - 1
         # Senario 2
-        elif prev_task_cnt == end and prev_task_cnt > max_capacity:
-            start = start - 1
-            end = end - 1
-            current_task_id = current_task_id - 1
+        elif prev_task_cnt == st.end_task_id and prev_task_cnt > st.latest_max_capacity:
+            st.start_task_id = st.start_task_id - 1
+            st.end_task_id = st.end_task_id - 1
+            st.current_task_id = st.current_task_id - 1
         # Senario 3 and 4 does not lead to any change
     
     # Senario 5
     else:
-        end = end - 1
-        if current_task_id == prev_task_cnt:
-            current_row = current_row - 1
-            current_task_id = current_task_id - 1
-    return current_task_id, current_row, start, end
+        st.end_task_id = st.end_task_id - 1
+        if st.current_task_id == prev_task_cnt:
+            st.current_task_row = st.current_task_row - 1
+            st.current_task_id = st.current_task_id - 1
 
-def is_view_fully_packed(start, end, capacity):
+def _is_view_fully_packed():
     """indicates whether the current view is completely filled with tasks"""
-    return end - start + 1 >= capacity
+    return st.end_task_id - st.start_task_id + 1 >= st.latest_max_capacity

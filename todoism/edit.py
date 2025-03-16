@@ -2,11 +2,8 @@ import curses
 import todoism.print as pr
 import todoism.task as tsk
 import todoism.navigate as nv
-import todoism.preference as pref
 import todoism.keycode as kc
-
-indent = 7
-max_task_count = 99
+import todoism.state as st
 
 def move_by_word(text, current_pos, direction):
     """Move cursor by word in the specified direction
@@ -50,7 +47,7 @@ def move_by_word(text, current_pos, direction):
             
         return pos
 
-def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text=None, is_sidebar=False):
+def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text=None):
     """Helper function to render a task being edited with appropriate scrolling and styling"""
     max_y, max_x = stdscr.getmaxyx()
     right_frame_pos = max_x - 1
@@ -64,7 +61,7 @@ def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_p
     stdscr.addstr(0, 15, "┬")  
     
     # Add right frame character with highlight off
-    if not is_sidebar:
+    if not st.focus_manager.is_sidebar_focused():
         stdscr.addstr(y, right_frame_pos, '│')
         stdscr.attron(curses.color_pair(1))
     
@@ -76,17 +73,16 @@ def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_p
         scroll_offset=scroll_offset,
         max_x=max_x,
         cursor_pos=cursor_pos_in_text,
-        is_edit_mode=True,
-        is_sidebar=is_sidebar
+        is_edit_mode=True
     )
     
     # Add extra protection for sidebar mode
-    if is_sidebar and result is not None and result > 14:
+    if st.focus_manager.is_sidebar_focused() and result is not None and result > 14:
         return 14
     
     return result
 
-def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset, is_sidebar=False):
+def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset):
     """Highlight selected text region"""
     # Highlight the selected region
     min_pos = min(start_pos, end_pos)
@@ -99,14 +95,14 @@ def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset, is_s
     # Apply highlighting to each visible character
     for i in range(visible_start, visible_end):
         # Calculate screen position based on whether we're in sidebar or task area
-        if is_sidebar:
+        if st.focus_manager.is_sidebar_focused():
             # Use base_indent (2) for sidebar to match text_start_pos in edit function
             screen_pos = 2 + (i - scroll_offset)  # Sidebar starts at position 2
             # Ensure we don't highlight beyond sidebar boundary
             if screen_pos > 14:  # Sidebar width limit
                 break
         else:
-            screen_pos = indent + 16 + (i - scroll_offset)  # Task position with sidebar offset
+            screen_pos = tsk.TASK_INDENT_IN_TASK_PANEL + 16 + (i - scroll_offset)  # Task position with sidebar offset
             
         if i - scroll_offset >= 0:  # Ensure we only render visible chars
             try:
@@ -115,7 +111,7 @@ def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset, is_s
                 # Skip characters that would go past the edge of the screen
                 pass
 
-def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sidebar=False):
+def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
     """
     A editing wrapper implemented using getch(). It delivers 
     more comprehensive functionalities than getstr() does.
@@ -125,24 +121,23 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
     right_frame_pos = max_x - 1
     
     # Standardize indent calculations
-    if is_sidebar:
+    if st.focus_manager.is_sidebar_focused():
         sidebar_width = 0
         base_indent = 2
         text_start_pos = base_indent
         import todoism.category as cat
-        MAX_LENGTH = cat.MAX_CATEGORY_NAME_LENGTH
+        MAX_DESCRIPTION_LENGTH = cat.MAX_CATEGORY_NAME_LENGTH
     else:
         sidebar_width = 16
-        base_indent = 7
+        base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
         text_start_pos = sidebar_width + base_indent
-        MAX_LENGTH = 500
+        MAX_DESCRIPTION_LENGTH = tsk.MAX_TASK_DESCRIPTION_LENGTH
     
     # Selection state variables
     selection_active = False
     selection_start = -1
     debug_keys = False
     scroll_offset = initial_scroll
-    MAX_DESCRIPTION_LENGTH = 500
     
     # Initialize cursor position
     if initial_cursor_pos is not None:
@@ -151,7 +146,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         cursor_pos_in_text = len(task['description'])  # Start at end of text for new tasks
     
     # Calculate available width
-    if is_sidebar:
+    if st.focus_manager.is_sidebar_focused():
         date_length = 0
         date_pos = 15
         max_visible_width = date_pos - base_indent
@@ -160,30 +155,26 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         date_pos = right_frame_pos - date_length - 1  # Only 1 char gap from right frame
         max_visible_width = date_pos - text_start_pos - 1
     
-    original_text = task['description']
     y = stdscr.getyx()[0]
     
     # Initial render with proper offset
-    target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text, is_sidebar)
+    target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text)
     stdscr.move(y, target_x)
     stdscr.refresh()
-    
-    lock_scrolling = True 
-    stabilize_count = 3
-    
+        
     while True:
         # Get current position
         y, x = stdscr.getyx()
         max_y, max_x = stdscr.getmaxyx()
         
-        # CRITICAL FIX: Ensure cursor never appears beyond sidebar for sidebar editing
-        if is_sidebar and x > 14:
+        # Ensure cursor never appears beyond sidebar for sidebar editing
+        if st.focus_manager.is_sidebar_focused() and x > 14:
             # Force cursor back into valid sidebar region if it somehow gets displaced
             x = min(14, text_start_pos + len(task['description']))
             stdscr.move(y, x)
         
         # Clear the edit line WITHOUT clearing the category at the same height
-        if is_sidebar:
+        if st.focus_manager.is_sidebar_focused():
             # For sidebar editing, clear just the sidebar area
             stdscr.move(y, 0)
             # Preserve left frame
@@ -219,27 +210,14 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             stdscr.move(y, 16)  # Position just after separator
             stdscr.clrtoeol()
             
-            # Redraw vertical separator (critical fix)
+            # Redraw vertical separator
             stdscr.addstr(y, 15, '│')
             
             # Redraw task ID
             stdscr.addstr(y, sidebar_width, f"{task['id']:2d} ")
-            
-            # Task symbol area needs redrawing too
-            if 'status' in task or 'flagged' in task:
-                import todoism.print as pr
-                pr.print_task_symbols(
-                    stdscr, 
-                    task, 
-                    y, 
-                    sidebar_width + 3, 
-                    sidebar_width + 5, 
-                    True, 
-                    True
-                )
         
         # Recalculate with current screen dimensions
-        if is_sidebar:
+        if st.focus_manager.is_sidebar_focused():
             date_pos = 15  # End of sidebar area
             max_visible_width = date_pos - base_indent
         else:
@@ -249,31 +227,28 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         right_limit = date_pos - 1
         
         # Additional bound check for sidebar
-        if is_sidebar:
+        if st.focus_manager.is_sidebar_focused():
             right_limit = min(14, date_pos - 1)  # Hard limit at the sidebar boundary
         
         # Calculate cursor position in text with bounds checking
         cursor_pos_in_text = max(0, min(x - text_start_pos + scroll_offset, len(task['description'])))
         
-        # Check if text has changed
-        text_modified = task['description'] != original_text
-        
         # Render the edit line with current scroll offset
-        target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text, is_sidebar)
+        target_x = render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_pos_in_text)
         
         # Add selection highlighting if active
         if selection_active:
-            highlight_selection(stdscr, task, y, selection_start, cursor_pos_in_text, scroll_offset, is_sidebar)
+            highlight_selection(stdscr, task, y, selection_start, cursor_pos_in_text, scroll_offset)
         
         # Redraw the separator
-        if is_sidebar:
-            stdscr.addstr(y, 15, "│")
+        if st.focus_manager.is_sidebar_focused():
+            stdscr.addstr(y, 15, '│')
         
         # Position cursor
         stdscr.move(y, target_x)
         
         # For sidebar mode: ensure cursor stays in valid position after rendering
-        if is_sidebar:
+        if st.focus_manager.is_sidebar_focused():
             current_x = stdscr.getyx()[1]
             if current_x > 14:
                 stdscr.move(y, 14)
@@ -294,13 +269,6 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             stdscr.attroff(curses.color_pair(4))
             # Restore cursor position
             stdscr.move(current_y, current_x)
-        
-        # Only decrement stabilize_count on actual keystrokes (not for -1 or timeout)
-        if ch != -1 and stabilize_count > 0:
-            stabilize_count -= 1
-            # Only unlock scrolling after stabilize period
-            if stabilize_count == 0:
-                lock_scrolling = False
                 
         # Handle key presses
         if ch == 4:  # Toggle debug mode with Ctrl+D
@@ -446,7 +414,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             new_pos = move_by_word(task['description'], cursor_pos_in_text, -1)
             
             # For sidebar (category names), no scrolling needed
-            if is_sidebar:
+            if st.focus_manager.is_sidebar_focused():
                 cursor_pos_in_text = new_pos
                 new_x = text_start_pos + new_pos
                 new_x = min(new_x, 14)  # Hard limit for sidebar
@@ -473,7 +441,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             new_pos = move_by_word(task['description'], cursor_pos_in_text, 1)
             
             # For sidebar (category names), no scrolling needed
-            if is_sidebar:
+            if st.focus_manager.is_sidebar_focused():
                 cursor_pos_in_text = new_pos
                 new_x = text_start_pos + new_pos
                 new_x = min(new_x, 14)  # Hard limit for sidebar
@@ -486,48 +454,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
                 new_x = min(new_x, right_limit)
             
             stdscr.move(y, new_x)
-            
-        # Try multiple common key code patterns for Ctrl+Shift+Backspace or Ctrl+W
-        elif ch in [523, 527, 23, 127]:
-            if cursor_pos_in_text <= 0:
-                continue
-                
-            # Find the start of the previous word
-            new_pos = move_by_word(task['description'], cursor_pos_in_text, -1)
-            
-            # Delete characters from new position to current position
-            task['description'] = task['description'][:new_pos] + task['description'][cursor_pos_in_text:]
-            
-            # Adjust scroll if needed
-            if new_pos < scroll_offset + 5:
-                scroll_offset = max(0, new_pos - 5)
-            
-            # Calculate new safe screen position
-            new_x = text_start_pos + (new_pos - scroll_offset)
-            if new_x >= max_x - 23:
-                new_x = max_x - 23
-            
-            # Clear selection state
-            selection_active = False
-            selection_start = -1
-            
-            stdscr.move(y, new_x)
-            
-        # Try multiple common key code patterns for Ctrl+Shift+Delete or Ctrl+Alt+D
-        elif ch in [524, 528, 127, 4]:
-            if cursor_pos_in_text >= len(task['description']):
-                continue
-                
-            # Find the end of the next word
-            new_pos = move_by_word(task['description'], cursor_pos_in_text, 1)
-            
-            # Delete characters from current position to new position
-            task['description'] = task['description'][:cursor_pos_in_text] + task['description'][new_pos:]
-            
-            # Clear selection state
-            selection_active = False
-            selection_start = -1
-            
+        
         elif ch == curses.KEY_BACKSPACE or ch == kc.BACKSPACE:  # Backspace
             # Clear selection if active
             if selection_active:
@@ -557,7 +484,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
                 stdscr.move(y, text_start_pos)
                 continue
             
-            # CRITICAL FIX: Save the text length before deletion
+            # Save the text length before deletion
             old_length = len(task['description'])
             
             # Verify cursor position is valid before deletion
@@ -593,12 +520,12 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
         elif 32 <= ch < 127:  # Printable char
             # IMPROVED CHECK: For sidebar (categories), enforce strict character limit 
             # to prevent visual glitches when the limit is reached
-            if is_sidebar and len(task['description']) >= MAX_LENGTH:
+            if st.focus_manager.is_sidebar_focused() and len(task['description']) >= MAX_DESCRIPTION_LENGTH:
                 # Skip character completely - no visual feedback
                 continue
                 
             # Check maximum length for regular tasks
-            if len(task['description']) >= MAX_LENGTH and not selection_active:
+            if len(task['description']) >= MAX_DESCRIPTION_LENGTH and not selection_active:
                 continue
                 
             # If a selection is active, replace it with the typed character
@@ -639,9 +566,6 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             # Keep track of whether we're at the end of text before insertion
             at_end_of_text = cursor_pos_in_text == len(task['description'])
             
-            # Record length before insertion to detect pastes
-            original_length = len(task['description'])
-            
             # Insert character at the correct position
             task['description'] = task['description'][:cursor_pos_in_text] + chr(ch) + task['description'][cursor_pos_in_text:]
             
@@ -651,10 +575,16 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             at_end_of_text = cursor_pos_in_text == len(task['description'])
             
             # Recalculate screen boundaries with exactly 1 space gap
-            date_length = len(task['date'])
-            date_pos = right_frame_pos - date_length - 1  # Position where date starts (with 1 char gap)
-            max_visible_width = date_pos - (text_start_pos)  # Total spaces available for text
-            right_limit = date_pos - 1  # Position of the 1 char gap
+            if not st.focus_manager.is_sidebar_focused():
+                date_length = len(task['date'])
+                date_pos = right_frame_pos - date_length - 1  # Position where date starts (with 1 char gap)
+                max_visible_width = date_pos - (text_start_pos)  # Total spaces available for text
+                right_limit = date_pos - 1  # Position of the 1 char gap
+            else:
+                date_length = 0
+                date_pos = 15
+                max_visible_width = date_pos - base_indent
+                 
             
             if at_end_of_text:
                 # When we're at the end of text and need to scroll:
@@ -682,7 +612,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
             stdscr.move(y, new_x)
             
             # IMPROVED SIDEBAR HANDLING: Add extra check after character insertion
-            if is_sidebar:
+            if st.focus_manager.is_sidebar_focused():
                 # Recalculate and verify cursor position doesn't exceed sidebar
                 new_x = text_start_pos + (new_cursor_pos - scroll_offset)
                 if new_x > 14:
@@ -786,7 +716,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None, is_sideb
     return task['description']
 
 def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
-    """Edit task with improved cursor positioning and scrolling behavior"""
+    """Edit task or category with improved cursor positioning and scrolling behavior"""
     # Get screen dimensions
     max_y, max_x = stdscr.getmaxyx()
     
@@ -796,27 +726,24 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     
     # Calculate exact space available for text (accounting for date + gap)
     date_pos = max_x - date_length - 1  # -1 for exactly one character gap before date
-    available_width = date_pos - (indent + 16) - 1  # -1 ensures the gap is preserved
+    available_width = date_pos - (tsk.TASK_INDENT_IN_TASK_PANEL + 16) - 1  # -1 ensures the gap is preserved
     
-    # NEW BEHAVIOR: Always initialize with scroll_offset = 0 to show beginning of text
+    # Always initialize with scroll_offset = 0 to show beginning of text
     scroll_offset = 0
     
     # Position cursor differently based on text length:
     if description_length <= available_width:
         # For short tasks (text fits): position at end of text
-        cursor_x = indent + 16 + description_length
+        cursor_x = tsk.TASK_INDENT_IN_TASK_PANEL + 16 + description_length
     else:
         # For long tasks: position at end of visible portion
-        cursor_x = indent + 16 + available_width
+        cursor_x = tsk.TASK_INDENT_IN_TASK_PANEL + 16 + available_width
     
     # Make sure cursor position is within screen bounds
     cursor_x = min(cursor_x, date_pos - 1)  # Ensure exactly one char gap
     
     # Calculate cursor position in text
-    cursor_pos_in_text = cursor_x - (indent + 16) + scroll_offset
-    
-    # Render once with fixed parameters before entering edit mode
-    render_edit_line(stdscr, task_list[id - 1], y, scroll_offset, available_width, cursor_pos_in_text)
+    cursor_pos_in_text = cursor_x - (tsk.TASK_INDENT_IN_TASK_PANEL + 16) + scroll_offset
     
     # Set cursor at the calculated position
     stdscr.move(y, cursor_x)
@@ -833,10 +760,10 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     # Handle task deletion if description is empty
     if task_list[id - 1]['description'] == "":
         del task_list[id - 1]
-        reassign_task_ids(task_list)
-        id, row, start, end = nv.post_deletion_update(id, row, start, end, len(task_list) + 1, max_capacity)
+        tsk.reassign_task_ids(task_list)
+        nv.post_deletion_update(len(task_list) + 1)
     
     # Save changes
-    tsk.save_tasks(task_list, pref.tasks_file_path)
+    tsk.save_tasks(task_list)
     return id, row, start, end
 

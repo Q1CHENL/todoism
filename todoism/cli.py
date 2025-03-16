@@ -4,6 +4,7 @@ import curses
 import todoism.task as tsk
 import todoism.print as pr
 import todoism.main as main
+import test.test as ts
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -12,6 +13,7 @@ def parse_args():
     parser.add_argument("-p", "--print-all", action="store_true", help="print all todos")
     parser.add_argument("-f", "--flag", action="store_true", help="set task as flagged (used with '-a')")
     parser.add_argument("-v", "--version", action="store_true", help="show todoism version")
+    parser.add_argument("--dev", action="store_true", help="enter development mode")
     return parser.parse_args()
 
 def validate_id(arg):
@@ -40,5 +42,8 @@ def run():
         pr.print_all_cli(todos)
     elif args.version:
         pr.print_version()
+    elif args.dev:
+        ts.load_dev_mode()
+        curses.wrapper(main.main)
     else:
         curses.wrapper(main.main)
