@@ -38,9 +38,11 @@ def _not_marked(task):
         return not task['status'] and not task['flagged']
     elif pref.get_sort_done():
         return not task['status']
-    else:
+    elif pref.get_sort_flagged():
         return not task['flagged']
-    
+    else:
+        return False
+        
 def main(stdscr):
     stdscr.keypad(True)  # enable e.g arrow keys
     stdscr.scrollok(True)
