@@ -21,7 +21,9 @@ adding_task = False
 editing_task = False
 
 # Current row in task panel
-current_row = 1
+current_task_row = 1
+
+filtered_tasks = []
 
 task_cnt = 0
 done_cnt = 0

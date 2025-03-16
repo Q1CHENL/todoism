@@ -441,7 +441,7 @@ def print_category(stdscr, category, y, is_selected=False, has_focus=False):
         stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
         stdscr.attroff(curses.A_BOLD)
 
-def print_whole_view(stdscr, filtered_tasks, 
+def print_whole_view(stdscr, 
                                categories, 
                                category_start_index, sidebar_has_focus):
     """Print the complete UI with sidebar and task list"""
@@ -482,13 +482,13 @@ def print_whole_view(stdscr, filtered_tasks,
         print_msg_in_task_panel(stdscr, msg.empty_msg, 16, highlight=False)
         print_right_frame(stdscr, max_y, max_x)
     else:
-        print_task_entries(stdscr, filtered_tasks, 16, sidebar_has_focus)
+        print_task_entries(stdscr, 16, sidebar_has_focus)
     
     # Use a single refresh at the end instead of multiple refreshes in each function
     stdscr.noutrefresh()
     curses.doupdate()
 
-def print_task_entries(stdscr, filtered_tasks, x_offset=0, sidebar_has_focus=False):
+def print_task_entries(stdscr, x_offset=0, sidebar_has_focus=False):
     """Print tasks with horizontal offset to accommodate sidebar"""
     max_y, max_x = stdscr.getmaxyx()
     
@@ -498,8 +498,8 @@ def print_task_entries(stdscr, filtered_tasks, x_offset=0, sidebar_has_focus=Fal
         stdscr.clrtoeol()
 
     # Only print if we have tasks and a valid start index
-    if filtered_tasks and st.start_task_id > 0:
-        for i, task in enumerate(filtered_tasks[st.start_task_id - 1:st.end_task_id]):
+    if st.filtered_tasks and st.start_task_id > 0:
+        for i, task in enumerate(st.filtered_tasks[st.start_task_id - 1:st.end_task_id]):
             row = i + 1  # +1 due to status bar
             display_id = i + st.start_task_id  # Sequential display ID (1, 2, 3, etc.)
             
@@ -511,17 +511,16 @@ def print_task_entries(stdscr, filtered_tasks, x_offset=0, sidebar_has_focus=Fal
                 print_task_entry(stdscr, task, row, False, x_offset, display_id)
     
     max_y, max_x = stdscr.getmaxyx()
-    for y in range(len(filtered_tasks) if len(filtered_tasks) > 0 else 1, max_y - 1):
+    for y in range(len(st.filtered_tasks) if len(st.filtered_tasks) > 0 else 1, max_y - 1):
         stdscr.addstr(y, max_x - 1, "│")
     
     # Reset all attributes before drawing bottom right corner
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.A_REVERSE | curses.A_BLINK | 
                   curses.A_UNDERLINE | curses.color_pair(clr.backgournd_color_pair_num))
-    
+
     # Special trick for last char error in cursor window
     stdscr.addstr(max_y - 1, max_x - 2, "┘")
     stdscr.insstr(max_y - 1, max_x - 2, "─")
-    # print_bottom_right_corner(stdscr, max_y, max_x)    
     
 def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None):
     """Print a task with horizontal offset and optional display ID override"""

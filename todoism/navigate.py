@@ -75,13 +75,13 @@ def keydown_update(task_cnt, should_repaint):
     st.current_task_id += 1
     
     # Handle scrolling if needed
-    if task_cnt > st.latest_max_capacity and st.current_row == st.latest_max_capacity:
+    if task_cnt > st.latest_max_capacity and st.current_task_row == st.latest_max_capacity:
         # We need to scroll the view down
         st.start_task_id += 1
         st.end_task_id += 1
     else:
         # Just move the highlight down
-        st.current_row += 1
+        st.current_task_row += 1
     
     # Double-check that everything is in bounds after scrolling
     if st.end_task_id > task_cnt:
@@ -89,7 +89,7 @@ def keydown_update(task_cnt, should_repaint):
         st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
         
     # Make sure row is consistent with current_task_id and start
-    st.current_row = st.current_task_id - st.start_task_id + 1
+    st.current_task_row = st.current_task_id - st.start_task_id + 1
     
     return should_repaint
                 
@@ -103,13 +103,13 @@ def keyup_update(task_cnt, should_repaint):
     st.current_task_id -= 1
     
     # Handle scrolling if needed
-    if task_cnt >= st.latest_max_capacity and st.start_task_id > 1 and st.current_row == 1:
+    if task_cnt >= st.latest_max_capacity and st.start_task_id > 1 and st.current_task_row == 1:
         # We need to scroll the view up
         st.start_task_id = st.start_task_id - 1
         st.end_task_id = st.end_task_id - 1
     else:
         # Just move the highlight up
-        st.current_row = st.current_row - 1
+        st.current_task_row = st.current_task_row - 1
     
     # Double-check that everything is in bounds after scrolling
     if st.start_task_id < 1:
@@ -117,7 +117,7 @@ def keyup_update(task_cnt, should_repaint):
         st.end_task_id = min(st.start_task_id + st.latest_max_capacity - 1, task_cnt)
         
     # Make sure row is consistent with current_task_id and start
-    st.current_row =  st.current_task_id - st.start_task_id + 1
+    st.current_task_row =  st.current_task_id - st.start_task_id + 1
     
     return should_repaint
 
@@ -154,7 +154,7 @@ def post_deletion_update(prev_task_cnt):
         if prev_task_cnt == st.latest_max_capacity:
             # delete the last task, otherwise the row and id both remains unchanged
             if st.current_task_id == st.end_task_id:
-                st.current_row = st.current_row - 1
+                st.current_task_row = st.current_task_row - 1
                 st.current_task_id = st.current_task_id - 1
             st.end_task_id = st.end_task_id - 1
         # Senario 2
@@ -168,7 +168,7 @@ def post_deletion_update(prev_task_cnt):
     else:
         st.end_task_id = st.end_task_id - 1
         if st.current_task_id == prev_task_cnt:
-            st.current_row = st.current_row - 1
+            st.current_task_row = st.current_task_row - 1
             st.current_task_id = st.current_task_id - 1
 
 def _is_view_fully_packed():

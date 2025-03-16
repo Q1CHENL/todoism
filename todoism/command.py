@@ -81,7 +81,7 @@ def execute_command(
         if len(task_list) < original_cnt:
             # temporary solution: back to top
             st.current_task_id = 1
-            st.current_row = 1
+            st.current_task_row = 1
             st.start_task_id = 1
             if len(task_list) > displayed_task_cnt:
                 st.end_task_id = displayed_task_cnt
@@ -95,7 +95,7 @@ def execute_command(
             if 1 <= task_id <= len(task_list):
                 task_uuid = task_list[task_id - 1].get('uuid')
                 task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                # Update current_task_id, current_row, start, end after deletion
+                # Update current_task_id, current_task_row, start, end after deletion
                 nv.post_deletion_update(len(task_list))
         command_recognized = True
     elif command.startswith("edit "):
@@ -106,13 +106,13 @@ def execute_command(
 
             curses.echo()
             curses.curs_set(1)
-            st.current_row = edit_id - st.start_task_id + 1
+            st.current_task_row = edit_id - st.start_task_id + 1
             if len(task_list) and edit_id >= st.start_task_id and edit_id <= st.end_task_id:
-                st.current_task_id, st.current_row, st.start_task_id, st.end_task_id = ed.edit_and_save(
+                st.current_task_id, st.current_task_row, st.start_task_id, st.end_task_id = ed.edit_and_save(
                     stdscr, 
                     task_list, 
                     edit_id,
-                    st.current_row,
+                    st.current_task_row,
                     st.start_task_id,
                     st.end_task_id,
                     edit_id - st.start_task_id + 1,
@@ -309,7 +309,7 @@ def execute_command(
                     
                     # Reset view
                     st.current_task_id = 1
-                    st.current_row = 1
+                    st.current_task_row = 1
                     st.start_task_id = 1
                     st.end_task_id = min(len(task_list), st.latest_max_capacity)
                     
@@ -375,7 +375,7 @@ def execute_command(
                     
                     # Reset view
                     st.current_task_id = 1 if len(task_list) > 0 else 0
-                    st.current_row = 1 if len(task_list) > 0 else 0
+                    st.current_task_row = 1 if len(task_list) > 0 else 0
                     st.start_task_id = 1 if len(task_list) > 0 else 0
                     st.end_task_id = min(len(task_list), st.latest_max_capacity) if len(task_list) > 0 else 0
                     
