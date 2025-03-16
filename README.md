@@ -10,7 +10,7 @@ A powerful yet easy-to-use todo TUI
 ## Install and use
 
 - Install: `pip install todoism`
-- Run: `todoism` or `todo` 
+- Run: `todoism` or `todo`
 - Update: `pip install todoism --upgrade`
 - Use: Invoke help message using command `:help` to see commonly used operations and commands
 
@@ -62,7 +62,7 @@ A powerful yet easy-to-use todo TUI
 > You can turn it off use command `:st off`, as specified in the help message.
 
 > [!CAUTION]
-> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions is not yet implemented. Please backup your data (located in `~/.todoism/`) when needed.
+> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions is not yet implemented. **v1.21 and ealier versions are perticularly deprecated.**
 
 ### Keycode recording
 
