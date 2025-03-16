@@ -4,7 +4,8 @@ A simple and easy-to-use todo TUI
 
 ## Screenshot
 
-![UI](./assets/screenshot-v1.21.3.png)
+![UI](./assets/screenshot-v1.21.4.png)
+![UI](./assets/screenshot-v1.21.4-pref-panel.png)
 
 ## Install and use
 
@@ -21,7 +22,7 @@ A simple and easy-to-use todo TUI
 │   d - Mark task as done                          │
 │   e - Edit task/category                         │
 │   f - Mark task as flagged                       │
-│   q - Quit this help message/todoism             │
+│   q - Quit this help message/pref panel/todoism  │
 │                                                  │
 │   Key bindings:                                  │
 │   Tab - Toggle focus bewteen tasks and sidebar   │
@@ -39,19 +40,11 @@ A simple and easy-to-use todo TUI
 │   Vim-like long commands:                        │
 │   (:<command> [args])                            │
 │   :help - Show this help message                 │
-│   :pref - Show and customize preferences         │
+│   :pref - Open preference panel                  │
 │   :del <task_id> - Delete task                   │
 │   :edit <task_id> - Edit task                    │
 │   :done <task_id> - Mark task as done            |
 │   :purge - Purge all done tasks                  │
-│   :sort f - Sort flagged tasks to top            │
-│   :sort d - Sort done tasks to bottom            │
-│   :color blue|red|yellow|green                   │
-│    - Change background color of current task     │
-│   :st on|off - toggle strikethrough effect       │
-│   :tag on|off - toggle [tag] display All Tasks   │
-│   :autosort f on|off                             │
-│   :autosort d on|off                             │
 │                                                  │
 └──────────────────────────────────────────────────┘
 ```
