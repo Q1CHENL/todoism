@@ -13,6 +13,33 @@ import todoism.keycode as kc
 import todoism.color as clr
 import todoism.state as st
 
+def _sort_by_tag(filtered_tasks, categories):
+    marked = []
+    for i, task in enumerate(filtered_tasks):
+        if _not_marked_condition(task):
+            marked = filtered_tasks[:i]
+            break
+        
+    not_marked = []
+    for c in categories:
+        for task in filtered_tasks: 
+            if _not_marked_condition(task):
+                if c['id'] == task['category_id']:
+                    not_marked.append(task)
+    tsk.reassign_task_ids(not_marked)
+    for task in not_marked:
+        task['id'] += len(marked)
+    filtered_tasks = marked + not_marked    
+    return filtered_tasks 
+
+def _not_marked_condition(task):
+    if pref.get_sort_done() and pref.get_sort_flagged():
+        return not task['status'] and not task['flagged']
+    elif pref.get_sort_done():
+        return not task['status']
+    else:
+        return not task['flagged']
+    
 def main(stdscr):
     stdscr.keypad(True)  # enable e.g arrow keys
     stdscr.scrollok(True)
@@ -122,6 +149,8 @@ def main(stdscr):
         if pref.get_sort_flagged():
             filtered_tasks = cmd.sort(filtered_tasks, 'flagged')
             tsk.reassign_task_ids(filtered_tasks)
+        
+        filtered_tasks = _sort_by_tag(filtered_tasks, categories)
         
         st.task_cnt = len(filtered_tasks)
         st.done_cnt = tsk.done_count(filtered_tasks)
