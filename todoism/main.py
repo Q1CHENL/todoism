@@ -466,8 +466,10 @@ def main(stdscr):
                     has_focus=True
                 )
                 
-                pr.print_left_frame(stdscr, max_y)
-                pr.print_sidebar_task_panel_separator(stdscr, max_y)
+                pr.print_left_frame(stdscr, st.latest_max_y)
+                pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
+                pr.print_right_frame(stdscr, st.latest_max_y, st.latest_max_x)
+                pr.print_task_entries(stdscr, filtered_tasks, 16, True)
                 
                 stdscr.refresh()
 
