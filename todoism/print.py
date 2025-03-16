@@ -78,13 +78,7 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=16, highlight=False):
     
     # Draw the right frame for each line
     print_right_frame(stdscr, max_y, max_x)
-
-    # Use noutrefresh() instead of refresh() for better performance
-    # when multiple updates happen in sequence
-    stdscr.noutrefresh()
-    curses.doupdate()
     
-
 def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
     """Print a message box with proper centering in the task area with optional highlighting"""
     lines = msg.split('\n')
