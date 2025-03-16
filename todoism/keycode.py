@@ -4,6 +4,7 @@ import time
 import todoism.print as pr
 import todoism.message as msg
 import todoism.preference as pref
+import todoism.state as st
 
 CTRL_LEFT = 0
 CTRL_RIGHT = 0
@@ -31,11 +32,23 @@ def record_key_codes(stdscr):
     # Set timeout to non-blocking
     stdscr.timeout(-1)
 
-    # Display welcome message
-    pr.print_msg_center(stdscr, msg.keycode_msg)
-    ch = stdscr.getch()
-    if ch == ord('q'):
-        return False
+    pr.print_outer_frame(stdscr)
+    pr.print_msg(stdscr, msg.keycode_msg)
+    while True:
+        st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
+        if st.latest_max_x != st.old_max_x or st.latest_max_y != st.old_max_y:
+            st.old_max_x = st.latest_max_x
+            st.old_max_y = st.latest_max_y
+            stdscr.clear()
+            pr.print_outer_frame(stdscr)
+            pr.print_msg(stdscr, msg.keycode_msg)
+        ch = stdscr.getch()
+        if ch == ord('q'):
+            return False
+        elif ch == ENTER:
+            break
+        else:
+            continue
     
     # Key combination definitions
     key_definitions = [
@@ -70,8 +83,10 @@ def record_key_codes(stdscr):
             'feedback_msg': msg.keycode_feedback_alt_right_msg
         }
     ]
-
+    
     while True:
+        pr.clear_inner_content(stdscr)
+
         # Reset all key codes at start of new recording session
         for key in key_codes:
             key_codes[key] = 0
@@ -80,18 +95,15 @@ def record_key_codes(stdscr):
         
         # Process each key combination
         for key_def in key_definitions:
-            key_name = key_def['name']
             
-            # Show prompt message for this key
-            pr.print_msg_center(stdscr, key_def['prompt_msg'], 3, 3)
+            key_name = key_def['name']            
+            open_new_record_stage(stdscr, key_def['prompt_msg'])
             
-            # Get the key code
             ch = stdscr.getch()
-            
             # Handle restart/quit during key recording
             if ch == ord('r'):
                 restart_session = True
-                pr.print_msg_center(stdscr, msg.keycode_restart_msg, 3)
+                open_new_record_stage(stdscr, msg.keycode_restart_msg)
                 time.sleep(1)
                 break
             elif ch == ord('q'):
@@ -99,10 +111,9 @@ def record_key_codes(stdscr):
                 
             # Record the key code
             key_codes[key_name] = ch
-            
-            # Show feedback message
-            pr.print_msg_center(stdscr, key_def['feedback_msg'], 2)
-            
+
+            open_new_record_stage(stdscr, key_def['feedback_msg'])
+
             # Wait for Enter to continue, or handle restart/quit
             while True:
                 ch = stdscr.getch()
@@ -110,7 +121,7 @@ def record_key_codes(stdscr):
                     break
                 elif ch == ord('r'):
                     restart_session = True
-                    pr.print_msg_center(stdscr, msg.keycode_restart_msg, 3)
+                    open_new_record_stage(stdscr, msg.keycode_restart_msg)
                     time.sleep(1)
                     break
                 elif ch == ord('q'):
@@ -127,10 +138,15 @@ def record_key_codes(stdscr):
                 save_key_code(key, code)
             
             # Show completion message
-            pr.print_msg_center(stdscr, msg.keycode_completion_msg, 2)
+            open_new_record_stage(stdscr, msg.keycode_completion_msg)
             time.sleep(1)
             return True
 
+def open_new_record_stage(stdscr, msg):
+    """Open a new record stage"""
+    pr.clear_inner_content(stdscr)
+    pr.print_outer_frame(stdscr)
+    pr.print_msg(stdscr, msg)
 
 def need_key_recording():
     """Check if we need to record key codes (all keys are 0)"""

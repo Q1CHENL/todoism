@@ -783,6 +783,16 @@ def clear_task_panel(stdscr, max_y):
         except curses.error:
             continue
         
+def clear_inner_content(stdscr):
+    # Clear all content exepct the outer frame
+    max_y, max_x = stdscr.getmaxyx()
+    for i in range(1, max_y - 1):
+        try:
+            stdscr.move(i, 1)
+            stdscr.clrtoeol()
+        except curses.error:
+            continue
+        
 def print_q_to_close(stdscr, page, max_x, max_y):
     hint = f"┤Press 'q' to close {page}├"
     hint_pos_x = (max_x - len(hint)) // 2 
