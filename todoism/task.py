@@ -4,6 +4,8 @@ from datetime import datetime
 import todoism.preference as pref
 
 MAX_TASK_DESCRIPTION_LENGTH = 256
+TASK_INDENT_IN_TASK_PANEL = 7 # ID (2) + space (1) + flag (1) + space (1) + done (1) + space (1)
+MAX_TASK_COUNT = 1024
 
 def done_count(task_list):
     count = 0

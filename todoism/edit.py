@@ -5,9 +5,6 @@ import todoism.navigate as nv
 import todoism.keycode as kc
 import todoism.state as st
 
-indent = 7
-max_task_count = 99
-
 def move_by_word(text, current_pos, direction):
     """Move cursor by word in the specified direction
     
@@ -105,7 +102,7 @@ def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset):
             if screen_pos > 14:  # Sidebar width limit
                 break
         else:
-            screen_pos = indent + 16 + (i - scroll_offset)  # Task position with sidebar offset
+            screen_pos = tsk.TASK_INDENT_IN_TASK_PANEL + 16 + (i - scroll_offset)  # Task position with sidebar offset
             
         if i - scroll_offset >= 0:  # Ensure we only render visible chars
             try:
@@ -132,7 +129,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
         MAX_DESCRIPTION_LENGTH = cat.MAX_CATEGORY_NAME_LENGTH
     else:
         sidebar_width = 16
-        base_indent = 7
+        base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
         text_start_pos = sidebar_width + base_indent
         MAX_DESCRIPTION_LENGTH = tsk.MAX_TASK_DESCRIPTION_LENGTH
     
@@ -729,7 +726,7 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     
     # Calculate exact space available for text (accounting for date + gap)
     date_pos = max_x - date_length - 1  # -1 for exactly one character gap before date
-    available_width = date_pos - (indent + 16) - 1  # -1 ensures the gap is preserved
+    available_width = date_pos - (tsk.TASK_INDENT_IN_TASK_PANEL + 16) - 1  # -1 ensures the gap is preserved
     
     # Always initialize with scroll_offset = 0 to show beginning of text
     scroll_offset = 0
@@ -737,16 +734,16 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     # Position cursor differently based on text length:
     if description_length <= available_width:
         # For short tasks (text fits): position at end of text
-        cursor_x = indent + 16 + description_length
+        cursor_x = tsk.TASK_INDENT_IN_TASK_PANEL + 16 + description_length
     else:
         # For long tasks: position at end of visible portion
-        cursor_x = indent + 16 + available_width
+        cursor_x = tsk.TASK_INDENT_IN_TASK_PANEL + 16 + available_width
     
     # Make sure cursor position is within screen bounds
     cursor_x = min(cursor_x, date_pos - 1)  # Ensure exactly one char gap
     
     # Calculate cursor position in text
-    cursor_pos_in_text = cursor_x - (indent + 16) + scroll_offset
+    cursor_pos_in_text = cursor_x - (tsk.TASK_INDENT_IN_TASK_PANEL + 16) + scroll_offset
     
     # Set cursor at the calculated position
     stdscr.move(y, cursor_x)

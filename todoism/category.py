@@ -3,6 +3,7 @@ import todoism.preference as pref
 
 # Maximum allowed length for category names
 MAX_CATEGORY_NAME_LENGTH = 12
+MAX_CATEGORY_COUNT = 128
 
 def get_categories_file_path():
     """Get the correct categories file path based on whether test mode is active"""
@@ -34,9 +35,8 @@ def create_category(name, color="blue"):
     """Create a new category object"""
     categories = load_categories()
     new_id = max([cat['id'] for cat in categories], default=-1) + 1
-    
-    # Limit to 99 categories
-    if new_id > 99:
+
+    if new_id > MAX_CATEGORY_COUNT:
         return None
         
     new_category = {

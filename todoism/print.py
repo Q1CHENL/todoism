@@ -6,6 +6,7 @@ import todoism.color as clr
 import todoism.category as cat
 import todoism.preference as pref
 import todoism.state as st
+import todoism.task as tsk
 
 add_mode  = 0
 edit_mode = 1
@@ -190,7 +191,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     else:
         # Task area positioning - include sidebar offset
         sidebar_width = 16  # 15 chars + 1 for separator
-        base_indent = 7    # Length of ID + status + flag area
+        base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
         
         # Clear the row for custom rendering
         stdscr.move(y, sidebar_width)
@@ -547,8 +548,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     date_pos = right_frame_pos - len(date_str) - 1  # Only 1 char gap from right frame
     
     # Calculate available space for text
-    indent = 7  # ID + status + flag area
-    total_indent = x_offset + indent
+    total_indent = x_offset + tsk.TASK_INDENT_IN_TASK_PANEL
     available_width = date_pos - total_indent - 1  # Space for gap before date
     
     # Handle text display

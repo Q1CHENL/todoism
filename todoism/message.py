@@ -65,7 +65,7 @@ empty_msg = '''
 
 limit_msg = '''
 ┌────────────────────────────────────────┐
-│   You already have 99 tasks in hand.   │
+│  You already have 1024 tasks in hand.  │
 │  Maybe try to deal with them first :)  │
 └────────────────────────────────────────┘
 '''
