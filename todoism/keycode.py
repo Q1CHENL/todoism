@@ -163,7 +163,6 @@ def need_key_recording():
         pref.setup_default_settings()
         return True
 
-
 def save_key_code(key_name, code):
     """Save a recorded key code to settings"""
     try:
@@ -175,7 +174,6 @@ def save_key_code(key_name, code):
             settings_file.truncate()
     except FileNotFoundError:
         pref.setup_default_settings()
-
 
 def get_key_codes():
     """Get all key codes from settings"""
@@ -203,6 +201,8 @@ def get_key_codes():
 
 def setup_keycodes():
     """Setup key codes from settings"""
+    global CTRL_LEFT, CTRL_RIGHT, CTRL_SHIFT_LEFT, CTRL_SHIFT_RIGHT, ALT_LEFT, ALT_RIGHT
+    
     key_codes = get_key_codes()
     CTRL_LEFT = key_codes['ctrl+left']
     CTRL_RIGHT = key_codes['ctrl+right']
