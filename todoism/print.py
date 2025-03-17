@@ -258,9 +258,12 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     
     # Print date with exactly one character gap to right
     if not st.focus_manager.is_sidebar_focused() and date_str:
-        stdscr.addstr(y, date_pos, date_str)
-        if is_selected:
-            stdscr.addstr(y, date_pos + len(date_str), ' ')
+        try:
+            stdscr.addstr(y, date_pos, date_str)
+            if is_selected:
+                stdscr.addstr(y, date_pos + len(date_str), ' ')
+        except curses.error:
+            pass
     
     # Print right frame without highlight
     if not st.focus_manager.is_sidebar_focused():
