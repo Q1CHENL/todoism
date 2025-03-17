@@ -287,17 +287,16 @@ def execute_command(
             
             if test_module.is_dev_mode_active():
                 max_y, max_x = stdscr.getmaxyx()
-                sidebar_width = 16
                 warning_msg = "Already in dev mode!"
-                stdscr.move(st.latest_max_capacity, sidebar_width)
+                stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                 stdscr.clrtoeol()
                 yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
                 stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-                stdscr.addstr(st.latest_max_capacity, sidebar_width, warning_msg)
+                stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg)
                 stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
                 stdscr.refresh()
                 time.sleep(1)
-                stdscr.move(st.latest_max_capacity, sidebar_width)
+                stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                 stdscr.clrtoeol()
             else:
                 if test_module.load_dev_mode():
@@ -313,17 +312,16 @@ def execute_command(
                     
                     # Show success message
                     max_y, max_x = stdscr.getmaxyx()
-                    sidebar_width = 16
                     success_msg = "Dev mode enabled. Test tasks and categories loaded. Will auto-restore on exit."
-                    stdscr.move(st.latest_max_capacity, sidebar_width)
+                    stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                     stdscr.clrtoeol()
                     green_pair_num = clr.get_color_pair_num_by_str_text("green")
                     stdscr.attron(curses.color_pair(green_pair_num) | curses.A_BOLD)
-                    stdscr.addstr(st.latest_max_capacity, sidebar_width, success_msg)
+                    stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, success_msg)
                     stdscr.attroff(curses.color_pair(green_pair_num) | curses.A_BOLD)
                     stdscr.refresh()
                     time.sleep(1.5)
-                    stdscr.move(st.latest_max_capacity, sidebar_width)
+                    stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                     stdscr.clrtoeol()
                     
                     # Return updated categories and category ID
@@ -331,17 +329,16 @@ def execute_command(
         except ImportError:
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
-            sidebar_width = 16
             warning_msg = "Dev mode not available in installation."
-            stdscr.move(st.latest_max_capacity, sidebar_width)
+            stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
             yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
             stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-            stdscr.addstr(st.latest_max_capacity, sidebar_width, warning_msg)
+            stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg)
             stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
             stdscr.refresh()
             time.sleep(1.5)
-            stdscr.move(st.latest_max_capacity, sidebar_width)
+            stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
         command_recognized = True
         
@@ -352,17 +349,16 @@ def execute_command(
             
             if not test_module.is_dev_mode_active():
                 max_y, max_x = stdscr.getmaxyx()
-                sidebar_width = 16
                 warning_msg = "Not in dev mode - nothing to restore!"
-                stdscr.move(st.latest_max_capacity, sidebar_width)
+                stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                 stdscr.clrtoeol()
                 yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
                 stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-                stdscr.addstr(st.latest_max_capacity, sidebar_width, warning_msg)
+                stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg)
                 stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
                 stdscr.refresh()
                 time.sleep(1)
-                stdscr.move(st.latest_max_capacity, sidebar_width)
+                stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                 stdscr.clrtoeol()
             else:
                 if test_module.exit_dev_mode():
@@ -378,17 +374,16 @@ def execute_command(
                     
                     # Show success message
                     max_y, max_x = stdscr.getmaxyx()
-                    sidebar_width = 16
                     success_msg = "Dev mode disabled. Original tasks and categories restored."
-                    stdscr.move(st.latest_max_capacity, sidebar_width)
+                    stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                     stdscr.clrtoeol()
                     green_pair_num = clr.get_color_pair_num_by_str_text("green")
                     stdscr.attron(curses.color_pair(green_pair_num) | curses.A_BOLD)
-                    stdscr.addstr(st.latest_max_capacity, sidebar_width, success_msg)
+                    stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, success_msg)
                     stdscr.attroff(curses.color_pair(green_pair_num) | curses.A_BOLD)
                     stdscr.refresh()
                     time.sleep(1.5)
-                    stdscr.move(st.latest_max_capacity, sidebar_width)
+                    stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                     stdscr.clrtoeol()
                     
                     # Return updated categories and category ID
@@ -396,17 +391,16 @@ def execute_command(
         except ImportError:
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
-            sidebar_width = 16
             warning_msg = "Dev mode not available in installation"
-            stdscr.move(st.latest_max_capacity, sidebar_width)
+            stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
             yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
             stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-            stdscr.addstr(st.latest_max_capacity, sidebar_width, warning_msg)
+            stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg)
             stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
             stdscr.refresh()
             time.sleep(1.5)
-            stdscr.move(st.latest_max_capacity, sidebar_width)
+            stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
         command_recognized = True
         
@@ -414,24 +408,23 @@ def execute_command(
         command_recognized = True
 
     if not command_recognized and command.strip():
-        sidebar_width = 16
         error_msg = f"Invalid command: '{command}'. Type command 'help' for help."
         
         # Clear the line first, error might occur if resized small
         try:
-            stdscr.move(st.latest_max_capacity, sidebar_width)
+            stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
 
             red_pair_num = clr.get_color_pair_num_by_str_text("red")
             stdscr.attron(curses.color_pair(red_pair_num) | curses.A_BOLD)
-            stdscr.addstr(st.latest_max_capacity, sidebar_width, error_msg)
+            stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, error_msg)
             stdscr.attroff(curses.color_pair(red_pair_num) | curses.A_BOLD)
             stdscr.refresh()
 
             time.sleep(1.5)
 
             # Clear the error message
-            stdscr.move(st.latest_max_capacity, sidebar_width)
+            stdscr.move(st.latest_max_capacity, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
             stdscr.refresh()
         except curses.error:

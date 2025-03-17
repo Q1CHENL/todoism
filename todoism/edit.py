@@ -4,6 +4,7 @@ import todoism.task as tsk
 import todoism.navigate as nv
 import todoism.keycode as kc
 import todoism.state as st
+import todoism.category as cat
 
 def move_by_word(text, current_pos, direction):
     """Move cursor by word in the specified direction
@@ -122,15 +123,12 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
     
     # Standardize indent calculations
     if st.focus_manager.is_sidebar_focused():
-        sidebar_width = 0
         base_indent = 2
         text_start_pos = base_indent
-        import todoism.category as cat
         MAX_DESCRIPTION_LENGTH = cat.MAX_CATEGORY_NAME_LENGTH
     else:
-        sidebar_width = 16
         base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
-        text_start_pos = sidebar_width + base_indent
+        text_start_pos = cat.SIDEBAR_WIDTH + base_indent
         MAX_DESCRIPTION_LENGTH = tsk.MAX_TASK_DESCRIPTION_LENGTH
     
     # Selection state variables
@@ -202,10 +200,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
             # Force screen update to stabilize display
             stdscr.refresh()
             
-        else:
-            # Only clear from the separator onwards, preserving sidebar content
-            sidebar_width = 16  # Always use 16 here to preserve sidebar content
-            
+        else:            
             # Move to the separator and clear only to the right
             stdscr.move(y, 16)  # Position just after separator
             stdscr.clrtoeol()
@@ -214,7 +209,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
             stdscr.addstr(y, 15, '│')
             
             # Redraw task ID
-            stdscr.addstr(y, sidebar_width, f"{task['id']:2d} ")
+            stdscr.addstr(y, cat.SIDEBAR_WIDTH, f"{task['id']:2d} ")
         
         # Recalculate with current screen dimensions
         if st.focus_manager.is_sidebar_focused():

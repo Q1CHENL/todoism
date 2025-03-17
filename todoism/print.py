@@ -190,11 +190,10 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         date_pos = 15  # End of sidebar
     else:
         # Task area positioning - include sidebar offset
-        sidebar_width = 16  # 15 chars + 1 for separator
         base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
         
         # Clear the row for custom rendering
-        stdscr.move(y, sidebar_width)
+        stdscr.move(y, cat.SIDEBAR_WIDTH)
         stdscr.clrtoeol()
         
         # Print separator at correct position - check if this is the top row
@@ -206,17 +205,17 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
             stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
         
         # Print task ID with offset
-        stdscr.addstr(y, sidebar_width, f"{task['id']:2d} ")
+        stdscr.addstr(y, cat.SIDEBAR_WIDTH, f"{task['id']:2d} ")
         
         # Print symbols with offset
-        print_task_symbols(stdscr, task, y, sidebar_width + 3, sidebar_width + 5, use_colors=True, is_selected=is_selected)
+        print_task_symbols(stdscr, task, y, cat.SIDEBAR_WIDTH + 3, cat.SIDEBAR_WIDTH + 5, use_colors=True, is_selected=is_selected)
         
         # Calculate date position and available text space
         date_str = task['date']
         date_padding = 1  # Space between description and date
         date_pos = max_x - len(date_str) - date_padding - 1  # Account for right frame
         
-        text_start_pos = sidebar_width + base_indent  # Combined offset
+        text_start_pos = cat.SIDEBAR_WIDTH + base_indent  # Combined offset
         total_indent = text_start_pos
     
     # Calculate available width for text
@@ -384,7 +383,6 @@ def print_all_cli(todos):
 def print_category_entries(stdscr, categories, start_index):
     """Print the category sidebar"""
     # Set sidebar width
-    sidebar_width = 15
     max_y, max_x = stdscr.getmaxyx()
     
     # Clear sidebar area
@@ -410,18 +408,15 @@ def print_category(stdscr, category, y, is_selected=False):
             stdscr.attron(curses.A_BOLD)
         else: 
             turnoff_all_attributes(stdscr)
-    
-    # Calculate available width for category name
-    sidebar_width = 15
-    name_width = sidebar_width - 2  # 2 spaces for indentation (1 for left border + 1 for spacing)
+            
     try:
         if is_selected:
             stdscr.addstr(y, 1, ' ')
 
         # Always show the full name (it's already limited by MAX_CATEGORY_NAME_LENGTH)
         # If it's somehow longer, truncate it with an ellipsis
-        if len(category['name']) > name_width:
-            display_name = category['name'][:name_width-1] + "…"
+        if len(category['name']) > cat.MAX_CATEGORY_NAME_LENGTH:
+            display_name = category['name'][:cat.MAX_CATEGORY_NAME_LENGTH-1] + "…"
         else:
             display_name = category['name']
 
@@ -429,7 +424,7 @@ def print_category(stdscr, category, y, is_selected=False):
         stdscr.addstr(y, 2, display_name)
 
         # Fill remaining space with spaces to ensure fixed width
-        padding = name_width - len(display_name)
+        padding = cat.MAX_CATEGORY_NAME_LENGTH + 1 - len(display_name)
         if padding > 0:
             stdscr.addstr(' ' * padding)
     except curses.error:
@@ -453,7 +448,6 @@ def print_whole_view(stdscr, categories, category_start_index):
     # Print status bar first
     print_status_bar(stdscr)
     
-    sidebar_width = 15
     max_y, max_x = stdscr.getmaxyx()
     
     # Clear sidebar area

@@ -103,8 +103,6 @@ def main(stdscr):
     stdscr.timeout(500)
     last_time_update = time.time()
     
-    # Sidebar width
-    sidebar_width = 16  # 15 for sidebar + 1 for separator
     task_scroll_offset = 0
     
     max_y, max_x = stdscr.getmaxyx()
@@ -310,7 +308,7 @@ def main(stdscr):
             try:
                 mouse_id, mouse_x, mouse_y, mouse_z, button_state = curses.getmouse()
                 
-                if mouse_x < sidebar_width:
+                if mouse_x < cat.SIDEBAR_WIDTH:
                     if st.searching:
                         continue
                     if not st.focus_manager.is_sidebar_focused():
@@ -332,7 +330,7 @@ def main(stdscr):
                     continue
                 
                 # Handle clicks in task area (including blank areas)
-                if mouse_x >= sidebar_width:
+                if mouse_x >= cat.SIDEBAR_WIDTH:
                     if not st.focus_manager.is_tasks_focused():
                         st.focus_manager.toggle_focus()
                         should_repaint = True
@@ -345,10 +343,10 @@ def main(stdscr):
                         if st.start_task_id <= clicked_task_id <= st.end_task_id:
                             task_index = clicked_task_id - 1
                             
-                            flag_x_start = sidebar_width + 3
+                            flag_x_start = cat.SIDEBAR_WIDTH + 3
                             flag_x_end = flag_x_start + 1 
                             
-                            status_x_start = sidebar_width + 5
+                            status_x_start = cat.SIDEBAR_WIDTH + 5
                             status_x_end = status_x_start + 1
 
                             if flag_x_start <= mouse_x <= flag_x_end:
@@ -379,7 +377,7 @@ def main(stdscr):
 
                 _clear_bottom_line_content(stdscr)
 
-                stdscr.addstr(st.latest_max_capacity, sidebar_width, "/")
+                stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, "/")
                 stdscr.refresh()
                 command_line = stdscr.getstr().decode('utf-8')
                 stdscr.timeout(500)
@@ -396,7 +394,7 @@ def main(stdscr):
             srch.search(command_line, task_list)
             st.searching = True
             st.task_cnt = len(st.filtered_tasks)
-            pr.print_task_entries(stdscr, sidebar_width)
+            pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
             should_repaint = True
 
             if st.task_cnt > 0:
@@ -554,7 +552,7 @@ def main(stdscr):
                     
                     pr.print_left_frame(stdscr, st.latest_max_y)
                     pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
-                    pr.print_task_entries(stdscr, sidebar_width)
+                    pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     
                     stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
                     stdscr.move(row, 0)
@@ -583,7 +581,7 @@ def main(stdscr):
                             new_name = new_name[:cat.MAX_CATEGORY_NAME_LENGTH]
                         cat.update_category_name(st.current_category_id, new_name)
                         categories = cat.load_categories()
-                    pr.print_task_entries(stdscr, sidebar_width)
+                    pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     
                     curses.curs_set(0)
                     curses.noecho()
@@ -593,7 +591,7 @@ def main(stdscr):
                 # Delete selected category (with double backspace confirmation)
                 if len(categories) > 0 and st.current_category_id != 0:
                     # Wait for second backspace
-                    stdscr.addstr(st.latest_max_capacity, sidebar_width, "Press backspace again to delete")
+                    stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, "Press backspace again to delete")
                     stdscr.refresh()
                     
                     # Wait for confirmation
@@ -644,7 +642,7 @@ def main(stdscr):
                 _clear_bottom_line_content(stdscr)
                 
                 # Place the command input at the bottom of the screen, after the sidebar
-                stdscr.addstr(st.latest_max_capacity, sidebar_width, ":")
+                stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
                 stdscr.refresh()
 
                 command_line = stdscr.getstr().decode('utf-8')
@@ -717,16 +715,16 @@ def main(stdscr):
                 pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
                 
                 st.adding_task = True
-                # Print existing tasks with offset (crucial: pass sidebar_width to offset tasks)
-                pr.print_task_entries(stdscr, sidebar_width)
+                # Print existing tasks with offset (crucial: pass cat.SIDEBAR_WIDTH to offset tasks)
+                pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
 
                 # Add a new task with proper indentation
                 new_task_num = f"{st.task_cnt + 1:2d}"
                 y_pos = st.latest_max_capacity if st.task_cnt >= st.latest_max_capacity else st.task_cnt + 1
-                stdscr.addstr(y_pos, sidebar_width, f"{new_task_num} ")
+                stdscr.addstr(y_pos, cat.SIDEBAR_WIDTH, f"{new_task_num} ")
 
                 # Move cursor to the correct position after task number
-                stdscr.move(y_pos, sidebar_width + tsk.TASK_INDENT_IN_TASK_PANEL)
+                stdscr.move(y_pos, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
                 stdscr.refresh()
 
                 new_task = tsk.create_new_task(st.task_cnt + 1)
@@ -790,10 +788,10 @@ def main(stdscr):
                     )
                     pr.print_left_frame(stdscr, st.latest_max_y)
                     pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
-                    pr.print_task_entries(stdscr, sidebar_width)
+                    pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     
                     # Move cursor to edit position
-                    stdscr.move(edit_row, sidebar_width + tsk.TASK_INDENT_IN_TASK_PANEL)
+                    stdscr.move(edit_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
                     stdscr.refresh()
                     
                     st.filtered_tasks[task_idx]['description'] = ed.edit(
@@ -816,7 +814,7 @@ def main(stdscr):
                             st.end_task_id = 0
                             # Clear task area and show empty message
                             for i in range(1, st.latest_max_capacity + 1):
-                                stdscr.move(i, sidebar_width)
+                                stdscr.move(i, cat.SIDEBAR_WIDTH)
                                 stdscr.clrtoeol()
                         else:
                             # Keep the same visual position if possible
@@ -840,7 +838,7 @@ def main(stdscr):
                                 task_index = st.start_task_id + i - 1
                                 
                                 # Clear just this line
-                                stdscr.move(y, sidebar_width)
+                                stdscr.move(y, cat.SIDEBAR_WIDTH)
                                 stdscr.clrtoeol()
                                 
                                 # Render the task if it exists
@@ -855,7 +853,7 @@ def main(stdscr):
                             
                             # Clear the last line if needed
                             if st.task_cnt - st.start_task_id + 1 < st.latest_max_capacity:
-                                stdscr.move(st.task_cnt - st.start_task_id + 2, sidebar_width)
+                                stdscr.move(st.task_cnt - st.start_task_id + 2, cat.SIDEBAR_WIDTH)
                                 stdscr.clrtoeol()
                         
                         pr.print_status_bar(stdscr)
@@ -907,7 +905,7 @@ def main(stdscr):
             
                 _clear_bottom_line_content(stdscr)
                 
-                stdscr.addstr(st.latest_max_capacity, sidebar_width, ":")
+                stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
                 stdscr.refresh()
                 command_line = stdscr.getstr().decode('utf-8')
                 stdscr.timeout(500)
