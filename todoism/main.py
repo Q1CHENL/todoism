@@ -36,7 +36,7 @@ def _clear_bottom_line_content(stdscr):
     stdscr.addstr(st.latest_max_y - 2, st.latest_max_x - 1, "│")
     
 def _restore_task_panel(task_list):
-    st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+    st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
     st.task_cnt = len(st.filtered_tasks)
     st.current_task_id = 1 if st.task_cnt > 0 else 0
     st.current_task_row = 1 if st.task_cnt > 0 else 0
@@ -85,11 +85,6 @@ def main(stdscr):
     curses.start_color()
     clr.setup_color_pairs()
     
-    if kc.need_key_recording():
-        if not kc.record_key_codes(stdscr):
-            return
-    
-    kc.setup_keycodes()
     pref.update_preferences()
     
     # Enable mouse support
@@ -127,7 +122,7 @@ def main(stdscr):
     st.latest_max_capacity = max_y - 2
     st.current_category_id = 0
     st.cat_cnt = len(categories)
-    st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+    st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
     st.task_cnt = len(st.filtered_tasks)
     st.current_task_row = 1 if st.task_cnt > 0 else 0
     st.current_task_id = 1 if st.task_cnt > 0 else 0
@@ -137,9 +132,14 @@ def main(stdscr):
     st.focus_manager = nv.FocusManager()
     sidebar_scroller = nv.SidebarScroller(len(categories), st.latest_max_capacity)
     
+    if kc.need_key_recording():
+        if not kc.record_key_codes(stdscr):
+            return
+    kc.setup_keycodes()
+    
     while True:
         if not st.searching:
-            st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+            st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
         tsk.reassign_task_ids(st.filtered_tasks)
         
         if pref.get_sort_done():
@@ -652,13 +652,12 @@ def main(stdscr):
                             break
                             
                     # Update filtered tasks for the new category
-                    st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+                    st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                     st.task_cnt = len(st.filtered_tasks)
                 else:
                     task_list, done_list = command_result
                 
                 should_repaint = True
-                command = ""
                 
         # Handle task navigation and actions when task area is focused
         elif st.focus_manager.is_tasks_focused():
@@ -681,10 +680,9 @@ def main(stdscr):
                 
                 # adjust start end for pre-print
                 # taskoverflow if a new one is added:
-                if st.task_cnt >= st.latest_max_capacity:
-                    if st.end_task_id <= st.task_cnt:
-                        st.start_task_id = st.task_cnt - (st.end_task_id - st.start_task_id - 1)
-                        st.end_task_id = st.task_cnt
+                if st.task_cnt >= st.latest_max_capacity and st.end_task_id <= st.task_cnt:
+                    st.start_task_id = st.task_cnt - (st.end_task_id - st.start_task_id - 1)
+                    st.end_task_id = st.task_cnt
 
                 pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                 
@@ -696,9 +694,9 @@ def main(stdscr):
                 pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
 
                 # Add a new task with proper indentation
-                new_task_num = f"{st.task_cnt + 1:2d}"
+                new_task_id = f"{st.task_cnt + 1:2d}"
                 y_pos = st.latest_max_capacity if st.task_cnt >= st.latest_max_capacity else st.task_cnt + 1
-                stdscr.addstr(y_pos, cat.SIDEBAR_WIDTH, f"{new_task_num} ")
+                stdscr.addstr(y_pos, cat.SIDEBAR_WIDTH, f"{new_task_id} ")
 
                 # Move cursor to the correct position after task number
                 stdscr.move(y_pos, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
@@ -706,7 +704,6 @@ def main(stdscr):
 
                 new_task = tsk.create_new_task(st.task_cnt + 1)
                 new_task['category_id'] = 0 if st.current_category_id == 0 else st.current_category_id
-                
                 
                 new_task_description = ed.edit(stdscr, new_task, pr.add_mode)
                 st.adding_task = False
@@ -716,7 +713,7 @@ def main(stdscr):
                     task_list = tsk.add_new_task(
                         task_list, new_id, new_task_description, False, new_task['category_id'])
                     st.task_cnt = st.task_cnt + 1
-                    st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+                    st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                     
                     if st.task_cnt == 1:
                         st.start_task_id = 1
@@ -739,7 +736,6 @@ def main(stdscr):
                 curses.noecho()
                 
             elif key == ord('d') or key == ord(' '):
-                # mark the current task as 'done'
                 if st.filtered_tasks and st.current_task_id > 0:
                     task_idx = st.current_task_id - 1
                     done_list.append(st.filtered_tasks[task_idx])
@@ -750,88 +746,30 @@ def main(stdscr):
             elif key == ord('e'):
                 curses.echo()
                 curses.curs_set(1)
-                if len(st.filtered_tasks) > 0 and st.current_task_id > 0:
-                    task_idx = st.current_task_id - 1
-                    
-                    # Override the current task row y-position to account for sidebar
-                    edit_row = st.current_task_row  # Row is correct, it's relative to visible area
-                    st.task_cnt = len(st.filtered_tasks)
-                    pr.print_status_bar(stdscr)
-                    
+                if st.task_cnt > 0 and st.current_task_id > 0:
+                    current_task_idx = st.current_task_id - 1
+                    pr.print_status_bar(stdscr)                    
                     pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
-                    
                     pr.print_left_frame(stdscr)
                     pr.print_sidebar_task_panel_separator(stdscr)
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     
                     # Move cursor to edit position
-                    stdscr.move(edit_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
+                    stdscr.move(st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
                     stdscr.refresh()
                     
-                    st.filtered_tasks[task_idx]['description'] = ed.edit(
+                    st.filtered_tasks[current_task_idx]['description'] = ed.edit(
                         stdscr, 
-                        st.filtered_tasks[task_idx], 
+                        st.filtered_tasks[current_task_idx], 
                         pr.edit_mode
                     )
                     
-                    if st.filtered_tasks[task_idx]['description'] == "":
-                        task_uuid = st.filtered_tasks[task_idx]['uuid']
+                    if st.filtered_tasks[current_task_idx]['description'] == "":
+                        task_uuid = st.filtered_tasks[current_task_idx]['uuid']
                         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                        st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+                        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                         st.task_cnt = len(st.filtered_tasks)
-                        
-                        # Adjust selection after deletion
-                        if st.task_cnt == 0:
-                            st.current_task_id = 0
-                            st.current_task_row = 0
-                            st.start_task_id = 0
-                            st.end_task_id = 0
-                            # Clear task area and show empty message
-                            for i in range(1, st.latest_max_capacity + 1):
-                                stdscr.move(i, cat.SIDEBAR_WIDTH)
-                                stdscr.clrtoeol()
-                        else:
-                            # Keep the same visual position if possible
-                            if st.current_task_id > st.task_cnt:
-                                st.current_task_id = st.task_cnt
-                            
-                            # Adjust scroll range
-                            if st.end_task_id > st.task_cnt:
-                                st.end_task_id = st.task_cnt
-                                st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
-                            
-                            # Update current row
-                            st.current_task_row = st.current_task_id - st.start_task_id + 1
-                            
-                            # Start redraw from one row above the deleted position
-                            start_redraw = max(1, st.current_task_row - 1)
-                            
-                            # Update tasks from one row above deletion
-                            for i in range(start_redraw, min(st.task_cnt - st.start_task_id + 2, st.latest_max_capacity + 1)):
-                                y = i
-                                task_index = st.start_task_id + i - 1
-                                
-                                # Clear just this line
-                                stdscr.move(y, cat.SIDEBAR_WIDTH)
-                                stdscr.clrtoeol()
-                                
-                                # Render the task if it exists
-                                if task_index < st.task_cnt:
-                                    pr.render_task(
-                                        stdscr,
-                                        st.filtered_tasks[task_index],
-                                        y,
-                                        task_index + 1 == st.current_task_id,
-                                    )
-                            
-                            # Clear the last line if needed
-                            if st.task_cnt - st.start_task_id + 1 < st.latest_max_capacity:
-                                stdscr.move(st.task_cnt - st.start_task_id + 2, cat.SIDEBAR_WIDTH)
-                                stdscr.clrtoeol()
-                        
-                        pr.print_status_bar(stdscr)
-                        stdscr.refresh()
-                    
+                        nv.post_deletion_update(st.task_cnt + 1)
                     tsk.save_tasks(task_list)
                     should_repaint = True
                     
@@ -844,12 +782,15 @@ def main(stdscr):
                     st.filtered_tasks[task_idx]['flagged'] = not st.filtered_tasks[task_idx]['flagged']
                     tsk.save_tasks(task_list)
                     should_repaint = True
+                    
             elif key == curses.KEY_RIGHT:
                 task_scroll_offset += 1
                 pr.render_task(stdscr, st.filtered_tasks[st.current_task_id - 1], st.current_task_row, True, task_scroll_offset) 
+                
             elif key == curses.KEY_LEFT:
                 task_scroll_offset = max(0, task_scroll_offset - 1)
                 pr.render_task(stdscr, st.filtered_tasks[st.current_task_id - 1], st.current_task_row, True, task_scroll_offset)
+                
             elif key == ord('q'):
                 if st.searching:
                     st.searching = False
@@ -895,13 +836,12 @@ def main(stdscr):
                             sidebar_scroller.current_index = i
                             break  
                     # Update filtered tasks for the new category
-                    st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+                    st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                     st.task_cnt = len(st.filtered_tasks)
                 else:
                     task_list, done_list = command_result
                 
                 should_repaint = True
-                command = ""
                 
             elif key == curses.KEY_UP:
                 task_scroll_offset = 0
@@ -923,7 +863,7 @@ def main(stdscr):
                             st.done_cnt = st.done_cnt - 1
                         task_uuid = st.filtered_tasks[st.current_task_id - 1]['uuid']
                         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                        st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+                        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                         st.task_cnt = len(st.filtered_tasks)
                         nv.post_deletion_update(st.task_cnt + 1)
                     tsk.save_tasks(task_list)
