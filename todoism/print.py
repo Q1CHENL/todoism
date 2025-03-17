@@ -50,7 +50,7 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
     
     # Apply highlighting if requested
     if highlight:
-        stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
+        stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     
     # Print each line separately at the calculated position
     for i, line in enumerate(lines):
@@ -72,7 +72,7 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
     
     # Remove highlighting if it was applied
     if highlight:
-        stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     
     # Draw the right frame for each line
     print_right_frame(stdscr)
@@ -94,7 +94,7 @@ def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
     
     # Apply highlighting if requested
     if highlight:
-        stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
+        stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     
     # Print each line separately at the calculated position
     for i, line in enumerate(lines):
@@ -116,7 +116,7 @@ def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
     
     # Remove highlighting if it was applied
     if highlight:
-        stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
 
     stdscr.noutrefresh()
     curses.doupdate()
@@ -196,10 +196,10 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         # Print separator at correct position - check if this is the top row
         # Turn off highlight before drawing frame
         if is_selected:
-            stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+            stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
         stdscr.addstr(y, 15, '│')
         if is_selected:
-            stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
+            stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
         
         # Print task ID with offset
         stdscr.addstr(y, cat.SIDEBAR_WIDTH, f"{task['id']:2d} ")
@@ -265,13 +265,13 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     # Print right frame without highlight
     if not st.focus_manager.is_sidebar_focused():
         if is_selected:
-            stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+            stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
         try:
             stdscr.addstr(y, st.latest_max_x - 1, '│')
         except curses.error:
             pass
         if is_selected:
-            stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
+            stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     
     # Calculate cursor position for edit mode
     if is_edit_mode and cursor_pos is not None:
@@ -299,7 +299,7 @@ def print_status_bar(stdscr):
     """Print centered status bar with progress, percentage, date and time"""
 
     # Reset all attributes at the start
-    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(clr.backgournd_color_pair_num) | 
+    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) | 
                    curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
     
     # Calculate percentage
@@ -354,7 +354,7 @@ def print_status_bar(stdscr):
         pass
     
     # Ensure all attributes are reset at the end
-    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(clr.backgournd_color_pair_num) | 
+    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) | 
                    curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
 
 def print_all_cli(todos):
@@ -393,7 +393,7 @@ def print_category(stdscr, category, y, is_selected=False):
     """Print a single category in the sidebar with fixed width"""
     # Set format based on selection and focus
     if is_selected and st.focus_manager.is_sidebar_focused():
-        stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))  # Use the same highlight as tasks
+        stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))  # Use the same highlight as tasks
     elif not st.focus_manager.is_sidebar_focused():
         if is_selected:
             stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
@@ -424,7 +424,7 @@ def print_category(stdscr, category, y, is_selected=False):
     
     # Reset attributes
     if is_selected and st.focus_manager.is_sidebar_focused():
-        stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     elif is_selected and not st.focus_manager.is_sidebar_focused():
         stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
         stdscr.attroff(curses.A_BOLD)
@@ -495,7 +495,7 @@ def print_task_entries(stdscr, x_offset=0):
         pass
     # Reset all attributes before drawing bottom right corner
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.A_REVERSE | curses.A_BLINK | 
-                  curses.A_UNDERLINE | curses.color_pair(clr.backgournd_color_pair_num))
+                  curses.A_UNDERLINE | curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
 
 def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None):
     """Print a task with horizontal offset and optional display ID override"""
@@ -506,7 +506,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     id_to_show = display_id if display_id is not None else task['id']
     
     if not is_selected:
-        stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
 
     # Print task ID
     stdscr.addstr(row, x_offset, f"{id_to_show:2d} ")
@@ -549,13 +549,13 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     try:
     # Display text at calculated position with proper styling
         if is_selected:
-            stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
+            stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
             stdscr.addstr(row, total_indent, visible_text)
             # Fill remaining space with spaces
             for i in range(available_width - len(visible_text) + 1):
                 stdscr.addstr(' ')
             stdscr.addstr(row, date_pos, date_str)
-            stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+            stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
         else:
             if task.get('status', False):
                 stdscr.attron(curses.A_DIM)
@@ -570,9 +570,9 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     
     
         if is_selected:
-            stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
+            stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
             stdscr.addstr(row, right_frame_pos - 1, ' ')
-            stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+            stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
         stdscr.addstr(row, right_frame_pos, '│')
     except curses.error:
         pass
@@ -580,9 +580,9 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
 
 def print_task_entry_selected(stdscr, task, row, x_offset=0, display_id=None):
     """Print a selected task with offset"""
-    stdscr.attron(curses.color_pair(clr.backgournd_color_pair_num))
+    stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     print_task_entry(stdscr, task, row, True, x_offset, display_id)
-    stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
+    stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
 
 def print_pref_panel(stdscr, current_selection_index=0):
     """
@@ -858,5 +858,5 @@ def print_outer_frame(stdscr):
     
 def turnoff_all_attributes(stdscr):
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.A_REVERSE | curses.A_BLINK | 
-                  curses.A_UNDERLINE | curses.color_pair(clr.backgournd_color_pair_num) |
+                  curses.A_UNDERLINE | curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) |
                   curses.color_pair(clr.get_theme_color_pair_num_text()))

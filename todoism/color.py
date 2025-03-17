@@ -3,7 +3,7 @@ import curses
 import random
 import todoism.preference as pref
 
-backgournd_color_pair_num = 9
+BACKGROUND_COLOR_PAIR_NUM = 9
 
 # Rainbow order
 color_set = {
@@ -23,7 +23,7 @@ def setup_color_pairs():
         # For text
         curses.init_pair(color[0], color[1], curses.COLOR_BLACK)
     # For selection background
-    curses.init_pair(backgournd_color_pair_num, curses.COLOR_BLACK, get_theme_color_curses())
+    curses.init_pair(BACKGROUND_COLOR_PAIR_NUM, curses.COLOR_BLACK, get_theme_color_curses())
 
 def set_theme_color(color: str):
     if color not in color_set and color != "random":
