@@ -83,18 +83,29 @@ def render_edit_line(stdscr, task, y, scroll_offset, max_visible_width, cursor_p
     
     return result
 
-def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset):
-    """Highlight selected text region"""
+def highlight_selection(stdscr, task, y, selection_start_idx_in_text, selection_end_idx_in_text, scroll_offset, max_visible_width):
+    """
+    Highlight the selected region of text in the task description.
+    scroll_offset: length of text scrolled off the screen to left
+    """
+    
+    # stdscr.addstr(st.latest_max_capacity, len(str(selection_start_idx_in_text)) + 1, ",")
+    # stdscr.addstr(st.latest_max_capacity, len(str(selection_start_idx_in_text)) + 3, str(selection_end_idx_in_text))
+    
     # Highlight the selected region
-    min_pos = min(start_pos, end_pos)
-    max_pos = max(start_pos, end_pos)
+    min_pos = min(selection_start_idx_in_text, selection_end_idx_in_text)
+    max_pos = max(selection_start_idx_in_text, selection_end_idx_in_text)
     
     # Only highlight visible portion
-    visible_start = max(min_pos, scroll_offset)
-    visible_end = max_pos
+    visible_selection_start_idx_in_text = max(min_pos, scroll_offset)
+    visible_selection_end_idx_in_text = min(max_pos, scroll_offset + max_visible_width)
+    
+    # stdscr.addstr(st.latest_max_capacity - 3, 0, f"text len: {len(task['description'])}")
+    # stdscr.addstr(st.latest_max_capacity - 2, 0, f"Scroll effect: {scroll_offset}")
+    # stdscr.addstr(st.latest_max_capacity - 1, 0, f"Selection: {visible_selection_start_idx_in_text} to {visible_selection_end_idx_in_text}")
     
     # Apply highlighting to each visible character
-    for i in range(visible_start, visible_end):
+    for i in range(visible_selection_start_idx_in_text, visible_selection_end_idx_in_text):
         # Calculate screen position based on whether we're in sidebar or task area
         if st.focus_manager.is_sidebar_focused():
             # Use base_indent (2) for sidebar to match text_start_pos in edit function
@@ -233,7 +244,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
         
         # Add selection highlighting if active
         if selection_active:
-            highlight_selection(stdscr, task, y, selection_start, cursor_pos_in_text, scroll_offset)
+            highlight_selection(stdscr, task, y, selection_start, cursor_pos_in_text, scroll_offset, max_visible_width)
         
         # Redraw the separator
         if st.focus_manager.is_sidebar_focused():
@@ -350,7 +361,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
             # Find the start of the previous word
             new_pos = move_by_word(task['description'], cursor_pos_in_text, -1)
             
-            # KEY FIX: Check if we're near the end of text (within 5 chars)
+            # Check if we're near the end of text (within 5 chars)
             near_end = len(task['description']) - cursor_pos_in_text <= 5
             
             # Only adjust scroll if we're not near the end
@@ -370,7 +381,6 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
         elif ch == kc.CTRL_RIGHT:
             # Don't do anything if already at the end of text
             if cursor_pos_in_text >= len(task['description']):
-                # KEY FIX: Explicitly stabilize position at the end
                 new_x = text_start_pos + (len(task['description']) - scroll_offset)
                 new_x = min(new_x, date_pos - 1)  # Ensure we respect the gap
                 stdscr.move(y, new_x)
@@ -457,7 +467,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
                 min_pos = min(selection_start, cursor_pos_in_text)
                 max_pos = max(selection_start, cursor_pos_in_text)
                 
-                # Fixed concatenation - properly join text before min_pos with text after max_pos
+                # Properly join text before min_pos with text after max_pos
                 task['description'] = task['description'][:min_pos] + task['description'][max_pos:]
                 
                 selection_active = False
