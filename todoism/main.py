@@ -276,9 +276,9 @@ def main(stdscr):
                     )
                     pr.print_frame_all(stdscr)
                     if st.searching:
-                        pr.print_msg_in_task_panel(stdscr, msg.no_tasks_found_msg, 16, highlight=False)
+                        pr.print_msg_in_task_panel(stdscr, msg.no_tasks_found_msg, cat.SIDEBAR_WIDTH, highlight=False)
                     else:
-                        pr.print_msg_in_task_panel(stdscr, msg.empty_msg, 16, highlight=True)
+                        pr.print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=True)
                     pr.print_status_bar(stdscr)
 
             else:
@@ -483,9 +483,9 @@ def main(stdscr):
                 pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
                 pr.print_right_frame(stdscr, st.latest_max_y, st.latest_max_x)
                 if st.task_cnt > 0:
-                    pr.print_task_entries(stdscr, 16)
+                    pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                 else: 
-                    pr.print_msg_in_task_panel(stdscr, msg.empty_msg, 16, highlight=False)
+                    pr.print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
                 pr.print_status_bar(stdscr)
                 
                 stdscr.refresh()

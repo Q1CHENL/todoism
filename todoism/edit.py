@@ -103,7 +103,7 @@ def highlight_selection(stdscr, task, y, start_pos, end_pos, scroll_offset):
             if screen_pos > 14:  # Sidebar width limit
                 break
         else:
-            screen_pos = tsk.TASK_INDENT_IN_TASK_PANEL + 16 + (i - scroll_offset)  # Task position with sidebar offset
+            screen_pos = tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH + (i - scroll_offset)  # Task position with sidebar offset
             
         if i - scroll_offset >= 0:  # Ensure we only render visible chars
             try:
@@ -202,7 +202,7 @@ def edit(stdscr, task, mode, initial_scroll=0, initial_cursor_pos=None):
             
         else:            
             # Move to the separator and clear only to the right
-            stdscr.move(y, 16)  # Position just after separator
+            stdscr.move(y, cat.SIDEBAR_WIDTH)  # Position just after separator
             stdscr.clrtoeol()
             
             # Redraw vertical separator
@@ -721,7 +721,7 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     
     # Calculate exact space available for text (accounting for date + gap)
     date_pos = max_x - date_length - 1  # -1 for exactly one character gap before date
-    available_width = date_pos - (tsk.TASK_INDENT_IN_TASK_PANEL + 16) - 1  # -1 ensures the gap is preserved
+    available_width = date_pos - (tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH) - 1  # -1 ensures the gap is preserved
     
     # Always initialize with scroll_offset = 0 to show beginning of text
     scroll_offset = 0
@@ -729,16 +729,16 @@ def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
     # Position cursor differently based on text length:
     if description_length <= available_width:
         # For short tasks (text fits): position at end of text
-        cursor_x = tsk.TASK_INDENT_IN_TASK_PANEL + 16 + description_length
+        cursor_x = tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH + description_length
     else:
         # For long tasks: position at end of visible portion
-        cursor_x = tsk.TASK_INDENT_IN_TASK_PANEL + 16 + available_width
+        cursor_x = tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH + available_width
     
     # Make sure cursor position is within screen bounds
     cursor_x = min(cursor_x, date_pos - 1)  # Ensure exactly one char gap
     
     # Calculate cursor position in text
-    cursor_pos_in_text = cursor_x - (tsk.TASK_INDENT_IN_TASK_PANEL + 16) + scroll_offset
+    cursor_pos_in_text = cursor_x - (tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH) + scroll_offset
     
     # Set cursor at the calculated position
     stdscr.move(y, cursor_x)

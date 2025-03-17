@@ -30,7 +30,7 @@ def print_msg_center(stdscr, message, color_pair=0, highlight_line=-1):
     
     stdscr.refresh()
 
-def print_msg_in_task_panel(stdscr, msg, x_offset=16, highlight=False):
+def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, highlight=False):
     """Print a message box with proper centering in the task area with optional highlighting"""
     lines = msg.split('\n')
     width = len(lines[1])
@@ -337,7 +337,7 @@ def print_status_bar(stdscr):
     
     # Calculate center position
     total_len = len(status_prefix) + len(percent_text) + len(datetime_str) + 2  # +2 for spacing
-    start_pos = (max_x - total_len - 16) // 2 + 16
+    start_pos = (max_x - total_len - cat.SIDEBAR_WIDTH) // 2 + cat.SIDEBAR_WIDTH
     
     # Clear only the top line
     stdscr.move(0, 0)
@@ -469,13 +469,13 @@ def print_whole_view(stdscr, categories, category_start_index):
     if st.task_cnt == 0:
         # Clear task area
         for y in range(1, max_height + 1):
-            stdscr.move(y, 16)
+            stdscr.move(y, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
         # Print empty message with highlighting when task area has focus
-        print_msg_in_task_panel(stdscr, msg.empty_msg, 16, highlight=False)
+        print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
         print_right_frame(stdscr, max_y, max_x)
     else:
-        print_task_entries(stdscr, 16)
+        print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
     
     # Use a single refresh at the end instead of multiple refreshes in each function
     stdscr.noutrefresh()
@@ -769,7 +769,7 @@ def print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center
 def clear_task_panel(stdscr, max_y):
     for i in range(1, max_y - 1):
         try:
-            stdscr.move(i, 16)
+            stdscr.move(i, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
         except curses.error:
             continue
