@@ -414,26 +414,28 @@ def execute_command(
         command_recognized = True
 
     if not command_recognized and command.strip():
-        max_y, max_x = stdscr.getmaxyx()
         sidebar_width = 16
         error_msg = f"Invalid command: '{command}'. Type command 'help' for help."
         
-        # Clear the line first
-        stdscr.move(st.latest_max_capacity, sidebar_width)
-        stdscr.clrtoeol()
-        
-        red_pair_num = clr.get_color_pair_num_by_str_text("red")
-        stdscr.attron(curses.color_pair(red_pair_num) | curses.A_BOLD)
-        stdscr.addstr(st.latest_max_capacity, sidebar_width, error_msg)
-        stdscr.attroff(curses.color_pair(red_pair_num) | curses.A_BOLD)
-        stdscr.refresh()
-        
-        time.sleep(1.5)
-        
-        # Clear the error message
-        stdscr.move(st.latest_max_capacity, sidebar_width)
-        stdscr.clrtoeol()
-        stdscr.refresh()
+        # Clear the line first, error might occur if resized small
+        try:
+            stdscr.move(st.latest_max_capacity, sidebar_width)
+            stdscr.clrtoeol()
+
+            red_pair_num = clr.get_color_pair_num_by_str_text("red")
+            stdscr.attron(curses.color_pair(red_pair_num) | curses.A_BOLD)
+            stdscr.addstr(st.latest_max_capacity, sidebar_width, error_msg)
+            stdscr.attroff(curses.color_pair(red_pair_num) | curses.A_BOLD)
+            stdscr.refresh()
+
+            time.sleep(1.5)
+
+            # Clear the error message
+            stdscr.move(st.latest_max_capacity, sidebar_width)
+            stdscr.clrtoeol()
+            stdscr.refresh()
+        except curses.error:
+            pass
     
     return task_list, done_list
 
