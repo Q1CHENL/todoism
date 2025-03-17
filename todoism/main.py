@@ -13,6 +13,18 @@ import todoism.keycode as kc
 import todoism.color as clr
 import todoism.state as st
 import todoism.search as srch
+import todoism.backup as bkp
+
+def _exit():
+    # Always backup normal data on exit
+    bkp.backup_normal_data()
+    try:
+        import test.test as test_module
+        if test_module.is_dev_mode_active():
+            test_module.exit_dev_mode()
+    except ImportError:
+        # No test module found (PyPI installation), continue with normal exit
+        pass
 
 def _clear_bottom_line_content(stdscr):
     # clear bottom line
@@ -261,19 +273,10 @@ def main(stdscr):
                         st.current_task_row = min(st.current_task_row, st.latest_max_capacity)
                     
                     # Render the main view with sidebar
-                    pr.print_whole_view(
-                        stdscr,
-                        categories,
-                        sidebar_scroller.start_index,
-                    )
+                    pr.print_whole_view(stdscr, categories, sidebar_scroller.start_index)
                     
                 else:
-                    # No tasks in current category
-                    pr.print_category_entries(
-                        stdscr,
-                        categories,
-                        sidebar_scroller.start_index,
-                    )
+                    pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                     pr.print_frame_all(stdscr)
                     if st.searching:
                         pr.print_msg_in_task_panel(stdscr, msg.no_tasks_found_msg, cat.SIDEBAR_WIDTH, highlight=False)
@@ -282,11 +285,7 @@ def main(stdscr):
                     pr.print_status_bar(stdscr)
 
             else:
-                pr.print_whole_view(
-                    stdscr,
-                    categories,
-                    sidebar_scroller.start_index,
-                )
+                pr.print_whole_view(stdscr, categories, sidebar_scroller.start_index)
             if st.searching:
                 pr.print_q_to_close(stdscr, 'search')
             should_repaint = False
@@ -379,19 +378,19 @@ def main(stdscr):
 
                 stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, "/")
                 stdscr.refresh()
-                command_line = stdscr.getstr().decode('utf-8')
+                command = stdscr.getstr().decode('utf-8')
                 stdscr.timeout(500)
 
                 curses.curs_set(0)
                 curses.noecho()
 
-                if command_line == '':
+                if command == '':
                     _clear_bottom_line_content(stdscr)
                     continue
             except curses.error:
                 continue
 
-            srch.search(command_line, task_list)
+            srch.search(command, task_list)
             st.searching = True
             st.task_cnt = len(st.filtered_tasks)
             pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
@@ -426,17 +425,7 @@ def main(stdscr):
                     _restore_task_panel(task_list)
                     should_repaint = True
                     continue
-                # Always backup normal data on exit
-                import todoism.backup as backup
-                backup.backup_normal_data()
-                
-                try:
-                    import test.test as test_module
-                    if test_module.is_dev_mode_active():
-                        test_module.exit_dev_mode()
-                except ImportError:
-                    # No test module found (PyPI installation), continue with normal exit
-                    pass
+                _exit()
                 break
                 
             elif key == ord('a'):
@@ -473,11 +462,7 @@ def main(stdscr):
                     stdscr.addch(i, 15, '│')
                 
                 # Redraw all categories in the sidebar with updated start_index
-                pr.print_category_entries(
-                    stdscr,
-                    categories,
-                    sidebar_scroller.start_index,
-                )
+                pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                 
                 pr.print_left_frame(stdscr)
                 pr.print_sidebar_task_panel_separator(stdscr)
@@ -544,11 +529,7 @@ def main(stdscr):
                     pr.print_status_bar(stdscr)
                     
                     # Draw all categories
-                    pr.print_category_entries(
-                        stdscr,
-                        categories,
-                        sidebar_scroller.start_index,
-                    )
+                    pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                     
                     pr.print_left_frame(stdscr)
                     pr.print_sidebar_task_panel_separator(stdscr)
@@ -645,7 +626,7 @@ def main(stdscr):
                 stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
                 stdscr.refresh()
 
-                command_line = stdscr.getstr().decode('utf-8')
+                command = stdscr.getstr().decode('utf-8')
                 stdscr.timeout(500)
                 
                 curses.curs_set(0)
@@ -653,7 +634,7 @@ def main(stdscr):
                 
                 command_result = cmd.execute_command(
                     stdscr,
-                    command_line,
+                    command,
                     task_list,
                     done_list,
                     purged_list,
@@ -677,7 +658,7 @@ def main(stdscr):
                     task_list, done_list = command_result
                 
                 should_repaint = True
-                command_line = ""
+                command = ""
                 
         # Handle task navigation and actions when task area is focused
         elif st.focus_manager.is_tasks_focused():
@@ -705,11 +686,7 @@ def main(stdscr):
                         st.start_task_id = st.task_cnt - (st.end_task_id - st.start_task_id - 1)
                         st.end_task_id = st.task_cnt
 
-                pr.print_category_entries(
-                    stdscr,
-                    categories,
-                    sidebar_scroller.start_index,
-                )
+                pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                 
                 pr.print_left_frame(stdscr)
                 pr.print_sidebar_task_panel_separator(stdscr)
@@ -781,11 +758,8 @@ def main(stdscr):
                     st.task_cnt = len(st.filtered_tasks)
                     pr.print_status_bar(stdscr)
                     
-                    pr.print_category_entries(
-                        stdscr,
-                        categories,
-                        sidebar_scroller.start_index,
-                    )
+                    pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
+                    
                     pr.print_left_frame(stdscr)
                     pr.print_sidebar_task_panel_separator(stdscr)
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
@@ -882,17 +856,7 @@ def main(stdscr):
                     _restore_task_panel(task_list)
                     should_repaint = True
                     continue
-
-                # Always backup normal data on exit
-                import todoism.backup as backup
-                backup.backup_normal_data()
-                try:
-                    import test.test as test_module
-                    if test_module.is_dev_mode_active():
-                        test_module.exit_dev_mode()
-                except ImportError:
-                    # No test module found (PyPI installation), continue with normal exit
-                    pass
+                _exit()
                 break
                 
             elif key == ord(':'):
@@ -906,7 +870,7 @@ def main(stdscr):
                 
                 stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
                 stdscr.refresh()
-                command_line = stdscr.getstr().decode('utf-8')
+                command = stdscr.getstr().decode('utf-8')
                 stdscr.timeout(500)
                 
                 curses.curs_set(0)
@@ -914,7 +878,7 @@ def main(stdscr):
                 
                 command_result = cmd.execute_command(
                     stdscr,
-                    command_line,
+                    command,
                     task_list,
                     done_list,
                     purged_list,
@@ -937,7 +901,7 @@ def main(stdscr):
                     task_list, done_list = command_result
                 
                 should_repaint = True
-                command_line = ""
+                command = ""
                 
             elif key == curses.KEY_UP:
                 task_scroll_offset = 0
