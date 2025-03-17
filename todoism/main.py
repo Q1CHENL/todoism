@@ -288,7 +288,7 @@ def main(stdscr):
                     sidebar_scroller.start_index,
                 )
             if st.searching:
-                pr.print_q_to_close(stdscr, 'search', st.latest_max_x, st.latest_max_y)
+                pr.print_q_to_close(stdscr, 'search')
             should_repaint = False
             
         # Wait for user input
@@ -479,9 +479,9 @@ def main(stdscr):
                     sidebar_scroller.start_index,
                 )
                 
-                pr.print_left_frame(stdscr, st.latest_max_y)
-                pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
-                pr.print_right_frame(stdscr, st.latest_max_y, st.latest_max_x)
+                pr.print_left_frame(stdscr)
+                pr.print_sidebar_task_panel_separator(stdscr)
+                pr.print_right_frame(stdscr)
                 if st.task_cnt > 0:
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                 else: 
@@ -550,8 +550,8 @@ def main(stdscr):
                         sidebar_scroller.start_index,
                     )
                     
-                    pr.print_left_frame(stdscr, st.latest_max_y)
-                    pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
+                    pr.print_left_frame(stdscr)
+                    pr.print_sidebar_task_panel_separator(stdscr)
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     
                     stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
@@ -711,8 +711,8 @@ def main(stdscr):
                     sidebar_scroller.start_index,
                 )
                 
-                pr.print_left_frame(stdscr, st.latest_max_y)
-                pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
+                pr.print_left_frame(stdscr)
+                pr.print_sidebar_task_panel_separator(stdscr)
                 
                 st.adding_task = True
                 # Print existing tasks with offset (crucial: pass cat.SIDEBAR_WIDTH to offset tasks)
@@ -786,8 +786,8 @@ def main(stdscr):
                         categories,
                         sidebar_scroller.start_index,
                     )
-                    pr.print_left_frame(stdscr, st.latest_max_y)
-                    pr.print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
+                    pr.print_left_frame(stdscr)
+                    pr.print_sidebar_task_panel_separator(stdscr)
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     
                     # Move cursor to edit position
@@ -848,7 +848,6 @@ def main(stdscr):
                                         st.filtered_tasks[task_index],
                                         y,
                                         task_index + 1 == st.current_task_id,
-                                        max_x=max_x
                                     )
                             
                             # Clear the last line if needed

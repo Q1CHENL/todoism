@@ -436,10 +436,10 @@ def open_help_page(stdscr):
     stdscr.clear()
     pr.print_outer_frame(stdscr)
     pr.print_msg(stdscr, msg.help_msg)
-    pr.print_q_to_close(stdscr, "help", st.latest_max_x, st.latest_max_y)
+    pr.print_q_to_close(stdscr, "help")
 
 def open_pref_panel(stdscr, selection_index):
     stdscr.clear()
     pr.print_pref_panel(stdscr, selection_index)
     pr.print_outer_frame(stdscr)
-    pr.print_q_to_close(stdscr, "preferences", st.latest_max_x, st.latest_max_y)
+    pr.print_q_to_close(stdscr, "preferences")
