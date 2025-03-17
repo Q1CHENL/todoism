@@ -122,7 +122,7 @@ def add_new_task(task_list, task_id, task_description, flagged=False, category_i
     save_tasks(task_list)  # Use save_tasks without explicit path
     return task_list
 
-def get_tasks_by_category(task_list, category_id):
+def get_tasks_by_category_id(task_list, category_id):
     """Filter tasks by category"""
     if category_id == 0:  # 'All' category
         return task_list
