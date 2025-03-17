@@ -816,44 +816,39 @@ def print_separator_connector_bottom(stdscr):
     stdscr.addstr(st.latest_max_y - 1, 15, "┴")
     
 def print_frame_all(stdscr):
-    
-    turnoff_all_attributes(stdscr)
-    print_top_left_corner(stdscr)
-    print_bottom_left_corner(stdscr)
-    print_left_frame(stdscr)
-    
-    print_top_right_corner(stdscr)
-    print_top_frame(stdscr)
-    
-    print_right_frame(stdscr)
-    
-    print_bottom_frame(stdscr)
-    
-    print_separator_connector_top(stdscr)
-    print_separator_connector_bottom(stdscr)
-    print_sidebar_task_panel_separator(stdscr)
-    
-    # Trick for last char (bottom right) error in cursor window    
-    stdscr.addstr(st.latest_max_y - 1, st.latest_max_x - 2, "┘")
-    stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    try:
+        turnoff_all_attributes(stdscr)
+        print_top_left_corner(stdscr)
+        print_bottom_left_corner(stdscr)
+        print_left_frame(stdscr)
+        print_top_right_corner(stdscr)
+        print_top_frame(stdscr)
+        print_right_frame(stdscr)
+        print_bottom_frame(stdscr)
+        print_separator_connector_top(stdscr)
+        print_separator_connector_bottom(stdscr)
+        print_sidebar_task_panel_separator(stdscr)
+        # Trick for last char (bottom right) error in cursor window    
+        stdscr.addstr(st.latest_max_y - 1, st.latest_max_x - 2, "┘")
+        stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    except curses.error:
+        pass
     
 def print_outer_frame(stdscr):
-    
-    turnoff_all_attributes(stdscr)
-    print_top_left_corner(stdscr)
-    print_bottom_left_corner(stdscr)
-    print_left_frame(stdscr)
-    
-    print_top_right_corner(stdscr)
-    print_top_frame(stdscr)
-    
-    print_right_frame(stdscr)
-    
-    print_bottom_frame(stdscr)
-    
-    # Trick for last char (bottom right) error in cursor window
-    stdscr.addstr(st.latest_max_y - 1, st.latest_max_x - 2, "┘")
-    stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    try:
+        turnoff_all_attributes(stdscr)
+        print_top_left_corner(stdscr)
+        print_bottom_left_corner(stdscr)
+        print_left_frame(stdscr)
+        print_top_right_corner(stdscr)
+        print_top_frame(stdscr)
+        print_right_frame(stdscr)
+        print_bottom_frame(stdscr)
+        # Trick for last char (bottom right) error in cursor window
+        stdscr.addstr(st.latest_max_y - 1, st.latest_max_x - 2, "┘")
+        stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    except curses.error:
+        pass
 
     
 def turnoff_all_attributes(stdscr):
