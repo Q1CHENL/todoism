@@ -12,15 +12,13 @@ add_mode  = 0
 edit_mode = 1
 
 # Function to display centered messages
-def print_msg_center(stdscr, message, color_pair=0, highlight_line=-1):
-    # stdscr.clear()
-    max_y, max_x = stdscr.getmaxyx()
+def print_msg_center(stdscr, message, color_pair=0, highlight_line=-1):    
     lines = message.strip().split("\n")
-    start_y = max(0, (max_y - len(lines)) // 2)
+    start_y = max(0, (st.latest_max_y - len(lines)) // 2)
     
     for i, line in enumerate(lines):
         if line.strip():  # Only print non-empty lines
-            start_x = max(0, (max_x - len(line)) // 2)
+            start_x = max(0, (st.latest_max_x - len(line)) // 2)
             if i == highlight_line and color_pair > 0:
                 stdscr.attron(curses.color_pair(color_pair))
                 stdscr.addstr(start_y + i, start_x, line)
@@ -34,22 +32,21 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
     """Print a message box with proper centering in the task area with optional highlighting"""
     lines = msg.split('\n')
     width = len(lines[1])
-    max_y, max_x = stdscr.getmaxyx()
-    
+
     # Ensure we have minimum required space
-    if max_y < 2 or max_x < x_offset + 1:
+    if st.latest_max_y < 2 or st.latest_max_x < x_offset + 1:
         return
     
     # Calculate available width for task area (total width minus sidebar)
-    available_width = max(0, max_x - x_offset)
+    available_width = max(0, st.latest_max_x - x_offset)
     
     # Calculate center position within the available task area
     # Ensure center_offset is never negative
     center_offset_x = max(0, (available_width - width) // 2)
-    center_offset_y = max(0, (max_y - len(lines)) // 2)
+    center_offset_y = max(0, (st.latest_max_y - len(lines)) // 2)
     
     # Clear the task area before printing
-    clear_task_panel(stdscr, max_y)
+    clear_task_panel(stdscr, st.latest_max_y)
     
     # Apply highlighting if requested
     if highlight:
@@ -58,14 +55,14 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
     # Print each line separately at the calculated position
     for i, line in enumerate(lines):
         y = i + 1  # Start at row 1 (row 0 is status bar)
-        if y < max_y - 1 and line.strip():  # Only print non-empty lines and check bounds
+        if y < st.latest_max_y - 1 and line.strip():  # Only print non-empty lines and check bounds
             try:
                 # Position cursor at sidebar edge + centering offset
                 stdscr.move(y + center_offset_y, x_offset + center_offset_x)
                 # Print the line directly, truncating if necessary
-                if x_offset + center_offset_x + len(line) > max_x:
+                if x_offset + center_offset_x + len(line) > st.latest_max_x:
                     # Truncate line to fit available space
-                    available_space = max_x - (x_offset + center_offset_x)
+                    available_space = st.latest_max_x - (x_offset + center_offset_x)
                     if available_space > 0:
                         stdscr.addstr(line[:available_space])
                 else:
@@ -78,22 +75,22 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
         stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
     
     # Draw the right frame for each line
-    print_right_frame(stdscr, max_y, max_x)
+    print_right_frame(stdscr, st.latest_max_y, st.latest_max_x)
     
 def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
     """Print a message box with proper centering in the task area with optional highlighting"""
     lines = msg.split('\n')
     width = len(lines[1])
-    max_y, max_x = stdscr.getmaxyx()
+    
     
     # Ensure we have minimum required space
-    if max_y < 2 or max_x < x_offset + 1:
+    if st.latest_max_y < 2 or st.latest_max_x < x_offset + 1:
         return
     
     # Calculate available width for task area (total width minus sidebar)
-    available_width = max(0, max_x - x_offset)
+    available_width = max(0, st.latest_max_x - x_offset)
     center_offset_x = max(0, (available_width - width) // 2)
-    center_offset_y = max(0, (max_y - len(lines)) // 2)
+    center_offset_y = max(0, (st.latest_max_y - len(lines)) // 2)
     
     # Apply highlighting if requested
     if highlight:
@@ -102,14 +99,14 @@ def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
     # Print each line separately at the calculated position
     for i, line in enumerate(lines):
         y = i + 1  # Start at row 1 (row 0 is status bar)
-        if y < max_y - 1 and line.strip():  # Only print non-empty lines and check bounds
+        if y < st.latest_max_y - 1 and line.strip():  # Only print non-empty lines and check bounds
             try:
                 # Position cursor at sidebar edge + centering offset
                 stdscr.move(y + center_offset_y, x_offset + center_offset_x)
                 # Print the line directly, truncating if necessary
-                if x_offset + center_offset_x + len(line) > max_x:
+                if x_offset + center_offset_x + len(line) > st.latest_max_x:
                     # Truncate line to fit available space
-                    available_space = max_x - (x_offset + center_offset_x)
+                    available_space = st.latest_max_x - (x_offset + center_offset_x)
                     if available_space > 0:
                         stdscr.addstr(line[:available_space])
                 else:
@@ -170,8 +167,8 @@ def print_task_symbols(stdscr, task, y, flag_x=3, status_x=5, use_colors=True, i
 def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0, 
                cursor_pos=None, is_edit_mode=False):
     """Render a task with proper formatting and positioning"""
-    if max_x == 0:
-        max_x = stdscr.getmaxyx()[1]
+    if st.latest_max_x == 0:
+        st.latest_max_x = stdscr.getmaxyx()[1]
     
     # Determine position calculations based on sidebar mode
     if st.focus_manager.is_sidebar_focused():
@@ -213,7 +210,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         # Calculate date position and available text space
         date_str = task['date']
         date_padding = 1  # Space between description and date
-        date_pos = max_x - len(date_str) - date_padding - 1  # Account for right frame
+        date_pos = st.latest_max_x - len(date_str) - date_padding - 1  # Account for right frame
         
         text_start_pos = cat.SIDEBAR_WIDTH + base_indent  # Combined offset
         total_indent = text_start_pos
@@ -270,7 +267,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         if is_selected:
             stdscr.attroff(curses.color_pair(clr.backgournd_color_pair_num))
         try:
-            stdscr.addstr(y, max_x - 1, '│')
+            stdscr.addstr(y, st.latest_max_x - 1, '│')
         except curses.error:
             pass
         if is_selected:
@@ -298,11 +295,9 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     
     return None
 
-
 def print_status_bar(stdscr):
     """Print centered status bar with progress, percentage, date and time"""
-    max_y, max_x = stdscr.getmaxyx()
-    
+
     # Reset all attributes at the start
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(clr.backgournd_color_pair_num) | 
                    curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
@@ -337,16 +332,16 @@ def print_status_bar(stdscr):
     
     # Calculate center position
     total_len = len(status_prefix) + len(percent_text) + len(datetime_str) + 2  # +2 for spacing
-    start_pos = (max_x - total_len - cat.SIDEBAR_WIDTH) // 2 + cat.SIDEBAR_WIDTH
+    start_pos = (st.latest_max_x - total_len - cat.SIDEBAR_WIDTH) // 2 + cat.SIDEBAR_WIDTH
     
     # Clear only the top line
     stdscr.move(0, 0)
     stdscr.clrtoeol()
     
     print_top_left_corner(stdscr)
-    print_top_frame(stdscr, max_x)
+    print_top_frame(stdscr, st.latest_max_x)
     print_separator_connector_top(stdscr)
-    print_top_right_corner(stdscr, max_x)
+    print_top_right_corner(stdscr, st.latest_max_x)
     
     # Print centered status with colored percentage and datetime
     try:
@@ -361,7 +356,6 @@ def print_status_bar(stdscr):
     # Ensure all attributes are reset at the end
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(clr.backgournd_color_pair_num) | 
                    curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
-
 
 def print_all_cli(todos):
     if len(todos) == 0:
@@ -382,8 +376,6 @@ def print_all_cli(todos):
 
 def print_category_entries(stdscr, categories, start_index):
     """Print the category sidebar"""
-    # Set sidebar width
-    max_y, max_x = stdscr.getmaxyx()
     
     # Clear sidebar area
     for y in range(1, st.latest_max_capacity + 1):
@@ -440,20 +432,18 @@ def print_category(stdscr, category, y, is_selected=False):
 def print_whole_view(stdscr, categories, category_start_index):
     """Print the complete UI with sidebar and task list"""
     # Get max visible height
-    max_y, _ = stdscr.getmaxyx()
+    st.latest_max_y, _ = stdscr.getmaxyx()
     # Reduce max_height by 1 to account for bottom frame
-    max_height = max_y - 2  # -1 for status bar, -1 for bottom frame
+    max_height = st.latest_max_y - 2  # -1 for status bar, -1 for bottom frame
     
     print_frame_all(stdscr)
     # Print status bar first
     print_status_bar(stdscr)
-    
-    max_y, max_x = stdscr.getmaxyx()
-    
+
     # Clear sidebar area
     for y in range(1, max_height + 1):
         stdscr.move(y, 0)
-        stdscr.clrtoeol()  # Use clrtoeol() for consistent clearing
+        stdscr.clrtoeol()
         
     # Print visible categories
     visible_categories = categories[category_start_index:category_start_index + max_height]
@@ -462,18 +452,15 @@ def print_whole_view(stdscr, categories, category_start_index):
         is_selected = category['id'] == st.current_category_id
         print_category(stdscr, category, row, is_selected)
     
-    print_left_frame(stdscr, max_y)
-    print_sidebar_task_panel_separator(stdscr, max_y)
+    print_left_frame(stdscr, st.latest_max_y)
+    print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
     
     # Print tasks or empty message
     if st.task_cnt == 0:
-        # Clear task area
-        for y in range(1, max_height + 1):
-            stdscr.move(y, cat.SIDEBAR_WIDTH)
-            stdscr.clrtoeol()
+        clear_task_panel(stdscr, st.latest_max_y)
         # Print empty message with highlighting when task area has focus
         print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
-        print_right_frame(stdscr, max_y, max_x)
+        print_right_frame(stdscr, st.latest_max_y, st.latest_max_x)
     else:
         print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
     
@@ -483,12 +470,8 @@ def print_whole_view(stdscr, categories, category_start_index):
 
 def print_task_entries(stdscr, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
-    max_y, max_x = stdscr.getmaxyx()
-    
-    # Clear task area first
-    for y in range(1, min(st.end_task_id - st.start_task_id + 2, max_y)):
-        stdscr.move(y, x_offset)
-        stdscr.clrtoeol()
+
+    clear_task_panel(stdscr, st.latest_max_y)
 
     # Only print if we have tasks and a valid start index
     if st.filtered_tasks and st.start_task_id > 0:
@@ -503,22 +486,21 @@ def print_task_entries(stdscr, x_offset=0):
                 # Normal task
                 print_task_entry(stdscr, task, row, False, x_offset, display_id)
     
-    max_y, max_x = stdscr.getmaxyx()
-    for y in range(len(st.filtered_tasks) if len(st.filtered_tasks) > 0 else 1, max_y - 1):
-        stdscr.addstr(y, max_x - 1, "│")
-    
+    try:
+        # Print right frame of area without task entries, compensate for clearing the whole task panel
+        # Might get error when resizing window while typing search query
+        for y in range(len(st.filtered_tasks) if len(st.filtered_tasks) > 0 else 1, st.latest_max_y - 1):
+            stdscr.addstr(y, st.latest_max_x - 1, "│")
+    except curses.error:
+        pass
     # Reset all attributes before drawing bottom right corner
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.A_REVERSE | curses.A_BLINK | 
                   curses.A_UNDERLINE | curses.color_pair(clr.backgournd_color_pair_num))
 
-    # Special trick for last char error in cursor window
-    stdscr.addstr(max_y - 1, max_x - 2, "┘")
-    stdscr.insstr(max_y - 1, max_x - 2, "─")
-    
 def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None):
     """Print a task with horizontal offset and optional display ID override"""
     # Calculate available width for text
-    max_y, max_x = stdscr.getmaxyx()
+    
     
     # Use display_id if provided, otherwise use task's actual ID
     id_to_show = display_id if display_id is not None else task['id']
@@ -537,7 +519,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
                       is_selected=is_selected)
     
     # Calculate positions with right frame
-    right_frame_pos = max_x - 1
+    right_frame_pos = st.latest_max_x - 1
     date_str = task['date']
     date_pos = right_frame_pos - len(date_str) - 1  # Only 1 char gap from right frame
     
@@ -616,16 +598,16 @@ def print_pref_panel(stdscr, current_selection_index=0):
     pref_content_lines = msg.pref_panel.strip().split("\n")
 
     # Calculate dimensions and position
-    max_y, max_x = stdscr.getmaxyx()
+    
     
     # Calculate available width - adapt to screen size
     original_width = len(pref_content_lines[0]) if pref_content_lines else 0
     # Make sure panel is at least 20 chars wide or as wide as possible
-    available_width = min(original_width, max(20, max_x - 4))
+    available_width = min(original_width, max(20, st.latest_max_x - 4))
     
     # Calculate center offsets (similar to print_msg)
-    center_offset_x = max(0, (max_x - available_width) // 2)
-    center_offset_y = max(0, (max_y - len(pref_content_lines)) // 2) - 1
+    center_offset_x = max(0, (st.latest_max_x - available_width) // 2)
+    center_offset_y = max(0, (st.latest_max_y - len(pref_content_lines)) // 2) - 1
     
     # Get current preference values for coloring
     tag_enabled = pref.get_tag()
@@ -653,121 +635,121 @@ def print_pref_panel(stdscr, current_selection_index=0):
             formatted_content.append(line)
     
     # Print each line of the panel with appropriate formatting
-    for y in range(0, min(len(formatted_content), max_y - 2)):
+    for y in range(0, min(len(formatted_content), st.latest_max_y - 2)):
         try:
             line = formatted_content[y]
             
             # Draw the top frame (first line)
             if y == 0:
-                stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:max_x-center_offset_x-1])
+                stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:st.latest_max_x-center_offset_x-1])
                 continue
             
             # Process and draw content lines
             if "Tag:" in line:
                 value = "on" if tag_enabled else "off"
                 pos = line.find(value)
-                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, max_x)
+                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, st.latest_max_x)
                     
             elif "Strikethrough:" in line:
                 value = "on" if strikethrough_enabled else "off"
                 pos = line.find(value)
-                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, max_x)                
+                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, st.latest_max_x)                
                     
             elif "Color:" in line and current_color in line:
                 pos = line.find(current_color)
                 print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, 
-                                             current_color, clr.get_theme_color_pair_num_text(), max_x)
+                                             current_color, clr.get_theme_color_pair_num_text(), st.latest_max_x)
                     
             elif "Date format:" in line and current_date_format in line:
                 pos = line.find(current_date_format)
                 print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, 
-                                             current_date_format, clr.get_theme_color_pair_num_text(), max_x)
+                                             current_date_format, clr.get_theme_color_pair_num_text(), st.latest_max_x)
                 
             elif "Sort by flagged:" in line:
                 value = "on" if sort_flagged else "off"
                 pos = line.find(value)
-                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, max_x)
+                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, st.latest_max_x)
                 
             elif "Sort by done:" in line:
                 value = "on" if sort_done else "off"
                 pos = line.rfind(value)  # reverse find because done contains "on" as well
-                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, max_x)
+                print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, st.latest_max_x)
                 
             else:
                 # Print other lines without special formatting
-                stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:max_x-center_offset_x-1])
+                stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:st.latest_max_x-center_offset_x-1])
         except curses.error:
             continue
 
-def print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value, max_x):
+def print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value):
     """Safely print a preference line with on/off value highlighted"""
     try:
         if pos <= 0:
             # Value not found, print the whole line
-            stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:max_x-center_offset_x-1])
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:st.latest_max_x-center_offset_x-1])
             return
             
         # Print the prefix (part before the value)
         prefix = line[:pos]
-        if center_offset_x + len(prefix) < max_x:
-            stdscr.addstr(y + center_offset_y + 1, center_offset_x, prefix[:max_x-center_offset_x-1])
+        if center_offset_x + len(prefix) < st.latest_max_x:
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x, prefix[:st.latest_max_x-center_offset_x-1])
         
         # Determine if there's space for the value
-        if center_offset_x + pos + len(value) > max_x:
+        if center_offset_x + pos + len(value) > st.latest_max_x:
             return
             
         # Print the value with appropriate color
         if value == "on":
             green_pair_num = clr.get_color_pair_num_by_str_text("green")
             stdscr.attron(curses.color_pair(green_pair_num))
-            stdscr.addstr(y + center_offset_y + 1, center_offset_x + pos, value[:max_x-(center_offset_x+pos)-1])
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1])
             stdscr.attroff(curses.color_pair(green_pair_num))
         else:  # "off"
             red_pair_num = clr.get_color_pair_num_by_str_text("red")
             stdscr.attron(curses.color_pair(red_pair_num))
-            stdscr.addstr(y + center_offset_y + 1, center_offset_x + pos, value[:max_x-(center_offset_x+pos)-1])
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1])
             stdscr.attroff(curses.color_pair(red_pair_num))
         
         # Print the suffix (part after the value) if it fits
         suffix = line[pos + len(value):]
         suffix_pos = center_offset_x + pos + len(value)
-        if suffix_pos < max_x and len(suffix) > 0:
-            stdscr.addstr(y + center_offset_y + 1, suffix_pos, suffix[:max_x-suffix_pos-1])
+        if suffix_pos < st.latest_max_x and len(suffix) > 0:
+            stdscr.addstr(y + center_offset_y + 1, suffix_pos, suffix[:st.latest_max_x-suffix_pos-1])
     except curses.error:
         pass
 
-def print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, value, color_pair, max_x):
+def print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, value, color_pair):
     """Safely print a preference line with a highlighted value using specified color pair"""
     try:
         if pos <= 0:
             # Value not found, print the whole line
-            stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:max_x-center_offset_x-1])
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x, line[:st.latest_max_x-center_offset_x-1])
             return
             
         # Print the prefix (part before the value)
         prefix = line[:pos]
-        if center_offset_x + len(prefix) < max_x:
-            stdscr.addstr(y + center_offset_y + 1, center_offset_x, prefix[:max_x-center_offset_x-1])
+        if center_offset_x + len(prefix) < st.latest_max_x:
+            stdscr.addstr(y + center_offset_y + 1, center_offset_x, prefix[:st.latest_max_x-center_offset_x-1])
         
         # Determine if there's space for the value
-        if center_offset_x + pos + len(value) > max_x:
+        if center_offset_x + pos + len(value) > st.latest_max_x:
             return
             
         # Print the value with specified color
         stdscr.attron(curses.color_pair(color_pair))
-        stdscr.addstr(y + center_offset_y + 1, center_offset_x + pos, value[:max_x-(center_offset_x+pos)-1])
+        stdscr.addstr(y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1])
         stdscr.attroff(curses.color_pair(color_pair))
         
         # Print the suffix (part after the value) if it fits
         suffix = line[pos + len(value):]
         suffix_pos = center_offset_x + pos + len(value)
-        if suffix_pos < max_x and len(suffix) > 0:
-            stdscr.addstr(y + center_offset_y + 1, suffix_pos, suffix[:max_x-suffix_pos-1])
+        if suffix_pos < st.latest_max_x and len(suffix) > 0:
+            stdscr.addstr(y + center_offset_y + 1, suffix_pos, suffix[:st.latest_max_x-suffix_pos-1])
     except curses.error:
         pass
 
-def clear_task_panel(stdscr, max_y):
-    for i in range(1, max_y - 1):
+def clear_task_panel(stdscr):
+    for i in range(1, st.latest_max_y - 1):
         try:
             stdscr.move(i, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
@@ -776,103 +758,102 @@ def clear_task_panel(stdscr, max_y):
         
 def clear_inner_content(stdscr):
     # Clear all content exepct the outer frame
-    max_y, max_x = stdscr.getmaxyx()
-    for i in range(1, max_y - 1):
+    
+    for i in range(1, st.latest_max_y - 1):
         try:
             stdscr.move(i, 1)
             stdscr.clrtoeol()
         except curses.error:
             continue
         
-def print_q_to_close(stdscr, page, max_x, max_y):
+def print_q_to_close(stdscr, page):
     try:
         hint = f"┤Press 'q' to close {page}├"
-        hint_pos_x = (max_x - len(hint)) // 2 
-        stdscr.addstr(max_y - 1, hint_pos_x, hint)
+        hint_pos_x = (st.latest_max_x - len(hint)) // 2 
+        stdscr.addstr(st.latest_max_y - 1, hint_pos_x, hint)
     except curses.error:
         pass
 
 # Functions for drawing frames and separators
-def print_right_frame(stdscr, max_y, max_x):
-    for y in range(1, max_y - 1):
-        stdscr.addstr(y, max_x - 1, "│")
+def print_right_frame(stdscr):
+    for y in range(1, st.latest_max_y - 1):
+        stdscr.addstr(y, st.latest_max_x - 1, "│")
 
-def print_left_frame(stdscr, max_y):
-    for y in range(1, max_y - 1):
+def print_left_frame(stdscr):
+    for y in range(1, st.latest_max_y - 1):
         stdscr.addstr(y, 0, '│')
         
-def print_top_frame(stdscr, max_x):
-    for x in range(1, max_x - 1):
+def print_top_frame(stdscr):
+    for x in range(1, st.latest_max_x - 1):
         stdscr.addstr(0, x, '─')
 
-def print_bottom_frame(stdscr, max_y, max_x):    
+def print_bottom_frame(stdscr):    
     for x in range(1, max_x - 2):
-        stdscr.addstr(max_y - 1, x, '─')
+        stdscr.addstr(st.latest_max_y - 1, x, '─')
 
-def print_top_right_corner(stdscr, max_x):
-    stdscr.addstr(0, max_x - 1, "┐")
+def print_top_right_corner(stdscr):
+    stdscr.addstr(0, st.latest_max_x - 1, "┐")
 
 def print_top_left_corner(stdscr):
     stdscr.addstr(0, 0, "┌")
     
-def print_bottom_right_corner(stdscr, max_x, max_y):
-    # stdscr.addstr(max_y - 1, max_x - 1, "┘")
-    stdscr.addstr(max_y - 1, max_x - 2, "┘")
-    stdscr.insstr(max_y - 1, max_x - 2, "─")
+def print_bottom_right_corner(stdscr):
+    stdscr.addstr(st.latest_max_y - 1, st.latest_max_x - 2, "┘")
+    stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
 
-def print_bottom_left_corner(stdscr, max_y):
+def print_bottom_left_corner(stdscr):
     # Reset attributes before drawing corner to prevent highlighting
-    stdscr.addstr(max_y - 1, 0, "└")
+    stdscr.addstr(st.latest_max_y - 1, 0, "└")
     
-def print_sidebar_task_panel_separator(stdscr, max_y):
-    for y in range(1, max_y - 1):
+def print_sidebar_task_panel_separator(stdscr):
+    for y in range(1, st.latest_max_y - 1):
         stdscr.addstr(y, 15, "│")
 
 def print_separator_connector_top(stdscr):
     stdscr.addstr(0, 15, "┬")
 
-def print_separator_connector_bottom(stdscr, max_y):
-    stdscr.addstr(max_y - 1, 15, "┴")
+def print_separator_connector_bottom(stdscr):
+    stdscr.addstr(st.latest_max_y - 1, 15, "┴")
     
 def print_frame_all(stdscr):
-    max_y, max_x = stdscr.getmaxyx()
+    
     turnoff_all_attributes(stdscr)
     print_top_left_corner(stdscr)
-    print_bottom_left_corner(stdscr, max_y)
-    print_left_frame(stdscr, max_y)
+    print_bottom_left_corner(stdscr, st.latest_max_y)
+    print_left_frame(stdscr, st.latest_max_y)
     
-    print_top_right_corner(stdscr, max_x)
-    print_top_frame(stdscr, max_x)
+    print_top_right_corner(stdscr, st.latest_max_x)
+    print_top_frame(stdscr, st.latest_max_x)
     
-    print_right_frame(stdscr, max_y, max_x)
+    print_right_frame(stdscr, st.latest_max_y, st.latest_max_x)
     
-    print_bottom_frame(stdscr, max_y, max_x)
+    print_bottom_frame(stdscr, st.latest_max_y, st.latest_max_x)
     
     print_separator_connector_top(stdscr)
-    print_separator_connector_bottom(stdscr, max_y)
-    print_sidebar_task_panel_separator(stdscr, max_y)
+    print_separator_connector_bottom(stdscr, st.latest_max_y)
+    print_sidebar_task_panel_separator(stdscr, st.latest_max_y)
     
     # Trick for last char (bottom right) error in cursor window    
-    stdscr.addstr(max_y - 1, max_x - 2, "┘")
-    stdscr.insstr(max_y - 1, max_x - 2, "─")
+    stdscr.addstr(st.latest_max_y - 1, st.latest_max_x - 2, "┘")
+    stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
     
 def print_outer_frame(stdscr):
-    max_y, max_x = stdscr.getmaxyx()
+    
     turnoff_all_attributes(stdscr)
     print_top_left_corner(stdscr)
-    print_bottom_left_corner(stdscr, max_y)
-    print_left_frame(stdscr, max_y)
+    print_bottom_left_corner(stdscr, st.latest_max_y)
+    print_left_frame(stdscr, st.latest_max_y)
     
-    print_top_right_corner(stdscr, max_x)
-    print_top_frame(stdscr, max_x)
+    print_top_right_corner(stdscr, st.latest_max_x)
+    print_top_frame(stdscr, st.latest_max_x)
     
-    print_right_frame(stdscr, max_y, max_x)
+    print_right_frame(stdscr, st.latest_max_y, st.latest_max_x)
     
-    print_bottom_frame(stdscr, max_y, max_x)
+    print_bottom_frame(stdscr, st.latest_max_y, st.latest_max_x)
     
     # Trick for last char (bottom right) error in cursor window
-    stdscr.addstr(max_y - 1, max_x - 2, "┘")
-    stdscr.insstr(max_y - 1, max_x - 2, "─")
+    stdscr.addstr(st.latest_max_y - 1, st.latest_max_x - 2, "┘")
+    stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
 
     
 def turnoff_all_attributes(stdscr):
