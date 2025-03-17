@@ -12,28 +12,48 @@ import todoism.message as msg
 import todoism.keycode as kc
 import todoism.color as clr
 import todoism.state as st
+import todoism.search as srch
+
+def _clear_bottom_line_content(stdscr):
+    # clear bottom line
+    stdscr.move(st.latest_max_capacity, 0)
+    stdscr.clrtoeol()
+    # Keep frames visible
+    stdscr.addstr(st.latest_max_y - 2, 0, "│")
+    stdscr.addstr(st.latest_max_y - 2, 15, "│")
+    stdscr.addstr(st.latest_max_y - 2, st.latest_max_x - 1, "│")
+    
+def _restore_task_panel(task_list):
+    st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+    st.task_cnt = len(st.filtered_tasks)
+    st.current_task_id = 1 if st.task_cnt > 0 else 0
+    st.current_task_row = 1 if st.task_cnt > 0 else 0
+    st.start_task_id = 1 if st.task_cnt > 0 else 0
+    st.end_task_id = min(st.latest_max_capacity, st.task_cnt)
+
+def _window_resized():
+    return st.old_max_x != st.latest_max_x or st.latest_max_y != st.old_max_y
 
 def _sort_by_tag(categories):
     marked = []
     for i, task in enumerate(st.filtered_tasks):
-        if _not_marked(task):
+        if _task_not_marked(task):
             marked = st.filtered_tasks[:i]
             break
-    if len(st.filtered_tasks) > 0 and not _not_marked(st.filtered_tasks[len(st.filtered_tasks) - 1]):
+    if len(st.filtered_tasks) > 0 and not _task_not_marked(st.filtered_tasks[len(st.filtered_tasks) - 1]):
             marked = st.filtered_tasks
     tsk.reassign_task_ids(marked)
     not_marked = []
     for c in categories:
         for task in st.filtered_tasks: 
-            if _not_marked(task):
-                if c['id'] == task['category_id']:
+            if _task_not_marked(task) and c['id'] == task['category_id']:
                     not_marked.append(task)
     tsk.reassign_task_ids(not_marked)
     for task in not_marked:
         task['id'] += len(marked)
     st.filtered_tasks = marked + not_marked
 
-def _not_marked(task):
+def _task_not_marked(task):
     if pref.get_sort_done() and pref.get_sort_flagged():
         return not task['status'] and not task['flagged']
     elif pref.get_sort_done():
@@ -144,8 +164,8 @@ def main(stdscr):
     st.filtered_tasks = filtered_tasks
     
     while True:
-        # Get filtered tasks for current category
-        st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+        if not st.searching:
+            st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
         tsk.reassign_task_ids(st.filtered_tasks)
         
         if pref.get_sort_done():
@@ -161,18 +181,19 @@ def main(stdscr):
         st.done_cnt = tsk.done_count(st.filtered_tasks)
         st.cat_cnt = len(categories)
 
+        # Update window dimension in every iteration
+        st.old_max_y = st.latest_max_y        
         st.old_max_x = st.latest_max_x
-        # Handling window resizing
         st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
+        st.old_max_capacity = st.latest_max_capacity
         st.latest_max_capacity = st.latest_max_y - 2
         
         # Prevent error when window is vertically too small
         if st.latest_max_capacity < 0:
             st.latest_max_capacity = 0
         
-        # In case of window height change
+        # In case of max_capacity change
         if st.latest_max_capacity != st.old_max_capacity:
-            # Store if we're getting more or less space
             is_growing = st.latest_max_capacity > st.old_max_capacity
             
             # Update sidebar view
@@ -182,7 +203,6 @@ def main(stdscr):
             if st.task_cnt > 0:
                 if is_growing:
                     # WINDOW GROWING: Show maximum possible tasks while keeping current selection visible
-                    # Calculate how much more space we have
                     
                     # Step 1: First attempt to fill from bottom
                     # Calculate how many more tasks we could show with new size
@@ -256,10 +276,8 @@ def main(stdscr):
                     elif st.current_task_id > st.end_task_id:
                         st.end_task_id = st.current_task_id
                         st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
-        
-        # Window was resized
-        if st.old_max_x != st.latest_max_x or st.latest_max_capacity != st.old_max_capacity:
-            st.old_max_capacity = st.latest_max_capacity
+                        
+        if _window_resized():
             should_repaint = True
             continue
         
@@ -272,6 +290,8 @@ def main(stdscr):
             
         if should_repaint:
             tsk.reassign_task_ids(st.filtered_tasks)
+            if st.searching and not st.focus_manager.is_tasks_focused(): 
+                st.focus_manager.toggle_focus()
             if st.focus_manager.is_tasks_focused():
                 if st.task_cnt > 0:
                     if st.current_task_id > st.task_cnt:
@@ -284,6 +304,7 @@ def main(stdscr):
                         categories,
                         sidebar_scroller.start_index,
                     )
+                    
                 else:
                     # No tasks in current category
                     pr.print_category_entries(
@@ -292,7 +313,10 @@ def main(stdscr):
                         sidebar_scroller.start_index,
                     )
                     pr.print_frame_all(stdscr)
-                    pr.print_msg_in_task_panel(stdscr, msg.empty_msg, 16, highlight=True)
+                    if st.searching:
+                        pr.print_msg_in_task_panel(stdscr, msg.no_tasks_found_msg, 16, highlight=False)
+                    else:
+                        pr.print_msg_in_task_panel(stdscr, msg.empty_msg, 16, highlight=True)
                     pr.print_status_bar(stdscr)
 
             else:
@@ -301,7 +325,8 @@ def main(stdscr):
                     categories,
                     sidebar_scroller.start_index,
                 )
-
+            if st.searching:
+                pr.print_q_to_close(stdscr, 'search', st.latest_max_x, st.latest_max_y)
             should_repaint = False
             
         # Wait for user input
@@ -310,7 +335,9 @@ def main(stdscr):
         if key == -1:
             continue
             
-        if key == 9:  # Tab key for switching focus
+        if key == kc.TAB:  # Tab key for switching focus
+            if st.searching:
+                continue
             st.focus_manager.toggle_focus()
             should_repaint = True
             continue
@@ -320,6 +347,8 @@ def main(stdscr):
                 mouse_id, mouse_x, mouse_y, mouse_z, button_state = curses.getmouse()
                 
                 if mouse_x < sidebar_width:
+                    if st.searching:
+                        continue
                     if not st.focus_manager.is_sidebar_focused():
                         st.focus_manager.toggle_focus()
                         should_repaint = True
@@ -334,12 +363,7 @@ def main(stdscr):
                             st.current_category_id = categories[clicked_cat_index]['id']
                             
                             if old_category_id != st.current_category_id:
-                                st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
-                                st.task_cnt = len(st.filtered_tasks)
-                                st.current_task_id = 1 if st.task_cnt > 0 else 0
-                                st.current_task_row = 1 if st.task_cnt > 0 else 0
-                                st.start_task_id = 1 if st.task_cnt > 0 else 0
-                                st.end_task_id = st.task_cnt if st.task_cnt < st.latest_max_capacity else st.latest_max_capacity
+                                _restore_task_panel(task_list)
                                 should_repaint = True
                     continue
                 
@@ -381,21 +405,49 @@ def main(stdscr):
                 pass
             continue
         
+        if key == ord('/'):
+            try:
+                curses.echo()
+                curses.curs_set(1)
+
+                # Disable timeout temporarily
+                stdscr.timeout(-1)
+
+                _clear_bottom_line_content(stdscr)
+
+                stdscr.addstr(st.latest_max_capacity, sidebar_width, "/")
+                stdscr.refresh()
+                command_line = stdscr.getstr().decode('utf-8')
+                stdscr.timeout(500)
+
+                curses.curs_set(0)
+                curses.noecho()
+
+                if command_line == '':
+                    _clear_bottom_line_content(stdscr)
+                    continue
+            except curses.error:
+                continue
+
+            srch.search(command_line, task_list)
+            st.searching = True
+            st.task_cnt = len(st.filtered_tasks)
+            pr.print_task_entries(stdscr, sidebar_width)
+            should_repaint = True
+
+            if st.task_cnt > 0:
+                st.current_task_id = 1  
+                st.current_task_row = 1
+                st.start_task_id = 1
+                st.end_task_id = min(st.latest_max_capacity, st.task_cnt)        
+        
         if st.focus_manager.is_sidebar_focused():
             if key == curses.KEY_UP:
                 task_scroll_offset = 0
                 sidebar_scroller.scroll_up()
                 if len(categories) > 0:
                     st.current_category_id = categories[sidebar_scroller.current_index]['id']
-                    
-                    # Reset task selection for the new category
-                    st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
-                    st.task_cnt = len(st.filtered_tasks)
-                    st.current_task_id = 1 if st.task_cnt > 0 else 0
-                    st.current_task_row = 1 if st.task_cnt > 0 else 0
-                    st.start_task_id = 1 if st.task_cnt > 0 else 0
-                    st.end_task_id = st.task_cnt if st.task_cnt < st.latest_max_capacity else st.latest_max_capacity
-
+                    _restore_task_panel(task_list)
                 should_repaint = True
                 
             elif key == curses.KEY_DOWN:
@@ -403,18 +455,15 @@ def main(stdscr):
                 sidebar_scroller.scroll_down()
                 if len(categories) > 0:
                     st.current_category_id = categories[sidebar_scroller.current_index]['id']
-                    
-                    # Reset task selection for the new category
-                    st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
-                    st.task_cnt = len(st.filtered_tasks)
-                    st.current_task_id = 1 if st.task_cnt > 0 else 0
-                    st.current_task_row = 1 if st.task_cnt > 0 else 0
-                    st.start_task_id = 1 if st.task_cnt > 0 else 0
-                    st.end_task_id = st.task_cnt if st.task_cnt < st.latest_max_capacity else st.latest_max_capacity
-                    
+                    _restore_task_panel(task_list)
                 should_repaint = True
             
             elif key == ord('q'):
+                if st.searching:
+                    st.searching = False
+                    _restore_task_panel(task_list)
+                    should_repaint = True
+                    continue
                 # Always backup normal data on exit
                 import todoism.backup as backup
                 backup.backup_normal_data()
@@ -429,6 +478,8 @@ def main(stdscr):
                 break
                 
             elif key == ord('a'):
+                if st.searching:
+                    continue
                 curses.echo()
                 curses.curs_set(1)
                 
@@ -509,12 +560,7 @@ def main(stdscr):
                                 break
                                 
                         # Update filtered tasks for the new category
-                        st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
-                        st.task_cnt = len(st.filtered_tasks)
-                        st.current_task_id = 1 if st.task_cnt > 0 else 0
-                        st.current_task_row = 1 if st.task_cnt > 0 else 0
-                        st.start_task_id = 1 if st.task_cnt > 0 else 0
-                        st.end_task_id = st.task_cnt if st.task_cnt < st.latest_max_capacity else st.latest_max_capacity
+                        _restore_task_panel(task_list)
                         st.cat_cnt = len(categories)
                 
                 curses.curs_set(0)
@@ -522,6 +568,8 @@ def main(stdscr):
                 should_repaint = True
                 
             elif key == ord('e'):
+                if st.searching:
+                    continue
                 # Edit category name with scrolling (skip for "All" category)
                 if len(categories) > 0 and st.current_category_id != 0:
                     curses.echo()
@@ -615,13 +663,7 @@ def main(stdscr):
                             sidebar_scroller.current_index = new_index
                             st.current_category_id = categories[new_index]['id']
 
-                        st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
-                        st.task_cnt = len(st.filtered_tasks)
-                        
-                        st.current_task_id = 1 if st.task_cnt > 0 else 0
-                        st.current_task_row = 1 if st.task_cnt > 0 else 0
-                        st.start_task_id = 1 if st.task_cnt > 0 else 0
-                        st.end_task_id = st.task_cnt if st.task_cnt < st.latest_max_capacity else st.latest_max_capacity
+                        _restore_task_panel(task_list)
                     
                     # Clear the status line
                     stdscr.move(st.latest_max_capacity, 0)
@@ -635,13 +677,7 @@ def main(stdscr):
                 # Disable timeout temporarily
                 stdscr.timeout(-1)
                 
-                # Clear the bottom line before showing command prompt
-                stdscr.move(st.latest_max_capacity, 0)
-                stdscr.clrtoeol()
-                # Keep frames visible
-                stdscr.addstr(st.latest_max_y - 2, 0, "│")
-                stdscr.addstr(st.latest_max_y - 2, 15, "│")
-                stdscr.addstr(st.latest_max_y - 2, st.latest_max_x - 1, "│")
+                _clear_bottom_line_content(stdscr)
                 
                 # Place the command input at the bottom of the screen, after the sidebar
                 stdscr.addstr(st.latest_max_capacity, sidebar_width, ":")
@@ -685,6 +721,8 @@ def main(stdscr):
         elif st.focus_manager.is_tasks_focused():
             # Handle user input for tasks
             if key == ord('a'):
+                if st.searching:
+                    continue
                 if st.task_cnt == tsk.MAX_TASK_COUNT:
                     pr.print_msg(stdscr, msg.limit_msg)
                     stdscr.refresh()
@@ -878,6 +916,12 @@ def main(stdscr):
                 task_scroll_offset = max(0, task_scroll_offset - 1)
                 pr.render_task(stdscr, st.filtered_tasks[st.current_task_id - 1], st.current_task_row, True, task_scroll_offset)
             elif key == ord('q'):
+                if st.searching:
+                    st.searching = False
+                    _restore_task_panel(task_list)
+                    should_repaint = True
+                    continue
+
                 # Always backup normal data on exit
                 import todoism.backup as backup
                 backup.backup_normal_data()
@@ -896,14 +940,8 @@ def main(stdscr):
                 
                 # Disable timeout temporarily
                 stdscr.timeout(-1)
-                
-                # Clear the bottom line
-                stdscr.move(st.latest_max_capacity, 0)
-                stdscr.clrtoeol()
-                # Keep frames visible
-                stdscr.addstr(st.latest_max_y - 2, 0, "│")
-                stdscr.addstr(st.latest_max_y - 2, 15, "│")
-                stdscr.addstr(st.latest_max_y - 2, st.latest_max_x - 1, "│")
+            
+                _clear_bottom_line_content(stdscr)
                 
                 stdscr.addstr(st.latest_max_capacity, sidebar_width, ":")
                 stdscr.refresh()
@@ -953,6 +991,8 @@ def main(stdscr):
                 # Double backspace to delete a task
                 k = stdscr.getch()
                 if k == curses.KEY_BACKSPACE or k == kc.BACKSPACE:
+                    if st.searching:
+                        continue
                     if len(st.filtered_tasks) > 0:
                         if st.filtered_tasks[st.current_task_id - 1]['status'] is True:
                             st.done_cnt = st.done_cnt - 1

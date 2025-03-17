@@ -19,6 +19,7 @@ end_task_id = 1
 # Current mode
 adding_task = False
 editing_task = False
+searching = False
 
 # Current row in task panel
 current_task_row = 1
