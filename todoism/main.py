@@ -77,14 +77,7 @@ def main(stdscr):
         if not kc.record_key_codes(stdscr):
             return
     
-    keycodes = kc.get_key_codes()
-    kc.CTRL_LEFT = keycodes['ctrl+left']
-    kc.CTRL_RIGHT = keycodes['ctrl+right']
-    kc.CTRL_SHIFT_LEFT = keycodes['ctrl+shift+left']
-    kc.CTRL_SHIFT_RIGHT = keycodes['ctrl+shift+right']
-    kc.ALT_LEFT = keycodes['alt+left']
-    kc.ALT_RIGHT = keycodes['alt+right']
-    
+    kc.setup_keycodes()
     pref.update_preferences()
     
     # Enable mouse support
@@ -96,72 +89,43 @@ def main(stdscr):
     # Assuming color pair 0 represents the default colors
     stdscr.bkgd(' ', curses.COLOR_BLACK | curses.A_NORMAL)
 
-    # Define the initial todo list
-    task_list = tsk.load_tasks()
     # Update existing tasks to include category_id if missing
     task_list = tsk.update_existing_tasks()
-    
-    # Load categories
+    tsk.reassign_task_ids(task_list)
     categories = cat.load_categories()
-    
-    # Initialize focus manager
-    st.focus_manager = nv.FocusManager()
-    
-    current_category_id = 0  # Start with "All" category
     
     done_list = []  # a part of task list
     purged_list = []
 
-    tsk.reassign_task_ids(task_list)  # reassign_task_ids in case something went wrong in last session
-    
-    # Get screen dimensions
-    max_y, max_x = stdscr.getmaxyx()
-    
-    max_capacity = max_y - 2 # status and bottom frame
-    
-    # Initialize sidebar scroller
-    sidebar_scroller = nv.SidebarScroller(len(categories), max_capacity)
-    
-    # Get filtered task list for current category
-    filtered_tasks = tsk.get_tasks_by_category(task_list, current_category_id)
-    
-    # Initialize task display state
-    task_cnt = len(filtered_tasks)  # done + undone
-    current_task_id = 1 if task_cnt > 0 else 0  # id of task selected
-    current_task_row = 1 if task_cnt > 0 else 0  # range: [0, height-1]
-    
-    # Initialize task scrolling (using the original logic)
-    start = 1 if task_cnt > 0 else 0
-    end = task_cnt if task_cnt < max_capacity else max_capacity
-    
     should_repaint = True
     
     # Set a timeout for getch() to make it non-blocking (500ms)
     stdscr.timeout(500)
-    # Track when we last updated the time
     last_time_update = time.time()
-    
-    key = 0
     
     # Sidebar width
     sidebar_width = 16  # 15 for sidebar + 1 for separator
     task_scroll_offset = 0
     
+    max_y, max_x = stdscr.getmaxyx()
     # setup state
     st.latest_max_x = max_x
     st.latest_max_y = max_y
     st.old_max_x = max_x
     st.old_max_y = max_y
-    st.old_max_capacity = max_capacity
-    st.latest_max_capacity = max_capacity
-    st.current_task_id = current_task_id
-    st.current_category_id = current_category_id
-    st.start_task_id = start
-    st.end_task_id = end
-    st.current_task_row = current_task_row
-    st.task_cnt = task_cnt 
+    st.old_max_capacity = max_y - 2
+    st.latest_max_capacity = max_y - 2
+    st.current_category_id = 0
     st.cat_cnt = len(categories)
-    st.filtered_tasks = filtered_tasks
+    st.filtered_tasks = tsk.get_tasks_by_category(task_list, st.current_category_id)
+    st.task_cnt = len(st.filtered_tasks)
+    st.current_task_row = 1 if st.task_cnt > 0 else 0
+    st.current_task_id = 1 if st.task_cnt > 0 else 0
+    st.start_task_id = 1 if st.task_cnt > 0 else 0
+    st.end_task_id = st.task_cnt if st.task_cnt < st.latest_max_capacity else st.latest_max_capacity
+    
+    st.focus_manager = nv.FocusManager()
+    sidebar_scroller = nv.SidebarScroller(len(categories), st.latest_max_capacity)
     
     while True:
         if not st.searching:
@@ -335,7 +299,7 @@ def main(stdscr):
         if key == -1:
             continue
             
-        if key == kc.TAB:  # Tab key for switching focus
+        if key == kc.TAB:
             if st.searching:
                 continue
             st.focus_manager.toggle_focus()

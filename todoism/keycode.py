@@ -200,3 +200,13 @@ def get_key_codes():
             'alt+left': 0,
             'alt+right': 0
         }
+
+def setup_keycodes():
+    """Setup key codes from settings"""
+    key_codes = get_key_codes()
+    CTRL_LEFT = key_codes['ctrl+left']
+    CTRL_RIGHT = key_codes['ctrl+right']
+    CTRL_SHIFT_LEFT = key_codes['ctrl+shift+left']
+    CTRL_SHIFT_RIGHT = key_codes['ctrl+shift+right']
+    ALT_LEFT = key_codes['alt+left']
+    ALT_RIGHT = key_codes['alt+right']
