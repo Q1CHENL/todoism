@@ -452,15 +452,6 @@ def main(stdscr):
                     'id': new_cat_id, 
                     'name': ''
                 }
-                
-                for i in range(0, st.latest_max_capacity + 1):
-                    # Clear only the sidebar portion of each line (not the entire line)
-                    for j in range(15):  # Clear only columns 0-14
-                        stdscr.addch(i, j, ' ')
-                    
-                    # Restore the separator line
-                    stdscr.addch(i, 15, '│')
-                
                 # Redraw all categories in the sidebar with updated start_index
                 pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                 
@@ -475,16 +466,12 @@ def main(stdscr):
                 
                 stdscr.refresh()
 
-                # Print new category placeholder
-                stdscr.addstr(new_cat_row, 0, f"{new_cat_id:2d} ")
-                
                 # Move cursor to the consistent 1-space indent position
                 stdscr.move(new_cat_row, 1)  # 1-space indent, matching print_category()
                 stdscr.refresh()
                 
                 # Use the same edit function as for tasks, but adapt for sidebar position
-                temp_category['description'] = ''  # Add this field for edit function compatibility
-                new_cat_name = ed.edit(stdscr, temp_category, pr.add_mode, 0, 0)
+                new_cat_name = ed.edit(stdscr, temp_category, 'name', pr.add_mode, 0)
                 temp_category['name'] = new_cat_name  # Store result in name field
                 
                 if new_cat_name:
@@ -551,10 +538,8 @@ def main(stdscr):
                     stdscr.refresh()
                     
                     # Create a temporary copy for editing using the same mechanism as tasks
-                    edit_cat = current_cat.copy()
-                    edit_cat['description'] = current_cat['name']  # Map name to description for edit function
-                    
-                    new_name = ed.edit(stdscr, edit_cat, pr.edit_mode, 0, len(current_cat['name']))
+                    edit_cat = current_cat.copy()                    
+                    new_name = ed.edit(stdscr, edit_cat, 'name', pr.edit_mode, 0)
                     
                     if new_name:
                         # Enforce maximum length for category name
@@ -705,7 +690,13 @@ def main(stdscr):
                 new_task = tsk.create_new_task(st.task_cnt + 1)
                 new_task['category_id'] = 0 if st.current_category_id == 0 else st.current_category_id
                 
-                new_task_description = ed.edit(stdscr, new_task, pr.add_mode)
+                new_task_description = ed.edit(stdscr, new_task, 'description', pr.add_mode)
+                if new_task_description != "":
+                    st.current_task_id = st.task_cnt + 1
+                pr.render_task(stdscr, new_task, 'description', y_pos, False, 0)
+                stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+                stdscr.addch(y_pos, st.latest_max_x - 2, ' ')
+                stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
                 st.adding_task = False
                 
                 if new_task_description != "":
@@ -723,6 +714,7 @@ def main(stdscr):
                         st.current_task_row = st.latest_max_capacity
                     st.current_task_id = new_id
                     st.end_task_id = st.end_task_id + 1
+                    task_scroll_offset = 0
                 else:
                     st.start_task_id = old_start
                     st.end_task_id = old_end
@@ -760,7 +752,8 @@ def main(stdscr):
                     
                     st.filtered_tasks[current_task_idx]['description'] = ed.edit(
                         stdscr, 
-                        st.filtered_tasks[current_task_idx], 
+                        st.filtered_tasks[current_task_idx],
+                        'description',
                         pr.edit_mode
                     )
                     
@@ -785,11 +778,11 @@ def main(stdscr):
                     
             elif key == curses.KEY_RIGHT:
                 task_scroll_offset += 1
-                pr.render_task(stdscr, st.filtered_tasks[st.current_task_id - 1], st.current_task_row, True, task_scroll_offset) 
+                pr.render_task(stdscr, st.filtered_tasks[st.current_task_id - 1], 'description', st.current_task_row, True, task_scroll_offset) 
                 
             elif key == curses.KEY_LEFT:
                 task_scroll_offset = max(0, task_scroll_offset - 1)
-                pr.render_task(stdscr, st.filtered_tasks[st.current_task_id - 1], st.current_task_row, True, task_scroll_offset)
+                pr.render_task(stdscr, st.filtered_tasks[st.current_task_id - 1], 'description', st.current_task_row, True, task_scroll_offset)
                 
             elif key == ord('q'):
                 if st.searching:

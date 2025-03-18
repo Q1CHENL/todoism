@@ -164,7 +164,7 @@ def print_task_symbols(stdscr, task, y, flag_x=3, status_x=5, use_colors=True, i
     
     stdscr.addstr(y, status_x + 1, ' ')
 
-def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0, 
+def render_task(stdscr, task, text_key, y, is_selected=False, scroll_offset=0, max_x=0, 
                cursor_pos=None, is_edit_mode=False):
     """Render a task with proper formatting and positioning"""
     if st.latest_max_x == 0:
@@ -197,7 +197,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
         # Turn off highlight before drawing frame
         if is_selected:
             stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-        stdscr.addstr(y, 15, '│')
+        # stdscr.addstr(y, 15, '│')
         if is_selected:
             stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
         
@@ -219,22 +219,22 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     available_width = date_pos - total_indent - (0 if st.focus_manager.is_sidebar_focused() else 1)
     
     # In view mode, we just show what fits; in edit mode, we scroll
-    text_length = len(task['description'])
+    text_length = len(task[text_key])
     if is_edit_mode:
         # Calculate visible portion of text based on scroll offset
         visible_start = scroll_offset
         visible_end = min(text_length, scroll_offset + available_width)
-        visible_text = task['description'][visible_start:visible_end]
+        visible_text = task[text_key][visible_start:visible_end]
     else:
         if text_length > available_width:
             visible_start = scroll_offset
             visible_end = min(text_length, scroll_offset + available_width)
             if visible_end == text_length:
-                visible_text = task['description'][text_length - available_width:]
+                visible_text = task[text_key][text_length - available_width:]
             else:
-                visible_text = task['description'][visible_start:visible_end]
+                visible_text = task[text_key][visible_start:visible_end]
         else:
-            visible_text = task['description']
+            visible_text = task[text_key]
         # Apply strike-through for completed tasks in view mode
         if task.get('status', False) and stk.get_strikethrough() and not is_edit_mode:
             strikethrough_desc = ""
@@ -267,8 +267,7 @@ def render_task(stdscr, task, y, is_selected=False, scroll_offset=0, max_x=0,
     
     # Print right frame without highlight
     if not st.focus_manager.is_sidebar_focused():
-        if is_selected:
-            stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
         try:
             stdscr.addstr(y, st.latest_max_x - 1, '│')
         except curses.error:
@@ -381,9 +380,9 @@ def print_category_entries(stdscr, categories, start_index):
     """Print the category sidebar"""
     
     # Clear sidebar area
-    for y in range(1, st.latest_max_capacity + 1):
-        stdscr.move(y, 0)
-        stdscr.clrtoeol()  # Use clrtoeol() for consistent clearing
+    # for y in range(1, st.latest_max_capacity + 1):
+    #     stdscr.move(y, 0)
+    #     stdscr.clrtoeol()  # Use clrtoeol() for consistent clearing
         
     # Print visible categories
     visible_categories = categories[start_index:start_index + st.latest_max_capacity]
@@ -471,6 +470,7 @@ def print_whole_view(stdscr, categories, category_start_index):
     stdscr.noutrefresh()
     curses.doupdate()
 
+
 def print_task_entries(stdscr, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
 
@@ -502,9 +502,7 @@ def print_task_entries(stdscr, x_offset=0):
 
 def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None):
     """Print a task with horizontal offset and optional display ID override"""
-    # Calculate available width for text
-    
-    
+
     # Use display_id if provided, otherwise use task's actual ID
     id_to_show = display_id if display_id is not None else task['id']
     
