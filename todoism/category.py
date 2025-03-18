@@ -5,6 +5,7 @@ import todoism.preference as pref
 MAX_CATEGORY_NAME_LENGTH = 12
 MAX_CATEGORY_COUNT = 128
 SIDEBAR_WIDTH = 16
+NAME_INDENT = 2
 
 def get_categories_file_path():
     """Get the correct categories file path based on whether dev mode is active"""
