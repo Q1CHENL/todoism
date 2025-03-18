@@ -99,23 +99,33 @@ def execute_command(
         task_id = command[5:]
         if task_id.isdigit() and int(task_id) <= len(task_list):
             st.latest_max_capacity = stdscr.getmaxyx()[0] - 1    
-            edit_id = int(task_id)
-
+            pr.print_task_entry(stdscr, st.filtered_tasks[st.current_task_id-1], st.current_task_row, False, cat.SIDEBAR_WIDTH)
+            st.current_task_id = int(task_id)
             curses.echo()
             curses.curs_set(1)
-            st.current_task_row = edit_id - st.start_task_id + 1
-            if len(task_list) and edit_id >= st.start_task_id and edit_id <= st.end_task_id:
-                st.current_task_id, st.current_task_row, st.start_task_id, st.end_task_id = ed.edit_and_save(
+            st.current_task_row = st.current_task_id - st.start_task_id + 1
+            sf.safe_move(stdscr, st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
+            stdscr.refresh()
+                    
+            if len(task_list) and st.current_task_id >= st.start_task_id and st.current_task_id <= st.end_task_id:
+                current_task_idx = st.current_task_id - 1
+                st.filtered_tasks[current_task_idx]['description'] = ed.edit(
                     stdscr, 
-                    task_list, 
-                    edit_id,
-                    st.current_task_row,
-                    st.start_task_id,
-                    st.end_task_id,
-                    edit_id - st.start_task_id + 1,
-                    len(task_list[edit_id - 1]['description']) + tsk.TASK_INDENT_IN_TASK_PANEL,
-                    st.latest_max_capacity
+                    st.filtered_tasks[current_task_idx],
+                    'description',
+                    pr.edit_mode
                 )
+                if st.filtered_tasks[current_task_idx]['description'] == "":
+                    task_uuid = st.filtered_tasks[current_task_idx]['uuid']
+                    task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
+                    if st.searching:
+                        st.filtered_tasks = [task for task in st.filtered_tasks if task['uuid'] != task_uuid]
+                    else:
+                        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+                    st.task_cnt = len(st.filtered_tasks)
+                    nv.post_deletion_update(st.task_cnt + 1)
+                tsk.save_tasks(task_list)
+
             curses.curs_set(0)
             curses.noecho()      
         command_recognized = True

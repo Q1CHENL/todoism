@@ -58,9 +58,7 @@ def highlight_selection(stdscr, task, text_key, y, selection_start_idx_in_text, 
     # Highlight the selected region
     min_pos = min(selection_start_idx_in_text, selection_end_idx_in_text)
     max_pos = max(selection_start_idx_in_text, selection_end_idx_in_text)
-    
-    sf.safe_addstr(stdscr, st.latest_max_capacity - 4, 0, f"min: {min_pos}, max: {max_pos}")
-    
+        
     # Only highlight visible portion
     visible_selection_start_idx_in_text = max(min_pos, scroll_offset)
     visible_selection_end_idx_in_text = min(max_pos, scroll_offset + max_visible_width)
@@ -594,56 +592,3 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             sf.safe_move(stdscr, y, new_x)
             
     return entry[text_key]
-
-def edit_and_save(stdscr, task_list, id, row, start, end, y, x, max_capacity):
-    """Edit task or category with improved cursor positioning and scrolling behavior"""
-    # Get screen dimensions
-    st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
-    
-    # Get description length
-    description_length = len(task_list[id - 1]['description'])
-    date_length = len(task_list[id - 1]['date'])
-    
-    # Calculate exact space available for text (accounting for date + gap)
-    date_pos = st.latest_max_x - date_length - 1  # -1 for exactly one character gap before date
-    available_width = date_pos - (tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH) - 1  # -1 ensures the gap is preserved
-    
-    # Always initialize with scroll_offset = 0 to show beginning of text
-    scroll_offset = 0
-    
-    # Position cursor differently based on text length:
-    if description_length <= available_width:
-        # For short tasks (text fits): position at end of text
-        cursor_x = tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH + description_length
-    else:
-        # For long tasks: position at end of visible portion
-        cursor_x = tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH + available_width
-    
-    # Make sure cursor position is within screen bounds
-    cursor_x = min(cursor_x, date_pos - 1)  # Ensure exactly one char gap
-    
-    # Calculate cursor position in text
-    cursor_pos_in_text = cursor_x - (tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH) + scroll_offset
-    
-    # Set cursor at the calculated position
-    sf.safe_move(stdscr, y, cursor_x)
-    
-    # Initialize the edit function with the appropriate scroll offset and cursor position
-    task_list[id - 1]['description'] = edit(
-        stdscr, 
-        task_list[id - 1], 
-        pr.edit_mode, 
-        initial_scroll=scroll_offset,
-        initial_cursor_pos=cursor_pos_in_text
-    )
-    
-    # Handle task deletion if description is empty
-    if task_list[id - 1]['description'] == "":
-        del task_list[id - 1]
-        tsk.reassign_task_ids(task_list)
-        nv.post_deletion_update(len(task_list) + 1)
-    
-    # Save changes
-    tsk.save_tasks(task_list)
-    return id, row, start, end
-
