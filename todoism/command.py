@@ -410,27 +410,20 @@ def execute_command(
 
     if not command_recognized and command.strip():
         error_msg = f"Invalid command: '{command}'. Type command 'help' for help."
-        
         # Clear the line first, error might occur if resized small
-        try:
-            sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-            stdscr.clrtoeol()
+        sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
+        stdscr.clrtoeol()
+        red_pair_num = clr.get_color_pair_num_by_str_text("red")
+        stdscr.attron(curses.color_pair(red_pair_num) | curses.A_BOLD)
+        sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, error_msg)
+        stdscr.attroff(curses.color_pair(red_pair_num) | curses.A_BOLD)
+        stdscr.refresh()
+        time.sleep(1.5)
+        # Clear the error message
+        sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
+        stdscr.clrtoeol()
+        stdscr.refresh()
 
-            red_pair_num = clr.get_color_pair_num_by_str_text("red")
-            stdscr.attron(curses.color_pair(red_pair_num) | curses.A_BOLD)
-            sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, error_msg)
-            stdscr.attroff(curses.color_pair(red_pair_num) | curses.A_BOLD)
-            stdscr.refresh()
-
-            time.sleep(1.5)
-
-            # Clear the error message
-            sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-            stdscr.clrtoeol()
-            stdscr.refresh()
-        except curses.error:
-            pass
-    
     return task_list, done_list
 
 def open_help_page(stdscr):

@@ -368,27 +368,20 @@ def main(stdscr):
             continue
         
         if key == ord('/'):
-            try:
-                curses.echo()
-                curses.curs_set(1)
+            curses.echo()
+            curses.curs_set(1)
+            # Disable timeout temporarily
+            stdscr.timeout(-1)
+            _clear_bottom_line_content(stdscr)
+            sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, "/")
+            stdscr.refresh()
+            command = stdscr.getstr().decode('utf-8')
+            stdscr.timeout(500)
+            curses.curs_set(0)
+            curses.noecho()
 
-                # Disable timeout temporarily
-                stdscr.timeout(-1)
-
+            if command == '':
                 _clear_bottom_line_content(stdscr)
-
-                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, "/")
-                stdscr.refresh()
-                command = stdscr.getstr().decode('utf-8')
-                stdscr.timeout(500)
-
-                curses.curs_set(0)
-                curses.noecho()
-
-                if command == '':
-                    _clear_bottom_line_content(stdscr)
-                    continue
-            except curses.error:
                 continue
 
             srch.search(command, task_list)

@@ -78,11 +78,8 @@ def highlight_selection(stdscr, task, text_key, y, selection_start_idx_in_text, 
             screen_pos = tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH + (i - scroll_offset)  # Task position with sidebar offset
             
         if i - scroll_offset >= 0:  # Ensure we only render visible chars
-            try:
-                sf.safe_addstr(stdscr, y, screen_pos, task[text_key][i], curses.A_REVERSE)
-            except curses.error:
-                # Skip characters that would go past the edge of the screen
-                pass
+            sf.safe_addstr(stdscr, y, screen_pos, task[text_key][i], curses.A_REVERSE)
+
 
 def edit(stdscr, entry, text_key, mode, initial_scroll=0):
     """
@@ -453,9 +450,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             at_end_of_text = cursor_pos_in_text == len(entry[text_key])
             
             # Insert character at the correct position
-            entry[text_key] = entry[text_key][:cursor_pos_in_text] + chr(ch) + entry[text_key][cursor_pos_in_text:]
-            sf.safe_addstr(stdscr, st.latest_max_capacity - 2, 0, f"adding {chr(ch)}")
-            
+            entry[text_key] = entry[text_key][:cursor_pos_in_text] + chr(ch) + entry[text_key][cursor_pos_in_text:]            
             # Calculate new cursor position in text
             new_cursor_pos = cursor_pos_in_text + 1
             
