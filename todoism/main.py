@@ -375,16 +375,16 @@ def main(stdscr):
             _clear_bottom_line_content(stdscr)
             sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, "/")
             stdscr.refresh()
-            command = stdscr.getstr().decode('utf-8')
+            query = stdscr.getstr().decode('utf-8')
             stdscr.timeout(500)
             curses.curs_set(0)
             curses.noecho()
 
-            if command == '':
+            if query == '':
                 _clear_bottom_line_content(stdscr)
                 continue
 
-            srch.search(command, task_list)
+            st.filtered_tasks = srch.search(query, task_list)
             st.searching = True
             st.task_cnt = len(st.filtered_tasks)
             pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
