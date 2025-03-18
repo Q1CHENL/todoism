@@ -1,7 +1,6 @@
 import curses
 import todoism.print as pr
 import todoism.task as tsk
-import todoism.navigate as nv
 import todoism.keycode as kc
 import todoism.state as st
 import todoism.category as cat
@@ -398,10 +397,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             sf.safe_move(stdscr, y, new_x)
         
         elif 32 <= ch < 127:  # Printable char
-            # IMPROVED CHECK: For sidebar (categories), enforce strict character limit 
-            # to prevent visual glitches when the limit is reached
             if st.focus_manager.is_sidebar_focused() and len(entry[text_key]) >= MAX_DESCRIPTION_LENGTH:
-                # Skip character completely - no visual feedback
                 continue
                 
             # Check maximum length for regular tasks
@@ -502,31 +498,8 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 new_x = min(new_x, 14)
                 sf.safe_move(stdscr, y, new_x)
         
-        # Alt+Left to jump to beginning of text (handle recorded keycode)
+        # Alt+Left to jump to beginning of text
         elif ch == kc.ALT_LEFT:
-            # If ESC (27), need to check if it's followed by proper sequence
-            if ch == kc.ESC:
-                # Check for ESC sequence
-                next_ch = stdscr.getch()
-                if next_ch != ord('[') and next_ch != 91:  # Check for '[' character
-                    continue
-                    
-                direction_ch = stdscr.getch()
-                if direction_ch != 49 and direction_ch != ord('1'):  # Not part of Alt+Left sequence
-                    continue
-                    
-                final_ch = stdscr.getch()
-                if final_ch != 59 and final_ch != ord(';'):  # Not part of Alt+Left sequence
-                    continue
-                    
-                mod_ch = stdscr.getch()
-                if mod_ch != 51 and mod_ch != ord('3'):  # Not Alt modifier (3)
-                    continue
-                    
-                arrow_ch = stdscr.getch()
-                if arrow_ch != 68 and arrow_ch != ord('D'):  # Not left arrow ('D')
-                    continue
-            
             # Clear selection if active
             if selection_active:
                 selection_active = False
@@ -534,38 +507,13 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 
             # Jump to beginning of text
             cursor_pos_in_text = 0
-            
             # Reset scroll offset to show beginning of text
             scroll_offset = 0
-            
             # Position cursor at beginning
             sf.safe_move(stdscr, y, text_start_pos)
             
-        # Alt+Right to jump to end of text (handle recorded keycode)
-        elif ch == kc.ALT_RIGHT:  # Various codes for Alt+Right
-            # If ESC (27), need to check if it's followed by proper sequence
-            if ch == kc.ESC:
-                # Check for ESC sequence
-                next_ch = stdscr.getch()
-                if next_ch != ord('[') and next_ch != 91:  # Check for '[' character
-                    continue
-                    
-                direction_ch = stdscr.getch()
-                if direction_ch != 49 and direction_ch != ord('1'):  # Not part of Alt+Right sequence
-                    continue
-                    
-                final_ch = stdscr.getch()
-                if final_ch != 59 and final_ch != ord(';'):  # Not part of Alt+Right sequence
-                    continue
-                    
-                mod_ch = stdscr.getch()
-                if mod_ch != 51 and mod_ch != ord('3'):  # Not Alt modifier (3)
-                    continue
-                    
-                arrow_ch = stdscr.getch()
-                if arrow_ch != 67 and arrow_ch != ord('C'):  # Not right arrow ('C')
-                    continue
-            
+        # Alt+Right to jump to end of text
+        elif ch == kc.ALT_RIGHT:
             # Clear selection if active
             if selection_active:
                 selection_active = False
@@ -573,12 +521,10 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 
             # Jump to end of text
             cursor_pos_in_text = len(entry[text_key])
-            
             # For long text, adjust scroll to show the end of text
             if len(entry[text_key]) > max_visible_width:
                 # Calculate scroll needed to position cursor at right side with proper buffer
                 scroll_offset = max(0, len(entry[text_key]) - max_visible_width)
-                
                 # Position cursor at end with proper right side alignment
                 new_x = text_start_pos + max_visible_width
                 new_x = min(new_x, right_limit)
