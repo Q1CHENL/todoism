@@ -571,8 +571,7 @@ def main(stdscr):
                                 task['category_id'] -= 1
                         tsk.save_tasks(task_list)
                         
-                        # Update task category references to match new category IDs
-                        # This is only necessary if we're renumbering categories
+                        # A category in the middle might be deleted
                         if len(categories) > 1:
                             # We need to reload tasks after renumbering to ensure proper associations
                             task_list = tsk.load_tasks()

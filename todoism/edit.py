@@ -80,7 +80,6 @@ def highlight_selection(stdscr, task, text_key, y, selection_start_idx_in_text, 
         if i - scroll_offset >= 0:  # Ensure we only render visible chars
             sf.safe_addstr(stdscr, y, screen_pos, task[text_key][i], curses.A_REVERSE)
 
-
 def edit(stdscr, entry, text_key, mode, initial_scroll=0):
     """
     A editing wrapper implemented using getch(). It delivers 
@@ -467,7 +466,6 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 date_pos = 15
                 max_visible_width = date_pos - base_indent
                  
-            
             if at_end_of_text:
                 # When we're at the end of text and need to scroll:
                 if new_cursor_pos > scroll_offset + max_visible_width:

@@ -29,7 +29,6 @@ def purge(task_list, purged_list):
     tsk.save_tasks(purged_list, pref.purged_file_path)
     return remained, []
 
-
 def sort(task_list, key) -> list:
     marked = []
     not_marked = []
@@ -39,7 +38,6 @@ def sort(task_list, key) -> list:
         else:
             not_marked.append(t)
     return marked + not_marked
-
 
 def execute_command(
         stdscr, 

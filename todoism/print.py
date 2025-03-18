@@ -50,7 +50,6 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
     # Clear the task area before printing
     clear_task_panel(stdscr)
     
-    # Apply highlighting if requested
     if highlight:
         stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     
@@ -69,8 +68,6 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
             else:
                 sf.safe_appendstr(stdscr, line)
 
-    
-    # Remove highlighting if it was applied
     if highlight:
         stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     
@@ -220,7 +217,6 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     if is_selected:
         stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
 
-
 def print_status_bar(stdscr):
     """Print centered status bar with progress, percentage, date and time"""
 
@@ -275,7 +271,6 @@ def print_status_bar(stdscr):
     sf.safe_addstr(stdscr, 0, start_pos + len(status_prefix), percent_text)
     stdscr.attroff(curses.color_pair(color_pair))
     sf.safe_addstr(stdscr, 0, start_pos + len(status_prefix) + len(percent_text) + 2, datetime_str)
-
     
     # Ensure all attributes are reset at the end
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) | 
@@ -328,7 +323,6 @@ def print_category(stdscr, category, y, is_selected=False):
     if padding > 0:
         sf.safe_appendstr(stdscr, ' ' * padding)
 
-    
     # Reset attributes
     if is_selected and st.focus_manager.is_sidebar_focused():
         stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
@@ -370,11 +364,9 @@ def print_whole_view(stdscr, categories, category_start_index):
     else:
         print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
 
-    
     # Use a single refresh at the end instead of multiple refreshes in each function
     stdscr.noutrefresh()
     curses.doupdate()
-
 
 def print_task_entries(stdscr, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
@@ -448,7 +440,6 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
             strikethrough_desc += (char + "\u0336")
         visible_text = strikethrough_desc
     
-
     # Display text at calculated position with proper styling
     if is_selected:
         stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
@@ -497,9 +488,6 @@ def print_pref_panel(stdscr, current_selection_index=0):
     # Get preference panel content
     pref_content_lines = msg.pref_panel.strip().split("\n")
 
-    # Calculate dimensions and position
-    
-    
     # Calculate available width - adapt to screen size
     original_width = len(pref_content_lines[0]) if pref_content_lines else 0
     # Make sure panel is at least 20 chars wide or as wide as possible
@@ -647,14 +635,12 @@ def clear_task_panel(stdscr):
     for i in range(1, st.latest_max_y - 1):    
         sf.safe_move(stdscr, i, cat.SIDEBAR_WIDTH)
         stdscr.clrtoeol()
-
         
 def clear_inner_content(stdscr):
     # Clear all content exepct the outer frame
     for i in range(1, st.latest_max_y - 1):
         sf.safe_move(stdscr, i, 1)
         stdscr.clrtoeol()
-
         
 def print_q_to_close(stdscr, page):
     hint = f"┤Press 'q' to close {page}├"
@@ -718,7 +704,6 @@ def print_frame_all(stdscr):
     sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
     stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
 
-    
 def print_outer_frame(stdscr):
     turnoff_all_attributes(stdscr)
     print_top_left_corner(stdscr)
