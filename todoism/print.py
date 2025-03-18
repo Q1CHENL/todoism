@@ -672,7 +672,7 @@ def print_top_left_corner(stdscr):
     
 def print_bottom_right_corner(stdscr):
     sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
-    stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
 
 def print_bottom_left_corner(stdscr):
     # Reset attributes before drawing corner to prevent highlighting
@@ -702,7 +702,7 @@ def print_frame_all(stdscr):
     print_sidebar_task_panel_separator(stdscr)
     # Trick for last char (bottom right) error in cursor window    
     sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
-    stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
 
 def print_outer_frame(stdscr):
     turnoff_all_attributes(stdscr)
@@ -715,7 +715,7 @@ def print_outer_frame(stdscr):
     print_bottom_frame(stdscr)
     # Trick for last char (bottom right) error in cursor window
     sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
-    stdscr.insstr(st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
 
 def turnoff_all_attributes(stdscr):
     stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.A_REVERSE | curses.A_BLINK | 

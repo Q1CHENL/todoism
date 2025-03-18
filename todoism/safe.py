@@ -53,3 +53,14 @@ def safe_move(stdscr, y: int, x: int) -> bool:
         return True
     except curses.error:
         return False
+    
+def safe_insstr(stdscr, y: int, x: int, text: str, attr=0) -> bool:
+    """Safely insert a string at the cursor."""
+    try:
+        if attr:
+            stdscr.insstr(y, x, text, attr)
+        else:
+            stdscr.insstr(y, x, text)
+        return True
+    except curses.error:
+        return False

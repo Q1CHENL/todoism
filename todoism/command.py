@@ -285,7 +285,6 @@ def execute_command(
             import test.test as test_module
             
             if test_module.is_dev_mode_active():
-                max_y, max_x = stdscr.getmaxyx()
                 warning_msg = "Already in dev mode!"
                 sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                 stdscr.clrtoeol()
@@ -310,7 +309,6 @@ def execute_command(
                     st.end_task_id = min(len(task_list), st.latest_max_capacity)
                     
                     # Show success message
-                    max_y, max_x = stdscr.getmaxyx()
                     success_msg = "Dev mode enabled. Test tasks and categories loaded. Will auto-restore on exit."
                     sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                     stdscr.clrtoeol()
@@ -327,7 +325,6 @@ def execute_command(
                     return task_list, done_list, categories
         except ImportError:
             # Test module not found (likely PyPI installation)
-            max_y, max_x = stdscr.getmaxyx()
             warning_msg = "Dev mode not available in installation."
             sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
@@ -347,7 +344,6 @@ def execute_command(
             import test.test as test_module
             
             if not test_module.is_dev_mode_active():
-                max_y, max_x = stdscr.getmaxyx()
                 warning_msg = "Not in dev mode - nothing to restore!"
                 sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                 stdscr.clrtoeol()
@@ -372,7 +368,6 @@ def execute_command(
                     st.end_task_id = min(len(task_list), st.latest_max_capacity) if len(task_list) > 0 else 0
                     
                     # Show success message
-                    max_y, max_x = stdscr.getmaxyx()
                     success_msg = "Dev mode disabled. Original tasks and categories restored."
                     sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                     stdscr.clrtoeol()
