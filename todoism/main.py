@@ -14,6 +14,7 @@ import todoism.color as clr
 import todoism.state as st
 import todoism.search as srch
 import todoism.backup as bkp
+import todoism.safe as sf
 
 def _exit():
     # Always backup normal data on exit
@@ -28,12 +29,12 @@ def _exit():
 
 def _clear_bottom_line_content(stdscr):
     # clear bottom line
-    stdscr.move(st.latest_max_capacity, 0)
+    sf.safe_move(stdscr, st.latest_max_capacity, 0)
     stdscr.clrtoeol()
     # Keep frames visible
-    stdscr.addstr(st.latest_max_y - 2, 0, "│")
-    stdscr.addstr(st.latest_max_y - 2, 15, "│")
-    stdscr.addstr(st.latest_max_y - 2, st.latest_max_x - 1, "│")
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, 0, "│")
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, 15, "│")
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, st.latest_max_x - 1, "│")
     
 def _restore_task_panel(task_list):
     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
@@ -367,30 +368,23 @@ def main(stdscr):
             continue
         
         if key == ord('/'):
-            try:
-                curses.echo()
-                curses.curs_set(1)
+            curses.echo()
+            curses.curs_set(1)
+            # Disable timeout temporarily
+            stdscr.timeout(-1)
+            _clear_bottom_line_content(stdscr)
+            sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, "/")
+            stdscr.refresh()
+            query = stdscr.getstr().decode('utf-8')
+            stdscr.timeout(500)
+            curses.curs_set(0)
+            curses.noecho()
 
-                # Disable timeout temporarily
-                stdscr.timeout(-1)
-
+            if query == '':
                 _clear_bottom_line_content(stdscr)
-
-                stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, "/")
-                stdscr.refresh()
-                command = stdscr.getstr().decode('utf-8')
-                stdscr.timeout(500)
-
-                curses.curs_set(0)
-                curses.noecho()
-
-                if command == '':
-                    _clear_bottom_line_content(stdscr)
-                    continue
-            except curses.error:
                 continue
 
-            srch.search(command, task_list)
+            st.filtered_tasks = srch.search(query, task_list)
             st.searching = True
             st.task_cnt = len(st.filtered_tasks)
             pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
@@ -452,15 +446,7 @@ def main(stdscr):
                     'id': new_cat_id, 
                     'name': ''
                 }
-                
-                for i in range(0, st.latest_max_capacity + 1):
-                    # Clear only the sidebar portion of each line (not the entire line)
-                    for j in range(15):  # Clear only columns 0-14
-                        stdscr.addch(i, j, ' ')
-                    
-                    # Restore the separator line
-                    stdscr.addch(i, 15, '│')
-                
+                st.current_category_id = new_cat_id
                 # Redraw all categories in the sidebar with updated start_index
                 pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                 
@@ -475,16 +461,12 @@ def main(stdscr):
                 
                 stdscr.refresh()
 
-                # Print new category placeholder
-                stdscr.addstr(new_cat_row, 0, f"{new_cat_id:2d} ")
-                
                 # Move cursor to the consistent 1-space indent position
-                stdscr.move(new_cat_row, 1)  # 1-space indent, matching print_category()
+                sf.safe_move(stdscr, new_cat_row, 1)  # 1-space indent, matching print_category()
                 stdscr.refresh()
                 
                 # Use the same edit function as for tasks, but adapt for sidebar position
-                temp_category['description'] = ''  # Add this field for edit function compatibility
-                new_cat_name = ed.edit(stdscr, temp_category, pr.add_mode, 0, 0)
+                new_cat_name = ed.edit(stdscr, temp_category, 'name', pr.add_mode, 0)
                 temp_category['name'] = new_cat_name  # Store result in name field
                 
                 if new_cat_name:
@@ -515,8 +497,8 @@ def main(stdscr):
                 should_repaint = True
                 
             elif key == ord('e'):
-                if st.searching:
-                    continue
+                # if st.searching:
+                #     continue
                 # Edit category name with scrolling (skip for "All" category)
                 if len(categories) > 0 and st.current_category_id != 0:
                     curses.echo()
@@ -536,25 +518,23 @@ def main(stdscr):
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     
                     stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
-                    stdscr.move(row, 0)
+                    sf.safe_move(stdscr, row, 0)
                     
                     # Append spaces
                     for j in range(15): 
-                        stdscr.addch(row, j, ' ')
+                        sf.safe_addch(stdscr, row, j, ' ')
                         
                     # Redraw the separator
                     stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
-                    stdscr.addstr(row, 15, '│')
+                    sf.safe_addstr(stdscr, row, 15, '│')
                     
                     # Position cursor at start of category name (1 char indent)
-                    stdscr.move(row, 1)
+                    sf.safe_move(stdscr, row, 1)
                     stdscr.refresh()
                     
                     # Create a temporary copy for editing using the same mechanism as tasks
-                    edit_cat = current_cat.copy()
-                    edit_cat['description'] = current_cat['name']  # Map name to description for edit function
-                    
-                    new_name = ed.edit(stdscr, edit_cat, pr.edit_mode, 0, len(current_cat['name']))
+                    edit_cat = current_cat.copy()                    
+                    new_name = ed.edit(stdscr, edit_cat, 'name', pr.edit_mode, 0)
                     
                     if new_name:
                         # Enforce maximum length for category name
@@ -572,7 +552,7 @@ def main(stdscr):
                 # Delete selected category (with double backspace confirmation)
                 if len(categories) > 0 and st.current_category_id != 0:
                     # Wait for second backspace
-                    stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, "Press backspace again to delete")
+                    sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, "Press backspace again to delete")
                     stdscr.refresh()
                     
                     # Wait for confirmation
@@ -591,8 +571,7 @@ def main(stdscr):
                                 task['category_id'] -= 1
                         tsk.save_tasks(task_list)
                         
-                        # Update task category references to match new category IDs
-                        # This is only necessary if we're renumbering categories
+                        # A category in the middle might be deleted
                         if len(categories) > 1:
                             # We need to reload tasks after renumbering to ensure proper associations
                             task_list = tsk.load_tasks()
@@ -609,7 +588,7 @@ def main(stdscr):
                         _restore_task_panel(task_list)
                     
                     # Clear the status line
-                    stdscr.move(st.latest_max_capacity, 0)
+                    sf.safe_move(stdscr, st.latest_max_capacity, 0)
                     stdscr.clrtoeol()
                     should_repaint = True
                 
@@ -623,7 +602,7 @@ def main(stdscr):
                 _clear_bottom_line_content(stdscr)
                 
                 # Place the command input at the bottom of the screen, after the sidebar
-                stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
+                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
                 stdscr.refresh()
 
                 command = stdscr.getstr().decode('utf-8')
@@ -696,16 +675,22 @@ def main(stdscr):
                 # Add a new task with proper indentation
                 new_task_id = f"{st.task_cnt + 1:2d}"
                 y_pos = st.latest_max_capacity if st.task_cnt >= st.latest_max_capacity else st.task_cnt + 1
-                stdscr.addstr(y_pos, cat.SIDEBAR_WIDTH, f"{new_task_id} ")
+                sf.safe_addstr(stdscr, y_pos, cat.SIDEBAR_WIDTH, f"{new_task_id} ")
 
                 # Move cursor to the correct position after task number
-                stdscr.move(y_pos, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
+                sf.safe_move(stdscr, y_pos, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
                 stdscr.refresh()
 
                 new_task = tsk.create_new_task(st.task_cnt + 1)
                 new_task['category_id'] = 0 if st.current_category_id == 0 else st.current_category_id
                 
-                new_task_description = ed.edit(stdscr, new_task, pr.add_mode)
+                new_task_description = ed.edit(stdscr, new_task, 'description', pr.add_mode)
+                if new_task_description != "":
+                    st.current_task_id = st.task_cnt + 1
+                # pr.print_editing_entry(stdscr, new_task, 'description', y_pos, False, 0)
+                stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+                sf.safe_addch(stdscr, y_pos, st.latest_max_x - 2, ' ')
+                stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
                 st.adding_task = False
                 
                 if new_task_description != "":
@@ -723,6 +708,7 @@ def main(stdscr):
                         st.current_task_row = st.latest_max_capacity
                     st.current_task_id = new_id
                     st.end_task_id = st.end_task_id + 1
+                    task_scroll_offset = 0
                 else:
                     st.start_task_id = old_start
                     st.end_task_id = old_end
@@ -755,19 +741,23 @@ def main(stdscr):
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     
                     # Move cursor to edit position
-                    stdscr.move(st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
+                    sf.safe_move(stdscr, st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
                     stdscr.refresh()
                     
                     st.filtered_tasks[current_task_idx]['description'] = ed.edit(
                         stdscr, 
-                        st.filtered_tasks[current_task_idx], 
+                        st.filtered_tasks[current_task_idx],
+                        'description',
                         pr.edit_mode
                     )
                     
                     if st.filtered_tasks[current_task_idx]['description'] == "":
                         task_uuid = st.filtered_tasks[current_task_idx]['uuid']
                         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+                        if st.searching:
+                            st.filtered_tasks = [task for task in st.filtered_tasks if task['uuid'] != task_uuid]
+                        else:
+                            st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                         st.task_cnt = len(st.filtered_tasks)
                         nv.post_deletion_update(st.task_cnt + 1)
                     tsk.save_tasks(task_list)
@@ -785,11 +775,11 @@ def main(stdscr):
                     
             elif key == curses.KEY_RIGHT:
                 task_scroll_offset += 1
-                pr.render_task(stdscr, st.filtered_tasks[st.current_task_id - 1], st.current_task_row, True, task_scroll_offset) 
+                pr.print_editing_entry(stdscr, st.filtered_tasks[st.current_task_id - 1], 'description', st.current_task_row, True, task_scroll_offset) 
                 
             elif key == curses.KEY_LEFT:
                 task_scroll_offset = max(0, task_scroll_offset - 1)
-                pr.render_task(stdscr, st.filtered_tasks[st.current_task_id - 1], st.current_task_row, True, task_scroll_offset)
+                pr.print_editing_entry(stdscr, st.filtered_tasks[st.current_task_id - 1], 'description', st.current_task_row, True, task_scroll_offset)
                 
             elif key == ord('q'):
                 if st.searching:
@@ -809,7 +799,7 @@ def main(stdscr):
             
                 _clear_bottom_line_content(stdscr)
                 
-                stdscr.addstr(st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
+                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
                 stdscr.refresh()
                 command = stdscr.getstr().decode('utf-8')
                 stdscr.timeout(500)
@@ -856,14 +846,15 @@ def main(stdscr):
                 # Double backspace to delete a task
                 k = stdscr.getch()
                 if k == curses.KEY_BACKSPACE or k == kc.BACKSPACE:
-                    if st.searching:
-                        continue
                     if len(st.filtered_tasks) > 0:
                         if st.filtered_tasks[st.current_task_id - 1]['status'] is True:
                             st.done_cnt = st.done_cnt - 1
                         task_uuid = st.filtered_tasks[st.current_task_id - 1]['uuid']
                         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+                        if st.searching:
+                            st.filtered_tasks = [task for task in st.filtered_tasks if task['uuid'] != task_uuid]
+                        else:
+                            st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                         st.task_cnt = len(st.filtered_tasks)
                         nv.post_deletion_update(st.task_cnt + 1)
                     tsk.save_tasks(task_list)

@@ -1,8 +1,8 @@
 import todoism.state as st
 
-def search(query, task_list):
+def search(query, task_list) -> list:
     query = query.lower()
-    st.filtered_tasks = [
+    return [
         task for task in task_list
         if query in task['description'].lower()
     ]
