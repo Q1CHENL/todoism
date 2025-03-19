@@ -52,31 +52,31 @@ def execute_command(
         if len(tasks_sperated_by_comma) == 1:
             ids_to_done = tasks_sperated_by_comma[0].split(',')
             if all(i.isdigit() for i in ids_to_done):
+                command_recognized = True
                 for id_to_done in ids_to_done:
                     index_to_done = int(id_to_done) - 1
                     if 0 <= index_to_done < len(task_list):
                         done_list.append(copy.copy(task_list[index_to_done]))
                         task_uuid = st.filtered_tasks[index_to_done].get('uuid')
                         tsk.done_task_by_uuid(task_list, task_uuid)
-        command_recognized = True
+                        return task_list, done_list
     elif command.startswith("flag "):
         tasks_sperated_by_comma = command[5:].split(' ')
         if len(tasks_sperated_by_comma) == 1:
             ids_to_flag = tasks_sperated_by_comma[0].split(',')
             if all(i.isdigit() for i in ids_to_flag):
+                command_recognized = True
                 for id_to_flag in ids_to_flag:
                     index_to_flag = int(id_to_flag) - 1
                     if 0 <= index_to_flag < len(task_list):
                         tsk.flag_task_by_uuid(task_list, task_list[index_to_flag]['uuid'])
-        command_recognized = True
+                        return task_list, done_list
     elif command == "purge":
         original_cnt = len(task_list)
         displayed_task_cnt = st.end_task_id - st.start_task_id + 1
         task_list, done_list = purge(task_list, purged_list)
         tsk.save_tasks(task_list)
-        # change current id to 1 if some tasks were purged
         if len(task_list) < original_cnt:
-            # temporary solution: back to top
             st.current_task_id = 1
             st.current_task_row = 1
             st.start_task_id = 1
@@ -84,51 +84,38 @@ def execute_command(
                 st.end_task_id = displayed_task_cnt
             else:
                 st.end_task_id = len(task_list)
-        command_recognized = True
+        return task_list, done_list       
     elif command.startswith("del "):
         parts = command.split()
-        if len(parts) > 1 and parts[1].isdigit():
+        if len(parts) == 2 and parts[1].isdigit():
+            command_recognized = True
             task_id = int(parts[1])
             if 1 <= task_id <= len(task_list):
                 task_uuid = task_list[task_id - 1].get('uuid')
                 task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                # Update current_task_id, current_task_row, start, end after deletion
                 nv.post_deletion_update(len(task_list))
-        command_recognized = True
-    elif command.startswith("edit "):
-        task_id = command[5:]
-        if task_id.isdigit() and int(task_id) <= len(task_list):
-            st.latest_max_capacity = stdscr.getmaxyx()[0] - 1    
-            pr.print_task_entry(stdscr, st.filtered_tasks[st.current_task_id-1], st.current_task_row, False, cat.SIDEBAR_WIDTH)
-            st.current_task_id = int(task_id)
-            curses.echo()
-            curses.curs_set(1)
-            st.current_task_row = st.current_task_id - st.start_task_id + 1
-            sf.safe_move(stdscr, st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
-            stdscr.refresh()
-                    
-            if len(task_list) and st.current_task_id >= st.start_task_id and st.current_task_id <= st.end_task_id:
-                current_task_idx = st.current_task_id - 1
-                st.filtered_tasks[current_task_idx]['description'] = ed.edit(
-                    stdscr, 
-                    st.filtered_tasks[current_task_idx],
-                    'description',
-                    pr.edit_mode
-                )
-                if st.filtered_tasks[current_task_idx]['description'] == "":
-                    task_uuid = st.filtered_tasks[current_task_idx]['uuid']
-                    task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                    if st.searching:
-                        st.filtered_tasks = [task for task in st.filtered_tasks if task['uuid'] != task_uuid]
-                    else:
-                        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-                    st.task_cnt = len(st.filtered_tasks)
-                    nv.post_deletion_update(st.task_cnt + 1)
-                tsk.save_tasks(task_list)
-
-            curses.curs_set(0)
-            curses.noecho()      
-        command_recognized = True
+            return task_list, done_list
+        else:
+            command_recognized = False
+    elif command.startswith('edit '):
+        parts = command.split()
+        if len(parts) == 2 and parts[1].isdigit():
+            command_recognized = True
+            task_id = int(parts[1])
+            if 1 <= task_id <= len(task_list):
+                st.latest_max_capacity = stdscr.getmaxyx()[0] - 1    
+                pr.print_task_entry(stdscr, st.filtered_tasks[st.current_task_id-1], st.current_task_row, False, cat.SIDEBAR_WIDTH)
+                st.current_task_id = int(task_id)
+                st.current_task_row = st.current_task_id - st.start_task_id + 1
+                if len(task_list) and st.current_task_id >= st.start_task_id and st.current_task_id <= st.end_task_id:
+                    curses.echo()
+                    curses.curs_set(1)
+                    task_list = ed.handle_edit(stdscr, task_list)
+                    curses.curs_set(0)
+                    curses.noecho()      
+                    return task_list, done_list
+        else:
+            command_recognized = False
     elif command == "help":
         open_help_page(stdscr)
         st.old_max_x = st.latest_max_x
@@ -150,7 +137,6 @@ def execute_command(
     elif command == "pref":
         selection_index = 0
         open_pref_panel(stdscr, selection_index)
-        command_recognized = True
         old_timeout = 500  
         stdscr.timeout(-1)
         quit = False
@@ -278,22 +264,13 @@ def execute_command(
                     selection_index += 2
                 elif ch == ord('q'):
                     quit = True
-        
         # Restore original timeout
         stdscr.timeout(old_timeout)
-    elif command.startswith("tag "):
-        tag = command[4:]
-        if tag == "on":
-            pref.set_tag(True)
-            command_recognized = True
-        elif tag == "off":
-            pref.set_tag(False)
-            command_recognized = True
+        return task_list, done_list
     elif command == 'dev':
         # Hidden command for developers - load test data
         try:
             import test.test as test_module
-            
             if test_module.is_dev_mode_active():
                 warning_msg = "Already in dev mode!"
                 sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
@@ -409,7 +386,7 @@ def execute_command(
         command_recognized = True
         
     elif command.strip() == "":
-        command_recognized = True
+        return task_list, done_list
 
     if not command_recognized and command.strip():
         error_msg = f"Invalid command: '{command}'. Type command 'help' for help."

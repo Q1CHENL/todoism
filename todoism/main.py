@@ -733,34 +733,12 @@ def main(stdscr):
                 curses.echo()
                 curses.curs_set(1)
                 if st.task_cnt > 0 and st.current_task_id > 0:
-                    current_task_idx = st.current_task_id - 1
                     pr.print_status_bar(stdscr)                    
                     pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                     pr.print_left_frame(stdscr)
                     pr.print_sidebar_task_panel_separator(stdscr)
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
-                    
-                    # Move cursor to edit position
-                    sf.safe_move(stdscr, st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
-                    stdscr.refresh()
-                    
-                    st.filtered_tasks[current_task_idx]['description'] = ed.edit(
-                        stdscr, 
-                        st.filtered_tasks[current_task_idx],
-                        'description',
-                        pr.edit_mode
-                    )
-                    
-                    if st.filtered_tasks[current_task_idx]['description'] == "":
-                        task_uuid = st.filtered_tasks[current_task_idx]['uuid']
-                        task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                        if st.searching:
-                            st.filtered_tasks = [task for task in st.filtered_tasks if task['uuid'] != task_uuid]
-                        else:
-                            st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-                        st.task_cnt = len(st.filtered_tasks)
-                        nv.post_deletion_update(st.task_cnt + 1)
-                    tsk.save_tasks(task_list)
+                    task_list = ed.handle_edit(stdscr, task_list)
                     should_repaint = True
                     
                 curses.curs_set(0)
