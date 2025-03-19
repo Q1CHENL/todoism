@@ -13,7 +13,6 @@ view_mode = 0
 add_mode  = 1
 edit_mode = 2
 
-# Function to display centered messages
 def print_msg_center(stdscr, message, color_pair=0, highlight_line=-1):    
     lines = message.strip().split("\n")
     start_y = max(0, (st.latest_max_y - len(lines)) // 2)
@@ -47,7 +46,6 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
     center_offset_x = max(0, (available_width - width) // 2)
     center_offset_y = max(0, (st.latest_max_y - len(lines)) // 2)
     
-    # Clear the task area before printing
     clear_task_panel(stdscr)
     
     if highlight:
@@ -201,8 +199,6 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     highlight_trailing_blank_space = available_width - len(visible_text) + 1    
     for i in range(highlight_trailing_blank_space):
         sf.safe_appendstr(stdscr, ' ')
-    
-    # Print date with exactly one character gap to right frame
 
     sf.safe_addstr(stdscr, y, date_pos, date_str)
     if is_selected:
@@ -366,7 +362,6 @@ def print_whole_view(stdscr, categories, category_start_index):
     else:
         print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
 
-    # Use a single refresh at the end instead of multiple refreshes in each function
     stdscr.noutrefresh()
     curses.doupdate()
 
@@ -439,7 +434,6 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     if task.get('status', False) and stk.get_strikethrough() and not is_selected:
         visible_text = stk.apply(visible_text)
     
-    # Display text at calculated position with proper styling
     if is_selected:
         stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
         sf.safe_addstr(stdscr, row, total_indent, visible_text)
@@ -512,7 +506,7 @@ def print_pref_panel(stdscr, current_selection_index=0):
         if len(line) > available_width:
             line = line[:available_width]
             
-        if i == current_selection_index + 2:  # +2 because one pref every 2 lines
+        if i == current_selection_index + 2:  # one pref every 2 lines
             # Handle selection marker
             if len(line) >= 3:
                 formatted_content.append(f"{line[0:2]}>{line[3:]}")

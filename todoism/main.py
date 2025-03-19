@@ -102,15 +102,14 @@ def main(stdscr):
     tsk.reassign_task_ids(task_list)
     categories = cat.load_categories()
     
-    done_list = []  # a part of task list
+    done_list = []
     purged_list = []
-
-    should_repaint = True
     
     # Set a timeout for getch() to make it non-blocking (500ms)
     stdscr.timeout(500)
     last_time_update = time.time()
     
+    should_repaint = True
     task_scroll_offset = 0
     
     max_y, max_x = stdscr.getmaxyx()
@@ -178,7 +177,6 @@ def main(stdscr):
             if st.task_cnt > 0:
                 if is_growing:
                     # WINDOW GROWING: Show maximum possible tasks while keeping current selection visible
-                    
                     # Step 1: First attempt to fill from bottom
                     # Calculate how many more tasks we could show with new size
                     potential_end = min(st.task_cnt, st.start_task_id + st.latest_max_capacity - 1)
@@ -273,7 +271,7 @@ def main(stdscr):
                         st.current_task_id = st.task_cnt
                         st.current_task_row = min(st.current_task_row, st.latest_max_capacity)
                     
-                    # Render the main view with sidebar
+                    # Render the whole view
                     pr.print_whole_view(stdscr, categories, sidebar_scroller.start_index)
                     
                 else:
@@ -391,7 +389,7 @@ def main(stdscr):
                 st.current_task_id = 1  
                 st.current_task_row = 1
                 st.start_task_id = 1
-                st.end_task_id = min(st.latest_max_capacity, st.task_cnt)        
+                st.end_task_id = min(st.latest_max_capacity, st.task_cnt)
         
         if st.focus_manager.is_sidebar_focused():
             if key == curses.KEY_UP:
@@ -425,7 +423,6 @@ def main(stdscr):
                 curses.echo()
                 curses.curs_set(1)
                 
-                # Calculate the position where new category would appear
                 cat_count = len(categories)
                 visible_count = min(cat_count, st.latest_max_capacity)
                 is_sidebar_full = visible_count >= st.latest_max_capacity
@@ -462,16 +459,14 @@ def main(stdscr):
                 sf.safe_move(stdscr, new_cat_row, 1)  # 1-space indent, matching print_category()
                 stdscr.refresh()
                 
-                # Use the same edit function as for tasks, but adapt for sidebar position
                 new_cat_name = ed.edit(stdscr, temp_category, 'name', pr.add_mode, 0)
-                temp_category['name'] = new_cat_name  # Store result in name field
+                temp_category['name'] = new_cat_name
                 
                 if new_cat_name:
                     # Enforce maximum length for category name
                     if len(new_cat_name) > cat.MAX_CATEGORY_NAME_LENGTH:
                         new_cat_name = new_cat_name[:cat.MAX_CATEGORY_NAME_LENGTH]
                         
-                    # Add the category
                     new_cat = cat.add_category(new_cat_name)
                     if new_cat:
                         # Reload categories and update scroller
@@ -494,7 +489,7 @@ def main(stdscr):
                 should_repaint = True
                 
             elif key == ord('e'):
-                # Edit category name with scrolling (skip for "All" category)
+                # Edit category name with scrolling (skip for "All Tasks" category)
                 if len(categories) > 0 and st.current_category_id != 0:
                     curses.echo()
                     curses.curs_set(1)
