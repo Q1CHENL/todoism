@@ -10,7 +10,7 @@ MAX_TASK_COUNT = 1024
 def done_count(task_list):
     count = 0
     for t in task_list:
-        if t['status'] is True:
+        if t["status"] is True:
             count = count + 1
     return count        
 
@@ -27,7 +27,7 @@ def get_tasks_file_path():
 def load_tasks():
     """Load tasks from file"""
     try:
-        with open(get_tasks_file_path(), "r") as file:
+        with open(get_tasks_file_path(), 'r') as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
@@ -43,13 +43,13 @@ def load_purged_tasks():
 def create_new_task(task_id, task_description="", flagged=False, category_id=0):
     """Create a new task with UUID and optional category assignment"""
     return {
-        'uuid': str(uuid.uuid4()),
-        'id': task_id,
-        'description': task_description,
-        'date': formatted_datetime_now(),
-        'status': False,
-        'flagged': flagged,
-        'category_id': category_id
+        "uuid": str(uuid.uuid4()),
+        "id": task_id,
+        "description": task_description,
+        "date": formatted_datetime_now(),
+        "status": False,
+        "flagged": flagged,
+        "category_id": category_id
     }
 
 def formatted_datetime_now():
@@ -97,7 +97,7 @@ def save_tasks(task_list, custom_path=None):
     else:
         file_path = get_tasks_file_path()
     
-    with open(file_path, "w") as file:
+    with open(file_path, 'w') as file:
         json.dump(task_list, file, indent=4)
 
 def add_new_task_cli(task_description, flagged=False):
@@ -113,7 +113,7 @@ def delete_task_cli(task_id):
     task_list = load_tasks()
     reassign_task_ids(task_list)
     if task_id <= len(task_list):
-        task_uuid = task_list[task_id - 1].get('uuid')
+        task_uuid = task_list[task_id - 1].get("uuid")
         if task_uuid:
             task_list = delete_task_by_uuid(task_list, task_uuid)
         return True
@@ -128,12 +128,12 @@ def add_new_task(task_list, task_id, task_description, flagged=False, category_i
 
 def get_tasks_by_category_id(task_list, category_id):
     """Filter tasks by category"""
-    if category_id == 0:  # 'All' category
+    if category_id == 0:  # All Tasks category
         return task_list
     
     result = []
     for task in task_list:
-        task_category = task.get('category_id', 0)
+        task_category = task.get("category_id", 0)
         if task_category == category_id:
             result.append(task)
     return result
@@ -144,12 +144,12 @@ def update_existing_tasks():
     modified = False
     
     for task in task_list:
-        if 'category_id' not in task:
-            task['category_id'] = 0
+        if "category_id" not in task:
+            task["category_id"] = 0
             modified = True
         
-        if 'uuid' not in task:
-            task['uuid'] = str(uuid.uuid4())
+        if "uuid" not in task:
+            task["uuid"] = str(uuid.uuid4())
             modified = True
     
     if modified:
@@ -160,11 +160,11 @@ def update_existing_tasks():
 def reassign_task_ids(task_list):
     """Reassign ids to every task in the list"""
     for i, t in enumerate(task_list):
-        t['id'] = i + 1
+        t["id"] = i + 1
 
 def delete_task_by_uuid(task_list, task_uuid):
     """Delete task by UUID and return updated list"""
-    task_list = [task for task in task_list if task.get('uuid') != task_uuid]
+    task_list = [task for task in task_list if task.get("uuid") != task_uuid]
     reassign_task_ids(task_list)
     save_tasks(task_list)
     return task_list
@@ -172,8 +172,8 @@ def delete_task_by_uuid(task_list, task_uuid):
 def done_task_by_uuid(task_list, task_uuid):
     """Mark task as done by UUID and return updated list"""
     for task in task_list:
-        if task.get('uuid') == task_uuid:
-            task['status'] = True
+        if task.get("uuid") == task_uuid:
+            task["status"] = True
             save_tasks(task_list)
             return task_list
     return task_list
@@ -181,8 +181,8 @@ def done_task_by_uuid(task_list, task_uuid):
 def flag_task_by_uuid(task_list, task_uuid):
     """Flag task by UUID and return updated list"""
     for task in task_list:
-        if task.get('uuid') == task_uuid:
-            task['flagged'] = not task.get('flagged', False)
+        if task.get("uuid") == task_uuid:
+            task["flagged"] = not task.get("flagged", False)
             save_tasks(task_list)
             return task_list
     return task_list

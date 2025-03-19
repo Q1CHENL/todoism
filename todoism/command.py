@@ -22,7 +22,7 @@ def purge(task_list):
     purged = []
     remained = []
     for t in task_list:
-        if t['status'] is False:
+        if t["status"] is False:
             remained.append(t)
         else:
             purged.append(t)
@@ -78,7 +78,7 @@ def execute_command(stdscr, command: str, task_list: list):
             command_recognized = True
             task_id = int(parts[1])
             if 1 <= task_id <= len(task_list):
-                task_uuid = task_list[task_id - 1].get('uuid')
+                task_uuid = task_list[task_id - 1].get("uuid")
                 task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
                 nv.post_deletion_update(len(task_list))
             return task_list
@@ -253,7 +253,7 @@ def execute_command(stdscr, command: str, task_list: list):
         # Restore original timeout
         stdscr.timeout(old_timeout)
         return task_list
-    elif command == 'dev':
+    elif command == "dev":
         # Hidden command for developers - load test data
         try:
             import test.test as test_module

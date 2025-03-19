@@ -31,7 +31,7 @@ def set_theme_color(color: str):
     try:
         with open(pref.settings_path, "r+") as settings_file:
             settings = json.load(settings_file)
-            settings['selected_color'] = color
+            settings["selected_color"] = color
             settings_file.seek(0)  # move pointer back to beginning
             json.dump(settings, settings_file, indent=4)
             settings_file.truncate()
@@ -41,23 +41,23 @@ def set_theme_color(color: str):
 
 def get_theme_color_curses() -> int:
     try:
-        with open(pref.settings_path, "r") as settings_file:
+        with open(pref.settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
-            color = settings['selected_color']
+            color = settings["selected_color"]
             if color == "random":
                 return random.choice(list(color_set.values()))
             return color_set[color][1]
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
-        return pref.setup_default_settings()['selected_color']
+        return pref.setup_default_settings()["selected_color"]
     except Exception:
         return curses.COLOR_BLUE
 
 
 def get_theme_color_str() -> str:
     try:
-        with open(pref.settings_path, "r") as settings_file:
+        with open(pref.settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
-            color = settings['selected_color']
+            color = settings["selected_color"]
             if color == "random":
                 return random.choice(list(color_set.keys()))
             return color

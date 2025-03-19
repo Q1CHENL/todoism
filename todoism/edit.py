@@ -97,7 +97,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
         base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
         text_start_pos = cat.SIDEBAR_WIDTH + base_indent
         MAX_DESCRIPTION_LENGTH = tsk.MAX_TASK_DESCRIPTION_LENGTH    
-        date_length = len(entry['date'])
+        date_length = len(entry["date"])
         date_pos = right_frame_pos - date_length - 1  # Only 1 char gap from right frame
         max_visible_width = date_pos - text_start_pos - 1
     
@@ -452,7 +452,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             
             # Recalculate screen boundaries with exactly 1 space gap
             if not st.focus_manager.is_sidebar_focused():
-                date_length = len(entry['date'])
+                date_length = len(entry["date"])
                 date_pos = right_frame_pos - date_length - 1  # Position where date starts (with 1 char gap)
                 max_visible_width = date_pos - (text_start_pos)  # Total spaces available for text
                 right_limit = date_pos - 1  # Position of the 1 char gap
@@ -544,17 +544,17 @@ def handle_edit(stdscr, task_list):
     sf.safe_move(stdscr, st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
     stdscr.refresh()
     current_task_idx = st.current_task_id - 1
-    st.filtered_tasks[current_task_idx]['description'] = edit(
+    st.filtered_tasks[current_task_idx]["description"] = edit(
         stdscr, 
         st.filtered_tasks[current_task_idx],
-        'description',
+        "description",
         pr.edit_mode
     )
-    if st.filtered_tasks[current_task_idx]['description'] == "":
-        task_uuid = st.filtered_tasks[current_task_idx]['uuid']
+    if st.filtered_tasks[current_task_idx]["description"] == "":
+        task_uuid = st.filtered_tasks[current_task_idx]["uuid"]
         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
         if st.searching:
-            st.filtered_tasks = [task for task in st.filtered_tasks if task['uuid'] != task_uuid]
+            st.filtered_tasks = [task for task in st.filtered_tasks if task["uuid"] != task_uuid]
         else:
             st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
         st.task_cnt = len(st.filtered_tasks)

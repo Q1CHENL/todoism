@@ -21,7 +21,6 @@ def setup_default_settings():
     """
     default_settings = {
         "date_format": "Y-M-D",
-        "scroll": True,
         "sort_by_flagged": False,
         "sort_by_done": False,
         "selected_color": "blue",
@@ -34,7 +33,7 @@ def setup_default_settings():
         "alt+left": 0,
         "alt+right": 0
     }
-    with open(settings_path, "w") as file:
+    with open(settings_path, 'w') as file:
         json.dump(default_settings, file, indent=4)
     return default_settings
 
@@ -63,7 +62,7 @@ def update_preferences():
         
         # Try to read current settings
         try:
-            with open(settings_path, "r") as file:
+            with open(settings_path, 'r') as file:
                 current_settings = json.load(file)
         except (FileNotFoundError, json.JSONDecodeError):
             # If settings file doesn't exist or is invalid, create default
@@ -78,7 +77,7 @@ def update_preferences():
                 
         # Save updated settings if changes were made
         if updated:
-            with open(settings_path, "w") as file:
+            with open(settings_path, 'w') as file:
                 json.dump(current_settings, file, indent=4)
                 
         return current_settings
@@ -89,9 +88,9 @@ def update_preferences():
 def get_tag():
     """Get strikethrough setting state"""
     try:
-        with open(settings_path, "r") as settings_file:
+        with open(settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
-            return settings.get('tag', True)
+            return settings.get("tag", True)
     except FileNotFoundError:
         setup_default_settings()
         return True
@@ -99,13 +98,13 @@ def get_tag():
 def set_tag(enabled):
     """Set strikethrough effect for completed tasks"""
     try:
-        with open(settings_path, "r") as settings_file:
+        with open(settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
         
-        settings['tag'] = enabled
+        settings["tag"] = enabled
         
         # Write the entire file at once to avoid corruption
-        with open(settings_path, "w") as settings_file:
+        with open(settings_path, 'w') as settings_file:
             json.dump(settings, settings_file, indent=4)
             
     except FileNotFoundError:
@@ -114,7 +113,7 @@ def set_tag(enabled):
 def get_date_format():
     """Get date format setting"""
     try:
-        with open(settings_path, "r") as settings_file:
+        with open(settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
             return settings.get('date_format', "Y-M-D")  # Default to Y-M-D if not found
     except FileNotFoundError:
@@ -127,13 +126,13 @@ def set_date_format(format_string):
         format_string = "Y-M-D"  # Default if invalid
         
     try:
-        with open(settings_path, "r") as settings_file:
+        with open(settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
         
         settings['date_format'] = format_string
         
         # Write the entire file at once to avoid corruption
-        with open(settings_path, "w") as settings_file:
+        with open(settings_path, 'w') as settings_file:
             json.dump(settings, settings_file, indent=4)
             
     except FileNotFoundError:
@@ -142,7 +141,7 @@ def set_date_format(format_string):
 def get_sort_flagged():
     """Get sort flagged tasks setting"""
     try:
-        with open(settings_path, "r") as settings_file:
+        with open(settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
             return settings.get('sort_by_flagged', False)
     except FileNotFoundError:
@@ -152,13 +151,13 @@ def get_sort_flagged():
 def set_sort_flagged(enabled):
     """Set sort flagged tasks setting"""
     try:
-        with open(settings_path, "r") as settings_file:
+        with open(settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
         
         settings['sort_by_flagged'] = enabled
         
         # Write the entire file at once to avoid corruption
-        with open(settings_path, "w") as settings_file:
+        with open(settings_path, 'w') as settings_file:
             json.dump(settings, settings_file, indent=4)
             
     except FileNotFoundError:
@@ -167,7 +166,7 @@ def set_sort_flagged(enabled):
 def get_sort_done():
     """Get sort done tasks setting"""
     try:
-        with open(settings_path, "r") as settings_file:
+        with open(settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
             return settings.get('sort_by_done', False)
     except FileNotFoundError:
@@ -177,13 +176,13 @@ def get_sort_done():
 def set_sort_done(enabled):
     """Set sort done tasks setting"""
     try:
-        with open(settings_path, "r") as settings_file:
+        with open(settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
         
         settings['sort_by_done'] = enabled
         
         # Write the entire file at once to avoid corruption
-        with open(settings_path, "w") as settings_file:
+        with open(settings_path, 'w') as settings_file:
             json.dump(settings, settings_file, indent=4)
             
     except FileNotFoundError:
