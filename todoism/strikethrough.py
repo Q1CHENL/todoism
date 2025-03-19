@@ -22,3 +22,9 @@ def get_strikethrough():
     except FileNotFoundError:
         pref.setup_default_settings()
         return True
+    
+def apply(text: str) -> str:
+    applied = ""
+    for char in text:
+        applied += (char + "\u0336")
+    return applied

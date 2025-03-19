@@ -191,10 +191,6 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     visible_start = scroll_left
     visible_end = min(total_text_length, scroll_left + available_width)
     visible_text = task[text_key][visible_start:visible_end]
-    
-    # Apply strike-through for completed tasks in view mode
-    if task.get('status', False) and stk.get_strikethrough() and not is_edit_mode:
-        visible_text = stk.apply(visible_text)
 
     highlight_trailing_blank_space = 0
     # Display text at calculated position
@@ -441,10 +437,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
         visible_text = text
         
     if task.get('status', False) and stk.get_strikethrough() and not is_selected:
-        strikethrough_desc = ""
-        for char in visible_text:
-            strikethrough_desc += (char + "\u0336")
-        visible_text = strikethrough_desc
+        visible_text = stk.apply(visible_text)
     
     # Display text at calculated position with proper styling
     if is_selected:
