@@ -16,7 +16,6 @@ def is_dev_environment():
     test_module = importlib.util.find_spec('test')
     package_root = os.path.dirname(os.path.dirname(__file__))
     
-    # Check if .git exists (development) or if we're in site-packages (installed)
     is_git_repo = os.path.exists(os.path.join(package_root, '.git'))
     in_site_packages = 'site-packages' in __file__
     

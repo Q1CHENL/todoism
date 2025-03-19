@@ -1,7 +1,6 @@
 import json
 import todoism.preference as pref
 
-# Maximum allowed length for category names
 MAX_CATEGORY_NAME_LENGTH = 12
 MAX_CATEGORY_COUNT = 128
 SIDEBAR_WIDTH = 16

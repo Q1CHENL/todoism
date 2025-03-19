@@ -1,5 +1,3 @@
-import todoism.state as st
-
 def search(query, task_list) -> list:
     query = query.lower()
     return [
