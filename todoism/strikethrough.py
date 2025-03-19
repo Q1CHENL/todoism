@@ -24,7 +24,6 @@ def get_strikethrough():
         return True
     
 def apply(text: str) -> str:
-    applied = ""
-    for char in text:
-        applied += (char + "\u0336")
-    return applied
+    if not text:
+        return ""
+    return ''.join(char + '\u0336' for char in text)

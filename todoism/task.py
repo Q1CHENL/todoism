@@ -32,6 +32,14 @@ def load_tasks():
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
+def load_purged_tasks():
+    try:
+        with open(pref.purged_file_path, 'r') as f:
+            purged_tasks = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        purged_tasks = []
+    return purged_tasks
+
 def create_new_task(task_id, task_description="", flagged=False, category_id=0):
     """Create a new task with UUID and optional category assignment"""
     return {
@@ -178,3 +186,13 @@ def flag_task_by_uuid(task_list, task_uuid):
             save_tasks(task_list)
             return task_list
     return task_list
+
+def sort(task_list, key) -> list:
+    marked = []
+    not_marked = []
+    for t in task_list:
+        if t[key] is True:
+            marked.append(t)
+        else:
+            not_marked.append(t)
+    return marked + not_marked

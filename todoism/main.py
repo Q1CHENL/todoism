@@ -101,10 +101,7 @@ def main(stdscr):
     task_list = tsk.update_existing_tasks()
     tsk.reassign_task_ids(task_list)
     categories = cat.load_categories()
-    
-    done_list = []
-    purged_list = []
-    
+        
     # Set a timeout for getch() to make it non-blocking (500ms)
     stdscr.timeout(500)
     last_time_update = time.time()
@@ -143,10 +140,10 @@ def main(stdscr):
         tsk.reassign_task_ids(st.filtered_tasks)
         
         if pref.get_sort_done():
-            st.filtered_tasks = cmd.sort(st.filtered_tasks, 'status')
+            st.filtered_tasks = tsk.sort(st.filtered_tasks, 'status')
             tsk.reassign_task_ids(st.filtered_tasks)
         if pref.get_sort_flagged():
-            st.filtered_tasks = cmd.sort(st.filtered_tasks, 'flagged')
+            st.filtered_tasks = tsk.sort(st.filtered_tasks, 'flagged')
             tsk.reassign_task_ids(st.filtered_tasks)
         
         _sort_by_tag(categories)
@@ -351,7 +348,6 @@ def main(stdscr):
                                     tsk.save_tasks(task_list)
                             elif status_x_start <= mouse_x <= status_x_end:
                                 if st.filtered_tasks:
-                                    done_list.append(st.filtered_tasks[task_index])
                                     st.filtered_tasks[task_index]['status'] = not st.filtered_tasks[task_index]['status']
                                     tsk.save_tasks(task_list)
                             else:
@@ -592,17 +588,15 @@ def main(stdscr):
                 curses.curs_set(0)
                 curses.noecho()
                 
-                command_result = cmd.execute_command(
+                exe_result = cmd.execute_command(
                     stdscr,
                     command,
                     task_list,
-                    done_list,
-                    purged_list,
                 )
 
-                # Check if we have categories in the result (special case for test/restore)
-                if len(command_result) > 2:
-                    task_list, done_list, categories = command_result
+                # Check if we have newly loaded categories in the result (special case for test/restore)
+                if len(exe_result) > 1:
+                    task_list, categories = exe_result
                     sidebar_scroller.update_total(len(categories))
                     
                     # Find the new category index
@@ -615,7 +609,7 @@ def main(stdscr):
                     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                     st.task_cnt = len(st.filtered_tasks)
                 else:
-                    task_list, done_list = command_result
+                    task_list = exe_result
                 
                 should_repaint = True
                 
@@ -703,7 +697,6 @@ def main(stdscr):
             elif key == ord('d') or key == ord(' '):
                 if st.filtered_tasks and st.current_task_id > 0:
                     task_idx = st.current_task_id - 1
-                    done_list.append(st.filtered_tasks[task_idx])
                     st.filtered_tasks[task_idx]['status'] = not st.filtered_tasks[task_idx]['status']
                     tsk.save_tasks(task_list)
                     should_repaint = True
@@ -761,17 +754,15 @@ def main(stdscr):
                 curses.curs_set(0)
                 curses.noecho()
                 
-                command_result = cmd.execute_command(
+                exe_result = cmd.execute_command(
                     stdscr,
                     command,
                     task_list,
-                    done_list,
-                    purged_list,
                 )
 
-                # Check if we have categories in the result (special case for test/restore)
-                if len(command_result) > 2:
-                    task_list, done_list, categories = command_result
+                # Check if we have newly loaded categories in the result (special case for test/restore)
+                if len(exe_result) > 1:
+                    task_list, categories = exe_result
                     sidebar_scroller.update_total(len(categories))
                     
                     # Find the new category index
@@ -783,7 +774,7 @@ def main(stdscr):
                     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                     st.task_cnt = len(st.filtered_tasks)
                 else:
-                    task_list, done_list = command_result
+                    task_list = exe_result
                 
                 should_repaint = True
                 

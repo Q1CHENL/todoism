@@ -15,36 +15,27 @@ import todoism.category as cat
 import todoism.state as st
 import todoism.safe as sf
 
-def purge(task_list, purged_list):
+def purge(task_list):
     """
-    purge completed tasks
+    purge completed tasks, appending to existing purged tasks
     """
+    purged = []
     remained = []
     for t in task_list:
         if t['status'] is False:
             remained.append(t)
         else:
-            purged_list.append(t)
-    tsk.reassign_task_ids(remained)
-    tsk.save_tasks(purged_list, pref.purged_file_path)
-    return remained, []
+            purged.append(t)
 
-def sort(task_list, key) -> list:
-    marked = []
-    not_marked = []
-    for t in task_list:
-        if t[key] is True:
-            marked.append(t)
-        else:
-            not_marked.append(t)
-    return marked + not_marked
+    tsk.reassign_task_ids(remained)
+    purged_tasks.extend(purged)
+    tsk.save_tasks(purged_tasks, pref.purged_file_path)
+    return remained
 
 def execute_command(
         stdscr, 
         command, 
         task_list, 
-        done_list, 
-        purged_list,
         ):
     command_recognized = False    
     if command.startswith("done "):
@@ -56,10 +47,9 @@ def execute_command(
                 for id_to_done in ids_to_done:
                     index_to_done = int(id_to_done) - 1
                     if 0 <= index_to_done < len(task_list):
-                        done_list.append(copy.copy(task_list[index_to_done]))
                         task_uuid = st.filtered_tasks[index_to_done].get('uuid')
                         tsk.done_task_by_uuid(task_list, task_uuid)
-                        return task_list, done_list
+                        return task_list
     elif command.startswith("flag "):
         tasks_sperated_by_comma = command[5:].split(' ')
         if len(tasks_sperated_by_comma) == 1:
@@ -70,11 +60,11 @@ def execute_command(
                     index_to_flag = int(id_to_flag) - 1
                     if 0 <= index_to_flag < len(task_list):
                         tsk.flag_task_by_uuid(task_list, task_list[index_to_flag]['uuid'])
-                        return task_list, done_list
+                        return task_list
     elif command == "purge":
         original_cnt = len(task_list)
         displayed_task_cnt = st.end_task_id - st.start_task_id + 1
-        task_list, done_list = purge(task_list, purged_list)
+        task_list = purge(task_list)
         tsk.save_tasks(task_list)
         if len(task_list) < original_cnt:
             st.current_task_id = 1
@@ -84,7 +74,7 @@ def execute_command(
                 st.end_task_id = displayed_task_cnt
             else:
                 st.end_task_id = len(task_list)
-        return task_list, done_list       
+        return task_list       
     elif command.startswith("del "):
         parts = command.split()
         if len(parts) == 2 and parts[1].isdigit():
@@ -94,7 +84,7 @@ def execute_command(
                 task_uuid = task_list[task_id - 1].get('uuid')
                 task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
                 nv.post_deletion_update(len(task_list))
-            return task_list, done_list
+            return task_list
         else:
             command_recognized = False
     elif command.startswith('edit '):
@@ -113,7 +103,7 @@ def execute_command(
                     task_list = ed.handle_edit(stdscr, task_list)
                     curses.curs_set(0)
                     curses.noecho()      
-                    return task_list, done_list
+                    return task_list
         else:
             command_recognized = False
     elif command == "help":
@@ -133,7 +123,7 @@ def execute_command(
             if ch == ord('q'):
                 break
         stdscr.timeout(old_timeout)
-        return task_list, done_list
+        return task_list
     elif command == "pref":
         selection_index = 0
         open_pref_panel(stdscr, selection_index)
@@ -158,7 +148,6 @@ def execute_command(
                 st.old_max_y = st.latest_max_y
                 open_pref_panel(stdscr, selection_index)
                         
-            # Display the preference panel with current selection
             pr.print_pref_panel(stdscr, selection_index)
             
             # Get the current preference item
@@ -266,7 +255,7 @@ def execute_command(
                     quit = True
         # Restore original timeout
         stdscr.timeout(old_timeout)
-        return task_list, done_list
+        return task_list
     elif command == 'dev':
         # Hidden command for developers - load test data
         try:
@@ -309,7 +298,7 @@ def execute_command(
                     stdscr.clrtoeol()
                     
                     # Return updated categories and category ID
-                    return task_list, done_list, categories
+                    return task_list, categories
         except ImportError:
             # Test module not found (likely PyPI installation)
             warning_msg = "Dev mode not available in installation."
@@ -368,7 +357,7 @@ def execute_command(
                     stdscr.clrtoeol()
                     
                     # Return updated categories and category ID
-                    return task_list, done_list, categories
+                    return task_list, categories
         except ImportError:
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
@@ -386,7 +375,7 @@ def execute_command(
         command_recognized = True
         
     elif command.strip() == "":
-        return task_list, done_list
+        return task_list
 
     if not command_recognized and command.strip():
         error_msg = f"Invalid command: '{command}'. Type command 'help' for help."
@@ -404,7 +393,7 @@ def execute_command(
         stdscr.clrtoeol()
         stdscr.refresh()
 
-    return task_list, done_list
+    return task_list
 
 def open_help_page(stdscr):
     stdscr.clear()
