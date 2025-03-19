@@ -280,18 +280,24 @@ def print_all_cli(todos):
     if len(todos) == 0:
         print("no todos yet")
         exit(0)
-    flagged_fmt = "\033[3m%s\033[0m" # italic
-    done_fmt = "\033[9m%s\033[0m" # crossline
-    todo_fmt = "#{id:02d} {description} ({date})"
-    text = ""
+        
+    tsk.reassign_task_ids(todos)
+    done_fmt = "\033[9m%s\033[0m"     # strikethrough
+    flag_color = "\033[31m%s\033[0m"   # red for flag
+    check_color = "\033[32m%s\033[0m"  # green for checkmark
+    
     for todo in todos:
-        todo_line = todo_fmt.format(**todo)
+        id_part = f"#{todo['id']:02d}"
+
+        flag_symbol = flag_color % "⚑ " if todo.get("flagged") else "  "
+        check_symbol = check_color % "✓ " if todo.get("status") else "  "
+        
+        description = todo['description']
         if todo.get("status"):
-            todo_line = done_fmt % todo_line
-        if todo.get("flagged"):
-            todo_line = flagged_fmt % todo_line
-        text += todo_line + "\n"
-    print(text, end="")
+            description = done_fmt % description
+            
+        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo['date']})"
+        print(todo_line)
 
 def print_category_entries(stdscr, categories, start_index):
     """Print the category sidebar"""
@@ -424,7 +430,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     # Handle text display
     text = task['description']
     # Add tag if not in All Tasks
-    if st.current_category_id == 0 and pref.get_tag():
+    if (st.current_category_id == 0 or st.searching) and pref.get_tag():
         cat_id_of_current_task = task["category_id"]
         if cat_id_of_current_task != 0:
             text = "[" + cat.get_category_by_id(cat_id_of_current_task)["name"] +  "] " + text

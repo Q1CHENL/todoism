@@ -7,7 +7,7 @@ def set_strikethrough(enabled):
         with open(pref.settings_path, "r+") as settings_file:
             settings = json.load(settings_file)
             settings['strikethrough'] = enabled
-            settings_file.seek(0)  # move pointer back to beginning
+            settings_file.seek(0)
             json.dump(settings, settings_file, indent=4)
             settings_file.truncate()
     except FileNotFoundError:
@@ -18,7 +18,7 @@ def get_strikethrough():
     try:
         with open(pref.settings_path, "r") as settings_file:
             settings = json.load(settings_file)
-            return settings.get('strikethrough', True)  # Default to True if not found
+            return settings.get('strikethrough', True)
     except FileNotFoundError:
         pref.setup_default_settings()
         return True

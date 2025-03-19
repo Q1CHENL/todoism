@@ -5,6 +5,7 @@ import todoism.keycode as kc
 import todoism.state as st
 import todoism.category as cat
 import todoism.safe as sf
+import todoism.navigate as nv
 
 def move_by_word(text, current_pos, direction):
     """Move cursor by word in the specified direction
@@ -538,3 +539,26 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             sf.safe_move(stdscr, y, new_x)
             
     return entry[text_key]
+
+def handle_edit(stdscr, task_list):
+    sf.safe_move(stdscr, st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
+    stdscr.refresh()
+    current_task_idx = st.current_task_id - 1
+    st.filtered_tasks[current_task_idx]['description'] = edit(
+        stdscr, 
+        st.filtered_tasks[current_task_idx],
+        'description',
+        pr.edit_mode
+    )
+    if st.filtered_tasks[current_task_idx]['description'] == "":
+        task_uuid = st.filtered_tasks[current_task_idx]['uuid']
+        task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
+        if st.searching:
+            st.filtered_tasks = [task for task in st.filtered_tasks if task['uuid'] != task_uuid]
+        else:
+            st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+        st.task_cnt = len(st.filtered_tasks)
+        nv.post_deletion_update(st.task_cnt + 1)
+    tsk.save_tasks(task_list)
+    return task_list
+    

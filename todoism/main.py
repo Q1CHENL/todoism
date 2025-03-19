@@ -315,7 +315,6 @@ def main(stdscr):
                         st.focus_manager.toggle_focus()
                         should_repaint = True
                     
-                    # Only handle category selection if clicked on a valid category
                     if 1 <= mouse_y <= min(len(categories), st.latest_max_capacity):
                         clicked_cat_index = sidebar_scroller.start_index + mouse_y - 1
                         
@@ -329,7 +328,6 @@ def main(stdscr):
                                 should_repaint = True
                     continue
                 
-                # Handle clicks in task area (including blank areas)
                 if mouse_x >= cat.SIDEBAR_WIDTH:
                     if not st.focus_manager.is_tasks_focused():
                         st.focus_manager.toggle_focus()
@@ -370,7 +368,6 @@ def main(stdscr):
         if key == ord('/'):
             curses.echo()
             curses.curs_set(1)
-            # Disable timeout temporarily
             stdscr.timeout(-1)
             _clear_bottom_line_content(stdscr)
             sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, "/")
@@ -497,8 +494,6 @@ def main(stdscr):
                 should_repaint = True
                 
             elif key == ord('e'):
-                # if st.searching:
-                #     continue
                 # Edit category name with scrolling (skip for "All" category)
                 if len(categories) > 0 and st.current_category_id != 0:
                     curses.echo()
@@ -551,10 +546,6 @@ def main(stdscr):
             elif key == curses.KEY_BACKSPACE or key == kc.BACKSPACE:
                 # Delete selected category (with double backspace confirmation)
                 if len(categories) > 0 and st.current_category_id != 0:
-                    # Wait for second backspace
-                    sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, "Press backspace again to delete")
-                    stdscr.refresh()
-                    
                     # Wait for confirmation
                     k = stdscr.getch()
                     if k == curses.KEY_BACKSPACE or k == kc.BACKSPACE:
@@ -576,7 +567,6 @@ def main(stdscr):
                             # We need to reload tasks after renumbering to ensure proper associations
                             task_list = tsk.load_tasks()
                         
-                        # Update sidebar scroller with new category count
                         sidebar_scroller.update_total(len(categories))
                         
                         # Only category id if the last category was deleted
@@ -598,13 +588,9 @@ def main(stdscr):
                 
                 # Disable timeout temporarily
                 stdscr.timeout(-1)
-                
                 _clear_bottom_line_content(stdscr)
-                
-                # Place the command input at the bottom of the screen, after the sidebar
                 sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
                 stdscr.refresh()
-
                 command = stdscr.getstr().decode('utf-8')
                 stdscr.timeout(500)
                 
@@ -638,7 +624,6 @@ def main(stdscr):
                 
                 should_repaint = True
                 
-        # Handle task navigation and actions when task area is focused
         elif st.focus_manager.is_tasks_focused():
             # Handle user input for tasks
             if key == ord('a'):
@@ -687,7 +672,6 @@ def main(stdscr):
                 new_task_description = ed.edit(stdscr, new_task, 'description', pr.add_mode)
                 if new_task_description != "":
                     st.current_task_id = st.task_cnt + 1
-                # pr.print_editing_entry(stdscr, new_task, 'description', y_pos, False, 0)
                 stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
                 sf.safe_addch(stdscr, y_pos, st.latest_max_x - 2, ' ')
                 stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
@@ -733,34 +717,12 @@ def main(stdscr):
                 curses.echo()
                 curses.curs_set(1)
                 if st.task_cnt > 0 and st.current_task_id > 0:
-                    current_task_idx = st.current_task_id - 1
                     pr.print_status_bar(stdscr)                    
                     pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                     pr.print_left_frame(stdscr)
                     pr.print_sidebar_task_panel_separator(stdscr)
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
-                    
-                    # Move cursor to edit position
-                    sf.safe_move(stdscr, st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
-                    stdscr.refresh()
-                    
-                    st.filtered_tasks[current_task_idx]['description'] = ed.edit(
-                        stdscr, 
-                        st.filtered_tasks[current_task_idx],
-                        'description',
-                        pr.edit_mode
-                    )
-                    
-                    if st.filtered_tasks[current_task_idx]['description'] == "":
-                        task_uuid = st.filtered_tasks[current_task_idx]['uuid']
-                        task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                        if st.searching:
-                            st.filtered_tasks = [task for task in st.filtered_tasks if task['uuid'] != task_uuid]
-                        else:
-                            st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-                        st.task_cnt = len(st.filtered_tasks)
-                        nv.post_deletion_update(st.task_cnt + 1)
-                    tsk.save_tasks(task_list)
+                    task_list = ed.handle_edit(stdscr, task_list)
                     should_repaint = True
                     
                 curses.curs_set(0)
@@ -794,11 +756,8 @@ def main(stdscr):
                 curses.echo()
                 curses.curs_set(1)
                 
-                # Disable timeout temporarily
                 stdscr.timeout(-1)
-            
                 _clear_bottom_line_content(stdscr)
-                
                 sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
                 stdscr.refresh()
                 command = stdscr.getstr().decode('utf-8')
@@ -837,13 +796,13 @@ def main(stdscr):
                 task_scroll_offset = 0
                 if st.task_cnt > 0:
                     should_repaint = nv.keyup_update(st.task_cnt, True)
+                    
             elif key == curses.KEY_DOWN:
                 task_scroll_offset = 0
                 if st.task_cnt > 0:
                     should_repaint = nv.keydown_update(st.task_cnt, True)
                 
             elif key == curses.KEY_BACKSPACE or key == kc.BACKSPACE:
-                # Double backspace to delete a task
                 k = stdscr.getch()
                 if k == curses.KEY_BACKSPACE or k == kc.BACKSPACE:
                     if len(st.filtered_tasks) > 0:
