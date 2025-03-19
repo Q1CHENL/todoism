@@ -80,7 +80,7 @@ def update_task_date_format(task, old_format):
 def update_all_task_date_format(task_list, old_format):
     for task in task_list:
         update_task_date_format(task, old_format)
-    save_tasks(task_list)  # Use save_tasks without explicit path
+    save_tasks(task_list)
 
 def save_tasks(task_list, custom_path=None):
     """Save tasks to file"""
@@ -94,24 +94,20 @@ def save_tasks(task_list, custom_path=None):
 
 def add_new_task_cli(task_description, flagged=False):
     task_list = load_tasks()
-    task_id = len(task_list) + 1
-    new_task = create_new_task(task_id, task_description, flagged)
+    new_task_id = len(task_list) + 1
+    new_task = create_new_task(new_task_id, task_description, flagged)
     task_list.append(new_task)
-    save_tasks(task_list)  # Use save_tasks without explicit path
-    return task_id
+    save_tasks(task_list)
+    return new_task_id
 
-def remove_task_cli(task_id):
+def delete_task_cli(task_id):
     """Remove a task by its display ID from the command line"""
     task_list = load_tasks()
+    reassign_task_ids(task_list)
     if task_id <= len(task_list):
         task_uuid = task_list[task_id - 1].get('uuid')
         if task_uuid:
             task_list = delete_task_by_uuid(task_list, task_uuid)
-        else:
-            # Fallback for legacy tasks
-            del task_list[task_id - 1]
-            reassign_task_ids(task_list)
-            save_tasks(task_list)  # Use save_tasks without explicit path
         return True
     return False
 
@@ -119,7 +115,7 @@ def add_new_task(task_list, task_id, task_description, flagged=False, category_i
     """Create, append and save a new task with category support"""
     new_task = create_new_task(task_id, task_description, flagged, category_id)
     task_list.append(new_task)
-    save_tasks(task_list)  # Use save_tasks without explicit path
+    save_tasks(task_list)
     return task_list
 
 def get_tasks_by_category_id(task_list, category_id):
@@ -149,7 +145,7 @@ def update_existing_tasks():
             modified = True
     
     if modified:
-        save_tasks(task_list)  # Use save_tasks without explicit path
+        save_tasks(task_list)
     
     return task_list
 
@@ -162,7 +158,7 @@ def delete_task_by_uuid(task_list, task_uuid):
     """Delete task by UUID and return updated list"""
     task_list = [task for task in task_list if task.get('uuid') != task_uuid]
     reassign_task_ids(task_list)
-    save_tasks(task_list)  # Use save_tasks without explicit path
+    save_tasks(task_list)
     return task_list
 
 def done_task_by_uuid(task_list, task_uuid):
@@ -170,7 +166,7 @@ def done_task_by_uuid(task_list, task_uuid):
     for task in task_list:
         if task.get('uuid') == task_uuid:
             task['status'] = True
-            save_tasks(task_list)  # Use save_tasks without explicit path
+            save_tasks(task_list)
             return task_list
     return task_list
 
@@ -179,6 +175,6 @@ def flag_task_by_uuid(task_list, task_uuid):
     for task in task_list:
         if task.get('uuid') == task_uuid:
             task['flagged'] = not task.get('flagged', False)
-            save_tasks(task_list)  # Use save_tasks without explicit path
+            save_tasks(task_list)
             return task_list
     return task_list

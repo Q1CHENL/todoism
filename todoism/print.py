@@ -280,18 +280,24 @@ def print_all_cli(todos):
     if len(todos) == 0:
         print("no todos yet")
         exit(0)
-    flagged_fmt = "\033[3m%s\033[0m" # italic
-    done_fmt = "\033[9m%s\033[0m" # crossline
-    todo_fmt = "#{id:02d} {description} ({date})"
-    text = ""
+        
+    tsk.reassign_task_ids(todos)
+    done_fmt = "\033[9m%s\033[0m"     # strikethrough
+    flag_color = "\033[31m%s\033[0m"   # red for flag
+    check_color = "\033[32m%s\033[0m"  # green for checkmark
+    
     for todo in todos:
-        todo_line = todo_fmt.format(**todo)
+        id_part = f"#{todo['id']:02d}"
+
+        flag_symbol = flag_color % "⚑ " if todo.get("flagged") else "  "
+        check_symbol = check_color % "✓ " if todo.get("status") else "  "
+        
+        description = todo['description']
         if todo.get("status"):
-            todo_line = done_fmt % todo_line
-        if todo.get("flagged"):
-            todo_line = flagged_fmt % todo_line
-        text += todo_line + "\n"
-    print(text, end="")
+            description = done_fmt % description
+            
+        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo['date']})"
+        print(todo_line)
 
 def print_category_entries(stdscr, categories, start_index):
     """Print the category sidebar"""
