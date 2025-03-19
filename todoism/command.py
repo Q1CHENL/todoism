@@ -28,8 +28,8 @@ def purge(task_list):
             purged.append(t)
 
     tsk.reassign_task_ids(remained)
-    purged_tasks.extend(purged)
-    tsk.save_tasks(purged_tasks, pref.purged_file_path)
+    purged.extend(purged)
+    tsk.save_tasks(purged, pref.purged_file_path)
     return remained
 
 def execute_command(stdscr, command: str, task_list: list):
@@ -43,7 +43,9 @@ def execute_command(stdscr, command: str, task_list: list):
                 index = id - 1
                 task_uuid = st.filtered_tasks[index].get("uuid")
                 tsk.done_task_by_uuid(task_list, task_uuid)
-                return task_list
+            return task_list
+        else:
+            command_recognized = False
     elif command.startswith("flag"):
         parts = command.split()
         if len(parts) == 2 and parts[1].isdigit():
@@ -53,7 +55,9 @@ def execute_command(stdscr, command: str, task_list: list):
                 index = id - 1
                 task_uuid = st.filtered_tasks[index].get("uuid")
                 tsk.flag_task_by_uuid(task_list, task_uuid)
-                return task_list
+            return task_list
+        else:
+            command_recognized = False
     elif command == "purge":
         original_cnt = len(task_list)
         displayed_task_cnt = st.end_task_id - st.start_task_id + 1
