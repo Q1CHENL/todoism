@@ -588,11 +588,7 @@ def main(stdscr):
                 curses.curs_set(0)
                 curses.noecho()
                 
-                exe_result = cmd.execute_command(
-                    stdscr,
-                    command,
-                    task_list,
-                )
+                exe_result = cmd.execute_command(stdscr, command, task_list)
 
                 # Check if we have newly loaded categories in the result (special case for test/restore)
                 if len(exe_result) > 1:
@@ -754,11 +750,7 @@ def main(stdscr):
                 curses.curs_set(0)
                 curses.noecho()
                 
-                exe_result = cmd.execute_command(
-                    stdscr,
-                    command,
-                    task_list,
-                )
+                exe_result = cmd.execute_command(stdscr, command, task_list)
 
                 # Check if we have newly loaded categories in the result (special case for test/restore)
                 if len(exe_result) > 1:

@@ -32,35 +32,28 @@ def purge(task_list):
     tsk.save_tasks(purged_tasks, pref.purged_file_path)
     return remained
 
-def execute_command(
-        stdscr, 
-        command, 
-        task_list, 
-        ):
+def execute_command(stdscr, command: str, task_list: list):
     command_recognized = False    
-    if command.startswith("done "):
-        tasks_sperated_by_comma = command[5:].split(' ')
-        if len(tasks_sperated_by_comma) == 1:
-            ids_to_done = tasks_sperated_by_comma[0].split(',')
-            if all(i.isdigit() for i in ids_to_done):
-                command_recognized = True
-                for id_to_done in ids_to_done:
-                    index_to_done = int(id_to_done) - 1
-                    if 0 <= index_to_done < len(task_list):
-                        task_uuid = st.filtered_tasks[index_to_done].get('uuid')
-                        tsk.done_task_by_uuid(task_list, task_uuid)
-                        return task_list
-    elif command.startswith("flag "):
-        tasks_sperated_by_comma = command[5:].split(' ')
-        if len(tasks_sperated_by_comma) == 1:
-            ids_to_flag = tasks_sperated_by_comma[0].split(',')
-            if all(i.isdigit() for i in ids_to_flag):
-                command_recognized = True
-                for id_to_flag in ids_to_flag:
-                    index_to_flag = int(id_to_flag) - 1
-                    if 0 <= index_to_flag < len(task_list):
-                        tsk.flag_task_by_uuid(task_list, task_list[index_to_flag]['uuid'])
-                        return task_list
+    if command.startswith("done"):
+        parts = command.split()
+        if len(parts) == 2 and parts[1].isdigit():
+            command_recognized = True
+            id = int(parts[1])
+            if 1 <= id <= len(st.filtered_tasks):
+                index = id - 1
+                task_uuid = st.filtered_tasks[index].get("uuid")
+                tsk.done_task_by_uuid(task_list, task_uuid)
+                return task_list
+    elif command.startswith("flag"):
+        parts = command.split()
+        if len(parts) == 2 and parts[1].isdigit():
+            command_recognized = True
+            id = int(parts[1])
+            if 1 <= id <= len(st.filtered_tasks):
+                index = id - 1
+                task_uuid = st.filtered_tasks[index].get("uuid")
+                tsk.flag_task_by_uuid(task_list, task_uuid)
+                return task_list
     elif command == "purge":
         original_cnt = len(task_list)
         displayed_task_cnt = st.end_task_id - st.start_task_id + 1
@@ -75,7 +68,7 @@ def execute_command(
             else:
                 st.end_task_id = len(task_list)
         return task_list       
-    elif command.startswith("del "):
+    elif command.startswith("del"):
         parts = command.split()
         if len(parts) == 2 and parts[1].isdigit():
             command_recognized = True
@@ -87,7 +80,7 @@ def execute_command(
             return task_list
         else:
             command_recognized = False
-    elif command.startswith('edit '):
+    elif command.startswith("edit"):
         parts = command.split()
         if len(parts) == 2 and parts[1].isdigit():
             command_recognized = True
