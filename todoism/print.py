@@ -336,34 +336,23 @@ def print_task_entries(stdscr, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
 
     clear_task_panel(stdscr)
-
-    # Only print if we have tasks and a valid start index
+    sidebar_focused = st.focus_manager.is_sidebar_focused()
     if st.filtered_tasks and st.start_task_id > 0:
         for i, task in enumerate(st.filtered_tasks[st.start_task_id - 1:st.end_task_id]):
             row = i + 1  # +1 due to status bar
-            display_id = i + st.start_task_id  # Sequential display ID (1, 2, 3, etc.)
+            is_selected = st.start_task_id + i == st.current_task_id and not sidebar_focused and not st.adding_task 
+            print_task_entry(stdscr, task, row, is_selected=is_selected, x_offset=x_offset)
             
-            if st.start_task_id + i == st.current_task_id and not st.focus_manager.is_sidebar_focused() and not st.adding_task:
-                # Selected task
-                print_task_entry_selected(stdscr, task, row, x_offset, display_id)
-            else:
-                # Normal task
-                print_task_entry(stdscr, task, row, False, x_offset, display_id)
-    
-
     # Print right frame of area without task entries, compensate for clearing the whole task panel
-    # Might get error when resizing window while typing search query
     for y in range(len(st.filtered_tasks) if len(st.filtered_tasks) > 0 else 1, st.latest_max_y - 1):
         sf.safe_addstr(stdscr, y, st.latest_max_x - 1, "│")
 
 
-def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None):
+def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     """Print a task with horizontal offset and optional display ID override"""
 
     attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
     attr_done = curses.A_DIM
-    # Use display_id if provided, otherwise use task's actual ID
-    id_to_show = display_id if display_id is not None else task["id"]
     
     # Print task symbols with swapped positions
     print_task_symbols(stdscr, task, row, is_selected=is_selected)
@@ -394,8 +383,9 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     if is_done and stk.get_strikethrough() and not is_selected:
         visible_text = stk.apply(visible_text)
         
+    task_id = task["id"]
     if is_selected:
-        sf.safe_addstr(stdscr, row, x_offset, f"{id_to_show:2d} ", attr)
+        sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ", attr)
         sf.safe_addstr(stdscr, row, total_indent, visible_text, attr)
         # Fill remaining space with spaces
         for i in range(available_width - len(visible_text) + 1):
@@ -403,7 +393,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
         sf.safe_addstr(stdscr, row, date_pos, date_str, attr)
         sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ', attr)
     else:
-        sf.safe_addstr(stdscr, row, x_offset, f"{id_to_show:2d} ")
+        sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
         sf.safe_addstr(stdscr, row, total_indent, visible_text, attr_done if is_done else 0)
         # Fill remaining space with spaces
         for i in range(available_width - len(visible_text) + 1):
@@ -413,12 +403,6 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
         sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ')
         
     sf.safe_addstr(stdscr, row, right_frame_pos, '│')
-
-
-def print_task_entry_selected(stdscr, task, row, x_offset=0, display_id=None):
-    """Print a selected task with offset"""
-    # attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
-    print_task_entry(stdscr, task, row, True, x_offset, display_id)
 
 def print_pref_panel(stdscr, current_selection_index=0):
     """
@@ -617,7 +601,6 @@ def print_bottom_right_corner(stdscr):
     sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
 
 def print_bottom_left_corner(stdscr):
-    # Reset attributes before drawing corner to prevent highlighting
     sf.safe_addstr(stdscr, st.latest_max_y - 1, 0, "└")
     
 def print_sidebar_task_panel_separator(stdscr):
