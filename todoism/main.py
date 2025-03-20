@@ -403,7 +403,6 @@ def main(stdscr):
 
             st.filtered_tasks = srch.search(query, task_list)
             st.searching = True
-            st.task_cnt = len(st.filtered_tasks)
             pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
             should_repaint = True
 
@@ -625,7 +624,6 @@ def main(stdscr):
                             
                     # Update filtered tasks for the new category
                     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-                    st.task_cnt = len(st.filtered_tasks)
 
                 should_repaint = True
                 
@@ -779,7 +777,6 @@ def main(stdscr):
                             break  
                     # Update filtered tasks for the new category
                     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-                    st.task_cnt = len(st.filtered_tasks)
                 
                 should_repaint = True
                 
