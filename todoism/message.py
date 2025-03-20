@@ -1,38 +1,30 @@
 # This file contains all message templates for the application
 
 help_msg = '''
-┌──────────────────────────────────────────────────┐
-│                                                  │
-│   Short commands:                                │
-│   a - Create new task/category                   │
-│   d - Mark task as done                          │
-│   e - Edit task/category                         │
-│   f - Mark task as flagged                       │
-│   q - Quit this help message/pref panel/todoism  │
-│                                                  │
-│   Key bindings:                                  │
-│   Tab - Toggle focus bewteen tasks and sidebar   │
-│   Double Backspace - delete task                 │
-│   ESC - quit adding/editing task                 │
-│   Enter - finish adding/editing task             │
-│   Up/Down Arrow Keys - navigate through tasks    │
-│   Mouse Click:                                   │
-│    - on task: Select task                        │
-│    - on category: Select category                │
-│    - on done: Toggle task completion             │
-│    - on flag: Toggle task flag                   │
-│    - on blank area: toggle focus                 │
-│                                                  │
-│   Vim-like long commands:                        │
-│   (:<command> [args])                            │
-│   :help - Show this help message                 │
-│   :pref - Open preference panel                  │
-│   :del <task_id> - Delete task                   │
-│   :edit <task_id> - Edit task                    │
-│   :done <task_id> - Mark task as done            │
-│   :purge - Purge all done tasks                  │
-│                                                  │
-└──────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                             │
+│                                       todoism v1.21.5                                       │
+│                                                                                             │
+│                               Visit Github page for more info                               │
+│                                                                                             │
+│                                                                                             │
+│   Short commands:                            Key bindings:                                  │
+│   a - Create new task/category               Tab - Toggle focus bewteen tasks and sidebar   │
+│   d - Mark task as done                      Double Backspace - delete task                 │
+│   e - Edit task/category                     ESC - Quit adding/editing task                 │
+│   f - Mark task as flagged                   Enter - Finish adding/editing task             │
+│   q - Quit this help message/pref/todoism    Up/Down Arrow Keys - Navigate through tasks    │
+│                                                                                             │
+│   Vim-like long commands:                    Mouse Operations:                              │
+│   (:<command> [args])                        - Click on task: Select task                   │
+│   :help - Show this help message             - Click on category: Select category           │
+│   :pref - Open preference panel              - Click on done: Toggle task completion        │
+│   :del <task_id> - Delete task               - Click on flag: Toggle task flag              │
+│   :edit <task_id> - Edit task                - Click on blank area: toggle focus            │
+│   :done <task_id> - Mark task as done        - Wheel scroll up on tasks/categories          │
+│   :purge - Purge all done tasks              - Wheel scroll down on tasks/categories        │
+│                                                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘
 '''
 
 pref_panel = '''

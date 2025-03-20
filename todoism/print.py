@@ -101,16 +101,29 @@ def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
                 # Truncate line to fit available space
                 available_space = st.latest_max_x - (x_offset + center_offset_x)
                 if available_space > 0:
-                    sf.safe_addstr(stdscr, line[:available_space])
+                    if line.find("Github page") > 0:
+                        print_github_page_line(stdscr, line)
+                    else:
+                        sf.safe_appendstr(stdscr, line[:available_space])
             else:
-                sf.safe_appendstr(stdscr, line)
+                if line.find("Github page") > 0:
+                    print_github_page_line(stdscr, line)
+                else:
+                    sf.safe_appendstr(stdscr, line)
             
-    # Remove highlighting if it was applied
     if highlight:
         stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
 
     stdscr.noutrefresh()
     curses.doupdate()
+
+def print_github_page_line(stdscr, line):
+    sf.safe_appendstr(stdscr, line[:line.find("Github page")])
+    blue_pair = clr.get_color_pair_num_by_str_text("blue")
+    stdscr.attron(curses.A_UNDERLINE | curses.color_pair(blue_pair))
+    sf.safe_appendstr(stdscr, "Github page")
+    stdscr.attroff(curses.A_UNDERLINE | curses.color_pair(blue_pair))
+    sf.safe_appendstr(stdscr, line[line.find("Github page") + len("Github page"):])
 
 def print_version():
     print("todoism v1.21.4")
