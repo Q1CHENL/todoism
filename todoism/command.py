@@ -112,8 +112,8 @@ def execute_command(stdscr, command: str, task_list: list):
                     curses.curs_set(1)
                     task_list = ed.handle_edit(stdscr, task_list)
                     curses.curs_set(0)
-                    curses.noecho()      
-                    return task_list
+                    curses.noecho()
+                    return task_list, None
         else:
             command_recognized = False
     elif command == "help":
@@ -216,7 +216,7 @@ def execute_command(stdscr, command: str, task_list: list):
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                     # Update color pair for selection
-                    curses.init_pair(9, curses.COLOR_BLACK, clr.get_theme_color_curses())
+                    curses.init_pair(clr.BACKGROUND_COLOR_PAIR_NUM, curses.COLOR_BLACK, clr.get_theme_color_curses())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:

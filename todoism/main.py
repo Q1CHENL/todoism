@@ -715,11 +715,6 @@ def main(stdscr):
                 curses.echo()
                 curses.curs_set(1)
                 if st.task_cnt > 0 and st.current_task_id > 0:
-                    pr.print_status_bar(stdscr)                    
-                    pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
-                    pr.print_left_frame(stdscr)
-                    pr.print_sidebar_task_panel_separator(stdscr)
-                    pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     task_list = ed.handle_edit(stdscr, task_list)
                     should_repaint = True
                     
