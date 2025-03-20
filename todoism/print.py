@@ -275,32 +275,21 @@ def print_category(stdscr, category, y, is_selected=False):
 
 def print_whole_view(stdscr, categories, category_start_index):
     """Print the complete UI with sidebar and task list"""
-    # Get max visible height
-    st.latest_max_y, _ = stdscr.getmaxyx()
-    # Reduce max_height by 1 to account for bottom frame
-    max_height = st.latest_max_y - 2  # 2 for status bar and for bottom frame
     
     print_frame_all(stdscr)
     print_status_bar(stdscr)
     
     # Clear sidebar area
-    for y in range(1, max_height + 1):
+    for y in range(1, st.latest_max_capacity + 1):
         sf.safe_move(stdscr, y, 0)
         stdscr.clrtoeol()
-    # Print visible categories
-    visible_categories = categories[category_start_index:category_start_index + max_height]
-    
-    for i, category in enumerate(visible_categories):
-        row = i + 1  # Start from row 1 (row 0 is for status bar)
-        is_selected = category["id"] == st.current_category_id
-        print_category(stdscr, category, row, is_selected)
+        
+    print_category_entries(stdscr, categories, category_start_index)
     print_left_frame(stdscr)
     print_sidebar_task_panel_separator(stdscr)
     
-    # Print tasks or empty message
     if st.task_cnt == 0:
         clear_task_panel(stdscr)
-        # Print empty message with highlighting when task area has focus
         print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
         print_right_frame(stdscr)
     else:
