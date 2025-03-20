@@ -1,6 +1,7 @@
 import curses
 import copy
 import time
+import webbrowser
 
 import todoism.task as tsk
 import todoism.edit as ed
@@ -15,66 +16,67 @@ import todoism.category as cat
 import todoism.state as st
 import todoism.safe as sf
 
-def purge(task_list, purged_list):
+def purge(task_list):
     """
-    purge completed tasks
+    purge completed tasks, appending to existing purged tasks
     """
+    newly_purged = []
     remained = []
     for t in task_list:
-        if t['status'] is False:
+        if t["status"] is False:
             remained.append(t)
         else:
-            purged_list.append(t)
+            newly_purged.append(t)
     tsk.reassign_task_ids(remained)
-    tsk.save_tasks(purged_list, pref.purged_file_path)
-    return remained, []
+    purged_tasks = tsk.load_purged_tasks(pref.purged_file_path)
+    purged_tasks.extend(newly_purged)
+    tsk.save_tasks(purged_tasks, pref.purged_file_path)
+    return remained
 
-def sort(task_list, key) -> list:
-    marked = []
-    not_marked = []
-    for t in task_list:
-        if t[key] is True:
-            marked.append(t)
-        else:
-            not_marked.append(t)
-    return marked + not_marked
+def handle_delete(task_list, task_id=0):
+    task_id = st.current_task_id if task_id == 0 else task_id
+    task_uuid = st.filtered_tasks[task_id - 1].get("uuid")
+    purged_tasks = tsk.load_purged_tasks()
+    purged_tasks.append(st.filtered_tasks[task_id - 1])
+    tsk.save_tasks(purged_tasks, pref.purged_file_path)
+    task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
+    if st.searching:
+        st.filtered_tasks = [task for task in st.filtered_tasks if task["uuid"] != task_uuid]
+    else:
+        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+    nv.post_deletion_update(len(task_list))
+    return task_list
 
-def execute_command(
-        stdscr, 
-        command, 
-        task_list, 
-        done_list, 
-        purged_list,
-        ):
+def execute_command(stdscr, command: str, task_list: list):
     command_recognized = False    
-    if command.startswith("done "):
-        tasks_sperated_by_comma = command[5:].split(' ')
-        if len(tasks_sperated_by_comma) == 1:
-            ids_to_done = tasks_sperated_by_comma[0].split(',')
-            if all(i.isdigit() for i in ids_to_done):
-                command_recognized = True
-                for id_to_done in ids_to_done:
-                    index_to_done = int(id_to_done) - 1
-                    if 0 <= index_to_done < len(task_list):
-                        done_list.append(copy.copy(task_list[index_to_done]))
-                        task_uuid = st.filtered_tasks[index_to_done].get('uuid')
-                        tsk.done_task_by_uuid(task_list, task_uuid)
-                        return task_list, done_list
-    elif command.startswith("flag "):
-        tasks_sperated_by_comma = command[5:].split(' ')
-        if len(tasks_sperated_by_comma) == 1:
-            ids_to_flag = tasks_sperated_by_comma[0].split(',')
-            if all(i.isdigit() for i in ids_to_flag):
-                command_recognized = True
-                for id_to_flag in ids_to_flag:
-                    index_to_flag = int(id_to_flag) - 1
-                    if 0 <= index_to_flag < len(task_list):
-                        tsk.flag_task_by_uuid(task_list, task_list[index_to_flag]['uuid'])
-                        return task_list, done_list
+    if command.startswith("done"):
+        parts = command.split()
+        if len(parts) == 2 and parts[1].isdigit():
+            command_recognized = True
+            id = int(parts[1])
+            if 1 <= id <= len(st.filtered_tasks):
+                index = id - 1
+                task_uuid = st.filtered_tasks[index].get("uuid")
+                tsk.done_task_by_uuid(task_list, task_uuid)
+            return task_list, None
+        else:
+            command_recognized = False
+    elif command.startswith("flag"):
+        parts = command.split()
+        if len(parts) == 2 and parts[1].isdigit():
+            command_recognized = True
+            id = int(parts[1])
+            if 1 <= id <= len(st.filtered_tasks):
+                index = id - 1
+                task_uuid = st.filtered_tasks[index].get("uuid")
+                tsk.flag_task_by_uuid(task_list, task_uuid)
+            return task_list, None
+        else:
+            command_recognized = False
     elif command == "purge":
         original_cnt = len(task_list)
         displayed_task_cnt = st.end_task_id - st.start_task_id + 1
-        task_list, done_list = purge(task_list, purged_list)
+        task_list = purge(task_list)
         tsk.save_tasks(task_list)
         if len(task_list) < original_cnt:
             st.current_task_id = 1
@@ -84,20 +86,18 @@ def execute_command(
                 st.end_task_id = displayed_task_cnt
             else:
                 st.end_task_id = len(task_list)
-        return task_list, done_list       
-    elif command.startswith("del "):
+        return task_list, None
+    elif command.startswith("del"):
         parts = command.split()
         if len(parts) == 2 and parts[1].isdigit():
             command_recognized = True
             task_id = int(parts[1])
             if 1 <= task_id <= len(task_list):
-                task_uuid = task_list[task_id - 1].get('uuid')
-                task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                nv.post_deletion_update(len(task_list))
-            return task_list, done_list
+                task_list = handle_delete(task_list, task_id)
+            return task_list, None
         else:
             command_recognized = False
-    elif command.startswith('edit '):
+    elif command.startswith("edit"):
         parts = command.split()
         if len(parts) == 2 and parts[1].isdigit():
             command_recognized = True
@@ -112,8 +112,8 @@ def execute_command(
                     curses.curs_set(1)
                     task_list = ed.handle_edit(stdscr, task_list)
                     curses.curs_set(0)
-                    curses.noecho()      
-                    return task_list, done_list
+                    curses.noecho()
+                    return task_list, None
         else:
             command_recognized = False
     elif command == "help":
@@ -131,9 +131,18 @@ def execute_command(
 
             ch = stdscr.getch()
             if ch == ord('q'):
-                break
-        stdscr.timeout(old_timeout)
-        return task_list, done_list
+                stdscr.timeout(old_timeout)
+                return task_list, None
+            elif ch == curses.KEY_MOUSE:
+                _, mouse_x, mouse_y, _, button_state = curses.getmouse()
+                link_y = (st.latest_max_y - len(msg.help_msg.strip().split('\n'))) // 2 + 5
+                link_x = (st.latest_max_x - len(msg.help_msg.strip().split('\n')[0])) // 2 + 39
+                link_width = len("Github page")
+                if (mouse_y == link_y and 
+                    link_x <= mouse_x < link_x + link_width):
+                    webbrowser.open("https://github.com/Q1CHENL/todoism")
+                    continue
+
     elif command == "pref":
         selection_index = 0
         open_pref_panel(stdscr, selection_index)
@@ -158,7 +167,6 @@ def execute_command(
                 st.old_max_y = st.latest_max_y
                 open_pref_panel(stdscr, selection_index)
                         
-            # Display the preference panel with current selection
             pr.print_pref_panel(stdscr, selection_index)
             
             # Get the current preference item
@@ -208,7 +216,7 @@ def execute_command(
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                     # Update color pair for selection
-                    curses.init_pair(9, curses.COLOR_BLACK, clr.get_theme_color_curses())
+                    curses.init_pair(clr.BACKGROUND_COLOR_PAIR_NUM, curses.COLOR_BLACK, clr.get_theme_color_curses())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -266,8 +274,8 @@ def execute_command(
                     quit = True
         # Restore original timeout
         stdscr.timeout(old_timeout)
-        return task_list, done_list
-    elif command == 'dev':
+        return task_list, None
+    elif command == "dev":
         # Hidden command for developers - load test data
         try:
             import test.test as test_module
@@ -309,7 +317,7 @@ def execute_command(
                     stdscr.clrtoeol()
                     
                     # Return updated categories and category ID
-                    return task_list, done_list, categories
+                    return task_list, categories
         except ImportError:
             # Test module not found (likely PyPI installation)
             warning_msg = "Dev mode not available in installation."
@@ -368,7 +376,7 @@ def execute_command(
                     stdscr.clrtoeol()
                     
                     # Return updated categories and category ID
-                    return task_list, done_list, categories
+                    return task_list, categories
         except ImportError:
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
@@ -386,7 +394,7 @@ def execute_command(
         command_recognized = True
         
     elif command.strip() == "":
-        return task_list, done_list
+        return task_list, None
 
     if not command_recognized and command.strip():
         error_msg = f"Invalid command: '{command}'. Type command 'help' for help."
@@ -404,7 +412,7 @@ def execute_command(
         stdscr.clrtoeol()
         stdscr.refresh()
 
-    return task_list, done_list
+    return task_list, None
 
 def open_help_page(stdscr):
     stdscr.clear()

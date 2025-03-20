@@ -6,7 +6,7 @@ def set_strikethrough(enabled):
     try:
         with open(pref.settings_path, "r+") as settings_file:
             settings = json.load(settings_file)
-            settings['strikethrough'] = enabled
+            settings["strikethrough"] = enabled
             settings_file.seek(0)
             json.dump(settings, settings_file, indent=4)
             settings_file.truncate()
@@ -16,15 +16,14 @@ def set_strikethrough(enabled):
 def get_strikethrough():
     """Get strikethrough setting state"""
     try:
-        with open(pref.settings_path, "r") as settings_file:
+        with open(pref.settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
-            return settings.get('strikethrough', True)
+            return settings.get("strikethrough", True)
     except FileNotFoundError:
         pref.setup_default_settings()
         return True
     
 def apply(text: str) -> str:
-    applied = ""
-    for char in text:
-        applied += (char + "\u0336")
-    return applied
+    if not text:
+        return ""
+    return ''.join(char + '\u0336' for char in text)

@@ -101,16 +101,29 @@ def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
                 # Truncate line to fit available space
                 available_space = st.latest_max_x - (x_offset + center_offset_x)
                 if available_space > 0:
-                    sf.safe_addstr(stdscr, line[:available_space])
+                    if line.find("Github page") > 0:
+                        print_github_page_line(stdscr, line)
+                    else:
+                        sf.safe_appendstr(stdscr, line[:available_space])
             else:
-                sf.safe_appendstr(stdscr, line)
+                if line.find("Github page") > 0:
+                    print_github_page_line(stdscr, line)
+                else:
+                    sf.safe_appendstr(stdscr, line)
             
-    # Remove highlighting if it was applied
     if highlight:
         stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
 
     stdscr.noutrefresh()
     curses.doupdate()
+
+def print_github_page_line(stdscr, line):
+    sf.safe_appendstr(stdscr, line[:line.find("Github page")])
+    blue_pair = clr.get_color_pair_num_by_str_text("blue")
+    stdscr.attron(curses.A_UNDERLINE | curses.color_pair(blue_pair))
+    sf.safe_appendstr(stdscr, "Github page")
+    stdscr.attroff(curses.A_UNDERLINE | curses.color_pair(blue_pair))
+    sf.safe_appendstr(stdscr, line[line.find("Github page") + len("Github page"):])
 
 def print_version():
     print("todoism v1.21.4")
@@ -127,7 +140,7 @@ def print_task_symbols(stdscr, task, y, is_selected=False):
         use_colors: Whether to apply color formatting (default: True)
         is_selected: Whether the task is selected (affects coloring) (default: False)
     """
-    if task.get('flagged', False):
+    if task.get("flagged", False):
         if not is_selected:
             flag_color = clr.get_color_pair_num_by_str_text("red")
             stdscr.attron(curses.color_pair(flag_color))
@@ -142,7 +155,7 @@ def print_task_symbols(stdscr, task, y, is_selected=False):
     sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3 + 1, ' ')
     
     # Print status indicator second
-    if task.get('status', False):
+    if task.get("status", False):
         if not is_selected:
             check_color = clr.get_color_pair_num_by_str_text("green")
             stdscr.attron(curses.color_pair(check_color))
@@ -164,17 +177,17 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     
     if st.focus_manager.is_sidebar_focused():
         print_editing_category(stdscr, task, y, is_selected)
-        return min(len(task['name']) + 2, 14)
+        return min(len(task["name"]) + 2, 14)
     
     # Clear the row for custom rendering
     sf.safe_move(stdscr, y, cat.SIDEBAR_WIDTH)
     stdscr.clrtoeol()
     
-    sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, f"{task['id']:2d} ")
+    sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, f"{task["id"]:2d} ")
     print_task_symbols(stdscr, task, y, is_selected=is_selected)
     
     # Calculate date position and available text space
-    date_str = task['date']
+    date_str = task["date"]
     date_padding = 1  # Space between description and date
     date_pos = st.latest_max_x - len(date_str) - date_padding - 1  # Account for right frame
     
@@ -192,7 +205,7 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
 
     highlight_trailing_blank_space = 0
     # Display text at calculated position
-    if task.get('status', False) and not is_selected and not is_edit_mode:
+    if task.get("status", False) and not is_selected and not is_edit_mode:
         stdscr.attron(curses.A_DIM)
     sf.safe_addstr(stdscr, y, text_start_pos, visible_text)
     stdscr.attroff(curses.A_DIM)
@@ -279,16 +292,16 @@ def print_all_cli(todos):
     check_color = "\033[32m%s\033[0m"  # green for checkmark
     
     for todo in todos:
-        id_part = f"#{todo['id']:02d}"
+        id_part = f"#{todo["id"]:02d}"
 
         flag_symbol = flag_color % "⚑ " if todo.get("flagged") else "  "
         check_symbol = check_color % "✓ " if todo.get("status") else "  "
         
-        description = todo['description']
+        description = todo["description"]
         if todo.get("status"):
             description = done_fmt % description
             
-        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo['date']})"
+        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo["date"]})"
         print(todo_line)
 
 def print_category_entries(stdscr, categories, start_index):
@@ -298,7 +311,7 @@ def print_category_entries(stdscr, categories, start_index):
     visible_categories = categories[start_index:start_index + st.latest_max_capacity]
     for i, category in enumerate(visible_categories):
         row = i + 1  # Start from row 1 (row 0 is for status bar)
-        is_selected = category['id'] == st.current_category_id
+        is_selected = category["id"] == st.current_category_id
         print_category(stdscr, category, row, is_selected)
 
 def print_category(stdscr, category, y, is_selected=False):
@@ -315,9 +328,9 @@ def print_category(stdscr, category, y, is_selected=False):
             
     sf.safe_addstr(stdscr, y, 1, ' ')
     # Display name with fixed width - now at position 2 (after the left frame)
-    sf.safe_addstr(stdscr, y, 2, category['name'])
+    sf.safe_addstr(stdscr, y, 2, category["name"])
     # Fill remaining space with spaces to ensure fixed width
-    padding = cat.MAX_CATEGORY_NAME_LENGTH + 1 - len(category['name'])
+    padding = cat.MAX_CATEGORY_NAME_LENGTH + 1 - len(category["name"])
     if padding > 0:
         sf.safe_appendstr(stdscr, ' ' * padding)
 
@@ -348,7 +361,7 @@ def print_whole_view(stdscr, categories, category_start_index):
     
     for i, category in enumerate(visible_categories):
         row = i + 1  # Start from row 1 (row 0 is for status bar)
-        is_selected = category['id'] == st.current_category_id
+        is_selected = category["id"] == st.current_category_id
         print_category(stdscr, category, row, is_selected)
     print_left_frame(stdscr)
     print_sidebar_task_panel_separator(stdscr)
@@ -398,7 +411,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     """Print a task with horizontal offset and optional display ID override"""
 
     # Use display_id if provided, otherwise use task's actual ID
-    id_to_show = display_id if display_id is not None else task['id']
+    id_to_show = display_id if display_id is not None else task["id"]
     
     if not is_selected:
         stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
@@ -411,7 +424,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     
     # Calculate positions with right frame
     right_frame_pos = st.latest_max_x - 1
-    date_str = task['date']
+    date_str = task["date"]
     date_pos = right_frame_pos - len(date_str) - 1  # Only 1 char gap from right frame
     
     # Calculate available space for text
@@ -419,8 +432,8 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     available_width = date_pos - total_indent - 1  # Space for gap before date
     
     # Handle text display
-    text = task['description']
-    # Add tag if not in All Tasks
+    text = task["description"]
+
     if (st.current_category_id == 0 or st.searching) and pref.get_tag():
         cat_id_of_current_task = task["category_id"]
         if cat_id_of_current_task != 0:
@@ -431,7 +444,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     else:
         visible_text = text
         
-    if task.get('status', False) and stk.get_strikethrough() and not is_selected:
+    if task.get("status", False) and stk.get_strikethrough() and not is_selected:
         visible_text = stk.apply(visible_text)
     
     if is_selected:
@@ -443,7 +456,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
         sf.safe_addstr(stdscr, row, date_pos, date_str)
         stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     else:
-        if task.get('status', False):
+        if task.get("status", False):
             stdscr.attron(curses.A_DIM)
         sf.safe_addstr(stdscr, row, total_indent, visible_text)
         # Fill remaining space with spaces
@@ -451,7 +464,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
             sf.safe_appendstr(stdscr, ' ')
         # Print date
         sf.safe_addstr(stdscr, row, date_pos, date_str)
-        if task.get('status', False):
+        if task.get("status", False):
             stdscr.attroff(curses.A_DIM)
 
 
