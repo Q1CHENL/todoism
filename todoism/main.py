@@ -303,7 +303,33 @@ def main(stdscr):
             try:
                 mouse_id, mouse_x, mouse_y, mouse_z, button_state = curses.getmouse()
                 
-                if mouse_x < cat.SIDEBAR_WIDTH:
+                if button_state & curses.BUTTON4_PRESSED:  # Scroll up
+                    if st.focus_manager.is_sidebar_focused():
+                        task_scroll_offset = 0
+                        sidebar_scroller.scroll_up()
+                        if len(categories) > 0:
+                            st.current_category_id = categories[sidebar_scroller.current_index]["id"]
+                            _restore_task_panel(task_list)
+                        should_repaint = True
+                    elif st.task_cnt > 0:
+                        task_scroll_offset = 0
+                        should_repaint = nv.keyup_update(st.task_cnt, True)
+                    continue
+            
+                elif button_state & curses.BUTTON5_PRESSED:  # Scroll down
+                    if st.focus_manager.is_sidebar_focused():
+                        task_scroll_offset = 0
+                        sidebar_scroller.scroll_down()
+                        if len(categories) > 0:
+                            st.current_category_id = categories[sidebar_scroller.current_index]["id"]
+                            _restore_task_panel(task_list)
+                        should_repaint = True
+                    elif st.task_cnt > 0:
+                        task_scroll_offset = 0
+                        should_repaint = nv.keydown_update(st.task_cnt, True)
+                    continue
+
+                elif mouse_x < cat.SIDEBAR_WIDTH:
                     if st.searching:
                         continue
                     if not st.focus_manager.is_sidebar_focused():
