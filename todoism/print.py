@@ -13,35 +13,12 @@ view_mode = 0
 add_mode  = 1
 edit_mode = 2
 
-def print_msg_center(stdscr, message, color_pair=0, highlight_line=-1):    
-    lines = message.strip().split("\n")
-    start_y = max(0, (st.latest_max_y - len(lines)) // 2)
-    
-    for i, line in enumerate(lines):
-        if line.strip():  # Only print non-empty lines
-            start_x = max(0, (st.latest_max_x - len(line)) // 2)
-            if i == highlight_line and color_pair > 0:
-                attr = curses.color_pair(color_pair)
-                sf.safe_addstr(stdscr, start_y + i, start_x, line, attr)
-            else:
-                sf.safe_addstr(stdscr, start_y + i, start_x, line)
-    
-    stdscr.refresh()
-
 def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, highlight=False):
     """Print a message box with proper centering in the task area with optional highlighting"""
     lines = msg.split('\n')
     width = len(lines[1])
 
-    # Ensure we have minimum required space
-    if st.latest_max_y < 2 or st.latest_max_x < x_offset + 1:
-        return
-    
-    # Calculate available width for task area (total width minus sidebar)
     available_width = max(0, st.latest_max_x - x_offset)
-    
-    # Calculate center position within the available task area
-    # Ensure center_offset is never negative
     center_offset_x = max(0, (available_width - width) // 2)
     center_offset_y = max(0, (st.latest_max_y - len(lines)) // 2)
     
