@@ -449,7 +449,7 @@ def main(stdscr):
                 is_sidebar_full = visible_count >= st.latest_max_capacity
                 if is_sidebar_full:
                     # scroll up
-                    sidebar_scroller.start_index += 1
+                    sidebar_scroller.start_index = cat_count - st.latest_max_capacity + 1
                     new_cat_row = st.latest_max_capacity
                 else:
                     new_cat_row = visible_count + 1
