@@ -6,12 +6,9 @@ config_dir = os.path.join(home_dir, ".todoism")
 os.makedirs(config_dir, exist_ok=True)
 
 settings_path = os.path.join(config_dir, "settings.json")
-
 purged_file_path = os.path.join(config_dir, "purged.json")
-
 tasks_file_path = os.path.join(config_dir, "tasks.json")
 categories_file_path = os.path.join(config_dir, "categories.json")
-
 test_tasks_file_path = os.path.join(config_dir, "tasks_test.json")
 test_categories_file_path = os.path.join(config_dir, "categories_test.json")
 
@@ -101,7 +98,7 @@ def get_date_format():
     try:
         with open(settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
-            return settings.get('date_format', "Y-M-D")  # Default to Y-M-D if not found
+            return settings.get('date_format', "Y-M-D")
     except FileNotFoundError:
         setup_default_settings()
         return "Y-M-D"
@@ -109,8 +106,8 @@ def get_date_format():
 def set_date_format(format_string):
     """Set date format setting"""
     if format_string not in ["Y-M-D", "D-M-Y", "M-D-Y"]:
-        format_string = "Y-M-D"  # Default if invalid
-        
+        format_string = "Y-M-D"
+
     try:
         with open(settings_path, 'r') as settings_file:
             settings = json.load(settings_file)
@@ -124,7 +121,7 @@ def set_date_format(format_string):
     except FileNotFoundError:
         setup_default_settings()
 
-def get_sort_flagged():
+def get_sort_by_flagged():
     """Get sort flagged tasks setting"""
     try:
         with open(settings_path, 'r') as settings_file:
@@ -134,7 +131,7 @@ def get_sort_flagged():
         setup_default_settings()
         return False
 
-def set_sort_flagged(enabled):
+def set_sort_by_flagged(enabled):
     """Set sort flagged tasks setting"""
     try:
         with open(settings_path, 'r') as settings_file:
@@ -149,7 +146,7 @@ def set_sort_flagged(enabled):
     except FileNotFoundError:
         setup_default_settings()
     
-def get_sort_done():
+def get_sort_by_done():
     """Get sort done tasks setting"""
     try:
         with open(settings_path, 'r') as settings_file:
@@ -159,7 +156,7 @@ def get_sort_done():
         setup_default_settings()
         return False
     
-def set_sort_done(enabled):
+def set_sort_by_done(enabled):
     """Set sort done tasks setting"""
     try:
         with open(settings_path, 'r') as settings_file:

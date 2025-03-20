@@ -67,11 +67,11 @@ def _sort_by_tag(categories):
     st.filtered_tasks = marked + not_marked
 
 def _task_not_marked(task):
-    if pref.get_sort_done() and pref.get_sort_flagged():
+    if pref.get_sort_by_done() and pref.get_sort_by_flagged():
         return not task["status"] and not task["flagged"]
-    elif pref.get_sort_done():
+    elif pref.get_sort_by_done():
         return not task["status"]
-    elif pref.get_sort_flagged():
+    elif pref.get_sort_by_flagged():
         return not task["flagged"]
     else:
         return False
@@ -139,10 +139,10 @@ def main(stdscr):
             st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
         tsk.reassign_task_ids(st.filtered_tasks)
         
-        if pref.get_sort_done():
+        if pref.get_sort_by_done():
             st.filtered_tasks = tsk.sort(st.filtered_tasks, "status")
             tsk.reassign_task_ids(st.filtered_tasks)
-        if pref.get_sort_flagged():
+        if pref.get_sort_by_flagged():
             st.filtered_tasks = tsk.sort(st.filtered_tasks, "flagged")
             tsk.reassign_task_ids(st.filtered_tasks)
         

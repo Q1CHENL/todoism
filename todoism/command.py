@@ -246,7 +246,7 @@ def execute_command(stdscr, command: str, task_list: list):
             elif preference_type.startswith("│   Sort by flagged"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    pref.set_sort_flagged(not pref.get_sort_flagged())
+                    pref.set_sort_by_flagged(not pref.get_sort_by_flagged())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -256,7 +256,7 @@ def execute_command(stdscr, command: str, task_list: list):
             elif preference_type.startswith("│   Sort by done"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    pref.set_sort_done(not pref.get_sort_done())
+                    pref.set_sort_by_done(not pref.get_sort_by_done())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:

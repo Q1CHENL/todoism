@@ -447,8 +447,8 @@ def print_pref_panel(stdscr, current_selection_index=0):
     strikethrough_enabled = stk.get_strikethrough()
     current_color = clr.get_theme_color_str()
     current_date_format = pref.get_date_format()
-    sort_flagged = pref.get_sort_flagged()
-    sort_done = pref.get_sort_done()
+    sort_flagged = pref.get_sort_by_flagged()
+    sort_done = pref.get_sort_by_done()
     
     # Format each line with ">" for selected item
     # Adapt line width to available space
