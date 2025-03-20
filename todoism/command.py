@@ -1,6 +1,7 @@
 import curses
 import copy
 import time
+import webbrowser
 
 import todoism.task as tsk
 import todoism.edit as ed
@@ -43,7 +44,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 index = id - 1
                 task_uuid = st.filtered_tasks[index].get("uuid")
                 tsk.done_task_by_uuid(task_list, task_uuid)
-            return task_list
+            return task_list, None
         else:
             command_recognized = False
     elif command.startswith("flag"):
@@ -55,7 +56,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 index = id - 1
                 task_uuid = st.filtered_tasks[index].get("uuid")
                 tsk.flag_task_by_uuid(task_list, task_uuid)
-            return task_list
+            return task_list, None
         else:
             command_recognized = False
     elif command == "purge":
@@ -71,7 +72,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 st.end_task_id = displayed_task_cnt
             else:
                 st.end_task_id = len(task_list)
-        return task_list       
+        return task_list, None
     elif command.startswith("del"):
         parts = command.split()
         if len(parts) == 2 and parts[1].isdigit():
@@ -81,7 +82,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 task_uuid = task_list[task_id - 1].get("uuid")
                 task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
                 nv.post_deletion_update(len(task_list))
-            return task_list
+            return task_list, None
         else:
             command_recognized = False
     elif command.startswith("edit"):
@@ -118,9 +119,18 @@ def execute_command(stdscr, command: str, task_list: list):
 
             ch = stdscr.getch()
             if ch == ord('q'):
-                break
-        stdscr.timeout(old_timeout)
-        return task_list
+                stdscr.timeout(old_timeout)
+                return task_list, None
+            elif ch == curses.KEY_MOUSE:
+                _, mouse_x, mouse_y, _, button_state = curses.getmouse()
+                link_y = (st.latest_max_y - len(msg.help_msg.strip().split('\n'))) // 2 + 5
+                link_x = (st.latest_max_x - len(msg.help_msg.strip().split('\n')[0])) // 2 + 39
+                link_width = len("Github page")
+                if (mouse_y == link_y and 
+                    link_x <= mouse_x < link_x + link_width):
+                    webbrowser.open("https://github.com/Q1CHENL/todoism")
+                    continue
+
     elif command == "pref":
         selection_index = 0
         open_pref_panel(stdscr, selection_index)
@@ -252,7 +262,7 @@ def execute_command(stdscr, command: str, task_list: list):
                     quit = True
         # Restore original timeout
         stdscr.timeout(old_timeout)
-        return task_list
+        return task_list, None
     elif command == "dev":
         # Hidden command for developers - load test data
         try:
@@ -372,7 +382,7 @@ def execute_command(stdscr, command: str, task_list: list):
         command_recognized = True
         
     elif command.strip() == "":
-        return task_list
+        return task_list, None
 
     if not command_recognized and command.strip():
         error_msg = f"Invalid command: '{command}'. Type command 'help' for help."
@@ -390,7 +400,7 @@ def execute_command(stdscr, command: str, task_list: list):
         stdscr.clrtoeol()
         stdscr.refresh()
 
-    return task_list
+    return task_list, None
 
 def open_help_page(stdscr):
     stdscr.clear()

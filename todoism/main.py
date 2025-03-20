@@ -611,13 +611,12 @@ def main(stdscr):
                 curses.curs_set(0)
                 curses.noecho()
                 
-                exe_result = cmd.execute_command(stdscr, command, task_list)
+                task_list, cats = cmd.execute_command(stdscr, command, task_list)
 
                 # Check if we have newly loaded categories in the result (special case for test/restore)
-                if len(exe_result) > 1:
-                    task_list, categories = exe_result
+                if cats is not None:
+                    categories = cats
                     sidebar_scroller.update_total(len(categories))
-                    
                     # Find the new category index
                     for i, c in enumerate(categories):
                         if c["id"] == st.current_category_id:
@@ -627,9 +626,7 @@ def main(stdscr):
                     # Update filtered tasks for the new category
                     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                     st.task_cnt = len(st.filtered_tasks)
-                else:
-                    task_list = exe_result
-                
+
                 should_repaint = True
                 
         elif st.focus_manager.is_tasks_focused():
@@ -769,13 +766,12 @@ def main(stdscr):
                 curses.curs_set(0)
                 curses.noecho()
                 
-                exe_result = cmd.execute_command(stdscr, command, task_list)
+                task_list, cats = cmd.execute_command(stdscr, command, task_list)
 
                 # Check if we have newly loaded categories in the result (special case for test/restore)
-                if len(exe_result) > 1:
-                    task_list, categories = exe_result
+                if cats is not None:
+                    categories = cats
                     sidebar_scroller.update_total(len(categories))
-                    
                     # Find the new category index
                     for i, c in enumerate(categories):
                         if c["id"] == st.current_category_id:
@@ -784,8 +780,6 @@ def main(stdscr):
                     # Update filtered tasks for the new category
                     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                     st.task_cnt = len(st.filtered_tasks)
-                else:
-                    task_list = exe_result
                 
                 should_repaint = True
                 
