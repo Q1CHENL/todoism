@@ -15,44 +15,21 @@ edit_mode = 2
 
 def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, highlight=False):
     """Print a message box with proper centering in the task area with optional highlighting"""
-    lines = msg.split('\n')
-    width = len(lines[1])
 
-    available_width = max(0, st.latest_max_x - x_offset)
-    center_offset_x = max(0, (available_width - width) // 2)
-    center_offset_y = max(0, (st.latest_max_y - len(lines)) // 2)
-    
     clear_task_panel(stdscr)
-    
     attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) if highlight else 0
-    # Print each line separately at the calculated position
-    for i, line in enumerate(lines):
-        y = i + 1  # Start at row 1 (row 0 is status bar)
-        if y < st.latest_max_y - 1 and line.strip():  # Only print non-empty lines and check bounds
-            # Position cursor at sidebar edge + centering offset
-            sf.safe_move(stdscr, y + center_offset_y, x_offset + center_offset_x)
-            # Print the line directly, truncating if necessary
-            if x_offset + center_offset_x + len(line) > st.latest_max_x:
-                # Truncate line to fit available space
-                available_space = st.latest_max_x - (x_offset + center_offset_x)
-                if available_space > 0:
-                    sf.safe_appendstr(stdscr, line[:available_space], attr)
-            else:
-                sf.safe_appendstr(stdscr, line, attr)
-
-    
-    # Draw the right frame for each line
+    print_msg(stdscr, msg, x_offset, attr)
     print_right_frame(stdscr)
     
-def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
+def print_msg(stdscr, msg, x_offset=0, attr=0):
     """Print a message box with proper centering in the task area with optional highlighting"""
-    lines = msg.split('\n')
-    width = len(lines[1])
     
     # Ensure we have minimum required space
     if st.latest_max_y < 2 or st.latest_max_x < x_offset + 1:
         return
     
+    lines = msg.split('\n')
+    width = len(lines[1])
     # Calculate available width for task area (total width minus sidebar)
     available_width = max(0, st.latest_max_x - x_offset)
     center_offset_x = max(0, (available_width - width) // 2)
@@ -72,15 +49,13 @@ def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
                     if line.find("Github page") > 0:
                         print_github_page_line(stdscr, line)
                     else:
-                        sf.safe_appendstr(stdscr, line[:available_space])
+                        sf.safe_appendstr(stdscr, line[:available_space], attr)
             else:
                 if line.find("Github page") > 0:
                     print_github_page_line(stdscr, line)
                 else:
-                    sf.safe_appendstr(stdscr, line)
-            
-    stdscr.noutrefresh()
-    curses.doupdate()
+                    sf.safe_appendstr(stdscr, line, attr)
+
 
 def print_github_page_line(stdscr, line):
     sf.safe_appendstr(stdscr, line[:line.find("Github page")])
@@ -99,10 +74,7 @@ def print_task_symbols(stdscr, task, y, is_selected=False):
         stdscr: The curses window
         task: The task data dictionary
         y: The row position
-        flag_x: X position for flag symbol (default: 3)
-        status_x: X position for status symbol (default: 5)
-        use_colors: Whether to apply color formatting (default: True)
-        is_selected: Whether the task is selected (affects coloring) (default: False)
+        is_selected: Whether the task is selected
     """
     attr_bkg = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
     attr_space = attr_bkg if is_selected else 0
@@ -115,7 +87,7 @@ def print_task_symbols(stdscr, task, y, is_selected=False):
         sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3, ' ', attr_space)
     # Add space between flag and status
     sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3 + 1, ' ', attr_space)
-    # Print status indicator second
+
     if task.get("status", False):
         sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5, '✓', attr_bkg if is_selected else attr_green)
     else:
@@ -207,10 +179,6 @@ def print_status_bar(stdscr):
     # Calculate center position
     total_len = len(status_prefix) + len(percent_text) + len(datetime_str) + 2  # +2 for spacing
     start_pos = (st.latest_max_x - total_len - cat.SIDEBAR_WIDTH) // 2 + cat.SIDEBAR_WIDTH
-    
-    # Clear only the top line
-    sf.safe_move(stdscr, 0, 0)
-    stdscr.clrtoeol()
 
     print_top_left_corner(stdscr)
     print_top_frame(stdscr)
@@ -317,7 +285,6 @@ def print_task_entries(stdscr, x_offset=0):
 def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     """Print a task with horizontal offset and optional display ID override"""
     
-    # Print task symbols with swapped positions
     print_task_symbols(stdscr, task, row, is_selected=is_selected)
     
     # Calculate positions with right frame
@@ -480,7 +447,6 @@ def print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, cente
     if center_offset_x + pos + len(value) > st.latest_max_x:
         return
         
-    # Print the value with appropriate color
     if value == "on":
         green_pair_num = clr.get_color_pair_num_by_str_text("green")
         attr = curses.color_pair(green_pair_num)
