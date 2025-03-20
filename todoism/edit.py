@@ -149,9 +149,9 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             # Clear the debug area
             sf.safe_addstr(stdscr, 0, 0, ' ' * min(len(debug_info) + 5, st.latest_max_x))
             # Display debug info
-            stdscr.attron(curses.color_pair(4))  # Red color for visibility
-            sf.safe_addstr(stdscr, 0, 0, debug_info)
-            stdscr.attroff(curses.color_pair(4))
+            import todoism.color as clr
+            attr = curses.color_pair(clr.get_color_pair_num_by_str_text("red"))
+            sf.safe_addstr(stdscr, 0, 0, debug_info, attr)
             # Restore cursor position
             sf.safe_move(stdscr, current_y, current_x)
                 

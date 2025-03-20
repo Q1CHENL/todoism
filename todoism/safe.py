@@ -17,6 +17,7 @@ def safe_addstr(stdscr, y: int, x: int, text: str, attr=0) -> bool:
     try:
         if attr:
             stdscr.addstr(y, x, text, attr)
+            stdscr.attroff(attr)
         else:
             stdscr.addstr(y, x, text)
         return True
@@ -29,6 +30,7 @@ def safe_appendstr(stdscr, text: str, attr=0) -> bool:
     try:
         if attr:
             stdscr.addstr(text, attr)
+            stdscr.attroff(attr)
         else:
             stdscr.addstr(text)
         return True
@@ -40,6 +42,7 @@ def safe_addch(stdscr, y: int, x: int, ch: str, attr=0) -> bool:
     try:
         if attr:
             stdscr.addch(y, x, ch, attr)
+            stdscr.attroff(attr)
         else:
             stdscr.addch(y, x, ch)
         return True
@@ -59,6 +62,7 @@ def safe_insstr(stdscr, y: int, x: int, text: str, attr=0) -> bool:
     try:
         if attr:
             stdscr.insstr(y, x, text, attr)
+            stdscr.attroff(attr)
         else:
             stdscr.insstr(y, x, text)
         return True

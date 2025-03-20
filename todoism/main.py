@@ -525,17 +525,14 @@ def main(stdscr):
                     pr.print_sidebar_task_panel_separator(stdscr)
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     
-                    stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
                     sf.safe_move(stdscr, row, 0)
                     
                     # Append spaces
+                    attr = curses.color_pair(clr.get_theme_color_pair_num_text())
                     for j in range(15): 
-                        sf.safe_addch(stdscr, row, j, ' ')
-                        
-                    # Redraw the separator
-                    stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
+                        sf.safe_addch(stdscr, row, j, ' ', attr)
+
                     sf.safe_addstr(stdscr, row, 15, '│')
-                    
                     # Position cursor at start of category name (1 char indent)
                     sf.safe_move(stdscr, row, 1)
                     stdscr.refresh()
@@ -674,9 +671,6 @@ def main(stdscr):
                 new_task_description = ed.edit(stdscr, new_task, "description", pr.add_mode)
                 if new_task_description != "":
                     st.current_task_id = st.task_cnt + 1
-                stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-                sf.safe_addch(stdscr, y_pos, st.latest_max_x - 2, ' ')
-                stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
                 st.adding_task = False
                 
                 if new_task_description != "":
@@ -729,12 +723,21 @@ def main(stdscr):
                     should_repaint = True
                     
             elif key == curses.KEY_RIGHT:
-                task_scroll_offset += 1
-                pr.print_editing_entry(stdscr, st.filtered_tasks[st.current_task_id - 1], "description", st.current_task_row, True, task_scroll_offset) 
+                right_frame_pos = st.latest_max_x - 1
+                base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
+                text_start_pos = cat.SIDEBAR_WIDTH + base_indent
+                current_task = st.filtered_tasks[st.current_task_id - 1]
+                date_length = len(current_task["date"])
+                date_pos = right_frame_pos - date_length - 1  # Only 1 char gap from right frame
+                max_visible_width = date_pos - text_start_pos - 1
+                if len(current_task["description"]) > max_visible_width and task_scroll_offset < len(current_task["description"]) - max_visible_width:
+                    task_scroll_offset += 1
+                    pr.print_editing_entry(stdscr, current_task, "description", st.current_task_row, True, task_scroll_offset) 
                 
             elif key == curses.KEY_LEFT:
                 task_scroll_offset = max(0, task_scroll_offset - 1)
-                pr.print_editing_entry(stdscr, st.filtered_tasks[st.current_task_id - 1], "description", st.current_task_row, True, task_scroll_offset)
+                if task_scroll_offset >= 0:
+                    pr.print_editing_entry(stdscr, st.filtered_tasks[st.current_task_id - 1], "description", st.current_task_row, True, task_scroll_offset)
                 
             elif key == ord('q'):
                 if st.searching:
