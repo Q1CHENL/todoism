@@ -402,6 +402,7 @@ def main(stdscr):
                 continue
 
             st.filtered_tasks = srch.search(query, task_list)
+            tsk.reassign_task_ids(st.filtered_tasks)
             st.searching = True
             pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
             should_repaint = True
