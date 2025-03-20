@@ -83,9 +83,9 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
     A editing wrapper implemented using getch(). It delivers 
     more comprehensive functionalities than getstr() does.
     """
+    curses.curs_set(0)
     
     right_frame_pos = st.latest_max_x - 1
-    # Standardize indent calculations
     if st.focus_manager.is_sidebar_focused():
         base_indent = 2
         text_start_pos = base_indent
@@ -110,6 +110,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
 
     y = stdscr.getyx()[0]
     
+    curses.curs_set(1)
     pr.print_editing_entry(stdscr, entry, text_key, y, is_selected=True, scroll_left=scroll_offset, is_edit_mode=False if mode == pr.add_mode else True)
     if st.focus_manager.is_sidebar_focused():
         cursor_pos_in_text = len(entry[text_key]) 
@@ -164,8 +165,10 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 sf.safe_move(stdscr, current_y, current_x)
             continue
         elif ch == kc.ENTER:  # Enter to complete
+            curses.curs_set(0)
             break
         elif ch == kc.ESC:
+            curses.curs_set(0)
             if mode == pr.add_mode:
                 return ""
             else:
