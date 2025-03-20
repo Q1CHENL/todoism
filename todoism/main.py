@@ -312,7 +312,7 @@ def main(stdscr):
                         should_repaint = True
                     elif st.task_cnt > 0:
                         task_scroll_offset = 0
-                        should_repaint = nv.keyup_update(st.task_cnt, True)
+                        should_repaint = nv.keyup_update(True)
                     continue
             
                 elif button_state & curses.BUTTON5_PRESSED:  # Scroll down
@@ -325,7 +325,7 @@ def main(stdscr):
                         should_repaint = True
                     elif st.task_cnt > 0:
                         task_scroll_offset = 0
-                        should_repaint = nv.keydown_update(st.task_cnt, True)
+                        should_repaint = nv.keydown_update(True)
                     continue
 
                 elif mouse_x < cat.SIDEBAR_WIDTH:
@@ -781,12 +781,12 @@ def main(stdscr):
             elif key == curses.KEY_UP:
                 task_scroll_offset = 0
                 if st.task_cnt > 0:
-                    should_repaint = nv.keyup_update(st.task_cnt, True)
+                    should_repaint = nv.keyup_update(True)
                     
             elif key == curses.KEY_DOWN:
                 task_scroll_offset = 0
                 if st.task_cnt > 0:
-                    should_repaint = nv.keydown_update(st.task_cnt, True)
+                    should_repaint = nv.keydown_update(True)
                 
             elif key == curses.KEY_BACKSPACE or key == kc.BACKSPACE:
                 k = stdscr.getch()
