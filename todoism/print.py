@@ -420,7 +420,7 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     
     # Handle text display
     text = task["description"]
-    # Add tag if not in All Tasks
+
     if (st.current_category_id == 0 or st.searching) and pref.get_tag():
         cat_id_of_current_task = task["category_id"]
         if cat_id_of_current_task != 0:

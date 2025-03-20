@@ -430,23 +430,17 @@ def main(stdscr):
                     new_cat_row = visible_count + 1
                     
                 new_cat_id = max([c["id"] for c in categories], default=0) + 1
-                
-                # Create a temporary category for editing
                 temp_category = {
                     "id": new_cat_id, 
                     "name": ""
                 }
+                old_cat_id = st.current_category_id
                 st.current_category_id = new_cat_id
-                # Redraw all categories in the sidebar with updated start_index
-                pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                 
+                pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
                 pr.print_left_frame(stdscr)
                 pr.print_sidebar_task_panel_separator(stdscr)
                 pr.print_right_frame(stdscr)
-                if st.task_cnt > 0:
-                    pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
-                else: 
-                    pr.print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
                 pr.print_status_bar(stdscr)
                 
                 stdscr.refresh()
@@ -458,7 +452,7 @@ def main(stdscr):
                 new_cat_name = ed.edit(stdscr, temp_category, "name", pr.add_mode, 0)
                 temp_category["name"] = new_cat_name
                 
-                if new_cat_name:
+                if new_cat_name != "":
                     # Enforce maximum length for category name
                     if len(new_cat_name) > cat.MAX_CATEGORY_NAME_LENGTH:
                         new_cat_name = new_cat_name[:cat.MAX_CATEGORY_NAME_LENGTH]
@@ -479,10 +473,13 @@ def main(stdscr):
                         # Update filtered tasks for the new category
                         _restore_task_panel(task_list)
                         st.cat_cnt = len(categories)
-                
+                        pr.print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
+                else:
+                    st.current_category_id = old_cat_id
+                    should_repaint = True
+
                 curses.curs_set(0)
                 curses.noecho()
-                should_repaint = True
                 
             elif key == ord('e'):
                 # Edit category name with scrolling (skip for "All Tasks" category)
@@ -610,7 +607,6 @@ def main(stdscr):
                 should_repaint = True
                 
         elif st.focus_manager.is_tasks_focused():
-            # Handle user input for tasks
             if key == ord('a'):
                 if st.searching:
                     continue
@@ -681,11 +677,8 @@ def main(stdscr):
                 else:
                     st.start_task_id = old_start
                     st.end_task_id = old_end
-                    should_repaint = True
-                    curses.curs_set(0)
-                    curses.noecho()
-                    continue
                     
+                should_repaint = True
                 stdscr.refresh()
                 curses.curs_set(0)
                 curses.noecho()
