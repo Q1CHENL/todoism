@@ -20,18 +20,32 @@ def purge(task_list):
     """
     purge completed tasks, appending to existing purged tasks
     """
-    purged = []
+    newly_purged = []
     remained = []
     for t in task_list:
         if t["status"] is False:
             remained.append(t)
         else:
-            purged.append(t)
-
+            newly_purged.append(t)
     tsk.reassign_task_ids(remained)
-    purged.extend(purged)
-    tsk.save_tasks(purged, pref.purged_file_path)
+    purged_tasks = tsk.load_purged_tasks(pref.purged_file_path)
+    purged_tasks.extend(newly_purged)
+    tsk.save_tasks(purged_tasks, pref.purged_file_path)
     return remained
+
+def handle_delete(task_list, task_id=0):
+    task_id = st.current_task_id if task_id == 0 else task_id
+    task_uuid = st.filtered_tasks[task_id - 1].get("uuid")
+    purged_tasks = tsk.load_purged_tasks()
+    purged_tasks.append(st.filtered_tasks[task_id - 1])
+    tsk.save_tasks(purged_tasks, pref.purged_file_path)
+    task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
+    if st.searching:
+        st.filtered_tasks = [task for task in st.filtered_tasks if task["uuid"] != task_uuid]
+    else:
+        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+    nv.post_deletion_update(len(task_list))
+    return task_list
 
 def execute_command(stdscr, command: str, task_list: list):
     command_recognized = False    
@@ -79,9 +93,7 @@ def execute_command(stdscr, command: str, task_list: list):
             command_recognized = True
             task_id = int(parts[1])
             if 1 <= task_id <= len(task_list):
-                task_uuid = task_list[task_id - 1].get("uuid")
-                task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                nv.post_deletion_update(len(task_list))
+                task_list = handle_delete(task_list, task_id)
             return task_list, None
         else:
             command_recognized = False

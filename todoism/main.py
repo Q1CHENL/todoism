@@ -797,16 +797,7 @@ def main(stdscr):
                 k = stdscr.getch()
                 if k == curses.KEY_BACKSPACE or k == kc.BACKSPACE:
                     if len(st.filtered_tasks) > 0:
-                        if st.filtered_tasks[st.current_task_id - 1]["status"] is True:
-                            st.done_cnt = st.done_cnt - 1
-                        task_uuid = st.filtered_tasks[st.current_task_id - 1]["uuid"]
-                        task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                        if st.searching:
-                            st.filtered_tasks = [task for task in st.filtered_tasks if task["uuid"] != task_uuid]
-                        else:
-                            st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-                        st.task_cnt = len(st.filtered_tasks)
-                        nv.post_deletion_update(st.task_cnt + 1)
+                        task_list = cmd.handle_delete(task_list)
                     tsk.save_tasks(task_list)
                     should_repaint = True
 
