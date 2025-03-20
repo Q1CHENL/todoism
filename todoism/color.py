@@ -38,7 +38,6 @@ def set_theme_color(color: str):
     except FileNotFoundError:
         pref.setup_default_settings()
 
-
 def get_theme_color_curses() -> int:
     try:
         with open(pref.settings_path, 'r') as settings_file:
@@ -51,7 +50,6 @@ def get_theme_color_curses() -> int:
         return pref.setup_default_settings()["selected_color"]
     except Exception:
         return curses.COLOR_BLUE
-
 
 def get_theme_color_str() -> str:
     try:

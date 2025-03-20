@@ -70,7 +70,7 @@ def highlight_selection(stdscr, task, text_key, y, selection_start_idx_in_text, 
             # Use base_indent (2) for sidebar to match text_start_pos in edit function
             screen_pos = 2 + (i - scroll_offset)  # Sidebar starts at position 2
             # Ensure we don't highlight beyond sidebar boundary
-            if screen_pos > 14:  # Sidebar width limit
+            if screen_pos > 14:
                 break
         else:
             screen_pos = tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH + (i - scroll_offset)  # Task position with sidebar offset
@@ -489,7 +489,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             
             sf.safe_move(stdscr, y, new_x)
             
-            # IMPROVED SIDEBAR HANDLING: Add extra check after character insertion
+            # Extra check after character insertion
             if st.focus_manager.is_sidebar_focused():
                 # Recalculate and verify cursor position doesn't exceed sidebar
                 new_x = text_start_pos + (new_cursor_pos - scroll_offset)
@@ -502,16 +502,13 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 new_x = min(new_x, 14)
                 sf.safe_move(stdscr, y, new_x)
         
-        # Alt+Left to jump to beginning of text
         elif ch == kc.ALT_LEFT:
             # Clear selection if active
             if selection_active:
                 selection_active = False
                 selection_start = -1
                 
-            # Jump to beginning of text
             cursor_pos_in_text = 0
-            # Reset scroll offset to show beginning of text
             scroll_offset = 0
             # Position cursor at beginning
             sf.safe_move(stdscr, y, text_start_pos)
@@ -523,7 +520,6 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 selection_active = False
                 selection_start = -1
                 
-            # Jump to end of text
             cursor_pos_in_text = len(entry[text_key])
             # For long text, adjust scroll to show the end of text
             if len(entry[text_key]) > max_visible_width:

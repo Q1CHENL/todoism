@@ -174,9 +174,10 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
 
 def print_status_bar(stdscr):
     """Print centered status bar with progress, percentage, date and time"""
+    done_cnt = tsk.done_count(st.filtered_tasks)
     
     # Calculate percentage
-    percent_value = (st.done_cnt/st.task_cnt)*100 if st.task_cnt > 0 else 0
+    percent_value = (done_cnt/st.task_cnt)*100 if st.task_cnt > 0 else 0
     percent_text = f"({percent_value:.0f}%)"
     
     # Choose color based on percentage range
@@ -188,7 +189,7 @@ def print_status_bar(stdscr):
         color_pair = clr.get_color_pair_num_by_str_text("green")
     
     # Split the status into parts for coloring
-    status_prefix = f"┤Done: {st.done_cnt}/{st.task_cnt} "
+    status_prefix = f"┤Done: {done_cnt}/{st.task_cnt} "
     
     current_date_format = pref.get_date_format()
     current_datetime = datetime.now()
@@ -277,10 +278,9 @@ def print_whole_view(stdscr, categories, category_start_index):
     # Get max visible height
     st.latest_max_y, _ = stdscr.getmaxyx()
     # Reduce max_height by 1 to account for bottom frame
-    max_height = st.latest_max_y - 2  # -1 for status bar, -1 for bottom frame
+    max_height = st.latest_max_y - 2  # 2 for status bar and for bottom frame
     
     print_frame_all(stdscr)
-    # Print status bar first
     print_status_bar(stdscr)
     
     # Clear sidebar area
@@ -327,9 +327,6 @@ def print_task_entries(stdscr, x_offset=0):
 
 def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     """Print a task with horizontal offset and optional display ID override"""
-
-    attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
-    attr_done = curses.A_DIM
     
     # Print task symbols with swapped positions
     print_task_symbols(stdscr, task, row, is_selected=is_selected)
@@ -361,11 +358,14 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         visible_text = stk.apply(visible_text)
         
     task_id = task["id"]
+    attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
+    attr_done = curses.A_DIM
+    
     if is_selected:
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ", attr)
         sf.safe_addstr(stdscr, row, total_indent, visible_text, attr)
         # Fill remaining space with spaces
-        for i in range(available_width - len(visible_text) + 1):
+        for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ', attr)
         sf.safe_addstr(stdscr, row, date_pos, date_str, attr)
         sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ', attr)
@@ -373,7 +373,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
         sf.safe_addstr(stdscr, row, total_indent, visible_text, attr_done if is_done else 0)
         # Fill remaining space with spaces
-        for i in range(available_width - len(visible_text) + 1):
+        for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ')
         # Print date
         sf.safe_addstr(stdscr, row, date_pos, date_str)
@@ -408,8 +408,8 @@ def print_pref_panel(stdscr, current_selection_index=0):
     strikethrough_enabled = stk.get_strikethrough()
     current_color = clr.get_theme_color_str()
     current_date_format = pref.get_date_format()
-    sort_flagged = pref.get_sort_by_flagged()
-    sort_done = pref.get_sort_by_done()
+    sort_by_flagged = pref.get_sort_by_flagged()
+    sort_by_done = pref.get_sort_by_done()
     
     # Format each line with ">" for selected item
     # Adapt line width to available space
@@ -460,12 +460,12 @@ def print_pref_panel(stdscr, current_selection_index=0):
                                          current_date_format, clr.get_theme_color_pair_num_text())
             
         elif "Sort by flagged:" in line:
-            value = "on" if sort_flagged else "off"
+            value = "on" if sort_by_flagged else "off"
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
             
         elif "Sort by done:" in line:
-            value = "on" if sort_done else "off"
+            value = "on" if sort_by_done else "off"
             pos = line.rfind(value)  # reverse find because done contains "on" as well
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
             
@@ -540,7 +540,7 @@ def clear_task_panel(stdscr):
         stdscr.clrtoeol()
         
 def clear_inner_content(stdscr):
-    # Clear all content exepct the outer frame
+    """Clear all content exepct the outer frame"""
     for i in range(1, st.latest_max_y - 1):
         sf.safe_move(stdscr, i, 1)
         stdscr.clrtoeol()

@@ -149,7 +149,6 @@ def main(stdscr):
         _sort_by_tag(categories)
         
         st.task_cnt = len(st.filtered_tasks)
-        st.done_cnt = tsk.done_count(st.filtered_tasks)
         st.cat_cnt = len(categories)
 
         # Update window dimension in every iteration
