@@ -24,7 +24,7 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
     
     clear_task_panel(stdscr)
     
-    attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
+    attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) if highlight else 0
     # Print each line separately at the calculated position
     for i, line in enumerate(lines):
         y = i + 1  # Start at row 1 (row 0 is status bar)
