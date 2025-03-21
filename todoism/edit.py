@@ -94,7 +94,8 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
         date_pos = 15
         max_visible_width = date_pos - base_indent        
     else:
-        entry[text_key] = entry[text_key] + ' ' +  '[' + entry["due"] + ']'
+        if pr.edit_mode == mode and entry["due"] != "":
+            entry[text_key] = entry[text_key] + ' ' +  '[' + entry["due"] + ']'
         base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
         text_start_pos = cat.SIDEBAR_WIDTH + base_indent
         MAX_DESCRIPTION_LENGTH = tsk.MAX_TASK_DESCRIPTION_LENGTH    

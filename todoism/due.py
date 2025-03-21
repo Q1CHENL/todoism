@@ -1,22 +1,24 @@
 import re
+from typing import Tuple
 
-def parse_due_date(description: str):
+def parse_due_date(description: str) -> Tuple[str, str]:
     """
     Parses a task description to extract a due date/time in the formats:
-    [yyyy-mm-dd hh:mm], [yyyy-mm-dd], [hh:mm], [Tomorrow], [Next Week].
+    [yyyy-mm-dd hh:mm], [yyyy-mm-dd], [mm-dd], [hh:mm], [Tomorrow], [Next Week].
     
     Returns:
     - A tuple (due_date, remaining_text), where:
-        - due_date is the extracted date as a string, or None if not found.
+        - due_date is the extracted date as a string, or an empty string if not found.
         - remaining_text is the input string with the date removed.
     """
     patterns = [
-        r'\[(\d{4}-\d{2}-\d{2} \d{1,2}:\d{1,2})\]',  # [yyyy-mm-dd hh:mm]
-        r'\[(\d{4}-\d{1,2}-\d{1,2})\]',              # [yyyy-mm-dd]
-        r'\[(\d{1,2}-\d{2})\]',                     # [mm-dd]
-        r'\[(\d{1,2}):(\d{2})\]',                # [hh:mm]
-        r'\[Tomorrow\]',                          # [Tomorrow]
-        r'\[Next Week\]'                          # [Next Week]
+        r'\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\]',       # [yyyy-mm-dd hh:mm]
+        r'\[(\d{4}-\d{1,2}-\d{1,2})\]',               # [yyyy-mm-dd]
+        r'\[(\d{2}-\d{2} \d{2}:\d{2})\]',             # [mm-dd hh:mm]
+        r'\[(\d{1,2}-\d{1,2})\]',                     # [mm-dd]
+        r'\[(\d{2}:\d{2})\]',                       # [hh:mm]
+        r'\[Tomorrow\]',                              # [Tomorrow]
+        r'\[Next Week\]'                              # [Next Week]
     ]
 
     for pattern in patterns:

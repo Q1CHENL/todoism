@@ -680,20 +680,21 @@ def main(stdscr):
                     new_id = st.task_cnt + 1
                     
                     due_date, new_task_description = due.parse_due_date(new_task_description)
-                    task_list = tsk.add_new_task(
-                        task_list, new_id, new_task_description, False, new_task["category_id"], due_date)
-                    st.task_cnt = st.task_cnt + 1
-                    st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-                    
-                    if st.task_cnt == 1:
-                        st.start_task_id = 1
-                    if st.task_cnt - 1 <= st.latest_max_capacity:
-                        st.current_task_row = st.task_cnt
-                    else:
-                        st.current_task_row = st.latest_max_capacity
-                    st.current_task_id = new_id
-                    st.end_task_id = st.end_task_id + 1
-                    task_scroll_offset = 0
+                    if new_task_description != "":
+                        task_list = tsk.add_new_task(
+                            task_list, new_id, new_task_description, False, new_task["category_id"], due_date)
+                        st.task_cnt = st.task_cnt + 1
+                        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+                        
+                        if st.task_cnt == 1:
+                            st.start_task_id = 1
+                        if st.task_cnt - 1 <= st.latest_max_capacity:
+                            st.current_task_row = st.task_cnt
+                        else:
+                            st.current_task_row = st.latest_max_capacity
+                        st.current_task_id = new_id
+                        st.end_task_id = st.end_task_id + 1
+                        task_scroll_offset = 0
                 else:
                     st.start_task_id = old_start
                     st.end_task_id = old_end
