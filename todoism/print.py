@@ -104,10 +104,6 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
         print_editing_category(stdscr, task, y, is_selected)
         return min(len(task["name"]) + 2, 14)
     
-    # Clear the row for custom rendering
-    sf.safe_move(stdscr, y, cat.SIDEBAR_WIDTH)
-    stdscr.clrtoeol()
-    
     attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
     sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, f"{task['id']:2d} ", attr)
     print_task_symbols(stdscr, task, y, is_selected=is_selected)
@@ -140,8 +136,6 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     sf.safe_addstr(stdscr, y, date_pos, date_str, curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     sf.safe_addstr(stdscr, y, date_pos + len(date_str), ' ', curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     sf.safe_addstr(stdscr, y, st.latest_max_x - 1, '│')
-    stdscr.refresh()
-
 
 def print_status_bar(stdscr):
     """Print centered status bar with progress, percentage, date and time"""

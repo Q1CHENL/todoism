@@ -134,7 +134,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
         
         # Print plain text first        
         pr.print_editing_entry(stdscr, entry, text_key, y, is_selected=True, scroll_left=scroll_offset, is_edit_mode=False if mode == pr.add_mode else True)
-        if  selection_active:
+        if selection_active:
             highlight_selection(stdscr, entry, text_key, y, selection_start, cursor_pos_in_text, scroll_offset, max_visible_width)
 
         # Move cursor back to correct position

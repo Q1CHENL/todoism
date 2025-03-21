@@ -303,7 +303,7 @@ def main(stdscr):
             
         if key == curses.KEY_MOUSE:
             try:
-                mouse_id, mouse_x, mouse_y, mouse_z, button_state = curses.getmouse()
+                _, mouse_x, mouse_y, _, button_state = curses.getmouse()
                 
                 if button_state & curses.BUTTON4_PRESSED:  # Scroll up
                     if st.focus_manager.is_sidebar_focused():
@@ -393,7 +393,6 @@ def main(stdscr):
             stdscr.timeout(-1)
             _clear_bottom_line_content(stdscr)
             sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, '/')
-            stdscr.refresh()
             query = stdscr.getstr().decode("utf-8")
             stdscr.timeout(500)
             curses.curs_set(0)
@@ -444,9 +443,6 @@ def main(stdscr):
             elif key == ord('a'):
                 if st.searching:
                     continue
-                curses.echo()
-                curses.curs_set(1)
-                
                 cat_count = len(categories)
                 visible_count = min(cat_count, st.latest_max_capacity)
                 is_sidebar_full = visible_count >= st.latest_max_capacity
@@ -497,20 +493,13 @@ def main(stdscr):
                     st.current_category_id = old_cat_id
                     should_repaint = True
 
-                curses.curs_set(0)
-                curses.noecho()
-                
             elif key == ord('e'):
                 # Edit category name with scrolling (skip for "All Tasks" category)
                 if len(categories) > 0 and st.current_category_id != 0:
-                    curses.echo()
-                    curses.curs_set(1)
-                    
                     # Get current category to edit
                     current_cat = categories[sidebar_scroller.current_index]
                     row = sidebar_scroller.current_index - sidebar_scroller.start_index + 1
                     sf.safe_move(stdscr, row, 0)
-                    stdscr.refresh()
                     
                     # Create a temporary copy for editing using the same mechanism as tasks
                     edit_cat = current_cat.copy()                    
@@ -523,8 +512,6 @@ def main(stdscr):
                         cat.update_category_name(st.current_category_id, new_name)
                         categories = cat.load_categories()
                     
-                    curses.curs_set(0)
-                    curses.noecho()
                     should_repaint = True
             
             elif key == curses.KEY_BACKSPACE or key == kc.BACKSPACE:
@@ -604,12 +591,8 @@ def main(stdscr):
                     continue
                 if st.task_cnt == tsk.MAX_TASK_COUNT:
                     pr.print_msg(stdscr, msg.limit_msg)
-                    stdscr.refresh()
                     time.sleep(1.2)
                     continue
-                
-                curses.echo()
-                curses.curs_set(1)
                 
                 # Store old values for potential rollback
                 old_start = st.start_task_id
@@ -632,8 +615,6 @@ def main(stdscr):
 
                 # Move cursor to the correct position after task number
                 sf.safe_move(stdscr, y_pos, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
-                stdscr.refresh()
-
                 new_task = tsk.create_new_task(st.task_cnt + 1)
                 new_task["category_id"] = 0 if st.current_category_id == 0 else st.current_category_id
                 
@@ -665,9 +646,6 @@ def main(stdscr):
                     st.end_task_id = old_end
                     
                 should_repaint = True
-                stdscr.refresh()
-                curses.curs_set(0)
-                curses.noecho()
                 
             elif key == ord('d') or key == ord(' '):
                 if st.filtered_tasks and st.current_task_id > 0:
@@ -677,14 +655,9 @@ def main(stdscr):
                     should_repaint = True
                     
             elif key == ord('e'):
-                curses.echo()
-                curses.curs_set(1)
                 if st.task_cnt > 0 and st.current_task_id > 0:
                     task_list = ed.handle_edit(stdscr, task_list)
                     should_repaint = True
-                    
-                curses.curs_set(0)
-                curses.noecho()
                 
             elif key == ord('f'):
                 if st.filtered_tasks and st.current_task_id > 0:
@@ -727,7 +700,6 @@ def main(stdscr):
                 stdscr.timeout(-1)
                 _clear_bottom_line_content(stdscr)
                 sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
-                stdscr.refresh()
                 command = stdscr.getstr().decode("utf-8")
                 stdscr.timeout(500)
                 
