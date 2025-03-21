@@ -99,7 +99,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
         base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
         text_start_pos = cat.SIDEBAR_WIDTH + base_indent
         MAX_DESCRIPTION_LENGTH = tsk.MAX_TASK_DESCRIPTION_LENGTH    
-        date_length = len(entry["due"])
+        date_length = len(entry["due"]) + 2
         date_pos = right_frame_pos - date_length - 1  # Only 1 char gap from right frame
         max_visible_width = date_pos - text_start_pos - 1
     
