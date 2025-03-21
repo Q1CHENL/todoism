@@ -320,13 +320,14 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         sf.safe_addstr(stdscr, row, date_pos, date_str, attr)
         sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ', attr)
     else:
+        attr_due = curses.color_pair(clr.get_theme_color_pair_num_text()) if task["due"] != "" else 0
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
-        sf.safe_addstr(stdscr, row, total_indent, visible_text, attr_done if is_done else 0)
+        sf.safe_addstr(stdscr, row, total_indent, visible_text, (attr_done if is_done else 0) | attr_due)
         # Fill remaining space with spaces
         for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ')
         # Print date
-        sf.safe_addstr(stdscr, row, date_pos, date_str)
+        sf.safe_addstr(stdscr, row, date_pos, date_str, attr_due)
         sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ')
         
     sf.safe_addstr(stdscr, row, right_frame_pos, '│')
