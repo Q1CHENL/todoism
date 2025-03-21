@@ -564,8 +564,7 @@ def handle_edit(stdscr, task_list):
         import todoism.due as due
         due_date, description = due.parse_due_date(description)
         st.filtered_tasks[current_task_idx]["description"] = description
-        if due_date != "":
-            st.filtered_tasks[current_task_idx]["due"] = due_date
+        st.filtered_tasks[current_task_idx]["due"] = due_date
         
     tsk.save_tasks(task_list)
     return task_list

@@ -678,7 +678,6 @@ def main(stdscr):
                 
                 if new_task_description != "":
                     new_id = st.task_cnt + 1
-                    
                     due_date, new_task_description = due.parse_due_date(new_task_description)
                     if new_task_description != "":
                         task_list = tsk.add_new_task(
