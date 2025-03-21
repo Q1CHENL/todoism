@@ -113,7 +113,7 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     print_task_symbols(stdscr, task, y, is_selected=is_selected)
     
     # Calculate date position and available text space
-    date_str = task["due"]
+    date_str = '[' + task["due"] + ']' if task["due"] != "" else task["due"]
     date_padding = 1  # Space between description and date
     date_pos = st.latest_max_x - len(date_str) - date_padding - 1  # Account for right frame
     
@@ -283,7 +283,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     
     # Calculate positions with right frame
     right_frame_pos = st.latest_max_x - 1
-    date_str = task["due"]
+    date_str = '[' + task["due"] + ']' if task["due"] != "" else task["due"]
     date_pos = right_frame_pos - len(date_str) - 1  # Only 1 char gap from right frame
     
     # Calculate available space for text
