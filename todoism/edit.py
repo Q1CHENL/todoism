@@ -94,6 +94,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
         date_pos = 15
         max_visible_width = date_pos - base_indent        
     else:
+        entry[text_key] = entry[text_key] + ' ' +  '[' + entry["due"] + ']'
         base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
         text_start_pos = cat.SIDEBAR_WIDTH + base_indent
         MAX_DESCRIPTION_LENGTH = tsk.MAX_TASK_DESCRIPTION_LENGTH    
@@ -543,13 +544,13 @@ def handle_edit(stdscr, task_list):
     sf.safe_move(stdscr, st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
     stdscr.refresh()
     current_task_idx = st.current_task_id - 1
-    st.filtered_tasks[current_task_idx]["description"] = edit(
+    description = edit(
         stdscr, 
         st.filtered_tasks[current_task_idx],
         "description",
         pr.edit_mode
     )
-    if st.filtered_tasks[current_task_idx]["description"] == "":
+    if description == "":
         task_uuid = st.filtered_tasks[current_task_idx]["uuid"]
         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
         if st.searching:
@@ -558,6 +559,13 @@ def handle_edit(stdscr, task_list):
             st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
         st.task_cnt = len(st.filtered_tasks)
         nv.post_deletion_update(st.task_cnt + 1)
+    else:
+        import todoism.due as due
+        due_date, description = due.parse_due_date(description)
+        st.filtered_tasks[current_task_idx]["description"] = description
+        if due_date != "":
+            st.filtered_tasks[current_task_idx]["due"] = due_date
+        
     tsk.save_tasks(task_list)
     return task_list
     

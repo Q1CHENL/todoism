@@ -100,7 +100,7 @@ def main(stdscr):
 
     # Update existing tasks to include category_id if missing
     task_list = tsk.update_existing_tasks()
-    pref.add_due_key_if_missing(task_list)
+    due.add_due_key_if_missing(task_list)
     tsk.save_tasks(task_list)
     tsk.reassign_task_ids(task_list)
     categories = cat.load_categories()
@@ -679,10 +679,9 @@ def main(stdscr):
                 if new_task_description != "":
                     new_id = st.task_cnt + 1
                     
-                    due_date = due.parse_due_date(new_task_description)
-                    end = - (len(due_date) + 2) if due_date != "" else len(new_task_description)
+                    due_date, new_task_description = due.parse_due_date(new_task_description)
                     task_list = tsk.add_new_task(
-                        task_list, new_id, new_task_description[:end], False, new_task["category_id"], due_date)
+                        task_list, new_id, new_task_description, False, new_task["category_id"], due_date)
                     st.task_cnt = st.task_cnt + 1
                     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                     

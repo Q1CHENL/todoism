@@ -1,5 +1,4 @@
 import curses
-import copy
 import time
 import webbrowser
 
@@ -348,8 +347,9 @@ def execute_command(stdscr, command: str, task_list: list):
                 stdscr.clrtoeol()
             else:
                 if test_module.exit_dev_mode():
+                    import todoism.due as due
                     task_list = tsk.load_tasks()
-                    pref.add_due_key_if_missing(task_list)
+                    due.add_due_key_if_missing(task_list)
                     tsk.save_tasks(task_list)
                     categories = cat.load_categories()
                     st.current_category_id = 0
