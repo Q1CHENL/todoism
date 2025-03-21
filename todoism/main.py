@@ -740,8 +740,9 @@ def main(stdscr):
                     pr.print_editing_entry(stdscr, current_task, "description", st.current_task_row, True, task_scroll_offset) 
                 
             elif key == curses.KEY_LEFT:
+                old_task_scroll_offset = task_scroll_offset
                 task_scroll_offset = max(0, task_scroll_offset - 1)
-                if task_scroll_offset >= 0:
+                if task_scroll_offset >= 0 and old_task_scroll_offset > task_scroll_offset:
                     pr.print_editing_entry(stdscr, st.filtered_tasks[st.current_task_id - 1], "description", st.current_task_row, True, task_scroll_offset)
                 
             elif key == ord('q'):
