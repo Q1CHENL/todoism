@@ -349,6 +349,8 @@ def execute_command(stdscr, command: str, task_list: list):
             else:
                 if test_module.exit_dev_mode():
                     task_list = tsk.load_tasks()
+                    pref.add_due_key_if_missing(task_list)
+                    tsk.save_tasks(task_list)
                     categories = cat.load_categories()
                     st.current_category_id = 0
                     

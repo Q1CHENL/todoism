@@ -56,7 +56,6 @@ def print_msg(stdscr, msg, x_offset=0, attr=0):
                 else:
                     sf.safe_appendstr(stdscr, line, attr)
 
-
 def print_github_page_line(stdscr, line):
     sf.safe_appendstr(stdscr, line[:line.find("Github page")])
     blue_pair = clr.get_color_pair_num_by_str_text("blue")
@@ -114,7 +113,7 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     print_task_symbols(stdscr, task, y, is_selected=is_selected)
     
     # Calculate date position and available text space
-    date_str = task["date"]
+    date_str = task["due"]
     date_padding = 1  # Space between description and date
     date_pos = st.latest_max_x - len(date_str) - date_padding - 1  # Account for right frame
     
@@ -152,13 +151,8 @@ def print_status_bar(stdscr):
     percent_value = (done_cnt/st.task_cnt)*100 if st.task_cnt > 0 else 0
     percent_text = f"({percent_value:.0f}%)"
     
-    # Choose color based on percentage range
-    if percent_value < 33:
-        color_pair = clr.get_color_pair_num_by_str_text("red")
-    elif percent_value < 67:
-        color_pair = clr.get_color_pair_num_by_str_text("yellow")
-    else:
-        color_pair = clr.get_color_pair_num_by_str_text("green")
+    color_text = "red" if percent_value < 33 else "yellow" if percent_value < 67 else "green"
+    color_pair = clr.get_color_pair_num_by_str_text(color_text)
     
     # Split the status into parts for coloring
     status_prefix = f"┤Done: {done_cnt}/{st.task_cnt} "
@@ -211,7 +205,7 @@ def print_all_cli(todos):
         if todo.get("status"):
             description = done_fmt % description
             
-        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo["date"]})"
+        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo["due"]})"
         print(todo_line)
 
 def print_category_entries(stdscr, categories, start_index):
@@ -289,7 +283,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     
     # Calculate positions with right frame
     right_frame_pos = st.latest_max_x - 1
-    date_str = task["date"]
+    date_str = task["due"]
     date_pos = right_frame_pos - len(date_str) - 1  # Only 1 char gap from right frame
     
     # Calculate available space for text

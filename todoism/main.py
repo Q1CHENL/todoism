@@ -15,6 +15,7 @@ import todoism.state as st
 import todoism.search as srch
 import todoism.backup as bkp
 import todoism.safe as sf
+import todoism.due as due 
 
 def _exit():
     # Always backup normal data on exit
@@ -75,7 +76,7 @@ def _task_not_marked(task):
         return not task["flagged"]
     else:
         return False
-        
+    
 def main(stdscr):
     stdscr.keypad(True)  # enable e.g arrow keys
     stdscr.scrollok(True)
@@ -99,6 +100,8 @@ def main(stdscr):
 
     # Update existing tasks to include category_id if missing
     task_list = tsk.update_existing_tasks()
+    pref.add_due_key_if_missing(task_list)
+    tsk.save_tasks(task_list)
     tsk.reassign_task_ids(task_list)
     categories = cat.load_categories()
         
@@ -668,15 +671,18 @@ def main(stdscr):
                 new_task = tsk.create_new_task(st.task_cnt + 1)
                 new_task["category_id"] = 0 if st.current_category_id == 0 else st.current_category_id
                 
-                new_task_description = ed.edit(stdscr, new_task, "description", pr.add_mode)
+                new_task_description = ed.edit(stdscr, new_task, "description", pr.add_mode)  
                 if new_task_description != "":
                     st.current_task_id = st.task_cnt + 1
                 st.adding_task = False
                 
                 if new_task_description != "":
                     new_id = st.task_cnt + 1
+                    
+                    due_date = due.parse_due_date(new_task_description)
+                    end = - (len(due_date) + 2) if due_date != "" else len(new_task_description)
                     task_list = tsk.add_new_task(
-                        task_list, new_id, new_task_description, False, new_task["category_id"])
+                        task_list, new_id, new_task_description[:end], False, new_task["category_id"], due_date)
                     st.task_cnt = st.task_cnt + 1
                     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
                     
@@ -727,7 +733,7 @@ def main(stdscr):
                 base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
                 text_start_pos = cat.SIDEBAR_WIDTH + base_indent
                 current_task = st.filtered_tasks[st.current_task_id - 1]
-                date_length = len(current_task["date"])
+                date_length = len(current_task["due"])
                 date_pos = right_frame_pos - date_length - 1  # Only 1 char gap from right frame
                 max_visible_width = date_pos - text_start_pos - 1
                 if len(current_task["description"]) > max_visible_width and task_scroll_offset < len(current_task["description"]) - max_visible_width:
