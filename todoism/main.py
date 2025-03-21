@@ -466,16 +466,7 @@ def main(stdscr):
                 st.current_category_id = new_cat_id
                 
                 pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
-                pr.print_left_frame(stdscr)
-                pr.print_sidebar_task_panel_separator(stdscr)
-                pr.print_right_frame(stdscr)
-                pr.print_status_bar(stdscr)
-                
-                stdscr.refresh()
-
-                # Move cursor to the consistent 1-space indent position
                 sf.safe_move(stdscr, new_cat_row, 1)  # 1-space indent, matching print_category()
-                stdscr.refresh()
                 
                 new_cat_name = ed.edit(stdscr, temp_category, "name", pr.add_mode, 0)
                 temp_category["name"] = new_cat_name
@@ -518,26 +509,7 @@ def main(stdscr):
                     # Get current category to edit
                     current_cat = categories[sidebar_scroller.current_index]
                     row = sidebar_scroller.current_index - sidebar_scroller.start_index + 1
-                    
-                    pr.print_status_bar(stdscr)
-                    
-                    # Draw all categories
-                    pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
-                    
-                    pr.print_left_frame(stdscr)
-                    pr.print_sidebar_task_panel_separator(stdscr)
-                    pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
-                    
                     sf.safe_move(stdscr, row, 0)
-                    
-                    # Append spaces
-                    attr = curses.color_pair(clr.get_theme_color_pair_num_text())
-                    for j in range(15): 
-                        sf.safe_addch(stdscr, row, j, ' ', attr)
-
-                    sf.safe_addstr(stdscr, row, 15, '│')
-                    # Position cursor at start of category name (1 char indent)
-                    sf.safe_move(stdscr, row, 1)
                     stdscr.refresh()
                     
                     # Create a temporary copy for editing using the same mechanism as tasks
@@ -550,7 +522,6 @@ def main(stdscr):
                             new_name = new_name[:cat.MAX_CATEGORY_NAME_LENGTH]
                         cat.update_category_name(st.current_category_id, new_name)
                         categories = cat.load_categories()
-                    pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     
                     curses.curs_set(0)
                     curses.noecho()
@@ -650,11 +621,6 @@ def main(stdscr):
                     st.start_task_id = st.task_cnt - (st.end_task_id - st.start_task_id - 1)
                     st.end_task_id = st.task_cnt
 
-                pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
-                
-                pr.print_left_frame(stdscr)
-                pr.print_sidebar_task_panel_separator(stdscr)
-                
                 st.adding_task = True
                 # Print existing tasks with offset (crucial: pass cat.SIDEBAR_WIDTH to offset tasks)
                 pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
