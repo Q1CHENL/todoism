@@ -15,14 +15,14 @@ help_msg = '''
 │   f - Mark task as flagged                   Enter - Finish adding/editing task             │
 │   q - Quit this help message/pref/todoism    Up/Down Arrow Keys - Navigate through tasks    │
 │                                              CTRL + Left/Right - Jump words                 │
-│                                              CTRL + Shift + Left/Right - Select words       │
-│   Vim-like long commands:                    ALT + Left/Right - Jump to start/end of text   │
-│   :help - Show this help message                                                            │
-│   :pref - Open preference panel              Mouse Operations:                              │
-│   :del <task_id> - Delete task               - Click on task/category: Select item          │
-│   :edit <task_id> - Edit task                - Click on done/flag: Toggle status            │
-│   :done <task_id> - Mark task as done        - Click on blank area: toggle focus            │
-│   :purge - Purge all done tasks              - Wheel scroll up/down: navigate on items      │
+│   Vim-like long commands:                    CTRL + Shift + Left/Right - Select words       │
+│   :help - Show this help message             ALT + Left/Right - Jump to start/end of text   │
+│   :pref - Open preference panel                                                             │
+│   :del <task_id> - Delete task               Mouse Operations:                              │
+│   :edit <task_id> - Edit task                - Click on task/category: Select item          │
+│   :done <task_id> - Mark task as done        - Click on done/flag: Toggle status            │
+│   :purge - Purge done tasks in current cat.  - Click on blank area: toggle focus            │
+│   :purge all - Purge all done tasks          - Wheel scroll up/down: navigate on items      │
 │                                                                                             │
 │   To add due date to a task:                                                                │
 │   Add [<due date>] at the end of the task                                                   │
