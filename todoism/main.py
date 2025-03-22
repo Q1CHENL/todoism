@@ -28,11 +28,34 @@ def _exit():
         # No test module found (PyPI installation), continue with normal exit
         pass
 
-def _clear_bottom_line_content(stdscr):
-    # clear bottom line
-    sf.safe_move(stdscr, st.latest_max_y - 2, 1)
-    stdscr.clrtoeol()
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, st.latest_max_x - 1, "│")
+def _quit_search(stdscr, task_list):
+    st.searching = False
+    pr.clear_bottom_bar_except_status(stdscr)
+    _restore_task_panel(task_list)
+
+def _handle_command_input(stdscr):
+    curses.echo()
+    curses.curs_set(1)
+    stdscr.timeout(-1)
+    pr.clear_bottom_bar_except_status(stdscr)
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ":")
+    stdscr.refresh()  # Include refresh for consistency
+    command = stdscr.getstr().decode("utf-8")
+    stdscr.timeout(500)
+    curses.curs_set(0)
+    curses.noecho()
+    return command
+
+def _handle_dev_restore(categories, task_list, sidebar_scroller):
+    sidebar_scroller.update_total(len(categories))
+    # Find the new category index
+    for i, c in enumerate(categories):
+        if c["id"] == st.current_category_id:
+            sidebar_scroller.current_index = i
+            break
+        
+    st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+    return categories  
     
 def _restore_task_panel(task_list):
     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
@@ -378,6 +401,26 @@ def main(stdscr):
                 pass
             continue
         
+        if key == ord('q'):
+            if st.searching:
+                _quit_search(stdscr, task_list)
+                should_repaint = True
+                continue
+            _exit()
+            break
+        
+        if key == ord(':'):
+            command = _handle_command_input(stdscr)
+            if command == "":
+                pr.clear_bottom_bar_except_status(stdscr)    
+                continue
+            task_list, cats = cmd.execute_command(stdscr, command, task_list)
+            pr.clear_bottom_bar_except_status(stdscr)
+            # Check if we have newly loaded categories in the result (special case for dev/restore)
+            if cats is not None:
+                categories = _handle_dev_restore(cats, task_list, sidebar_scroller)
+            should_repaint = True
+        
         if key == ord('/'):
             curses.echo()
             curses.curs_set(1)
@@ -421,17 +464,7 @@ def main(stdscr):
                     st.current_category_id = categories[sidebar_scroller.current_index]["id"]
                     _restore_task_panel(task_list)
                 should_repaint = True
-            
-            elif key == ord('q'):
-                if st.searching:
-                    st.searching = False
-                    pr.clear_bottom_bar_except_status(stdscr)
-                    _restore_task_panel(task_list)
-                    should_repaint = True
-                    continue
-                _exit()
-                break
-                
+
             elif key == ord('a'):
                 if st.searching:
                     continue
@@ -542,42 +575,6 @@ def main(stdscr):
                     
                     should_repaint = True
                 
-            elif key == ord(':'):
-                curses.echo()
-                curses.curs_set(1)
-                
-                # Disable timeout temporarily
-                stdscr.timeout(-1)
-                pr.clear_bottom_bar_except_status(stdscr)
-                sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ":")
-                stdscr.refresh()
-                command = stdscr.getstr().decode("utf-8")
-                stdscr.timeout(500)
-                
-                curses.curs_set(0)
-                curses.noecho()
-                
-                if command == "":
-                    pr.clear_bottom_bar_except_status(stdscr)    
-                    continue
-                
-                task_list, cats = cmd.execute_command(stdscr, command, task_list)
-
-                # Check if we have newly loaded categories in the result (special case for test/restore)
-                if cats is not None:
-                    categories = cats
-                    sidebar_scroller.update_total(len(categories))
-                    # Find the new category index
-                    for i, c in enumerate(categories):
-                        if c["id"] == st.current_category_id:
-                            sidebar_scroller.current_index = i
-                            break
-                            
-                    # Update filtered tasks for the new category
-                    st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-
-                should_repaint = True
-                
         elif st.focus_manager.is_tasks_focused():
             if key == ord('a'):
                 if st.searching:
@@ -676,49 +673,6 @@ def main(stdscr):
                 task_scroll_offset = max(0, task_scroll_offset - 1)
                 if task_scroll_offset >= 0 and old_task_scroll_offset > task_scroll_offset:
                     pr.print_editing_entry(stdscr, st.filtered_tasks[st.current_task_id - 1], "description", st.current_task_row, True, task_scroll_offset)
-                
-            elif key == ord('q'):
-                if st.searching:
-                    st.searching = False
-                    pr.clear_bottom_bar_except_status(stdscr)
-                    _restore_task_panel(task_list)
-                    should_repaint = True
-                    continue
-                _exit()
-                break
-                
-            elif key == ord(':'):
-                curses.echo()
-                curses.curs_set(1)
-                
-                stdscr.timeout(-1)
-                pr.clear_bottom_bar_except_status(stdscr)
-                sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ":")
-
-                command = stdscr.getstr().decode("utf-8")
-                stdscr.timeout(500)
-                curses.curs_set(0)
-                curses.noecho()
-                
-                if command == "":
-                    pr.clear_bottom_bar_except_status(stdscr)    
-                    continue
-                
-                task_list, cats = cmd.execute_command(stdscr, command, task_list)
-
-                # Check if we have newly loaded categories in the result (special case for test/restore)
-                if cats is not None:
-                    categories = cats
-                    sidebar_scroller.update_total(len(categories))
-                    # Find the new category index
-                    for i, c in enumerate(categories):
-                        if c["id"] == st.current_category_id:
-                            sidebar_scroller.current_index = i
-                            break  
-                    # Update filtered tasks for the new category
-                    st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-                
-                should_repaint = True
                 
             elif key == curses.KEY_UP:
                 task_scroll_offset = 0
