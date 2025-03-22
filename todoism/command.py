@@ -1,5 +1,4 @@
 import curses
-import copy
 import time
 import webbrowser
 
@@ -28,7 +27,7 @@ def purge(task_list):
         else:
             newly_purged.append(t)
     tsk.reassign_task_ids(remained)
-    purged_tasks = tsk.load_purged_tasks(pref.purged_file_path)
+    purged_tasks = tsk.load_purged_tasks()
     purged_tasks.extend(newly_purged)
     tsk.save_tasks(purged_tasks, pref.purged_file_path)
     return remained
@@ -103,7 +102,7 @@ def execute_command(stdscr, command: str, task_list: list):
             command_recognized = True
             task_id = int(parts[1])
             if 1 <= task_id <= len(task_list):
-                st.latest_max_capacity = stdscr.getmaxyx()[0] - 1    
+                st.latest_max_capacity = stdscr.getmaxyx()[0] - 1
                 pr.print_task_entry(stdscr, st.filtered_tasks[st.current_task_id-1], st.current_task_row, False, cat.SIDEBAR_WIDTH)
                 st.current_task_id = int(task_id)
                 st.current_task_row = st.current_task_id - st.start_task_id + 1
@@ -132,6 +131,7 @@ def execute_command(stdscr, command: str, task_list: list):
             ch = stdscr.getch()
             if ch == ord('q'):
                 stdscr.timeout(old_timeout)
+                pr.clear_bottom_bar(stdscr)
                 return task_list, None
             elif ch == curses.KEY_MOUSE:
                 _, mouse_x, mouse_y, _, button_state = curses.getmouse()
@@ -155,6 +155,7 @@ def execute_command(stdscr, command: str, task_list: list):
         
         while True:
             if quit:
+                pr.clear_bottom_bar(stdscr)
                 break                
             # Keep selection index in valid range
             if selection_index > 10:
@@ -235,7 +236,6 @@ def execute_command(stdscr, command: str, task_list: list):
                     pref.set_date_format(date_formats[date_index])
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
-                    tsk.update_all_task_date_format(task_list, current_format)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -246,7 +246,7 @@ def execute_command(stdscr, command: str, task_list: list):
             elif preference_type.startswith("│   Sort by flagged"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    pref.set_sort_flagged(not pref.get_sort_flagged())
+                    pref.set_sort_by_flagged(not pref.get_sort_by_flagged())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -256,7 +256,7 @@ def execute_command(stdscr, command: str, task_list: list):
             elif preference_type.startswith("│   Sort by done"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    pref.set_sort_done(not pref.get_sort_done())
+                    pref.set_sort_by_done(not pref.get_sort_by_done())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -284,9 +284,8 @@ def execute_command(stdscr, command: str, task_list: list):
                 sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                 stdscr.clrtoeol()
                 yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
-                stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg)
-                stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
+                attr = curses.color_pair(yellow_pair_num) | curses.A_BOLD
+                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg, attr)
                 stdscr.refresh()
                 time.sleep(1)
                 sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
@@ -308,9 +307,8 @@ def execute_command(stdscr, command: str, task_list: list):
                     sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                     stdscr.clrtoeol()
                     green_pair_num = clr.get_color_pair_num_by_str_text("green")
-                    stdscr.attron(curses.color_pair(green_pair_num) | curses.A_BOLD)
-                    sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, success_msg)
-                    stdscr.attroff(curses.color_pair(green_pair_num) | curses.A_BOLD)
+                    attr = curses.color_pair(green_pair_num) | curses.A_BOLD
+                    sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, success_msg, attr)
                     stdscr.refresh()
                     time.sleep(1.5)
                     sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
@@ -324,9 +322,8 @@ def execute_command(stdscr, command: str, task_list: list):
             sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
             yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
-            stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-            sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg)
-            stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
+            attr = curses.color_pair(yellow_pair_num) | curses.A_BOLD
+            sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg, attr)
             stdscr.refresh()
             time.sleep(1.5)
             sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
@@ -343,16 +340,18 @@ def execute_command(stdscr, command: str, task_list: list):
                 sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                 stdscr.clrtoeol()
                 yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
-                stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg)
-                stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
+                attr = curses.color_pair(yellow_pair_num) | curses.A_BOLD
+                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg, attr)
                 stdscr.refresh()
                 time.sleep(1)
                 sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                 stdscr.clrtoeol()
             else:
                 if test_module.exit_dev_mode():
+                    import todoism.due as due
                     task_list = tsk.load_tasks()
+                    due.add_due_key_if_missing(task_list)
+                    tsk.save_tasks(task_list)
                     categories = cat.load_categories()
                     st.current_category_id = 0
                     
@@ -367,9 +366,8 @@ def execute_command(stdscr, command: str, task_list: list):
                     sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
                     stdscr.clrtoeol()
                     green_pair_num = clr.get_color_pair_num_by_str_text("green")
-                    stdscr.attron(curses.color_pair(green_pair_num) | curses.A_BOLD)
-                    sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, success_msg)
-                    stdscr.attroff(curses.color_pair(green_pair_num) | curses.A_BOLD)
+                    attr = curses.color_pair(green_pair_num) | curses.A_BOLD
+                    sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, success_msg, attr)
                     stdscr.refresh()
                     time.sleep(1.5)
                     sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
@@ -384,9 +382,8 @@ def execute_command(stdscr, command: str, task_list: list):
             sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
             stdscr.clrtoeol()
             yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
-            stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-            sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg)
-            stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
+            attr = curses.color_pair(yellow_pair_num) | curses.A_BOLD
+            sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg, attr)
             stdscr.refresh()
             time.sleep(1.5)
             sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
@@ -402,9 +399,8 @@ def execute_command(stdscr, command: str, task_list: list):
         sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
         stdscr.clrtoeol()
         red_pair_num = clr.get_color_pair_num_by_str_text("red")
-        stdscr.attron(curses.color_pair(red_pair_num) | curses.A_BOLD)
-        sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, error_msg)
-        stdscr.attroff(curses.color_pair(red_pair_num) | curses.A_BOLD)
+        attr = curses.color_pair(red_pair_num) | curses.A_BOLD
+        sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, error_msg, attr)
         stdscr.refresh()
         time.sleep(1.5)
         # Clear the error message

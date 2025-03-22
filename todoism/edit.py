@@ -70,7 +70,7 @@ def highlight_selection(stdscr, task, text_key, y, selection_start_idx_in_text, 
             # Use base_indent (2) for sidebar to match text_start_pos in edit function
             screen_pos = 2 + (i - scroll_offset)  # Sidebar starts at position 2
             # Ensure we don't highlight beyond sidebar boundary
-            if screen_pos > 14:  # Sidebar width limit
+            if screen_pos > 14:
                 break
         else:
             screen_pos = tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH + (i - scroll_offset)  # Task position with sidebar offset
@@ -94,10 +94,12 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
         date_pos = 15
         max_visible_width = date_pos - base_indent        
     else:
+        if pr.edit_mode == mode and entry["due"] != "":
+            entry[text_key] = entry[text_key] + ' ' +  '[' + entry["due"] + ']'
         base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
         text_start_pos = cat.SIDEBAR_WIDTH + base_indent
         MAX_DESCRIPTION_LENGTH = tsk.MAX_TASK_DESCRIPTION_LENGTH    
-        date_length = len(entry["date"])
+        date_length = len(entry["due"]) + 2
         date_pos = right_frame_pos - date_length - 1  # Only 1 char gap from right frame
         max_visible_width = date_pos - text_start_pos - 1
     
@@ -132,7 +134,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
         
         # Print plain text first        
         pr.print_editing_entry(stdscr, entry, text_key, y, is_selected=True, scroll_left=scroll_offset, is_edit_mode=False if mode == pr.add_mode else True)
-        if  selection_active:
+        if selection_active:
             highlight_selection(stdscr, entry, text_key, y, selection_start, cursor_pos_in_text, scroll_offset, max_visible_width)
 
         # Move cursor back to correct position
@@ -149,9 +151,9 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             # Clear the debug area
             sf.safe_addstr(stdscr, 0, 0, ' ' * min(len(debug_info) + 5, st.latest_max_x))
             # Display debug info
-            stdscr.attron(curses.color_pair(4))  # Red color for visibility
-            sf.safe_addstr(stdscr, 0, 0, debug_info)
-            stdscr.attroff(curses.color_pair(4))
+            import todoism.color as clr
+            attr = curses.color_pair(clr.get_color_pair_num_by_str_text("red"))
+            sf.safe_addstr(stdscr, 0, 0, debug_info, attr)
             # Restore cursor position
             sf.safe_move(stdscr, current_y, current_x)
                 
@@ -455,7 +457,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             
             # Recalculate screen boundaries with exactly 1 space gap
             if not st.focus_manager.is_sidebar_focused():
-                date_length = len(entry["date"])
+                date_length = len(entry["due"])
                 date_pos = right_frame_pos - date_length - 1  # Position where date starts (with 1 char gap)
                 max_visible_width = date_pos - (text_start_pos)  # Total spaces available for text
                 right_limit = date_pos - 1  # Position of the 1 char gap
@@ -489,7 +491,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             
             sf.safe_move(stdscr, y, new_x)
             
-            # IMPROVED SIDEBAR HANDLING: Add extra check after character insertion
+            # Extra check after character insertion
             if st.focus_manager.is_sidebar_focused():
                 # Recalculate and verify cursor position doesn't exceed sidebar
                 new_x = text_start_pos + (new_cursor_pos - scroll_offset)
@@ -502,16 +504,13 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 new_x = min(new_x, 14)
                 sf.safe_move(stdscr, y, new_x)
         
-        # Alt+Left to jump to beginning of text
         elif ch == kc.ALT_LEFT:
             # Clear selection if active
             if selection_active:
                 selection_active = False
                 selection_start = -1
                 
-            # Jump to beginning of text
             cursor_pos_in_text = 0
-            # Reset scroll offset to show beginning of text
             scroll_offset = 0
             # Position cursor at beginning
             sf.safe_move(stdscr, y, text_start_pos)
@@ -523,7 +522,6 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 selection_active = False
                 selection_start = -1
                 
-            # Jump to end of text
             cursor_pos_in_text = len(entry[text_key])
             # For long text, adjust scroll to show the end of text
             if len(entry[text_key]) > max_visible_width:
@@ -547,13 +545,13 @@ def handle_edit(stdscr, task_list):
     sf.safe_move(stdscr, st.current_task_row, cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL)
     stdscr.refresh()
     current_task_idx = st.current_task_id - 1
-    st.filtered_tasks[current_task_idx]["description"] = edit(
+    description = edit(
         stdscr, 
         st.filtered_tasks[current_task_idx],
         "description",
         pr.edit_mode
     )
-    if st.filtered_tasks[current_task_idx]["description"] == "":
+    if description == "":
         task_uuid = st.filtered_tasks[current_task_idx]["uuid"]
         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
         if st.searching:
@@ -562,6 +560,12 @@ def handle_edit(stdscr, task_list):
             st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
         st.task_cnt = len(st.filtered_tasks)
         nv.post_deletion_update(st.task_cnt + 1)
+    else:
+        import todoism.due as due
+        due_date, description = due.parse_due_date(description)
+        st.filtered_tasks[current_task_idx]["description"] = description
+        st.filtered_tasks[current_task_idx]["due"] = due_date
+        
     tsk.save_tasks(task_list)
     return task_list
     

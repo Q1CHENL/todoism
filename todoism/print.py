@@ -13,83 +13,57 @@ view_mode = 0
 add_mode  = 1
 edit_mode = 2
 
-def print_msg_center(stdscr, message, color_pair=0, highlight_line=-1):    
-    lines = message.strip().split("\n")
-    start_y = max(0, (st.latest_max_y - len(lines)) // 2)
+def print_version():
+    print("todoism v1.21.4")
+
+def print_q_to_close(stdscr, page):
+    hint = f"Press 'q' to close {page}"
+    hint_pos_x = (st.latest_max_x - len(hint)) // 2 
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, hint_pos_x, hint)
+# Clearing functions
+def clear_sidebar_area(stdscr):
+    for y in range(1, st.latest_max_y - 3):
+        sf.safe_addstr(stdscr, y, 1, ' ' * (cat.SIDEBAR_WIDTH - 2))
+
+def clear_task_panel(stdscr):
+    for y in range(1, st.latest_max_y - 3):    
+        sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, ' ' * (st.latest_max_x - cat.SIDEBAR_WIDTH - 1))
+
+def clear_status(stdscr):
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, st.latest_max_x - 35, ' ' * 34)
+
+def clear_bottom_bar_except_status(stdscr):
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ' ' * (st.latest_max_x - 37))
     
-    for i, line in enumerate(lines):
-        if line.strip():  # Only print non-empty lines
-            start_x = max(0, (st.latest_max_x - len(line)) // 2)
-            if i == highlight_line and color_pair > 0:
-                stdscr.attron(curses.color_pair(color_pair))
-                sf.safe_addstr(stdscr, start_y + i, start_x, line)
-                stdscr.attroff(curses.color_pair(color_pair))
-            else:
-                sf.safe_addstr(stdscr, start_y + i, start_x, line)
+def clear_bottom_bar(stdscr):
+    clear_status(stdscr)
+    clear_bottom_bar_except_status(stdscr)
     
-    stdscr.refresh()
+def print_github_page_line(stdscr, line):
+    sf.safe_appendstr(stdscr, line[:line.find("Github page")])
+    blue_pair = clr.get_color_pair_num_by_str_text("blue")
+    attr = curses.color_pair(blue_pair) | curses.A_UNDERLINE
+    sf.safe_appendstr(stdscr, "Github page", attr)
+    sf.safe_appendstr(stdscr, line[line.find("Github page") + len("Github page"):])
 
 def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, highlight=False):
     """Print a message box with proper centering in the task area with optional highlighting"""
-    lines = msg.split('\n')
-    width = len(lines[1])
 
-    # Ensure we have minimum required space
-    if st.latest_max_y < 2 or st.latest_max_x < x_offset + 1:
-        return
-    
-    # Calculate available width for task area (total width minus sidebar)
-    available_width = max(0, st.latest_max_x - x_offset)
-    
-    # Calculate center position within the available task area
-    # Ensure center_offset is never negative
-    center_offset_x = max(0, (available_width - width) // 2)
-    center_offset_y = max(0, (st.latest_max_y - len(lines)) // 2)
-    
     clear_task_panel(stdscr)
-    
-    if highlight:
-        stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-    
-    # Print each line separately at the calculated position
-    for i, line in enumerate(lines):
-        y = i + 1  # Start at row 1 (row 0 is status bar)
-        if y < st.latest_max_y - 1 and line.strip():  # Only print non-empty lines and check bounds
-            # Position cursor at sidebar edge + centering offset
-            sf.safe_move(stdscr, y + center_offset_y, x_offset + center_offset_x)
-            # Print the line directly, truncating if necessary
-            if x_offset + center_offset_x + len(line) > st.latest_max_x:
-                # Truncate line to fit available space
-                available_space = st.latest_max_x - (x_offset + center_offset_x)
-                if available_space > 0:
-                    sf.safe_appendstr(stdscr, line[:available_space])
-            else:
-                sf.safe_appendstr(stdscr, line)
-
-    if highlight:
-        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-    
-    # Draw the right frame for each line
+    attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) if highlight else 0
+    print_msg(stdscr, msg, x_offset, attr)
     print_right_frame(stdscr)
     
-def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
+def print_msg(stdscr, msg, x_offset=0, attr=0):
     """Print a message box with proper centering in the task area with optional highlighting"""
+    
     lines = msg.split('\n')
     width = len(lines[1])
-    
-    # Ensure we have minimum required space
-    if st.latest_max_y < 2 or st.latest_max_x < x_offset + 1:
-        return
-    
     # Calculate available width for task area (total width minus sidebar)
     available_width = max(0, st.latest_max_x - x_offset)
     center_offset_x = max(0, (available_width - width) // 2)
     center_offset_y = max(0, (st.latest_max_y - len(lines)) // 2)
-    
-    # Apply highlighting if requested
-    if highlight:
-        stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-    
+        
     # Print each line separately at the calculated position
     for i, line in enumerate(lines):
         y = i + 1  # Start at row 1 (row 0 is status bar)
@@ -104,29 +78,12 @@ def print_msg(stdscr, msg, x_offset=0, y_offset=0, highlight=False):
                     if line.find("Github page") > 0:
                         print_github_page_line(stdscr, line)
                     else:
-                        sf.safe_appendstr(stdscr, line[:available_space])
+                        sf.safe_appendstr(stdscr, line[:available_space], attr)
             else:
                 if line.find("Github page") > 0:
                     print_github_page_line(stdscr, line)
                 else:
-                    sf.safe_appendstr(stdscr, line)
-            
-    if highlight:
-        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-
-    stdscr.noutrefresh()
-    curses.doupdate()
-
-def print_github_page_line(stdscr, line):
-    sf.safe_appendstr(stdscr, line[:line.find("Github page")])
-    blue_pair = clr.get_color_pair_num_by_str_text("blue")
-    stdscr.attron(curses.A_UNDERLINE | curses.color_pair(blue_pair))
-    sf.safe_appendstr(stdscr, "Github page")
-    stdscr.attroff(curses.A_UNDERLINE | curses.color_pair(blue_pair))
-    sf.safe_appendstr(stdscr, line[line.find("Github page") + len("Github page"):])
-
-def print_version():
-    print("todoism v1.21.4")
+                    sf.safe_appendstr(stdscr, line, attr)
 
 def print_task_symbols(stdscr, task, y, is_selected=False):
     """Print task flag and status symbols with appropriate colors
@@ -135,38 +92,25 @@ def print_task_symbols(stdscr, task, y, is_selected=False):
         stdscr: The curses window
         task: The task data dictionary
         y: The row position
-        flag_x: X position for flag symbol (default: 3)
-        status_x: X position for status symbol (default: 5)
-        use_colors: Whether to apply color formatting (default: True)
-        is_selected: Whether the task is selected (affects coloring) (default: False)
+        is_selected: Whether the task is selected
     """
+    attr_bkg = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
+    attr_space = attr_bkg if is_selected else 0
+    attr_red = curses.color_pair(clr.get_color_pair_num_by_str_text("red"))
+    attr_green = curses.color_pair(clr.get_color_pair_num_by_str_text("green"))
+    
     if task.get("flagged", False):
-        if not is_selected:
-            flag_color = clr.get_color_pair_num_by_str_text("red")
-            stdscr.attron(curses.color_pair(flag_color))
-            sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3, '⚑')
-            stdscr.attroff(curses.color_pair(flag_color))
-        else:
-            sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3, '⚑')
+        sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3, '⚑', attr_bkg if is_selected else attr_red)
     else:
-        sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3, ' ')
-    
+        sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3, ' ', attr_space)
     # Add space between flag and status
-    sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3 + 1, ' ')
-    
-    # Print status indicator second
+    sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3 + 1, ' ', attr_space)
+
     if task.get("status", False):
-        if not is_selected:
-            check_color = clr.get_color_pair_num_by_str_text("green")
-            stdscr.attron(curses.color_pair(check_color))
-            sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5, '✓')
-            stdscr.attroff(curses.color_pair(check_color))
-        else:
-            sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5, '✓')
+        sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5, '✓', attr_bkg if is_selected else attr_green)
     else:
-        sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5, ' ')
-    
-    sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5 + 1, ' ')
+        sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5, ' ', attr_space)
+    sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5 + 1, ' ', attr_space)
     
 def print_editing_category(stdscr, category, y, is_selected=False):
     sf.safe_addstr(stdscr, y, 0, "│")
@@ -179,17 +123,14 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
         print_editing_category(stdscr, task, y, is_selected)
         return min(len(task["name"]) + 2, 14)
     
-    # Clear the row for custom rendering
-    sf.safe_move(stdscr, y, cat.SIDEBAR_WIDTH)
-    stdscr.clrtoeol()
-    
-    sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, f"{task["id"]:2d} ")
+    attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
+    sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, f"{task['id']:2d} ", attr)
     print_task_symbols(stdscr, task, y, is_selected=is_selected)
     
     # Calculate date position and available text space
-    date_str = task["date"]
+    due_str = '[' + task["due"] + ']' if task["due"] != "" else task["due"]
     date_padding = 1  # Space between description and date
-    date_pos = st.latest_max_x - len(date_str) - date_padding - 1  # Account for right frame
+    date_pos = st.latest_max_x - len(due_str) - date_padding - 1  # Account for right frame
     
     text_start_pos = cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL  # Combined offset    
     # Calculate available width for text
@@ -204,45 +145,30 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     visible_text = task[text_key][visible_start:visible_end]
 
     highlight_trailing_blank_space = 0
-    # Display text at calculated position
-    if task.get("status", False) and not is_selected and not is_edit_mode:
-        stdscr.attron(curses.A_DIM)
-    sf.safe_addstr(stdscr, y, text_start_pos, visible_text)
-    stdscr.attroff(curses.A_DIM)
+
+    sf.safe_addstr(stdscr, y, text_start_pos, visible_text, curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+
     highlight_trailing_blank_space = available_width - len(visible_text) + 1    
-    for i in range(highlight_trailing_blank_space):
-        sf.safe_appendstr(stdscr, ' ')
+    for _ in range(highlight_trailing_blank_space):
+        sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
 
-    sf.safe_addstr(stdscr, y, date_pos, date_str)
-    if is_selected:
-        sf.safe_addstr(stdscr, y, date_pos + len(date_str), ' ')
-    stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+    sf.safe_addstr(stdscr, y, date_pos, due_str, curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+    sf.safe_addstr(stdscr, y, date_pos + len(due_str), ' ', curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     sf.safe_addstr(stdscr, y, st.latest_max_x - 1, '│')
-
-    if is_selected:
-        stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
 
 def print_status_bar(stdscr):
     """Print centered status bar with progress, percentage, date and time"""
-
-    # Reset all attributes at the start
-    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) | 
-                   curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
+    done_cnt = tsk.done_count(st.filtered_tasks)
     
     # Calculate percentage
-    percent_value = (st.done_cnt/st.task_cnt)*100 if st.task_cnt > 0 else 0
+    percent_value = (done_cnt/st.task_cnt)*100 if st.task_cnt > 0 else 0
     percent_text = f"({percent_value:.0f}%)"
     
-    # Choose color based on percentage range
-    if percent_value < 33:
-        color_pair = clr.get_color_pair_num_by_str_text("red")
-    elif percent_value < 67:
-        color_pair = clr.get_color_pair_num_by_str_text("yellow")
-    else:
-        color_pair = clr.get_color_pair_num_by_str_text("green")
+    color_text = "red" if percent_value < 33 else "yellow" if percent_value < 67 else "green"
+    color_pair = clr.get_color_pair_num_by_str_text(color_text)
     
     # Split the status into parts for coloring
-    status_prefix = f"┤Done: {st.done_cnt}/{st.task_cnt} "
+    status_prefix = f"Done: {done_cnt}/{st.task_cnt} "
     
     current_date_format = pref.get_date_format()
     current_datetime = datetime.now()
@@ -255,54 +181,17 @@ def print_status_bar(stdscr):
         date_str = current_datetime.strftime("%m-%d-%Y")
     
     time_str = current_datetime.strftime("%H:%M")
-    datetime_str = f"{date_str} {time_str}├"
+    datetime_str = f"{date_str} {time_str}"
     
-    # Calculate center position
-    total_len = len(status_prefix) + len(percent_text) + len(datetime_str) + 2  # +2 for spacing
-    start_pos = (st.latest_max_x - total_len - cat.SIDEBAR_WIDTH) // 2 + cat.SIDEBAR_WIDTH
+    start_pos = st.latest_max_x - 18 - len(datetime_str) - 2
     
-    # Clear only the top line
-    sf.safe_move(stdscr, 0, 0)
-    stdscr.clrtoeol()
+    first_len = len(status_prefix + percent_text)
+    padding = " " * (18 - first_len)
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, start_pos, status_prefix)
+    sf.safe_appendstr(stdscr, percent_text, curses.color_pair(color_pair))
+    sf.safe_appendstr(stdscr, padding)
+    sf.safe_appendstr(stdscr, datetime_str)
 
-    print_top_left_corner(stdscr)
-    print_top_frame(stdscr)
-    print_separator_connector_top(stdscr)
-    print_top_right_corner(stdscr)
-    
-    # Print centered status with colored percentage and datetime
-    sf.safe_addstr(stdscr, 0, start_pos, status_prefix)
-    stdscr.attron(curses.color_pair(color_pair))
-    sf.safe_addstr(stdscr, 0, start_pos + len(status_prefix), percent_text)
-    stdscr.attroff(curses.color_pair(color_pair))
-    sf.safe_addstr(stdscr, 0, start_pos + len(status_prefix) + len(percent_text) + 2, datetime_str)
-    
-    # Ensure all attributes are reset at the end
-    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) | 
-                   curses.color_pair(2) | curses.color_pair(3) | curses.color_pair(4))
-
-def print_all_cli(todos):
-    if len(todos) == 0:
-        print("no todos yet")
-        exit(0)
-        
-    tsk.reassign_task_ids(todos)
-    done_fmt = "\033[9m%s\033[0m"     # strikethrough
-    flag_color = "\033[31m%s\033[0m"   # red for flag
-    check_color = "\033[32m%s\033[0m"  # green for checkmark
-    
-    for todo in todos:
-        id_part = f"#{todo["id"]:02d}"
-
-        flag_symbol = flag_color % "⚑ " if todo.get("flagged") else "  "
-        check_symbol = check_color % "✓ " if todo.get("status") else "  "
-        
-        description = todo["description"]
-        if todo.get("status"):
-            description = done_fmt % description
-            
-        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo["date"]})"
-        print(todo_line)
 
 def print_category_entries(stdscr, categories, start_index):
     """Print the category sidebar"""
@@ -317,115 +206,39 @@ def print_category_entries(stdscr, categories, start_index):
 def print_category(stdscr, category, y, is_selected=False):
     """Print a single category in the sidebar with fixed width"""
     # Set format based on selection and focus
+    attr = 0
     if is_selected and st.focus_manager.is_sidebar_focused():
-        stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))  # Use the same highlight as tasks
-    elif not st.focus_manager.is_sidebar_focused():
-        if is_selected:
-            stdscr.attron(curses.color_pair(clr.get_theme_color_pair_num_text()))
-            stdscr.attron(curses.A_BOLD)
-        else: 
-            turnoff_all_attributes(stdscr)
+        attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
+    elif is_selected and not st.focus_manager.is_sidebar_focused():
+        attr = curses.color_pair(clr.get_theme_color_pair_num_text()) | curses.A_BOLD
             
-    sf.safe_addstr(stdscr, y, 1, ' ')
+    sf.safe_addstr(stdscr, y, 1, ' ', attr)
     # Display name with fixed width - now at position 2 (after the left frame)
-    sf.safe_addstr(stdscr, y, 2, category["name"])
+    sf.safe_addstr(stdscr, y, 2, category["name"], attr)
     # Fill remaining space with spaces to ensure fixed width
     padding = cat.MAX_CATEGORY_NAME_LENGTH + 1 - len(category["name"])
     if padding > 0:
-        sf.safe_appendstr(stdscr, ' ' * padding)
-
-    # Reset attributes
-    if is_selected and st.focus_manager.is_sidebar_focused():
-        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-    elif is_selected and not st.focus_manager.is_sidebar_focused():
-        stdscr.attroff(curses.color_pair(clr.get_theme_color_pair_num_text()))
-        stdscr.attroff(curses.A_BOLD)
-
-def print_whole_view(stdscr, categories, category_start_index):
-    """Print the complete UI with sidebar and task list"""
-    # Get max visible height
-    st.latest_max_y, _ = stdscr.getmaxyx()
-    # Reduce max_height by 1 to account for bottom frame
-    max_height = st.latest_max_y - 2  # -1 for status bar, -1 for bottom frame
-    
-    print_frame_all(stdscr)
-    # Print status bar first
-    print_status_bar(stdscr)
-    
-    # Clear sidebar area
-    for y in range(1, max_height + 1):
-        sf.safe_move(stdscr, y, 0)
-        stdscr.clrtoeol()
-    # Print visible categories
-    visible_categories = categories[category_start_index:category_start_index + max_height]
-    
-    for i, category in enumerate(visible_categories):
-        row = i + 1  # Start from row 1 (row 0 is for status bar)
-        is_selected = category["id"] == st.current_category_id
-        print_category(stdscr, category, row, is_selected)
-    print_left_frame(stdscr)
-    print_sidebar_task_panel_separator(stdscr)
-    
-    # Print tasks or empty message
-    if st.task_cnt == 0:
-        clear_task_panel(stdscr)
-        # Print empty message with highlighting when task area has focus
-        print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
-        print_right_frame(stdscr)
-    else:
-        print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
-
-    stdscr.noutrefresh()
-    curses.doupdate()
+        sf.safe_appendstr(stdscr, ' ' * padding, attr)
 
 def print_task_entries(stdscr, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
 
-    clear_task_panel(stdscr)
-
-    # Only print if we have tasks and a valid start index
+    sidebar_focused = st.focus_manager.is_sidebar_focused()
     if st.filtered_tasks and st.start_task_id > 0:
         for i, task in enumerate(st.filtered_tasks[st.start_task_id - 1:st.end_task_id]):
             row = i + 1  # +1 due to status bar
-            display_id = i + st.start_task_id  # Sequential display ID (1, 2, 3, etc.)
-            
-            if st.start_task_id + i == st.current_task_id and not st.focus_manager.is_sidebar_focused() and not st.adding_task:
-                # Selected task
-                print_task_entry_selected(stdscr, task, row, x_offset, display_id)
-            else:
-                # Normal task
-                print_task_entry(stdscr, task, row, False, x_offset, display_id)
-    
+            is_selected = st.start_task_id + i == st.current_task_id and not sidebar_focused and not st.adding_task 
+            print_task_entry(stdscr, task, row, is_selected=is_selected, x_offset=x_offset)
 
-    # Print right frame of area without task entries, compensate for clearing the whole task panel
-    # Might get error when resizing window while typing search query
-    for y in range(len(st.filtered_tasks) if len(st.filtered_tasks) > 0 else 1, st.latest_max_y - 1):
-        sf.safe_addstr(stdscr, y, st.latest_max_x - 1, "│")
-
-
-    # Reset all attributes before drawing bottom right corner
-    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.A_REVERSE | curses.A_BLINK | 
-                  curses.A_UNDERLINE | curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-
-def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None):
+def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     """Print a task with horizontal offset and optional display ID override"""
-
-    # Use display_id if provided, otherwise use task's actual ID
-    id_to_show = display_id if display_id is not None else task["id"]
     
-    if not is_selected:
-        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-
-    # Print task ID
-    sf.safe_addstr(stdscr, row, x_offset, f"{id_to_show:2d} ")
-    
-    # Print task symbols with swapped positions
     print_task_symbols(stdscr, task, row, is_selected=is_selected)
     
     # Calculate positions with right frame
     right_frame_pos = st.latest_max_x - 1
-    date_str = task["date"]
-    date_pos = right_frame_pos - len(date_str) - 1  # Only 1 char gap from right frame
+    due_str = '[' + task["due"] + ']' if task["due"] != "" else task["due"]
+    date_pos = right_frame_pos - len(due_str) - 1  # Only 1 char gap from right frame
     
     # Calculate available space for text
     total_indent = x_offset + tsk.TASK_INDENT_IN_TASK_PANEL
@@ -444,42 +257,47 @@ def print_task_entry(stdscr, task, row, is_selected, x_offset=0, display_id=None
     else:
         visible_text = text
         
-    if task.get("status", False) and stk.get_strikethrough() and not is_selected:
+    is_done = task.get("status", False)
+    if is_done and stk.get_strikethrough() and not is_selected:
         visible_text = stk.apply(visible_text)
+        
+    task_id = task["id"]
+    attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
+    attr_done = curses.A_DIM
     
     if is_selected:
-        stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-        sf.safe_addstr(stdscr, row, total_indent, visible_text)
+        sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ", attr)
+        sf.safe_addstr(stdscr, row, total_indent, visible_text, attr)
         # Fill remaining space with spaces
-        for i in range(available_width - len(visible_text) + 1):
-            sf.safe_appendstr(stdscr, ' ')
-        sf.safe_addstr(stdscr, row, date_pos, date_str)
-        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+        for _ in range(available_width - len(visible_text) + 1):
+            sf.safe_appendstr(stdscr, ' ', attr)
+        sf.safe_addstr(stdscr, row, date_pos, due_str, attr)
+        sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ', attr)
     else:
-        if task.get("status", False):
-            stdscr.attron(curses.A_DIM)
-        sf.safe_addstr(stdscr, row, total_indent, visible_text)
+        attr_due = curses.color_pair(clr.get_theme_color_pair_num_text()) if task["due"] != "" else 0
+        sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
+        sf.safe_addstr(stdscr, row, total_indent, visible_text, (attr_done if is_done else 0) | attr_due)
         # Fill remaining space with spaces
-        for i in range(available_width - len(visible_text)):
+        for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ')
         # Print date
-        sf.safe_addstr(stdscr, row, date_pos, date_str)
-        if task.get("status", False):
-            stdscr.attroff(curses.A_DIM)
-
-
-    if is_selected:
-        stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+        sf.safe_addstr(stdscr, row, date_pos, due_str, (attr_done if is_done else 0) | attr_due)
         sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ')
-        stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-    sf.safe_addstr(stdscr, row, right_frame_pos, '│')
 
-
-def print_task_entry_selected(stdscr, task, row, x_offset=0, display_id=None):
-    """Print a selected task with offset"""
-    stdscr.attron(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-    print_task_entry(stdscr, task, row, True, x_offset, display_id)
-    stdscr.attroff(curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+def print_whole_view(stdscr, categories, category_start_index):
+    """Print the complete UI with sidebar and task list"""
+    
+    clear_task_panel(stdscr)
+    if st.task_cnt == 0:
+        print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
+    else:
+        print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
+        
+    clear_sidebar_area(stdscr)
+    print_category_entries(stdscr, categories, category_start_index)
+    print_frame_all(stdscr)
+    clear_status(stdscr)
+    print_status_bar(stdscr)
 
 def print_pref_panel(stdscr, current_selection_index=0):
     """
@@ -508,8 +326,8 @@ def print_pref_panel(stdscr, current_selection_index=0):
     strikethrough_enabled = stk.get_strikethrough()
     current_color = clr.get_theme_color_str()
     current_date_format = pref.get_date_format()
-    sort_flagged = pref.get_sort_flagged()
-    sort_done = pref.get_sort_done()
+    sort_by_flagged = pref.get_sort_by_flagged()
+    sort_by_done = pref.get_sort_by_done()
     
     # Format each line with ">" for selected item
     # Adapt line width to available space
@@ -560,12 +378,12 @@ def print_pref_panel(stdscr, current_selection_index=0):
                                          current_date_format, clr.get_theme_color_pair_num_text())
             
         elif "Sort by flagged:" in line:
-            value = "on" if sort_flagged else "off"
+            value = "on" if sort_by_flagged else "off"
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
             
         elif "Sort by done:" in line:
-            value = "on" if sort_done else "off"
+            value = "on" if sort_by_done else "off"
             pos = line.rfind(value)  # reverse find because done contains "on" as well
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
             
@@ -591,17 +409,14 @@ def print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, cente
     if center_offset_x + pos + len(value) > st.latest_max_x:
         return
         
-    # Print the value with appropriate color
     if value == "on":
         green_pair_num = clr.get_color_pair_num_by_str_text("green")
-        stdscr.attron(curses.color_pair(green_pair_num))
-        sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1])
-        stdscr.attroff(curses.color_pair(green_pair_num))
+        attr = curses.color_pair(green_pair_num)
+        sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1], attr)
     else:  # "off"
         red_pair_num = clr.get_color_pair_num_by_str_text("red")
-        stdscr.attron(curses.color_pair(red_pair_num))
-        sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1])
-        stdscr.attroff(curses.color_pair(red_pair_num))
+        attr = curses.color_pair(red_pair_num)
+        sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1], attr)
     
     # Print the suffix (part after the value) if it fits
     suffix = line[pos + len(value):]
@@ -627,9 +442,8 @@ def print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center
         return
         
     # Print the value with specified color
-    stdscr.attron(curses.color_pair(color_pair))
-    sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1])
-    stdscr.attroff(curses.color_pair(color_pair))
+    attr = curses.color_pair(color_pair)
+    sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1], attr)
     
     # Print the suffix (part after the value) if it fits
     suffix = line[pos + len(value):]
@@ -637,30 +451,43 @@ def print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center
     if suffix_pos < st.latest_max_x and len(suffix) > 0:
         sf.safe_addstr(stdscr, y + center_offset_y + 1, suffix_pos, suffix[:st.latest_max_x-suffix_pos-1])
 
-def clear_task_panel(stdscr):
-    for i in range(1, st.latest_max_y - 1):    
-        sf.safe_move(stdscr, i, cat.SIDEBAR_WIDTH)
-        stdscr.clrtoeol()
+def print_all_cli(todos):
+    if len(todos) == 0:
+        print("no todos yet")
+        exit(0)
         
-def clear_inner_content(stdscr):
-    # Clear all content exepct the outer frame
-    for i in range(1, st.latest_max_y - 1):
-        sf.safe_move(stdscr, i, 1)
-        stdscr.clrtoeol()
-        
-def print_q_to_close(stdscr, page):
-    hint = f"┤Press 'q' to close {page}├"
-    hint_pos_x = (st.latest_max_x - len(hint)) // 2 
-    sf.safe_addstr(stdscr, st.latest_max_y - 1, hint_pos_x, hint)
+    tsk.reassign_task_ids(todos)
+    done_fmt = "\033[9m%s\033[0m"     # strikethrough
+    flag_color = "\033[31m%s\033[0m"   # red for flag
+    check_color = "\033[32m%s\033[0m"  # green for checkmark
+    
+    for todo in todos:
+        id_part = f"#{todo["id"]:02d}"
 
+        flag_symbol = flag_color % "⚑ " if todo.get("flagged") else "  "
+        check_symbol = check_color % "✓ " if todo.get("status") else "  "
+        
+        description = todo["description"]
+        if todo.get("status"):
+            description = done_fmt % description
+            
+        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo["due"]})"
+        print(todo_line)
+        
 # Functions for drawing frames and separators
 def print_right_frame(stdscr):
-    for y in range(1, st.latest_max_y - 1):
+    for y in range(1, st.latest_max_y - 3):
         sf.safe_addstr(stdscr, y, st.latest_max_x - 1, "│")
 
+def print_right_frame_2nd(stdscr):
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, st.latest_max_x - 1, "│")
+
 def print_left_frame(stdscr):
-    for y in range(1, st.latest_max_y - 1):
+    for y in range(1, st.latest_max_y - 3):
         sf.safe_addstr(stdscr, y, 0, '│')
+        
+def print_left_frame_2nd(stdscr):
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, 0, "│")
         
 def print_top_frame(stdscr):
     for x in range(1, st.latest_max_x - 1):
@@ -669,6 +496,19 @@ def print_top_frame(stdscr):
 def print_bottom_frame(stdscr):    
     for x in range(1, st.latest_max_x - 2):
         sf.safe_addstr(stdscr, st.latest_max_y - 1, x, '─')
+    
+def print_2nd_bottom(stdscr):
+    for x in range(1, st.latest_max_x - 1):
+        sf.safe_addstr(stdscr, st.latest_max_y - 3, x, '─')
+        
+def print_2nd_bottom_connector_up(stdscr):
+    sf.safe_addstr(stdscr, st.latest_max_y - 3, 15, "┴")
+
+def print_2nd_bottom_connector_left(stdscr):
+    sf.safe_addstr(stdscr, st.latest_max_y - 3, 0, "├")
+
+def print_2nd_bottom_right_corner(stdscr):
+    sf.safe_addstr(stdscr, st.latest_max_y - 3, st.latest_max_x - 1, "┤")
 
 def print_top_right_corner(stdscr):
     sf.safe_addstr(stdscr, 0, st.latest_max_x - 1, "┐")
@@ -681,49 +521,47 @@ def print_bottom_right_corner(stdscr):
     sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
 
 def print_bottom_left_corner(stdscr):
-    # Reset attributes before drawing corner to prevent highlighting
     sf.safe_addstr(stdscr, st.latest_max_y - 1, 0, "└")
     
 def print_sidebar_task_panel_separator(stdscr):
-    for y in range(1, st.latest_max_y - 1):
+    for y in range(1, st.latest_max_y - 3):
         sf.safe_addstr(stdscr, y, 15, "│")
 
 def print_separator_connector_top(stdscr):
     sf.safe_addstr(stdscr, 0, 15, "┬")
 
-def print_separator_connector_bottom(stdscr):
-    sf.safe_addstr(stdscr, st.latest_max_y - 1, 15, "┴")
-    
 def print_frame_all(stdscr):
-    turnoff_all_attributes(stdscr)
     print_top_left_corner(stdscr)
     print_bottom_left_corner(stdscr)
     print_left_frame(stdscr)
+    print_left_frame_2nd(stdscr)
     print_top_right_corner(stdscr)
     print_top_frame(stdscr)
     print_right_frame(stdscr)
     print_bottom_frame(stdscr)
+    print_2nd_bottom(stdscr)
+    print_2nd_bottom_connector_up(stdscr)
+    print_2nd_bottom_connector_left(stdscr)
     print_separator_connector_top(stdscr)
-    print_separator_connector_bottom(stdscr)
+    print_2nd_bottom_right_corner(stdscr)
+    print_right_frame_2nd(stdscr)
     print_sidebar_task_panel_separator(stdscr)
     # Trick for last char (bottom right) error in cursor window    
     sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
     sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
 
 def print_outer_frame(stdscr):
-    turnoff_all_attributes(stdscr)
     print_top_left_corner(stdscr)
     print_bottom_left_corner(stdscr)
     print_left_frame(stdscr)
+    sf.safe_addstr(stdscr, st.latest_max_y - 3, 0, "│")
+    print_left_frame_2nd(stdscr)
     print_top_right_corner(stdscr)
     print_top_frame(stdscr)
     print_right_frame(stdscr)
+    print_right_frame_2nd(stdscr)
+    sf.safe_addstr(stdscr, st.latest_max_y - 3, st.latest_max_x - 1, "│")
     print_bottom_frame(stdscr)
     # Trick for last char (bottom right) error in cursor window
     sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
     sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
-
-def turnoff_all_attributes(stdscr):
-    stdscr.attroff(curses.A_BOLD | curses.A_DIM | curses.A_REVERSE | curses.A_BLINK | 
-                  curses.A_UNDERLINE | curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) |
-                  curses.color_pair(clr.get_theme_color_pair_num_text()))

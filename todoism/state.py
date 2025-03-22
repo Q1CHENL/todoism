@@ -27,7 +27,6 @@ current_task_row = 1
 filtered_tasks = []
 
 task_cnt = 0
-done_cnt = 0
 cat_cnt = 0
 
 focus_manager = None
