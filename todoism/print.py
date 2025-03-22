@@ -168,7 +168,7 @@ def print_status_bar(stdscr):
     color_pair = clr.get_color_pair_num_by_str_text(color_text)
     
     # Add command hint at the beginning (dimmed)
-    hint_text = ":<command> or '/' to search tasks"
+    hint_text = ":<command> or '/' to search for tasks"
     sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, hint_text, curses.A_DIM)
     
     # Split the status into parts for coloring

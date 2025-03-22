@@ -24,8 +24,8 @@ help_msg = '''
 │   :purge - Purge done tasks in current cat.  - Click on blank area: Toggle focus            │
 │   :purge all - Purge all done tasks          - Wheel scroll Up/Down: Navigate on tasks/cats │
 │                                                                                             │
-│   To add due date to a task:                                                                │
-│   Add [<due date>] at the end of the task                                                   │
+│   To add due date to a task:                 To search for tasks:                           │
+│   Add [<due date>] at the end of the task    /<search term>                                 │
 │   Supported formats:                                                                        │
 │   - [yyyy-mm-dd hh:mm]    - [hh:mm]                                                         │
 │   - [yyyy-mm-dd]          - [Tomorrow]                                                      │
