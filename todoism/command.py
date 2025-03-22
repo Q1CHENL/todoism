@@ -1,5 +1,4 @@
 import curses
-import copy
 import time
 import webbrowser
 
@@ -132,6 +131,7 @@ def execute_command(stdscr, command: str, task_list: list):
             ch = stdscr.getch()
             if ch == ord('q'):
                 stdscr.timeout(old_timeout)
+                pr.clear_bottom_bar(stdscr)
                 return task_list, None
             elif ch == curses.KEY_MOUSE:
                 _, mouse_x, mouse_y, _, button_state = curses.getmouse()
@@ -155,6 +155,7 @@ def execute_command(stdscr, command: str, task_list: list):
         
         while True:
             if quit:
+                pr.clear_bottom_bar(stdscr)
                 break                
             # Keep selection index in valid range
             if selection_index > 10:
@@ -348,7 +349,10 @@ def execute_command(stdscr, command: str, task_list: list):
                 stdscr.clrtoeol()
             else:
                 if test_module.exit_dev_mode():
+                    import todoism.due as due
                     task_list = tsk.load_tasks()
+                    due.add_due_key_if_missing(task_list)
+                    tsk.save_tasks(task_list)
                     categories = cat.load_categories()
                     st.current_category_id = 0
                     

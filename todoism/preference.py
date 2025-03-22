@@ -170,3 +170,4 @@ def set_sort_by_done(enabled):
             
     except FileNotFoundError:
         setup_default_settings()
+              
