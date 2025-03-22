@@ -24,10 +24,6 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
 def print_msg(stdscr, msg, x_offset=0, attr=0):
     """Print a message box with proper centering in the task area with optional highlighting"""
     
-    # Ensure we have minimum required space
-    if st.latest_max_y < 2 or st.latest_max_x < x_offset + 1:
-        return
-    
     lines = msg.split('\n')
     width = len(lines[1])
     # Calculate available width for task area (total width minus sidebar)
@@ -249,15 +245,12 @@ def print_whole_view(stdscr, categories, category_start_index):
         print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
     else:
         print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
-
+        
     clear_sidebar_area(stdscr)
     print_category_entries(stdscr, categories, category_start_index)
-
     print_frame_all(stdscr)
-    
     clear_status(stdscr)
     print_status_bar(stdscr)
-
 
 def print_task_entries(stdscr, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
