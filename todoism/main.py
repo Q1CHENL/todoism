@@ -80,22 +80,16 @@ def _task_not_marked(task):
 def main(stdscr):
     stdscr.keypad(True)  # enable e.g arrow keys
     stdscr.scrollok(True)
-    curses.curs_set(1)
+    curses.curs_set(0)
     stdscr.clear()
     stdscr.refresh()
     
     curses.start_color()
     clr.setup_color_pairs()
     
-    pref.update_preferences()
-    
+    pref.update_preferences()    
     # Enable mouse support
     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
-
-    # Set up the screen
-    curses.curs_set(0)
-    stdscr.clear()
-    # Assuming color pair 0 represents the default colors
     stdscr.bkgd(' ', curses.COLOR_BLACK | curses.A_NORMAL)
 
     # Update existing tasks to include category_id if missing
@@ -255,9 +249,8 @@ def main(stdscr):
         
         # Check if we need to update the time (every second)
         current_time = time.time()
-        if current_time - last_time_update >= 2.0:  # Increased to 2 seconds to reduce lag
+        if current_time - last_time_update >= 2.0:
             pr.print_status_bar(stdscr)
-            stdscr.refresh()
             last_time_update = current_time
             
         if should_repaint:
