@@ -101,6 +101,7 @@ def main(stdscr):
     stdscr.keypad(True)  # enable e.g arrow keys
     stdscr.scrollok(True)
     curses.curs_set(0)
+    curses.set_escdelay(25)
     stdscr.clear()
     stdscr.refresh()
     

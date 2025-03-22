@@ -84,6 +84,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
     more comprehensive functionalities than getstr() does.
     """
     curses.curs_set(0)
+    original_text = entry[text_key]
     
     right_frame_pos = st.latest_max_x - 1
     if st.focus_manager.is_sidebar_focused():
@@ -177,7 +178,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 # Clear selection if active
                 selection_active = False
                 selection_start = -1
-                continue
+                return original_text
                 
         elif ch == curses.KEY_LEFT:
             # Clear selection if active
