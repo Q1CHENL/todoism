@@ -113,6 +113,10 @@ def update_existing_tasks():
         if "uuid" not in task:
             task["uuid"] = str(uuid.uuid4())
             modified = True
+        
+        if "due" not in task:
+            task["due"] = ""
+            modified = True
     
     if modified:
         save_tasks(task_list)
