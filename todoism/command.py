@@ -131,6 +131,7 @@ def execute_command(stdscr, command: str, task_list: list):
             ch = stdscr.getch()
             if ch == ord('q'):
                 stdscr.timeout(old_timeout)
+                pr.clear_bottom_bar(stdscr)
                 return task_list, None
             elif ch == curses.KEY_MOUSE:
                 _, mouse_x, mouse_y, _, button_state = curses.getmouse()
@@ -154,6 +155,7 @@ def execute_command(stdscr, command: str, task_list: list):
         
         while True:
             if quit:
+                pr.clear_bottom_bar(stdscr)
                 break                
             # Keep selection index in valid range
             if selection_index > 10:

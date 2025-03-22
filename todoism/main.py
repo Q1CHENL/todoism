@@ -30,11 +30,8 @@ def _exit():
 
 def _clear_bottom_line_content(stdscr):
     # clear bottom line
-    sf.safe_move(stdscr, st.latest_max_capacity, 0)
+    sf.safe_move(stdscr, st.latest_max_y - 2, 1)
     stdscr.clrtoeol()
-    # Keep frames visible
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, 0, "│")
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, 15, "│")
     sf.safe_addstr(stdscr, st.latest_max_y - 2, st.latest_max_x - 1, "│")
     
 def _restore_task_panel(task_list):
@@ -112,8 +109,8 @@ def main(stdscr):
     st.latest_max_y = max_y
     st.old_max_x = max_x
     st.old_max_y = max_y
-    st.old_max_capacity = max_y - 2
-    st.latest_max_capacity = max_y - 2
+    st.old_max_capacity = max_y - 2 - 2
+    st.latest_max_capacity = max_y - 2 - 2
     st.current_category_id = 0
     st.cat_cnt = len(categories)
     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
@@ -153,7 +150,7 @@ def main(stdscr):
         st.old_max_x = st.latest_max_x
         st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
         st.old_max_capacity = st.latest_max_capacity
-        st.latest_max_capacity = st.latest_max_y - 2
+        st.latest_max_capacity = st.latest_max_y - 2 - 2
         
         # Prevent error when window is vertically too small
         if st.latest_max_capacity < 0:
@@ -245,6 +242,7 @@ def main(stdscr):
                         
         if _window_resized():
             should_repaint = True
+            stdscr.clear()
             continue
         
         # Check if we need to update the time (every second)
@@ -268,7 +266,6 @@ def main(stdscr):
                     
                 else:
                     pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
-                    pr.print_frame_all(stdscr)
                     if st.searching:
                         pr.print_msg_in_task_panel(stdscr, msg.no_tasks_found_msg, cat.SIDEBAR_WIDTH, highlight=False)
                     else:
@@ -280,6 +277,7 @@ def main(stdscr):
             if st.searching:
                 pr.print_q_to_close(stdscr, "search")
             should_repaint = False
+            stdscr.refresh()
             
         # Wait for user input
         key = stdscr.getch()
@@ -384,15 +382,15 @@ def main(stdscr):
             curses.echo()
             curses.curs_set(1)
             stdscr.timeout(-1)
-            _clear_bottom_line_content(stdscr)
-            sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, '/')
+            pr.clear_bottom_bar_except_status(stdscr)
+            sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, "/")
             query = stdscr.getstr().decode("utf-8")
             stdscr.timeout(500)
             curses.curs_set(0)
             curses.noecho()
 
             if query == "":
-                _clear_bottom_line_content(stdscr)
+                pr.clear_bottom_bar_except_status(stdscr)
                 continue
 
             st.filtered_tasks = srch.search(query, task_list)
@@ -427,6 +425,7 @@ def main(stdscr):
             elif key == ord('q'):
                 if st.searching:
                     st.searching = False
+                    pr.clear_bottom_bar_except_status(stdscr)
                     _restore_task_panel(task_list)
                     should_repaint = True
                     continue
@@ -549,14 +548,18 @@ def main(stdscr):
                 
                 # Disable timeout temporarily
                 stdscr.timeout(-1)
-                _clear_bottom_line_content(stdscr)
-                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
+                pr.clear_bottom_bar_except_status(stdscr)
+                sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ":")
                 stdscr.refresh()
                 command = stdscr.getstr().decode("utf-8")
                 stdscr.timeout(500)
                 
                 curses.curs_set(0)
                 curses.noecho()
+                
+                if command == "":
+                    pr.clear_bottom_bar_except_status(stdscr)    
+                    continue
                 
                 task_list, cats = cmd.execute_command(stdscr, command, task_list)
 
@@ -677,6 +680,7 @@ def main(stdscr):
             elif key == ord('q'):
                 if st.searching:
                     st.searching = False
+                    pr.clear_bottom_bar_except_status(stdscr)
                     _restore_task_panel(task_list)
                     should_repaint = True
                     continue
@@ -688,13 +692,17 @@ def main(stdscr):
                 curses.curs_set(1)
                 
                 stdscr.timeout(-1)
-                _clear_bottom_line_content(stdscr)
-                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, ":")
+                pr.clear_bottom_bar_except_status(stdscr)
+                sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ":")
+
                 command = stdscr.getstr().decode("utf-8")
                 stdscr.timeout(500)
-                
                 curses.curs_set(0)
                 curses.noecho()
+                
+                if command == "":
+                    pr.clear_bottom_bar_except_status(stdscr)    
+                    continue
                 
                 task_list, cats = cmd.execute_command(stdscr, command, task_list)
 
