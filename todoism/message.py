@@ -14,15 +14,23 @@ help_msg = '''
 │   e - Edit task/category                     ESC - Quit adding/editing task                 │
 │   f - Mark task as flagged                   Enter - Finish adding/editing task             │
 │   q - Quit this help message/pref/todoism    Up/Down Arrow Keys - Navigate through tasks    │
+│                                              CTRL + Left/Right - Jump words                 │
+│                                              CTRL + Shift + Left/Right - Select words       │
+│   Vim-like long commands:                    ALT + Left/Right - Jump to start/end of text   │
+│   :help - Show this help message                                                            │
+│   :pref - Open preference panel              Mouse Operations:                              │
+│   :del <task_id> - Delete task               - Click on task/category: Select item          │
+│   :edit <task_id> - Edit task                - Click on done/flag: Toggle status            │
+│   :done <task_id> - Mark task as done        - Click on blank area: toggle focus            │
+│   :purge - Purge all done tasks              - Wheel scroll up/down: navigate on items      │
 │                                                                                             │
-│   Vim-like long commands:                    Mouse Operations:                              │
-│   (:<command> [args])                        - Click on task: Select task                   │
-│   :help - Show this help message             - Click on category: Select category           │
-│   :pref - Open preference panel              - Click on done: Toggle task completion        │
-│   :del <task_id> - Delete task               - Click on flag: Toggle task flag              │
-│   :edit <task_id> - Edit task                - Click on blank area: toggle focus            │
-│   :done <task_id> - Mark task as done        - Wheel scroll up on tasks/categories          │
-│   :purge - Purge all done tasks              - Wheel scroll down on tasks/categories        │
+│   To add due date to a task:                                                                │
+│   Add [<due date>] at the end of the task                                                   │
+│   Supported formats:                                                                        │
+│   - [yyyy-mm-dd hh:mm]    - [hh:mm]                                                         │
+│   - [yyyy-mm-dd]          - [Tomorrow]                                                      │
+│   - [mm-dd hh:mm]         - [Next Week]                                                     │
+│   - [mm-dd] or [dd-mm]                                                                      │
 │                                                                                             │
 └─────────────────────────────────────────────────────────────────────────────────────────────┘
 '''
