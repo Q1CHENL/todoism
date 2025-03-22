@@ -541,9 +541,6 @@ def main(stdscr):
 
                         _restore_task_panel(task_list)
                     
-                    # Clear the status line
-                    sf.safe_move(stdscr, st.latest_max_capacity, 0)
-                    stdscr.clrtoeol()
                     should_repaint = True
                 
             elif key == ord(':'):

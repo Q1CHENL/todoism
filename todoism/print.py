@@ -229,16 +229,18 @@ def print_category(stdscr, category, y, is_selected=False):
     if padding > 0:
         sf.safe_appendstr(stdscr, ' ' * padding, attr)
 
+def clear_sidebar_area(stdscr):
+    for y in range(1, st.latest_max_capacity + 1):
+        sf.safe_move(stdscr, y, 0)
+        stdscr.clrtoeol()
+
 def print_whole_view(stdscr, categories, category_start_index):
     """Print the complete UI with sidebar and task list"""
     
     print_frame_all(stdscr)
     print_status_bar(stdscr)
     
-    # Clear sidebar area
-    for y in range(1, st.latest_max_capacity + 1):
-        sf.safe_move(stdscr, y, 0)
-        stdscr.clrtoeol()
+    clear_sidebar_area(stdscr)
         
     print_category_entries(stdscr, categories, category_start_index)
     print_left_frame(stdscr)
