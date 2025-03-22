@@ -22,12 +22,12 @@ def print_q_to_close(stdscr, page):
     sf.safe_addstr(stdscr, st.latest_max_y - 2, hint_pos_x, hint)
 # Clearing functions
 def clear_sidebar_area(stdscr):
-    for y in range(1, st.latest_max_capacity - 4):
+    for y in range(1, st.latest_max_y - 3):
         sf.safe_addstr(stdscr, y, 1, ' ' * (cat.SIDEBAR_WIDTH - 2))
 
 def clear_task_panel(stdscr):
-    for i in range(1, st.latest_max_capacity + 1):    
-        sf.safe_addstr(stdscr, i, cat.SIDEBAR_WIDTH, ' ' * (st.latest_max_x - cat.SIDEBAR_WIDTH - 1))
+    for y in range(1, st.latest_max_y - 3):    
+        sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, ' ' * (st.latest_max_x - cat.SIDEBAR_WIDTH - 1))
 
 def clear_status(stdscr):
     sf.safe_addstr(stdscr, st.latest_max_y - 2, st.latest_max_x - 35, ' ' * 34)
