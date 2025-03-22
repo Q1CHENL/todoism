@@ -15,17 +15,21 @@ import todoism.category as cat
 import todoism.state as st
 import todoism.safe as sf
 
-def purge(task_list):
+def purge(task_list, category_id=0):
     """
     purge completed tasks, appending to existing purged tasks
     """
     newly_purged = []
     remained = []
+    
+    def purged_cond(task, category_id):
+        return task["status"] if category_id == 0 else task["status"] is True and task["category_id"]
+    
     for t in task_list:
-        if t["status"] is False:
-            remained.append(t)
+        if purged_cond(t, category_id):
+            newly_purged.append(t)            
         else:
-            newly_purged.append(t)
+            remained.append(t)
     tsk.reassign_task_ids(remained)
     purged_tasks = tsk.load_purged_tasks()
     purged_tasks.extend(newly_purged)
@@ -74,17 +78,17 @@ def execute_command(stdscr, command: str, task_list: list):
             command_recognized = False
     elif command == "purge":
         original_cnt = len(task_list)
-        displayed_task_cnt = st.end_task_id - st.start_task_id + 1
-        task_list = purge(task_list)
+        task_list = purge(task_list, st.current_category_id)
         tsk.save_tasks(task_list)
         if len(task_list) < original_cnt:
             st.current_task_id = 1
             st.current_task_row = 1
             st.start_task_id = 1
-            if len(task_list) > displayed_task_cnt:
-                st.end_task_id = displayed_task_cnt
-            else:
-                st.end_task_id = len(task_list)
+            st.end_task_id = min(len(task_list), st.latest_max_capacity)
+        return task_list, None
+    elif command == ("purge all"):
+        task_list = purge(task_list)
+        tsk.save_tasks(task_list)
         return task_list, None
     elif command.startswith("del"):
         parts = command.split()
