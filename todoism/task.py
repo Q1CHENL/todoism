@@ -52,45 +52,6 @@ def create_new_task(task_id, task_description="", flagged=False, category_id=0, 
         "category_id": category_id
     }
 
-def formatted_datetime_now():
-    current_format = pref.get_date_format()
-    if current_format == "Y-M-D":
-        return datetime.now().strftime("%Y-%m-%d %H:%M")
-    elif current_format == "D-M-Y":
-        return datetime.now().strftime("%d-%m-%Y %H:%M")
-    else:  # "M-D-Y"
-        return datetime.now().strftime("%m-%d-%Y %H:%M")
-
-def update_task_date_format(task, old_format):
-    """Update task date format to match settings"""
-    # current_datetime = task["date"]
-    # current_date_format = pref.get_date_format()
-    # date_time = current_datetime.strip().split(' ')
-    # date_parts = date_time[0].split('-')
-    # time = date_time[1]
-    
-    # # Parse date parts based on old format
-    # if old_format == "Y-M-D":
-    #     year, month, day = date_parts[0], date_parts[1], date_parts[2]
-    # elif old_format == "D-M-Y":
-    #     year, month, day = date_parts[2], date_parts[1], date_parts[0]
-    # else:  # "M-D-Y"
-    #     year, month, day = date_parts[2], date_parts[0], date_parts[1]
-    
-    # # Format according to new format
-    # if current_date_format == "Y-M-D":
-    #     task["date"] = f"{year}-{month}-{day} {time}"
-    # elif current_date_format == "D-M-Y":
-    #     task["date"] = f"{day}-{month}-{year} {time}"
-    # else:  # "M-D-Y"
-    #     task["date"] = f"{month}-{day}-{year} {time}"
-    pass
-    
-def update_all_task_date_format(task_list, old_format):
-    for task in task_list:
-        update_task_date_format(task, old_format)
-    save_tasks(task_list)
-
 def save_tasks(task_list, custom_path=None):
     """Save tasks to file"""
     if custom_path:

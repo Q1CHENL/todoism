@@ -236,7 +236,6 @@ def execute_command(stdscr, command: str, task_list: list):
                     pref.set_date_format(date_formats[date_index])
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
-                    tsk.update_all_task_date_format(task_list, current_format)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
