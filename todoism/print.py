@@ -13,6 +13,39 @@ view_mode = 0
 add_mode  = 1
 edit_mode = 2
 
+def print_version():
+    print("todoism v1.21.4")
+
+def print_q_to_close(stdscr, page):
+    hint = f"Press 'q' to close {page}"
+    hint_pos_x = (st.latest_max_x - len(hint)) // 2 
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, hint_pos_x, hint)
+# Clearing functions
+def clear_sidebar_area(stdscr):
+    for y in range(1, st.latest_max_capacity - 4):
+        sf.safe_addstr(stdscr, y, 1, ' ' * (cat.SIDEBAR_WIDTH - 2))
+
+def clear_task_panel(stdscr):
+    for i in range(1, st.latest_max_capacity + 1):    
+        sf.safe_addstr(stdscr, i, cat.SIDEBAR_WIDTH, ' ' * (st.latest_max_x - cat.SIDEBAR_WIDTH - 1))
+
+def clear_status(stdscr):
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, st.latest_max_x - 35, ' ' * 34)
+
+def clear_bottom_bar_except_status(stdscr):
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ' ' * (st.latest_max_x - 37))
+    
+def clear_bottom_bar(stdscr):
+    clear_status(stdscr)
+    clear_bottom_bar_except_status(stdscr)
+    
+def print_github_page_line(stdscr, line):
+    sf.safe_appendstr(stdscr, line[:line.find("Github page")])
+    blue_pair = clr.get_color_pair_num_by_str_text("blue")
+    attr = curses.color_pair(blue_pair) | curses.A_UNDERLINE
+    sf.safe_appendstr(stdscr, "Github page", attr)
+    sf.safe_appendstr(stdscr, line[line.find("Github page") + len("Github page"):])
+
 def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, highlight=False):
     """Print a message box with proper centering in the task area with optional highlighting"""
 
@@ -51,16 +84,6 @@ def print_msg(stdscr, msg, x_offset=0, attr=0):
                     print_github_page_line(stdscr, line)
                 else:
                     sf.safe_appendstr(stdscr, line, attr)
-
-def print_github_page_line(stdscr, line):
-    sf.safe_appendstr(stdscr, line[:line.find("Github page")])
-    blue_pair = clr.get_color_pair_num_by_str_text("blue")
-    attr = curses.color_pair(blue_pair) | curses.A_UNDERLINE
-    sf.safe_appendstr(stdscr, "Github page", attr)
-    sf.safe_appendstr(stdscr, line[line.find("Github page") + len("Github page"):])
-
-def print_version():
-    print("todoism v1.21.4")
 
 def print_task_symbols(stdscr, task, y, is_selected=False):
     """Print task flag and status symbols with appropriate colors
@@ -169,28 +192,6 @@ def print_status_bar(stdscr):
     sf.safe_appendstr(stdscr, padding)
     sf.safe_appendstr(stdscr, datetime_str)
 
-def print_all_cli(todos):
-    if len(todos) == 0:
-        print("no todos yet")
-        exit(0)
-        
-    tsk.reassign_task_ids(todos)
-    done_fmt = "\033[9m%s\033[0m"     # strikethrough
-    flag_color = "\033[31m%s\033[0m"   # red for flag
-    check_color = "\033[32m%s\033[0m"  # green for checkmark
-    
-    for todo in todos:
-        id_part = f"#{todo["id"]:02d}"
-
-        flag_symbol = flag_color % "⚑ " if todo.get("flagged") else "  "
-        check_symbol = check_color % "✓ " if todo.get("status") else "  "
-        
-        description = todo["description"]
-        if todo.get("status"):
-            description = done_fmt % description
-            
-        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo["due"]})"
-        print(todo_line)
 
 def print_category_entries(stdscr, categories, start_index):
     """Print the category sidebar"""
@@ -218,39 +219,6 @@ def print_category(stdscr, category, y, is_selected=False):
     padding = cat.MAX_CATEGORY_NAME_LENGTH + 1 - len(category["name"])
     if padding > 0:
         sf.safe_appendstr(stdscr, ' ' * padding, attr)
-
-def clear_sidebar_area(stdscr):
-    for y in range(1, st.latest_max_capacity - 4):
-        sf.safe_addstr(stdscr, y, 1, ' ' * (cat.SIDEBAR_WIDTH - 2))
-
-def clear_task_panel(stdscr):
-    for i in range(1, st.latest_max_capacity + 1):    
-        sf.safe_addstr(stdscr, i, cat.SIDEBAR_WIDTH, ' ' * (st.latest_max_x - cat.SIDEBAR_WIDTH - 1))
-
-def clear_status(stdscr):
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, st.latest_max_x - 35, ' ' * 34)
-
-def clear_bottom_bar_except_status(stdscr):
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ' ' * (st.latest_max_x - 37))
-    
-def clear_bottom_bar(stdscr):
-    clear_status(stdscr)
-    clear_bottom_bar_except_status(stdscr)
-
-def print_whole_view(stdscr, categories, category_start_index):
-    """Print the complete UI with sidebar and task list"""
-    
-    clear_task_panel(stdscr)
-    if st.task_cnt == 0:
-        print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
-    else:
-        print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
-        
-    clear_sidebar_area(stdscr)
-    print_category_entries(stdscr, categories, category_start_index)
-    print_frame_all(stdscr)
-    clear_status(stdscr)
-    print_status_bar(stdscr)
 
 def print_task_entries(stdscr, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
@@ -315,6 +283,21 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         # Print date
         sf.safe_addstr(stdscr, row, date_pos, date_str, attr_due)
         sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ')
+
+def print_whole_view(stdscr, categories, category_start_index):
+    """Print the complete UI with sidebar and task list"""
+    
+    clear_task_panel(stdscr)
+    if st.task_cnt == 0:
+        print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
+    else:
+        print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
+        
+    clear_sidebar_area(stdscr)
+    print_category_entries(stdscr, categories, category_start_index)
+    print_frame_all(stdscr)
+    clear_status(stdscr)
+    print_status_bar(stdscr)
 
 def print_pref_panel(stdscr, current_selection_index=0):
     """
@@ -468,17 +451,29 @@ def print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center
     if suffix_pos < st.latest_max_x and len(suffix) > 0:
         sf.safe_addstr(stdscr, y + center_offset_y + 1, suffix_pos, suffix[:st.latest_max_x-suffix_pos-1])
 
-def clear_inner_content(stdscr):
-    """Clear all content exepct the outer frame"""
-    for i in range(1, st.latest_max_y - 1):
-        sf.safe_move(stdscr, i, 1)
-        stdscr.clrtoeol()
+def print_all_cli(todos):
+    if len(todos) == 0:
+        print("no todos yet")
+        exit(0)
         
-def print_q_to_close(stdscr, page):
-    hint = f"Press 'q' to close {page}"
-    hint_pos_x = (st.latest_max_x - len(hint)) // 2 
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, hint_pos_x, hint)
+    tsk.reassign_task_ids(todos)
+    done_fmt = "\033[9m%s\033[0m"     # strikethrough
+    flag_color = "\033[31m%s\033[0m"   # red for flag
+    check_color = "\033[32m%s\033[0m"  # green for checkmark
+    
+    for todo in todos:
+        id_part = f"#{todo["id"]:02d}"
 
+        flag_symbol = flag_color % "⚑ " if todo.get("flagged") else "  "
+        check_symbol = check_color % "✓ " if todo.get("status") else "  "
+        
+        description = todo["description"]
+        if todo.get("status"):
+            description = done_fmt % description
+            
+        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo["due"]})"
+        print(todo_line)
+        
 # Functions for drawing frames and separators
 def print_right_frame(stdscr):
     for y in range(1, st.latest_max_y - 3):
