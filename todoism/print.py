@@ -128,9 +128,9 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     print_task_symbols(stdscr, task, y, is_selected=is_selected)
     
     # Calculate date position and available text space
-    date_str = '[' + task["due"] + ']' if task["due"] != "" else task["due"]
+    due_str = '[' + task["due"] + ']' if task["due"] != "" else task["due"]
     date_padding = 1  # Space between description and date
-    date_pos = st.latest_max_x - len(date_str) - date_padding - 1  # Account for right frame
+    date_pos = st.latest_max_x - len(due_str) - date_padding - 1  # Account for right frame
     
     text_start_pos = cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL  # Combined offset    
     # Calculate available width for text
@@ -152,8 +152,8 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     for _ in range(highlight_trailing_blank_space):
         sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
 
-    sf.safe_addstr(stdscr, y, date_pos, date_str, curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-    sf.safe_addstr(stdscr, y, date_pos + len(date_str), ' ', curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+    sf.safe_addstr(stdscr, y, date_pos, due_str, curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+    sf.safe_addstr(stdscr, y, date_pos + len(due_str), ' ', curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
     sf.safe_addstr(stdscr, y, st.latest_max_x - 1, '│')
 
 def print_status_bar(stdscr):
@@ -237,8 +237,8 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     
     # Calculate positions with right frame
     right_frame_pos = st.latest_max_x - 1
-    date_str = '[' + task["due"] + ']' if task["due"] != "" else task["due"]
-    date_pos = right_frame_pos - len(date_str) - 1  # Only 1 char gap from right frame
+    due_str = '[' + task["due"] + ']' if task["due"] != "" else task["due"]
+    date_pos = right_frame_pos - len(due_str) - 1  # Only 1 char gap from right frame
     
     # Calculate available space for text
     total_indent = x_offset + tsk.TASK_INDENT_IN_TASK_PANEL
@@ -271,7 +271,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         # Fill remaining space with spaces
         for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ', attr)
-        sf.safe_addstr(stdscr, row, date_pos, date_str, attr)
+        sf.safe_addstr(stdscr, row, date_pos, due_str, attr)
         sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ', attr)
     else:
         attr_due = curses.color_pair(clr.get_theme_color_pair_num_text()) if task["due"] != "" else 0
@@ -281,7 +281,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ')
         # Print date
-        sf.safe_addstr(stdscr, row, date_pos, date_str, attr_due)
+        sf.safe_addstr(stdscr, row, date_pos, due_str, (attr_done if is_done else 0) | attr_due)
         sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ')
 
 def print_whole_view(stdscr, categories, category_start_index):
