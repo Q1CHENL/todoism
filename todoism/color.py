@@ -8,13 +8,13 @@ BACKGROUND_COLOR_PAIR_NUM = 9
 # Rainbow order
 color_set = {
     # str: [self defined pair_index, curses.color]
-    "red": [1, curses.COLOR_RED],
-    "yellow": [2, curses.COLOR_YELLOW],
-    "green": [3, curses.COLOR_GREEN],
+    "red": [1, 196],
+    "yellow": [2, 226],
+    "green": [3, 41],
     "cyan": [4, curses.COLOR_CYAN],
-    "blue": [5, curses.COLOR_BLUE],
+    "blue": [5, 39],
     "magenta": [6, curses.COLOR_MAGENTA],
-    "white": [7, curses.COLOR_WHITE],
+    "white": [7, 231],
     "black": [8, curses.COLOR_BLACK]
 }
 
@@ -68,3 +68,6 @@ def get_theme_color_pair_num_text() -> int:
     
 def get_color_pair_num_by_str_text(color: str) -> int:
     return color_set[color][0]
+
+def get_color_pair_by_str(color: str) -> int:
+    return curses.color_pair(color_set[color][0])
