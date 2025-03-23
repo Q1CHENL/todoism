@@ -48,7 +48,6 @@ def _handle_command_input(stdscr):
 
 def _handle_dev_restore(categories, task_list, sidebar_scroller):
     sidebar_scroller.update_total(len(categories))
-    # Find the new category index
     for i, c in enumerate(categories):
         if c["id"] == st.current_category_id:
             sidebar_scroller.current_index = i
@@ -59,7 +58,7 @@ def _handle_dev_restore(categories, task_list, sidebar_scroller):
     
 def _restore_task_panel(task_list, categories):
     _restore_state(task_list)
-    _sort_by_flagged_done_tag(task_list, categories)
+    _sort_by_flagged_done_tag(categories)
 
 def _restore_state(task_list):    
     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
@@ -88,7 +87,7 @@ def _sort_by_tag(categories):
     st.filtered_tasks = marked + not_marked
     tsk.reassign_task_ids(st.filtered_tasks)
     
-def _sort_by_flagged_done_tag(task_list, categories):
+def _sort_by_flagged_done_tag(categories):
     if pref.get_sort_by_done():
         st.filtered_tasks = tsk.sort(st.filtered_tasks, "status")
         tsk.reassign_task_ids(st.filtered_tasks)
@@ -167,7 +166,7 @@ def main(stdscr):
             st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
         tsk.reassign_task_ids(st.filtered_tasks)
         
-        _sort_by_flagged_done_tag(task_list, categories)
+        _sort_by_flagged_done_tag(categories)
         
         st.task_cnt = len(st.filtered_tasks)
         st.cat_cnt = len(categories)
@@ -464,7 +463,7 @@ def main(stdscr):
                         st.end_task_id = min(st.latest_max_capacity, st.task_cnt)
                     
                     pr.clear_task_panel(stdscr)
-                    _sort_by_flagged_done_tag(task_list, categories)
+                    _sort_by_flagged_done_tag(categories)
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     sf.safe_move(stdscr, st.latest_max_y - 2, len(query) + 2)
                     stdscr.refresh()
@@ -726,18 +725,3 @@ def main(stdscr):
                         task_list = cmd.handle_delete(task_list)
                     tsk.save_tasks(task_list)
                     should_repaint = True
-
-
-def run():
-    args = cli.parse_args()
-    if args.add:
-        tsk.add_new_task_cli(args.add, args.flag)
-    elif args.delete:
-        tsk.remove_task_cli(args.delete)
-    elif args.print_all:
-        todos = tsk.load_tasks()
-        pr.print_all_cli(todos)
-    elif args.version:
-        pr.print_version()
-    else:
-        curses.wrapper(main)
