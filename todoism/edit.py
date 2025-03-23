@@ -338,7 +338,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
 
             sf.safe_move(stdscr, y, curs_new_x)
 
-        elif ch == curses.KEY_BACKSPACE or ch == kc.BACKSPACE:  # Backspace
+        elif ch == curses.KEY_BACKSPACE or ch == kc.BACKSPACE:
             # Clear selection if active
             if selection_active:
                 # Delete the selected text
@@ -352,8 +352,8 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 selection_start = -1
                 
                 # Adjust scroll if needed
-                if min_pos < scroll_offset + 5:
-                    scroll_offset = max(0, min_pos - 5)
+                if min_pos < scroll_offset:
+                    scroll_offset = max(0, min_pos)
                 
                 # Position cursor at deletion point
                 curs_new_x = text_start_pos + (min_pos - scroll_offset)
@@ -388,9 +388,9 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             if at_end and scroll_offset > 0:
                 # When deleting from end of text, adjust scroll to keep visible area stable
                 scroll_offset = max(0, scroll_offset - 1)
-            elif new_cursor_pos < scroll_offset + 5 and scroll_offset > 0:
+            elif new_cursor_pos < scroll_offset and scroll_offset > 0:
                 # Standard adjustment for deleting near left edge of view
-                scroll_offset = max(0, new_cursor_pos - 5)
+                scroll_offset = max(0, new_cursor_pos)
             
             # Calculate correct screen position after deletion
             curs_new_x = text_start_pos + (new_cursor_pos - scroll_offset)
