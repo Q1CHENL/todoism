@@ -20,9 +20,9 @@ def safe_addstr(stdscr, y: int, x: int, text: str, attr=0) -> bool:
             stdscr.addstr(y, x, text, attr)
             stdscr.attroff(attr)
         else:
-            white_pair = clr.get_color_pair_by_str("white")
-            stdscr.addstr(y, x, text, white_pair)
-            stdscr.attroff(white_pair)
+            bkg_color_pair = clr.get_bkg_color_pair()
+            stdscr.addstr(y, x, text, bkg_color_pair)
+            stdscr.attroff(bkg_color_pair)
         return True
     except curses.error:
         return False
@@ -35,9 +35,9 @@ def safe_appendstr(stdscr, text: str, attr=0) -> bool:
             stdscr.addstr(text, attr)
             stdscr.attroff(attr)
         else:
-            white_pair = clr.get_color_pair_by_str("white")
-            stdscr.addstr(text, white_pair)
-            stdscr.attroff(white_pair)
+            bkg_color_pair = clr.get_bkg_color_pair()
+            stdscr.addstr(text, bkg_color_pair)
+            stdscr.attroff(bkg_color_pair)
         return True
     except curses.error:
         return False
@@ -49,9 +49,9 @@ def safe_addch(stdscr, y: int, x: int, ch: str, attr=0) -> bool:
             stdscr.addch(y, x, ch, attr)
             stdscr.attroff(attr)
         else:
-            white_pair = clr.get_color_pair_by_str("white")
-            stdscr.addch(y, x, ch, white_pair)
-            stdscr.attroff()
+            bkg_color_pair = clr.get_bkg_color_pair()
+            stdscr.addch(y, x, ch, bkg_color_pair)
+            stdscr.attroff(bkg_color_pair)
         return True
     except curses.error:
         return False
@@ -71,9 +71,9 @@ def safe_insstr(stdscr, y: int, x: int, text: str, attr=0) -> bool:
             stdscr.insstr(y, x, text, attr)
             stdscr.attroff(attr)
         else:
-            white_pair = clr.get_color_pair_by_str("white")
-            stdscr.insstr(y, x, text, white_pair)
-            stdscr.attroff(white_pair)
+            bkg_color_pair = clr.get_bkg_color_pair()
+            stdscr.insstr(y, x, text, bkg_color_pair)
+            stdscr.attroff(bkg_color_pair)
         return True
     except curses.error:
         return False

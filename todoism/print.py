@@ -19,21 +19,21 @@ def print_version():
 def print_q_to_close(stdscr, page):
     hint = f"Press 'q' to close {page}"
     hint_pos_x = (st.latest_max_x - len(hint)) // 2 
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, hint_pos_x, hint)
-# Clearing functions
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, hint_pos_x, hint, clr.get_bkg_color_pair())
+
 def clear_sidebar_area(stdscr):
     for y in range(1, st.latest_max_y - 3):
-        sf.safe_addstr(stdscr, y, 1, ' ' * (cat.SIDEBAR_WIDTH - 2))
+        sf.safe_addstr(stdscr, y, 1, ' ' * (cat.SIDEBAR_WIDTH - 2), clr.get_bkg_color_pair())
 
 def clear_task_panel(stdscr):
     for y in range(1, st.latest_max_y - 3):    
-        sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, ' ' * (st.latest_max_x - cat.SIDEBAR_WIDTH - 1))
+        sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, ' ' * (st.latest_max_x - cat.SIDEBAR_WIDTH - 1), clr.get_bkg_color_pair())
 
 def clear_status(stdscr):
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, st.latest_max_x - 35, ' ' * 34)
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, st.latest_max_x - 35, ' ' * 34, clr.get_bkg_color_pair())
 
 def clear_bottom_bar_except_status(stdscr):
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ' ' * (st.latest_max_x - 37))
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ' ' * (st.latest_max_x - 37), clr.get_bkg_color_pair())
     
 def clear_bottom_bar(stdscr):
     clear_status(stdscr)
@@ -49,7 +49,7 @@ def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, 
     """Print a message box with proper centering in the task area with optional highlighting"""
 
     clear_task_panel(stdscr)
-    attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM) if highlight else 0
+    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM) if highlight else 0
     print_msg(stdscr, msg, x_offset, attr)
     print_right_frame(stdscr)
     
@@ -93,7 +93,7 @@ def print_task_symbols(stdscr, task, y, is_selected=False):
         y: The row position
         is_selected: Whether the task is selected
     """
-    attr_bkg = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
+    attr_bkg = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM)
     attr_space = attr_bkg if is_selected else 0
     attr_red = clr.get_color_pair_by_str("red")
     attr_green = clr.get_color_pair_by_str("green")
@@ -122,7 +122,7 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
         print_editing_category(stdscr, task, y, is_selected)
         return min(len(task["name"]) + 2, 14)
     
-    attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
+    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM)
     sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, f"{task['id']:2d} ", attr)
     print_task_symbols(stdscr, task, y, is_selected=is_selected)
     
@@ -145,14 +145,14 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
 
     highlight_trailing_blank_space = 0
 
-    sf.safe_addstr(stdscr, y, text_start_pos, visible_text, curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+    sf.safe_addstr(stdscr, y, text_start_pos, visible_text, curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
 
     highlight_trailing_blank_space = available_width - len(visible_text) + 1    
     for _ in range(highlight_trailing_blank_space):
-        sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+        sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
 
-    sf.safe_addstr(stdscr, y, date_pos, due_str, curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
-    sf.safe_addstr(stdscr, y, date_pos + len(due_str), ' ', curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM))
+    sf.safe_addstr(stdscr, y, date_pos, due_str, curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
+    sf.safe_addstr(stdscr, y, date_pos + len(due_str), ' ', curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
     sf.safe_addstr(stdscr, y, st.latest_max_x - 1, '│')
 
 def print_status_bar(stdscr):
@@ -211,7 +211,7 @@ def print_category(stdscr, category, y, is_selected=False):
     # Set format based on selection and focus
     attr = 0
     if is_selected and st.focus_manager.is_sidebar_focused():
-        attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
+        attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM)
     elif is_selected and not st.focus_manager.is_sidebar_focused():
         attr = clr.get_theme_color_pair() | curses.A_BOLD
             
@@ -265,7 +265,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         visible_text = stk.apply(visible_text)
         
     task_id = task["id"]
-    attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
+    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM)
     attr_done = curses.A_DIM
     
     if is_selected:
@@ -414,6 +414,7 @@ def print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, cente
         
     if value == "on":
         attr = clr.get_color_pair_by_str("green")
+        # attr = curses.init_pair(100, curses.COLOR_WHITE, clr.get)
         sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1], attr)
     else:  # "off"
         attr = clr.get_color_pair_by_str("red")

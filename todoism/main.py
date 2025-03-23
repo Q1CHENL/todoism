@@ -39,7 +39,7 @@ def _handle_command_input(stdscr):
     stdscr.timeout(-1)
     pr.clear_bottom_bar_except_status(stdscr)
     sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ":")
-    stdscr.refresh()  # Include refresh for consistency
+    stdscr.refresh()
     command = stdscr.getstr().decode("utf-8")
     stdscr.timeout(500)
     curses.curs_set(0)
@@ -107,11 +107,11 @@ def main(stdscr):
     
     curses.start_color()
     clr.setup_color_pairs()
+    stdscr.bkgd(' ', clr.get_bkg_color_pair())
     
     pref.update_preferences()    
     # Enable mouse support
     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
-    stdscr.bkgd(' ', curses.COLOR_BLACK | curses.A_NORMAL)
 
     # Update existing tasks to include category_id if missing
     task_list = tsk.update_existing_tasks()
