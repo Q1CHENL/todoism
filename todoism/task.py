@@ -47,6 +47,7 @@ def create_new_task(task_id, task_description="", flagged=False, category_id=0, 
         "id": task_id,
         "description": task_description,
         "due": due,
+        "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "status": False,
         "flagged": flagged,
         "category_id": category_id
@@ -116,6 +117,10 @@ def update_existing_tasks():
         
         if "due" not in task:
             task["due"] = ""
+            modified = True
+        
+        if "created" not in task:
+            task["created"] = ""
             modified = True
     
     if modified:
