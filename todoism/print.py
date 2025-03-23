@@ -112,42 +112,36 @@ def print_task_symbols(stdscr, task, y, is_selected=False):
         sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5, ' ', attr_space)
     sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5 + 1, ' ', attr_space)
     
-def print_editing_category(stdscr, category, y, is_selected=False):
-    sf.safe_addstr(stdscr, y, 0, "│")
-    print_category(stdscr, category, y, is_selected)
-    
-def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_left=0, is_edit_mode=False):
+def print_editing_entry(stdscr, entry, text_key, y, is_selected=False, scroll_left=0, is_edit_mode=False):
     """Render a task with proper formatting and positioning"""
     
     if st.focus_manager.is_sidebar_focused():
-        print_editing_category(stdscr, task, y, is_selected)
-        return min(len(task["name"]) + 2, 14)
+        print_category(stdscr, entry, y, is_selected)
+        return min(len(entry["name"]) + 2, 14)
     
     attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM)
-    sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, f"{task['id']:2d} ", attr)
-    print_task_symbols(stdscr, task, y, is_selected=is_selected)
+    sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, f"{entry['id']:2d} ", attr)
+    print_task_symbols(stdscr, entry, y, is_selected=is_selected)
         
-    due_str = due.get_due_str(task)    
+    due_str = due.get_due_str(entry)    
     due_pos = st.latest_max_x - len(due_str) - 1  # Account for right frame
     
-    text_start_pos = cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL  # Combined offset    
+    text_start_pos = cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL
     # Calculate available width for text
     available_width = due_pos - 2 - text_start_pos + 1
     
     # In view mode, we just show what fits; in edit mode, we scroll
-    total_text_length = len(task[text_key])
+    total_text_length = len(entry[text_key])
     
     # Calculate visible portion of text based on scroll offset
     visible_start_index = scroll_left
     visible_end_index = min(total_text_length, scroll_left + available_width - 1)
-    visible_text = task[text_key][visible_start_index:visible_end_index + 1]
-
-    highlight_trailing_blank_space = 0
+    visible_text = entry[text_key][visible_start_index:visible_end_index + 1]
 
     sf.safe_addstr(stdscr, y, text_start_pos, visible_text, curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
 
-    highlight_trailing_blank_space = available_width - len(visible_text) + 1    
-    for _ in range(highlight_trailing_blank_space):
+    trailing_blank_space_num = available_width - len(visible_text) + 1    
+    for _ in range(trailing_blank_space_num):
         sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
 
     sf.safe_appendstr(stdscr, due_str, curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
@@ -280,10 +274,9 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         # Fill remaining space with spaces
         for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ')
-        # Print date
         sf.safe_addstr(stdscr, row, due_pos, due_str, (attr_done if is_done else 0) | attr_due)
-        # sf.safe_addstr(stdscr, row, st.latest_max_x - 1, ' ')
-        # sf.safe_addstr(stdscr, row, st.latest_max_x - 2, 'X')
+        sf.safe_addstr(stdscr, row, st.latest_max_x - 2, ' ')
+        sf.safe_addstr(stdscr, row, st.latest_max_x - 1, '│')
 
 def print_whole_view(stdscr, categories, category_start_index):
     """Print the complete UI with sidebar and task list"""
