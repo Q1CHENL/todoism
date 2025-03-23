@@ -466,7 +466,7 @@ def print_all_cli(todos):
     check_color = "\033[32m%s\033[0m"  # green for checkmark
     
     for todo in todos:
-        id_part = f"#{todo["id"]:02d}"
+        id_part = f'#{todo["id"]:02d}'
 
         flag_symbol = flag_color % "⚑ " if todo.get("flagged") else "  "
         check_symbol = check_color % "✓ " if todo.get("status") else "  "
@@ -475,7 +475,7 @@ def print_all_cli(todos):
         if todo.get("status"):
             description = done_fmt % description
             
-        todo_line = f"{id_part} {flag_symbol}{check_symbol}{description} ({todo["due"]})"
+        todo_line = f'{id_part} {flag_symbol}{check_symbol}{description} ({todo["due"]})'
         print(todo_line)
         
 # Functions for drawing frames and separators
