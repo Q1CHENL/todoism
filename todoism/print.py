@@ -41,8 +41,7 @@ def clear_bottom_bar(stdscr):
     
 def print_github_page_line(stdscr, line):
     sf.safe_appendstr(stdscr, line[:line.find("Github page")])
-    blue_pair = clr.get_color_pair_num_by_str_text("blue")
-    attr = curses.color_pair(blue_pair) | curses.A_UNDERLINE
+    attr = clr.get_color_pair_by_str("blue") | curses.A_UNDERLINE
     sf.safe_appendstr(stdscr, "Github page", attr)
     sf.safe_appendstr(stdscr, line[line.find("Github page") + len("Github page"):])
 
@@ -96,8 +95,8 @@ def print_task_symbols(stdscr, task, y, is_selected=False):
     """
     attr_bkg = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
     attr_space = attr_bkg if is_selected else 0
-    attr_red = curses.color_pair(clr.get_color_pair_num_by_str_text("red"))
-    attr_green = curses.color_pair(clr.get_color_pair_num_by_str_text("green"))
+    attr_red = clr.get_color_pair_by_str("red")
+    attr_green = clr.get_color_pair_by_str("green")
     
     if task.get("flagged", False):
         sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3, '⚑', attr_bkg if is_selected else attr_red)
@@ -165,7 +164,7 @@ def print_status_bar(stdscr):
     percent_text = f"({percent_value:.0f}%)"
     
     color_text = "red" if percent_value < 33 else "yellow" if percent_value < 67 else "green"
-    color_pair = clr.get_color_pair_num_by_str_text(color_text)
+    color_pair = clr.get_color_pair_by_str(color_text)
     
     # Add command hint at the beginning (dimmed)
     hint_text = ":<command> or '/' to search for tasks"
@@ -192,7 +191,7 @@ def print_status_bar(stdscr):
     first_len = len(status_prefix + percent_text)
     padding = " " * (18 - first_len)
     sf.safe_addstr(stdscr, st.latest_max_y - 2, start_pos, status_prefix)
-    sf.safe_appendstr(stdscr, percent_text, curses.color_pair(color_pair))
+    sf.safe_appendstr(stdscr, percent_text, color_pair)
     sf.safe_appendstr(stdscr, padding)
     sf.safe_appendstr(stdscr, datetime_str)
 
@@ -214,7 +213,7 @@ def print_category(stdscr, category, y, is_selected=False):
     if is_selected and st.focus_manager.is_sidebar_focused():
         attr = curses.color_pair(clr.BACKGROUND_COLOR_PAIR_NUM)
     elif is_selected and not st.focus_manager.is_sidebar_focused():
-        attr = curses.color_pair(clr.get_theme_color_pair_num_text()) | curses.A_BOLD
+        attr = clr.get_theme_color_pair() | curses.A_BOLD
             
     sf.safe_addstr(stdscr, y, 1, ' ', attr)
     # Display name with fixed width - now at position 2 (after the left frame)
@@ -278,7 +277,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         sf.safe_addstr(stdscr, row, date_pos, due_str, attr)
         sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ', attr)
     else:
-        attr_due = curses.color_pair(clr.get_theme_color_pair_num_text()) if task["due"] != "" else 0
+        attr_due = clr.get_theme_color_pair() if task["due"] != "" else 0
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
         sf.safe_addstr(stdscr, row, total_indent, visible_text, (attr_done if is_done else 0) | attr_due)
         # Fill remaining space with spaces
@@ -374,12 +373,12 @@ def print_pref_panel(stdscr, current_selection_index=0):
         elif "Color:" in line and current_color in line:
             pos = line.find(current_color)
             print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, 
-                                         current_color, clr.get_theme_color_pair_num_text())
+                                         current_color, clr.get_theme_color_pair())
                 
         elif "Date format:" in line and current_date_format in line:
             pos = line.find(current_date_format)
             print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, 
-                                         current_date_format, clr.get_theme_color_pair_num_text())
+                                         current_date_format, clr.get_theme_color_pair())
             
         elif "Sort by flagged:" in line:
             value = "on" if sort_by_flagged else "off"
@@ -414,12 +413,10 @@ def print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, cente
         return
         
     if value == "on":
-        green_pair_num = clr.get_color_pair_num_by_str_text("green")
-        attr = curses.color_pair(green_pair_num)
+        attr = clr.get_color_pair_by_str("green")
         sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1], attr)
     else:  # "off"
-        red_pair_num = clr.get_color_pair_num_by_str_text("red")
-        attr = curses.color_pair(red_pair_num)
+        attr = clr.get_color_pair_by_str("red")
         sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1], attr)
     
     # Print the suffix (part after the value) if it fits
@@ -446,8 +443,7 @@ def print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center
         return
         
     # Print the value with specified color
-    attr = curses.color_pair(color_pair)
-    sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1], attr)
+    sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1], color_pair)
     
     # Print the suffix (part after the value) if it fits
     suffix = line[pos + len(value):]
