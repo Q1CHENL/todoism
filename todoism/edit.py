@@ -6,6 +6,7 @@ import todoism.state as st
 import todoism.category as cat
 import todoism.safe as sf
 import todoism.navigate as nv
+import todoism.due as due
 
 def move_by_word(text, current_pos, direction):
     """Move cursor by word in the specified direction
@@ -86,7 +87,6 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
     curses.curs_set(0)
     original_text = entry[text_key]
     
-    right_frame_pos = st.latest_max_x - 1
     if st.focus_manager.is_sidebar_focused():
         base_indent = 2
         text_start_pos = base_indent
@@ -100,16 +100,20 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
         base_indent = tsk.TASK_INDENT_IN_TASK_PANEL
         text_start_pos = cat.SIDEBAR_WIDTH + base_indent
         MAX_DESCRIPTION_LENGTH = tsk.MAX_TASK_DESCRIPTION_LENGTH    
-        date_length = len(entry["due"]) + 2
-        date_pos = right_frame_pos - date_length - 1  # Only 1 char gap from right frame
-        max_visible_width = date_pos - text_start_pos - 1
+        due_str = due.get_due_str(entry)
+        date_length = len(due_str)
+        if date_length > 0:
+            date_pos = st.latest_max_x - 1 - date_length
+        else:
+            date_pos = st.latest_max_x - 1
+        max_visible_width = date_pos - 2 - text_start_pos + 1
     
     # Selection state variables
     selection_active = False
     selection_start = -1
     debug_keys = False
     scroll_offset = initial_scroll
-    right_limit = 14 if st.focus_manager.is_sidebar_focused() else date_pos - 1
+    curs_max_x = 14 if st.focus_manager.is_sidebar_focused() else date_pos - 1
 
     y = stdscr.getyx()[0]
     
@@ -119,16 +123,15 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
         cursor_pos_in_text = len(entry[text_key]) 
         sf.safe_move(stdscr, y, base_indent + len(entry[text_key]))
     else:
-        sf.safe_move(stdscr, y, cat.SIDEBAR_WIDTH + base_indent + min(max_visible_width, len(entry[text_key])))        
-        cursor_pos_in_text = min(max_visible_width, len(entry[text_key]))
+        sf.safe_move(stdscr, y, text_start_pos)
+    cursor_pos_in_text = text_start_pos
     stdscr.refresh()
         
     while True:
         st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
    
         cursor_y, cursor_x = stdscr.getyx()
-        # Limit cursor position to the right boundary
-        cursor_x = min(cursor_x, right_limit)
+        cursor_x = min(cursor_x, curs_max_x)
 
         cursor_pos_in_text = cursor_x - text_start_pos + scroll_offset
         cursor_pos_in_text = min(cursor_pos_in_text, len(entry[text_key]))
@@ -210,26 +213,24 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 
             # Don't move if already at the absolute end of the text
             if cursor_pos_in_text >= len(entry[text_key]):
-                # This is critical - reset cursor to end position but don't change scroll
+                # Reset cursor to end position but don't change scroll
                 new_x = text_start_pos + (len(entry[text_key]) - scroll_offset)
-                new_x = min(new_x, right_limit)
+                new_x = min(new_x, curs_max_x)
                 sf.safe_move(stdscr, y, new_x)
                 continue
                 
             # Move right but strictly check against text length
-            new_pos = cursor_pos_in_text + 1
+            new_pos_in_text = cursor_pos_in_text + 1
             # Hard limit to prevent going past text end
-            new_pos = min(new_pos, len(entry[text_key]))
-                
+            new_pos_in_text = min(new_pos_in_text, len(entry[text_key]))     
             # Calculate screen position
-            new_x = text_start_pos + (new_pos - scroll_offset)
-            
+            new_x = text_start_pos + (new_pos_in_text - scroll_offset)
             # Only scroll if cursor would move out of view
-            if new_x > right_limit:
+            if new_x > curs_max_x:
                 # Only scroll the minimum needed to show cursor
-                scroll_amount = new_x - right_limit
+                scroll_amount = new_x - curs_max_x
                 scroll_offset += scroll_amount
-                new_x = right_limit
+                new_x = curs_max_x
             
             sf.safe_move(stdscr, y, new_x)
         
@@ -257,8 +258,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             
             # Calculate new safe screen position
             new_x = text_start_pos + (new_pos - scroll_offset)
-            # Use right_limit instead of hardcoded max_x - 23
-            new_x = min(new_x, right_limit)
+            new_x = min(new_x, curs_max_x)
             
             sf.safe_move(stdscr, y, new_x)
          
@@ -309,7 +309,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                     scroll_offset = max(0, new_pos)
                 cursor_pos_in_text = new_pos
                 new_x = text_start_pos + (new_pos - scroll_offset)
-                new_x = min(new_x, right_limit)
+                new_x = min(new_x, curs_max_x)
             
             sf.safe_move(stdscr, y, new_x)
             
@@ -335,10 +335,12 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 # Adjust scroll if needed
                 if new_pos > scroll_offset + max_visible_width:
                     scroll_offset = scroll_offset + new_pos - old_pos
+                    if new_pos == len(entry[text_key]):
+                        scroll_offset = max(0, len(entry[text_key]) - max_visible_width)
                 cursor_pos_in_text = new_pos
                 new_x = text_start_pos + (new_pos - scroll_offset)
-                new_x = min(new_x, right_limit)
-            
+                new_x = min(new_x, curs_max_x)
+
             sf.safe_move(stdscr, y, new_x)
 
         elif ch == curses.KEY_BACKSPACE or ch == kc.BACKSPACE:  # Backspace
@@ -360,7 +362,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 
                 # Position cursor at deletion point
                 new_x = text_start_pos + (min_pos - scroll_offset)
-                new_x = min(new_x, right_limit)  # Use right_limit instead of hardcoded value
+                new_x = min(new_x, curs_max_x)
                 
                 sf.safe_move(stdscr, y, new_x)
                 continue
@@ -399,7 +401,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             new_x = text_start_pos + (new_cursor_pos - scroll_offset)
             
             # Ensure position is valid
-            new_x = max(text_start_pos, min(new_x, right_limit))
+            new_x = max(text_start_pos, min(new_x, curs_max_x))
             
             sf.safe_move(stdscr, y, new_x)
         
@@ -437,7 +439,7 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                     
                     # Calculate screen position
                     new_x = text_start_pos + (cursor_pos_in_text - scroll_offset)
-                    new_x = min(new_x, right_limit)
+                    new_x = min(new_x, curs_max_x)
                     
                     sf.safe_move(stdscr, y, new_x)
                     continue
@@ -454,24 +456,14 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             # Calculate new cursor position in text
             new_cursor_pos = cursor_pos_in_text + 1
             
-            at_end_of_text = cursor_pos_in_text == len(entry[text_key])
+            at_end_of_text = new_cursor_pos == len(entry[text_key])
             
-            # Recalculate screen boundaries with exactly 1 space gap
-            if not st.focus_manager.is_sidebar_focused():
-                date_length = len(entry["due"])
-                date_pos = right_frame_pos - date_length - 1  # Position where date starts (with 1 char gap)
-                max_visible_width = date_pos - (text_start_pos)  # Total spaces available for text
-                right_limit = date_pos - 1  # Position of the 1 char gap
-            else:
-                date_length = 0
-                date_pos = 15
-                max_visible_width = date_pos - base_indent
-                 
+
             if at_end_of_text:
                 # When we're at the end of text and need to scroll:
                 if new_cursor_pos > scroll_offset + max_visible_width:
                     # First update the scroll position before updating cursor
-                    scroll_offset = new_cursor_pos - max_visible_width
+                    scroll_offset = new_cursor_pos - max_visible_width - 1
                 
                 # Always update cursor position after any scroll adjustment
                 cursor_pos_in_text = new_cursor_pos
@@ -487,8 +479,8 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             # Calculate new cursor X position with consistent gap
             new_x = text_start_pos + (new_cursor_pos - scroll_offset)
             
-            # Safety check to ensure we never go beyond right_limit
-            new_x = min(new_x, right_limit)
+            # Safety check to ensure we never go beyond curs_max_x
+            new_x = min(new_x, curs_max_x)
             
             sf.safe_move(stdscr, y, new_x)
             
@@ -530,14 +522,14 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
                 scroll_offset = max(0, len(entry[text_key]) - max_visible_width)
                 # Position cursor at end with proper right side alignment
                 new_x = text_start_pos + max_visible_width
-                new_x = min(new_x, right_limit)
+                new_x = min(new_x, curs_max_x)
             else:
                 # For short text, no scroll needed
                 scroll_offset = 0
                 new_x = text_start_pos + len(entry[text_key])
                 
             # Ensure we respect the right boundary
-            new_x = min(new_x, right_limit)
+            new_x = min(new_x, curs_max_x)
             sf.safe_move(stdscr, y, new_x)
             
     return entry[text_key]

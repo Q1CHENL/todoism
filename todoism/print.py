@@ -8,6 +8,7 @@ import todoism.preference as pref
 import todoism.state as st
 import todoism.task as tsk
 import todoism.safe as sf
+import todoism.due as due
 
 view_mode = 0
 add_mode  = 1
@@ -125,23 +126,21 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM)
     sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH, f"{task['id']:2d} ", attr)
     print_task_symbols(stdscr, task, y, is_selected=is_selected)
-    
-    # Calculate date position and available text space
-    due_str = '[' + task["due"] + ']' if task["due"] != "" else task["due"]
-    date_padding = 1  # Space between description and date
-    date_pos = st.latest_max_x - len(due_str) - date_padding - 1  # Account for right frame
+        
+    due_str = due.get_due_str(task)    
+    due_pos = st.latest_max_x - len(due_str) - 1  # Account for right frame
     
     text_start_pos = cat.SIDEBAR_WIDTH + tsk.TASK_INDENT_IN_TASK_PANEL  # Combined offset    
     # Calculate available width for text
-    available_width = date_pos - text_start_pos - 1
+    available_width = due_pos - 2 - text_start_pos + 1
     
     # In view mode, we just show what fits; in edit mode, we scroll
     total_text_length = len(task[text_key])
     
     # Calculate visible portion of text based on scroll offset
-    visible_start = scroll_left
-    visible_end = min(total_text_length, scroll_left + available_width)
-    visible_text = task[text_key][visible_start:visible_end]
+    visible_start_index = scroll_left
+    visible_end_index = min(total_text_length, scroll_left + available_width - 1)
+    visible_text = task[text_key][visible_start_index:visible_end_index + 1]
 
     highlight_trailing_blank_space = 0
 
@@ -151,8 +150,8 @@ def print_editing_entry(stdscr, task, text_key, y, is_selected=False, scroll_lef
     for _ in range(highlight_trailing_blank_space):
         sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
 
-    sf.safe_addstr(stdscr, y, date_pos, due_str, curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
-    sf.safe_addstr(stdscr, y, date_pos + len(due_str), ' ', curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
+    sf.safe_appendstr(stdscr, due_str, curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
+    sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
     sf.safe_addstr(stdscr, y, st.latest_max_x - 1, '│')
 
 def print_status_bar(stdscr):
@@ -238,14 +237,12 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     
     print_task_symbols(stdscr, task, row, is_selected=is_selected)
     
-    # Calculate positions with right frame
-    right_frame_pos = st.latest_max_x - 1
-    due_str = '[' + task["due"] + ']' if task["due"] != "" else task["due"]
-    date_pos = right_frame_pos - len(due_str) - 1  # Only 1 char gap from right frame
+    due_str = due.get_due_str(task)
+    due_pos = st.latest_max_x - len(due_str) - 1  # Only 1 char gap from right frame
     
     # Calculate available space for text
     total_indent = x_offset + tsk.TASK_INDENT_IN_TASK_PANEL
-    available_width = date_pos - total_indent - 1  # Space for gap before date
+    available_width = due_pos - total_indent # Space for gap before date
     
     # Handle text display
     text = task["description"]
@@ -256,7 +253,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
             text = "[" + cat.get_category_by_id(cat_id_of_current_task)["name"] +  "] " + text
 
     if len(text) > available_width:
-        visible_text = text[:available_width]
+        visible_text = text[:available_width - 1]
     else:
         visible_text = text
         
@@ -274,8 +271,8 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         # Fill remaining space with spaces
         for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ', attr)
-        sf.safe_addstr(stdscr, row, date_pos, due_str, attr)
-        sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ', attr)
+        sf.safe_addstr(stdscr, row, due_pos, due_str, attr)
+        sf.safe_addstr(stdscr, row, st.latest_max_x - 1, ' ', attr)
     else:
         attr_due = clr.get_theme_color_pair() if task["due"] != "" else 0
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
@@ -284,8 +281,9 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ')
         # Print date
-        sf.safe_addstr(stdscr, row, date_pos, due_str, (attr_done if is_done else 0) | attr_due)
-        sf.safe_addstr(stdscr, row, right_frame_pos - 1, ' ')
+        sf.safe_addstr(stdscr, row, due_pos, due_str, (attr_done if is_done else 0) | attr_due)
+        # sf.safe_addstr(stdscr, row, st.latest_max_x - 1, ' ')
+        # sf.safe_addstr(stdscr, row, st.latest_max_x - 2, 'X')
 
 def print_whole_view(stdscr, categories, category_start_index):
     """Print the complete UI with sidebar and task list"""
