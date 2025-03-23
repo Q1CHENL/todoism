@@ -2,6 +2,7 @@ import json
 import uuid
 from datetime import datetime
 import todoism.preference as pref
+import todoism.state as st
 
 MAX_TASK_DESCRIPTION_LENGTH = 256
 TASK_INDENT_IN_TASK_PANEL = 7 # ID (2) + space (1) + flag (1) + space (1) + done (1) + space (1)
@@ -140,24 +141,10 @@ def delete_task_by_uuid(task_list, task_uuid):
     save_tasks(task_list)
     return task_list
 
-def done_task_by_uuid(task_list, task_uuid):
-    """Mark task as done by UUID and return updated list"""
-    for task in task_list:
-        if task.get("uuid") == task_uuid:
-            task["status"] = True
-            save_tasks(task_list)
-            return task_list
-    return task_list
-
-def flag_task_by_uuid(task_list, task_uuid):
-    """Flag task by UUID and return updated list"""
-    for task in task_list:
-        if task.get("uuid") == task_uuid:
-            task["flagged"] = not task.get("flagged", False)
-            save_tasks(task_list)
-            return task_list
-    return task_list
-
+def flip_by_key(task_index, key: str, task_list):
+    st.filtered_tasks[task_index][key] = not st.filtered_tasks[task_index][key]
+    save_tasks(task_list)
+    
 def sort(task_list, key) -> list:
     marked = []
     not_marked = []

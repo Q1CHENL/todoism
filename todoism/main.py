@@ -389,12 +389,10 @@ def main(stdscr):
 
                             if flag_x_start <= mouse_x <= flag_x_end:
                                 if st.filtered_tasks:
-                                    st.filtered_tasks[task_index]["flagged"] = not st.filtered_tasks[task_index]["flagged"]
-                                    tsk.save_tasks(task_list)
+                                    tsk.flip_by_key(task_index, "flagged", task_list)
                             elif status_x_start <= mouse_x <= status_x_end:
                                 if st.filtered_tasks:
-                                    st.filtered_tasks[task_index]["status"] = not st.filtered_tasks[task_index]["status"]
-                                    tsk.save_tasks(task_list)
+                                    tsk.flip_by_key(task_index, "status", task_list)
                             else:
                                 st.current_task_id = clicked_task_id
                                 st.current_task_row = clicked_task_row
@@ -426,7 +424,7 @@ def main(stdscr):
         
         if key == ord('/'):
             query = ""
-            curses.curs_set(1)  # Show cursor
+            curses.curs_set(1)
             stdscr.timeout(-1)  # Blocking input for search
             pr.clear_bottom_bar_except_status(stdscr)
             sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, "/")
@@ -674,8 +672,7 @@ def main(stdscr):
             elif key == ord('d') or key == ord(' '):
                 if st.filtered_tasks and st.current_task_id > 0:
                     task_idx = st.current_task_id - 1
-                    st.filtered_tasks[task_idx]["status"] = not st.filtered_tasks[task_idx]["status"]
-                    tsk.save_tasks(task_list)
+                    tsk.flip_by_key(task_idx, "status", task_list)
                     should_repaint = True
                     
             elif key == ord('e'):
@@ -686,8 +683,7 @@ def main(stdscr):
             elif key == ord('f'):
                 if st.filtered_tasks and st.current_task_id > 0:
                     task_idx = st.current_task_id - 1
-                    st.filtered_tasks[task_idx]["flagged"] = not st.filtered_tasks[task_idx]["flagged"]
-                    tsk.save_tasks(task_list)
+                    tsk.flip_by_key(task_idx, "flagged", task_list)
                     should_repaint = True
                     
             elif key == curses.KEY_RIGHT:

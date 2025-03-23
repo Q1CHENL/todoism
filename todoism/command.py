@@ -59,8 +59,7 @@ def execute_command(stdscr, command: str, task_list: list):
             id = int(parts[1])
             if 1 <= id <= len(st.filtered_tasks):
                 index = id - 1
-                task_uuid = st.filtered_tasks[index].get("uuid")
-                tsk.done_task_by_uuid(task_list, task_uuid)
+                tsk.flip_by_key(index, "status", task_list)
             return task_list, None
         else:
             command_recognized = False
@@ -71,8 +70,7 @@ def execute_command(stdscr, command: str, task_list: list):
             id = int(parts[1])
             if 1 <= id <= len(st.filtered_tasks):
                 index = id - 1
-                task_uuid = st.filtered_tasks[index].get("uuid")
-                tsk.flag_task_by_uuid(task_list, task_uuid)
+                tsk.flip_by_key(index, "flagged", task_list)
             return task_list, None
         else:
             command_recognized = False
