@@ -31,7 +31,7 @@ def _exit():
 def _quit_search(stdscr, task_list):
     st.searching = False
     pr.clear_bottom_bar_except_status(stdscr)
-    _restore_task_panel(task_list)
+    _restore_state(task_list)
 
 def _handle_command_input(stdscr):
     curses.echo()
@@ -57,7 +57,11 @@ def _handle_dev_restore(categories, task_list, sidebar_scroller):
     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
     return categories  
     
-def _restore_task_panel(task_list):
+def _restore_task_panel(task_list, categories):
+    _restore_state(task_list)
+    _sort_by_flagged_done_tag(task_list, categories)
+
+def _restore_state(task_list):    
     st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
     st.task_cnt = len(st.filtered_tasks)
     st.current_task_id = 1 if st.task_cnt > 0 else 0
@@ -76,16 +80,22 @@ def _sort_by_tag(categories):
             break
     if len(st.filtered_tasks) > 0 and not _task_not_marked(st.filtered_tasks[len(st.filtered_tasks) - 1]):
             marked = st.filtered_tasks
-    tsk.reassign_task_ids(marked)
     not_marked = []
     for c in categories:
         for task in st.filtered_tasks: 
             if _task_not_marked(task) and c["id"] == task["category_id"]:
                     not_marked.append(task)
-    tsk.reassign_task_ids(not_marked)
-    for task in not_marked:
-        task["id"] += len(marked)
     st.filtered_tasks = marked + not_marked
+    tsk.reassign_task_ids(st.filtered_tasks)
+    
+def _sort_by_flagged_done_tag(task_list, categories):
+    if pref.get_sort_by_done():
+        st.filtered_tasks = tsk.sort(st.filtered_tasks, "status")
+        tsk.reassign_task_ids(st.filtered_tasks)
+    if pref.get_sort_by_flagged():
+        st.filtered_tasks = tsk.sort(st.filtered_tasks, "flagged")
+        tsk.reassign_task_ids(st.filtered_tasks)
+    _sort_by_tag(categories)
 
 def _task_not_marked(task):
     if pref.get_sort_by_done() and pref.get_sort_by_flagged():
@@ -157,14 +167,7 @@ def main(stdscr):
             st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
         tsk.reassign_task_ids(st.filtered_tasks)
         
-        if pref.get_sort_by_done():
-            st.filtered_tasks = tsk.sort(st.filtered_tasks, "status")
-            tsk.reassign_task_ids(st.filtered_tasks)
-        if pref.get_sort_by_flagged():
-            st.filtered_tasks = tsk.sort(st.filtered_tasks, "flagged")
-            tsk.reassign_task_ids(st.filtered_tasks)
-        
-        _sort_by_tag(categories)
+        _sort_by_flagged_done_tag(task_list, categories)
         
         st.task_cnt = len(st.filtered_tasks)
         st.cat_cnt = len(categories)
@@ -326,7 +329,7 @@ def main(stdscr):
                         sidebar_scroller.scroll_up()
                         if len(categories) > 0:
                             st.current_category_id = categories[sidebar_scroller.current_index]["id"]
-                            _restore_task_panel(task_list)
+                            _restore_state(task_list)
                         should_repaint = True
                     elif st.task_cnt > 0:
                         task_scroll_offset = 0
@@ -339,7 +342,7 @@ def main(stdscr):
                         sidebar_scroller.scroll_down()
                         if len(categories) > 0:
                             st.current_category_id = categories[sidebar_scroller.current_index]["id"]
-                            _restore_task_panel(task_list)
+                            _restore_state(task_list)
                         should_repaint = True
                     elif st.task_cnt > 0:
                         task_scroll_offset = 0
@@ -362,7 +365,7 @@ def main(stdscr):
                             st.current_category_id = categories[clicked_cat_index]["id"]
                             
                             if old_category_id != st.current_category_id:
-                                _restore_task_panel(task_list)
+                                _restore_state(task_list)
                                 should_repaint = True
                     continue
                 
@@ -423,31 +426,62 @@ def main(stdscr):
             should_repaint = True
         
         if key == ord('/'):
-            curses.echo()
-            curses.curs_set(1)
-            stdscr.timeout(-1)
+            query = ""
+            curses.curs_set(1)  # Show cursor
+            stdscr.timeout(-1)  # Blocking input for search
             pr.clear_bottom_bar_except_status(stdscr)
             sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, "/")
-            query = stdscr.getstr().decode("utf-8")
+            
+            while True:
+                ch = stdscr.getch()
+                
+                if ch == kc.ENTER:
+                    break
+                    
+                elif ch == kc.ESC:
+                    query = ""
+                    break
+                    
+                elif ch == kc.BACKSPACE or ch == curses.KEY_BACKSPACE:                    
+                    if query:
+                        query = query[:-1]
+                        pr.clear_bottom_bar_except_status(stdscr)
+                        sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, f"/{query}")
+                
+                elif 32 <= ch <= 126:
+                    query += chr(ch)
+                    sf.safe_addstr(stdscr, st.latest_max_y - 2, len(query) + 1, chr(ch))
+                
+                if query:
+                    st.filtered_tasks = srch.search(query, task_list)
+                    st.searching = True
+                    st.task_cnt = len(st.filtered_tasks)
+                    
+                    if st.task_cnt > 0:
+                        st.current_task_id = 1
+                        st.current_task_row = 1
+                        st.start_task_id = 1
+                        st.end_task_id = min(st.latest_max_capacity, st.task_cnt)
+                    
+                    pr.clear_task_panel(stdscr)
+                    _sort_by_flagged_done_tag(task_list, categories)
+                    pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
+                    sf.safe_move(stdscr, st.latest_max_y - 2, len(query) + 2)
+                    stdscr.refresh()
+                else:
+                    _restore_task_panel(task_list, categories)
+                    pr.clear_task_panel(stdscr)
+                    pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
+                    sf.safe_move(stdscr, st.latest_max_y - 2, 2)
+                    stdscr.refresh()
+            
             stdscr.timeout(500)
             curses.curs_set(0)
-            curses.noecho()
-
+            
             if query == "":
-                pr.clear_bottom_bar_except_status(stdscr)
-                continue
-
-            st.filtered_tasks = srch.search(query, task_list)
-            tsk.reassign_task_ids(st.filtered_tasks)
-            st.searching = True
-            pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
+                _quit_search(stdscr, task_list)
+            
             should_repaint = True
-
-            if st.task_cnt > 0:
-                st.current_task_id = 1  
-                st.current_task_row = 1
-                st.start_task_id = 1
-                st.end_task_id = min(st.latest_max_capacity, st.task_cnt)
         
         if st.focus_manager.is_sidebar_focused():
             if key == curses.KEY_UP:
@@ -455,7 +489,7 @@ def main(stdscr):
                 sidebar_scroller.scroll_up()
                 if len(categories) > 0:
                     st.current_category_id = categories[sidebar_scroller.current_index]["id"]
-                    _restore_task_panel(task_list)
+                    _restore_state(task_list)
                 should_repaint = True
                 
             elif key == curses.KEY_DOWN:
@@ -463,7 +497,7 @@ def main(stdscr):
                 sidebar_scroller.scroll_down()
                 if len(categories) > 0:
                     st.current_category_id = categories[sidebar_scroller.current_index]["id"]
-                    _restore_task_panel(task_list)
+                    _restore_state(task_list)
                 should_repaint = True
 
             elif key == ord('a'):
@@ -512,7 +546,7 @@ def main(stdscr):
                                 break
                                 
                         # Update filtered tasks for the new category
-                        _restore_task_panel(task_list)
+                        _restore_state(task_list)
                         st.cat_cnt = len(categories)
                         pr.print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
                 else:
@@ -572,7 +606,7 @@ def main(stdscr):
                             sidebar_scroller.current_index = new_index
                             st.current_category_id = categories[new_index]["id"]
 
-                        _restore_task_panel(task_list)
+                        _restore_state(task_list)
                     
                     should_repaint = True
                 
