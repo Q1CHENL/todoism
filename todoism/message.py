@@ -28,8 +28,7 @@ help_msg = '''
 │   Add [<due date>] at the end of the task    /<search term>                                 │
 │   Supported formats:                                                                        │
 │   - [yyyy-mm-dd hh:mm]    - [hh:mm]                                                         │
-│   - [yyyy-mm-dd]          - [Tomorrow]                                                      │
-│   - [mm-dd hh:mm]         - [Next Week]                                                     │
+│   - [yyyy-mm-dd]          - [mm-dd hh:mm]                                                   │
 │   - [mm-dd] or [dd-mm]                                                                      │
 │                                                                                             │
 └─────────────────────────────────────────────────────────────────────────────────────────────┘
