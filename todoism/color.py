@@ -16,14 +16,14 @@ color_set = {
     "blue": [5, 39],
     "magenta": [6, curses.COLOR_MAGENTA],
     "white": [7, 231],
-    "black": [8, 232]
+    "black": [8, 234]
 }
 
 def setup_color_pairs():
     for color in color_set.values():
-        curses.init_pair(color[0], color[1], 232)
+        curses.init_pair(color[0], color[1], get_color_code_by_str("black"))
     curses.init_pair(BACKGROUND_COLOR_PAIR_NUM, get_color_code_by_str("white"), get_color_code_by_str("black"))
-    curses.init_pair(SELECTION_COLOR_PAIR_NUM, curses.COLOR_BLACK, get_theme_color_curses())
+    curses.init_pair(SELECTION_COLOR_PAIR_NUM, get_color_code_by_str("black"), get_theme_color_curses())
 
 def set_theme_color(color: str):
     if color not in color_set and color != "random":
