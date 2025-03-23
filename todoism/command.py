@@ -285,15 +285,15 @@ def execute_command(stdscr, command: str, task_list: list):
             import test.test as test_module
             if test_module.is_dev_mode_active():
                 warning_msg = "Already in dev mode!"
-                sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-                stdscr.clrtoeol()
+                sf.safe_move(stdscr, st.latest_max_capacity, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
                 yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
                 attr = curses.color_pair(yellow_pair_num) | curses.A_BOLD
-                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg, attr)
+                sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
                 stdscr.refresh()
                 time.sleep(1)
-                sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-                stdscr.clrtoeol()
+                sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
             else:
                 if test_module.load_dev_mode():
                     task_list = tsk.load_tasks()
@@ -308,30 +308,30 @@ def execute_command(stdscr, command: str, task_list: list):
                     
                     # Show success message
                     success_msg = "Dev mode enabled. Test tasks and categories loaded. Will auto-restore on exit."
-                    sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-                    stdscr.clrtoeol()
+                    sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                    pr.clear_bottom_bar_except_status(stdscr)
                     green_pair_num = clr.get_color_pair_num_by_str_text("green")
                     attr = curses.color_pair(green_pair_num) | curses.A_BOLD
-                    sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, success_msg, attr)
+                    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, success_msg, attr)
                     stdscr.refresh()
                     time.sleep(1.5)
-                    sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-                    stdscr.clrtoeol()
+                    sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                    pr.clear_bottom_bar_except_status(stdscr)
                     
                     # Return updated categories and category ID
                     return task_list, categories
         except ImportError:
             # Test module not found (likely PyPI installation)
             warning_msg = "Dev mode not available in installation."
-            sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-            stdscr.clrtoeol()
+            sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+            pr.clear_bottom_bar_except_status(stdscr)
             yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
             attr = curses.color_pair(yellow_pair_num) | curses.A_BOLD
-            sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg, attr)
+            sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
             stdscr.refresh()
             time.sleep(1.5)
-            sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-            stdscr.clrtoeol()
+            sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+            pr.clear_bottom_bar_except_status(stdscr)
         command_recognized = True
         
     elif command == "restore":
@@ -341,15 +341,15 @@ def execute_command(stdscr, command: str, task_list: list):
             
             if not test_module.is_dev_mode_active():
                 warning_msg = "Not in dev mode - nothing to restore!"
-                sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-                stdscr.clrtoeol()
+                sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
                 yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
                 attr = curses.color_pair(yellow_pair_num) | curses.A_BOLD
-                sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg, attr)
+                sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
                 stdscr.refresh()
                 time.sleep(1)
-                sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-                stdscr.clrtoeol()
+                sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
             else:
                 if test_module.exit_dev_mode():
                     import todoism.due as due
@@ -367,15 +367,15 @@ def execute_command(stdscr, command: str, task_list: list):
                     
                     # Show success message
                     success_msg = "Dev mode disabled. Original tasks and categories restored."
-                    sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-                    stdscr.clrtoeol()
+                    sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                    pr.clear_bottom_bar_except_status(stdscr)
                     green_pair_num = clr.get_color_pair_num_by_str_text("green")
                     attr = curses.color_pair(green_pair_num) | curses.A_BOLD
-                    sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, success_msg, attr)
+                    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, success_msg, attr)
                     stdscr.refresh()
                     time.sleep(1.5)
-                    sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-                    stdscr.clrtoeol()
+                    sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                    pr.clear_bottom_bar_except_status(stdscr)
                     
                     # Return updated categories and category ID
                     return task_list, categories
@@ -383,15 +383,15 @@ def execute_command(stdscr, command: str, task_list: list):
             # Test module not found (likely PyPI installation)
             max_y, max_x = stdscr.getmaxyx()
             warning_msg = "Dev mode not available in installation"
-            sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-            stdscr.clrtoeol()
+            sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+            pr.clear_bottom_bar_except_status(stdscr)
             yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
             attr = curses.color_pair(yellow_pair_num) | curses.A_BOLD
-            sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, warning_msg, attr)
+            sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
             stdscr.refresh()
             time.sleep(1.5)
-            sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-            stdscr.clrtoeol()
+            sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+            pr.clear_bottom_bar_except_status(stdscr)
         command_recognized = True
         
     elif command.strip() == "":
@@ -400,16 +400,16 @@ def execute_command(stdscr, command: str, task_list: list):
     if not command_recognized and command.strip():
         error_msg = f"Invalid command: '{command}'. Type command 'help' for help."
         # Clear the line first, error might occur if resized small
-        sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-        stdscr.clrtoeol()
+        sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+        pr.clear_bottom_bar_except_status(stdscr)
         red_pair_num = clr.get_color_pair_num_by_str_text("red")
         attr = curses.color_pair(red_pair_num) | curses.A_BOLD
-        sf.safe_addstr(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH, error_msg, attr)
+        sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, error_msg, attr)
         stdscr.refresh()
         time.sleep(1.5)
         # Clear the error message
-        sf.safe_move(stdscr, st.latest_max_capacity, cat.SIDEBAR_WIDTH)
-        stdscr.clrtoeol()
+        sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+        pr.clear_bottom_bar_except_status(stdscr)
         stdscr.refresh()
 
     return task_list, None
