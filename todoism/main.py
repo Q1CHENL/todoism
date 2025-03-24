@@ -101,11 +101,15 @@ def main(stdscr):
     curses.set_escdelay(25)
     stdscr.clear()
     stdscr.refresh()
-    
     curses.start_color()
     clr.setup_color_pairs()
     stdscr.bkgd(' ', clr.get_bkg_color_pair())
     
+    if kc.need_key_recording():
+        if not kc.record_key_codes(stdscr):
+            return
+    kc.setup_keycodes()
+
     pref.update_preferences()    
     # Enable mouse support
     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
@@ -144,10 +148,6 @@ def main(stdscr):
     st.focus_manager = nv.FocusManager()
     sidebar_scroller = nv.SidebarScroller(len(categories), st.latest_max_capacity)
     
-    if kc.need_key_recording():
-        if not kc.record_key_codes(stdscr):
-            return
-    kc.setup_keycodes()
     
     while True:
         if not st.searching:
@@ -279,13 +279,7 @@ def main(stdscr):
                     pr.print_whole_view(stdscr, categories, sidebar_scroller.start_index)
                     
                 else:
-                    pr.print_category_entries(stdscr, categories, sidebar_scroller.start_index)
-                    if st.searching:
-                        pr.print_msg_in_task_panel(stdscr, msg.no_tasks_found_msg, cat.SIDEBAR_WIDTH, highlight=False)
-                    else:
-                        pr.print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=True)
-                    pr.print_status_bar(stdscr)
-
+                    pr.print_whole_view(stdscr, categories, sidebar_scroller.start_index)
             else:
                 pr.print_whole_view(stdscr, categories, sidebar_scroller.start_index)
             if st.searching:
@@ -531,7 +525,7 @@ def main(stdscr):
                         # Update filtered tasks for the new category
                         _restore_state(task_list)
                         st.cat_cnt = len(categories)
-                        pr.print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
+                        pr.print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH)
                 else:
                     st.current_category_id = old_cat_id
                     should_repaint = True

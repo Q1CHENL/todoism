@@ -23,6 +23,10 @@ def print_q_to_close(stdscr, page):
     hint_pos_x = (st.latest_max_x - len(hint)) // 2 
     sf.safe_addstr(stdscr, st.latest_max_y - 2, hint_pos_x, hint, clr.get_bkg_color_pair())
 
+def clear_all_except_outer_frames(stdscr):
+    for y in range(1, st.latest_max_y - 1):
+        sf.safe_addstr(stdscr, y, 1, ' ' * (st.latest_max_x - 2), clr.get_bkg_color_pair())
+
 def clear_sidebar_area(stdscr):
     for y in range(1, st.latest_max_y - 3):
         sf.safe_addstr(stdscr, y, 1, ' ' * (cat.SIDEBAR_WIDTH - 2), clr.get_bkg_color_pair())
@@ -47,11 +51,11 @@ def print_github_page_line(stdscr, line):
     sf.safe_appendstr(stdscr, "Github page", attr)
     sf.safe_appendstr(stdscr, line[line.find("Github page") + len("Github page"):])
 
-def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH, highlight=False):
+def print_msg_in_task_panel(stdscr, msg, x_offset=cat.MAX_CATEGORY_NAME_LENGTH):
     """Print a message box with proper centering in the task area with optional highlighting"""
 
     clear_task_panel(stdscr)
-    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM) if highlight else 0
+    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM) if not st.focus_manager.is_sidebar_focused() and not st.searching else 0
     print_msg(stdscr, msg, x_offset, attr)
     print_right_frame(stdscr)
     
@@ -283,7 +287,8 @@ def print_whole_view(stdscr, categories, category_start_index):
     
     clear_task_panel(stdscr)
     if st.task_cnt == 0:
-        print_msg_in_task_panel(stdscr, msg.empty_msg, cat.SIDEBAR_WIDTH, highlight=False)
+        message = msg.empty_msg if not st.searching else msg.no_tasks_found_msg
+        print_msg_in_task_panel(stdscr, message, cat.SIDEBAR_WIDTH)
     else:
         print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
         

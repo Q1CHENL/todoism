@@ -86,8 +86,6 @@ def record_key_codes(stdscr):
     ]
     
     while True:
-        pr.clear_inner_content(stdscr)
-
         # Reset all key codes at start of new recording session
         for key in key_codes:
             key_codes[key] = 0
@@ -145,9 +143,10 @@ def record_key_codes(stdscr):
 
 def open_new_record_stage(stdscr, msg):
     """Open a new record stage"""
-    pr.clear_inner_content(stdscr)
+    pr.clear_all_except_outer_frames(stdscr)
     pr.print_outer_frame(stdscr)
     pr.print_msg(stdscr, msg)
+    stdscr.refresh()
 
 def need_key_recording():
     """Check if we need to record key codes (all keys are 0)"""
