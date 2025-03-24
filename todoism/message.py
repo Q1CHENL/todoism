@@ -55,11 +55,16 @@ pref_panel = '''
 
 '''
 
+no_tasks_found_msg = '''
+┌────────────────────────────┐
+│      No tasks found :)     │
+└────────────────────────────┘
+'''
+
 empty_msg = '''
-┌──────────────────────────────────────────────────────┐
-│       Hmm, it seems there are no active tasks        │
-│     Take a break, or create some to get busy :)      │
-└──────────────────────────────────────────────────────┘
+┌──────────────────────────────────┐
+│      No active tasks here :)     │
+└──────────────────────────────────┘
 '''
 
 limit_msg = '''
@@ -92,7 +97,7 @@ keycode_msg = '''
 # Key recording message templates - fixed indentation and formatting
 keycode_recording_ctrl_left_msg = '''
 ┌───────────────────────────────────────────────────┐
-│ Keycode Recording (1/4)                           │
+│ Keycode Recording (1/6)                           │
 │                                                   │
 │ Press Ctrl + Left key combination                 │
 │                                                   │
@@ -103,7 +108,7 @@ keycode_recording_ctrl_left_msg = '''
 
 keycode_recording_ctrl_right_msg = '''
 ┌───────────────────────────────────────────────────┐
-│ Keycode Recording (2/4)                           │
+│ Keycode Recording (2/6)                           │
 │                                                   │
 │ Press Ctrl + Right key combination                │
 │                                                   │
@@ -114,7 +119,7 @@ keycode_recording_ctrl_right_msg = '''
 
 keycode_recording_ctrl_shift_left_msg = '''
 ┌───────────────────────────────────────────────────┐
-│ Keycode Recording (3/4)                           │
+│ Keycode Recording (3/6)                           │
 │                                                   │
 │ Press Ctrl + Shift + Left key combination         │
 │                                                   │
@@ -125,7 +130,7 @@ keycode_recording_ctrl_shift_left_msg = '''
 
 keycode_recording_ctrl_shift_right_msg = '''
 ┌───────────────────────────────────────────────────┐
-│ Keycode Recording (4/4)                           │
+│ Keycode Recording (4/6)                           │
 │                                                   │
 │ Press Ctrl + Shift + Right key combination        │
 │                                                   │
@@ -235,10 +240,4 @@ keycode_restart_msg = '''
 ┌───────────────────────────────────────────────────┐
 │ Restarting key recording...                       │
 └───────────────────────────────────────────────────┘
-'''
-
-no_tasks_found_msg = '''
-┌────────────────────────────┐
-│      No tasks found :)     │
-└────────────────────────────┘
 '''
