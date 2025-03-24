@@ -634,7 +634,8 @@ def main(stdscr):
                     st.end_task_id = st.task_cnt
 
                 st.adding_task = True
-                # Print existing tasks with offset (crucial: pass cat.SIDEBAR_WIDTH to offset tasks)
+                
+                pr.clear_task_panel(stdscr)
                 pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
 
                 # Add a new task with proper indentation
