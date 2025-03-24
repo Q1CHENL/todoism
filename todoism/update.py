@@ -26,14 +26,12 @@ def check_for_updates() -> bool:
                 # If checked within last 24 hours, use cached result
                 if current_time - last_check < 86400:  # 24 hours
                     check_required = False
-                    return (cache.get('update_available', False), 
-                           cache.get('current_version', ''), 
-                           cache.get('latest_version', ''))
+                    return cache.get('update_available', False)
         except (json.JSONDecodeError, IOError):
             pass
             
     if not check_required:
-        return (False, '', '')
+        return False
     
     try:
         # Get current installed version based on Python version
