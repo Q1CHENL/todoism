@@ -42,7 +42,7 @@ def clear_bottom_bar(stdscr):
     
 def print_github_page_line(stdscr, line):
     sf.safe_appendstr(stdscr, line[:line.find("Github page")])
-    attr = clr.get_color_pair_by_str("blue") | curses.A_UNDERLINE
+    attr = clr.get_theme_color_pair() | curses.A_UNDERLINE
     sf.safe_appendstr(stdscr, "Github page", attr)
     sf.safe_appendstr(stdscr, line[line.find("Github page") + len("Github page"):])
 
