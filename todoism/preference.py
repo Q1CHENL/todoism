@@ -19,7 +19,7 @@ TEST_CATEGORIES_FILE_PATH = os.path.join(CONFIG_DIR, "categories_test.json")
 
 default_settings = {
     "date_format": "Y-M-D",
-    "selected_color": "blue",
+    "selected_color": "purple",
     "tag": True,
     "strikethrough": True,
     "sort_by_flagged": False,

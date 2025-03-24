@@ -47,7 +47,8 @@ def get_theme_color_curses() -> int:
                 return random.choice(list(color_set.values()))
             return color_set[color][1]
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
-        return pref.setup_default_settings()["selected_color"]
+        color_str = pref.setup_default_settings()["selected_color"]
+        return get_color_code_by_str(color_str)
     except Exception:
         return curses.COLOR_BLUE
 
