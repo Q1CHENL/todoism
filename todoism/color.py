@@ -14,7 +14,7 @@ color_set = {
     "green": [3, 41],
     "cyan": [4, curses.COLOR_CYAN],
     "blue": [5, 39],
-    "magenta": [6, curses.COLOR_MAGENTA],
+    "purple": [6, 141],
     "white": [7, 231],
     "black": [8, 234]
 }

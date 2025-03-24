@@ -35,23 +35,23 @@ help_msg = '''
 '''
 
 pref_panel = '''
-┌────────────────────────────────────┐
-│                                    │
-│   Tag: on|off                      │
-│                                    │
-│   Strikethrough: on|off            │
-│                                    │
-│   Color: blue|red|yellow|green     │
-│                                    │
-│   Date format: Y-M-D|D-M-Y|M-D-Y   │
-│                                    │
-│   Sort by flagged: on|off          │
-│                                    │
-│   Sort by done: on|off             │
-│                                    │
-│   (Press Tab to toggle options)    │
-│                                    │
-└────────────────────────────────────┘
+┌───────────────────────────────────────┐
+│                                       │
+│   Tag: on|off                         │
+│                                       │
+│   Strikethrough: on|off               │
+│                                       │
+│   Color: blue|purple|red|yellow|green │
+│                                       │
+│   Date format: Y-M-D|D-M-Y|M-D-Y      │
+│                                       │
+│   Sort by flagged: on|off             │
+│                                       │
+│   Sort by done: on|off                │
+│                                       │
+│   (Press Tab to toggle options)       │
+│                                       │
+└───────────────────────────────────────┘
 
 '''
 

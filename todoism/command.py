@@ -207,7 +207,7 @@ def execute_command(stdscr, command: str, task_list: list):
             
             elif preference_type == "│   Color":
                 # Get currently selected color
-                colors = ["blue", "red", "yellow", "green"]
+                colors = ["blue", "purple", "red", "yellow", "green"]
                 current_color = clr.get_theme_color_str()
                 color_index = colors.index(current_color) if current_color in colors else 0
                 
