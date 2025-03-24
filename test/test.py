@@ -1,6 +1,7 @@
 import json
 import uuid
 import todoism.preference as pref
+import todoism.state as st
 
 def generate_test_tasks():
     """Generate a fresh set of test tasks with proper UUIDs and category_id"""
@@ -327,6 +328,7 @@ def generate_test_categories():
 
 def load_dev_mode():
     """Load test tasks and categories"""
+    st.is_dev_mode = True
 
     # Generate test data
     test_tasks = generate_test_tasks()
