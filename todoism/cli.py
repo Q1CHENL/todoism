@@ -20,10 +20,6 @@ def is_dev_environment():
     
     return test_module is not None and is_git_repo and not in_site_packages
 
-def get_active_mode():
-    """Get current running mode"""
-    return "development" if is_dev_environment() else "production"
-
 def parse_args():
     parser = argparse.ArgumentParser(
         description="A powerful yet easy-to-use todo TUI",
