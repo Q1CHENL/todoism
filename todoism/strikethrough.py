@@ -4,7 +4,7 @@ import todoism.preference as pref
 def set_strikethrough(enabled):
     """Set strikethrough effect for completed tasks"""
     try:
-        with open(pref.settings_path, "r+") as settings_file:
+        with open(pref.get_settings_path(), "r+") as settings_file:
             settings = json.load(settings_file)
             settings["strikethrough"] = enabled
             settings_file.seek(0)
@@ -16,7 +16,7 @@ def set_strikethrough(enabled):
 def get_strikethrough():
     """Get strikethrough setting state"""
     try:
-        with open(pref.settings_path, 'r') as settings_file:
+        with open(pref.get_settings_path(), 'r') as settings_file:
             settings = json.load(settings_file)
             return settings.get("strikethrough", True)
     except FileNotFoundError:

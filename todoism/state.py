@@ -30,3 +30,5 @@ task_cnt = 0
 cat_cnt = 0
 
 focus_manager = None
+
+IS_DEV_MODE = False

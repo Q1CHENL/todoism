@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 import todoism.preference as pref
 import todoism.state as st
+import todoism.backup as bkp
 
 MAX_TASK_DESCRIPTION_LENGTH = 256
 TASK_INDENT_IN_TASK_PANEL = 7 # ID (2) + space (1) + flag (1) + space (1) + done (1) + space (1)
@@ -15,27 +16,17 @@ def done_count(task_list):
             count = count + 1
     return count        
 
-def get_tasks_file_path():
-    """Get the correct tasks file path based on whether dev mode is active"""
-    try:
-        import test.test as test
-        if test.is_dev_mode_active():
-            return pref.test_tasks_file_path
-        return pref.tasks_file_path
-    except ImportError:
-        return pref.tasks_file_path
-
 def load_tasks():
     """Load tasks from file"""
     try:
-        with open(get_tasks_file_path(), 'r') as file:
+        with open(pref.get_tasks_path(), 'r') as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
 def load_purged_tasks():
     try:
-        with open(pref.purged_file_path, 'r') as f:
+        with open(pref.get_purged_path(), 'r') as f:
             purged_tasks = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         purged_tasks = []
@@ -55,15 +46,23 @@ def create_new_task(task_id, task_description="", flagged=False, category_id=0, 
     }
 
 def save_tasks(task_list, custom_path=None):
-    """Save tasks to file"""
-    if custom_path:
-        file_path = custom_path
-    else:
-        file_path = get_tasks_file_path()
+    """Save tasks to file with lock protection"""
+    import fcntl
+    import os
     
-    with open(file_path, 'w') as file:
-        json.dump(task_list, file, indent=4)
-
+    file_path = custom_path if custom_path else pref.get_tasks_path()
+    lock_path = file_path + '.lock'
+    
+    try:
+        with open(lock_path, 'w') as lock_file:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            with open(file_path, 'w') as file:
+                json.dump(task_list, file, indent=4)
+    finally:
+        if os.path.exists(lock_path):
+            os.remove(lock_path)
+        bkp.backup_data()
+            
 def add_new_task_cli(task_description, flagged=False):
     task_list = load_tasks()
     new_task_id = len(task_list) + 1

@@ -33,7 +33,7 @@ def purge(task_list, category_id=0):
     tsk.reassign_task_ids(remained)
     purged_tasks = tsk.load_purged_tasks()
     purged_tasks.extend(newly_purged)
-    tsk.save_tasks(purged_tasks, pref.purged_file_path)
+    tsk.save_tasks(purged_tasks, pref.get_purged_path())
     return remained
 
 def handle_delete(task_list, task_id=0):
@@ -41,7 +41,7 @@ def handle_delete(task_list, task_id=0):
     task_uuid = st.filtered_tasks[task_id - 1].get("uuid")
     purged_tasks = tsk.load_purged_tasks()
     purged_tasks.append(st.filtered_tasks[task_id - 1])
-    tsk.save_tasks(purged_tasks, pref.purged_file_path)
+    tsk.save_tasks(purged_tasks, pref.get_purged_path())
     task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
     if st.searching:
         st.filtered_tasks = [task for task in st.filtered_tasks if task["uuid"] != task_uuid]
@@ -277,9 +277,8 @@ def execute_command(stdscr, command: str, task_list: list):
     elif command == "dev":
         # Hidden command for developers - load test data
         try:
-            import test.test as test_module
-            if test_module.is_dev_mode_active():
-                warning_msg = "Already in dev mode!"
+            if st.IS_DEV_MODE:
+                warning_msg = "Already in dev mode or another instance in running!"
                 sf.safe_move(stdscr, st.latest_max_capacity, 1)
                 pr.clear_bottom_bar_except_status(stdscr)
                 attr = clr.get_color_pair_by_str("yellow") | curses.A_BOLD
@@ -289,7 +288,9 @@ def execute_command(stdscr, command: str, task_list: list):
                 sf.safe_move(stdscr, st.latest_max_y - 2, 1)
                 pr.clear_bottom_bar_except_status(stdscr)
             else:
-                if test_module.load_dev_mode():
+                import test.test as ts
+                if ts.load_dev_mode():
+                    st.IS_DEV_MODE = True
                     task_list = tsk.load_tasks()
                     categories = cat.load_categories()
                     st.current_category_id = 0
@@ -329,9 +330,9 @@ def execute_command(stdscr, command: str, task_list: list):
     elif command == "restore":
         # Hidden command for developers - restore real data
         try:
-            import test.test as test_module
+            import test.test as ts
             
-            if not test_module.is_dev_mode_active():
+            if not st.IS_DEV_MODE:
                 warning_msg = "Not in dev mode - nothing to restore!"
                 sf.safe_move(stdscr, st.latest_max_y - 2, 1)
                 pr.clear_bottom_bar_except_status(stdscr)
@@ -342,36 +343,35 @@ def execute_command(stdscr, command: str, task_list: list):
                 sf.safe_move(stdscr, st.latest_max_y - 2, 1)
                 pr.clear_bottom_bar_except_status(stdscr)
             else:
-                if test_module.exit_dev_mode():
-                    import todoism.due as due
-                    task_list = tsk.load_tasks()
-                    due.add_due_key_if_missing(task_list)
-                    tsk.save_tasks(task_list)
-                    categories = cat.load_categories()
-                    st.current_category_id = 0
-                    
-                    # Reset view
-                    st.current_task_id = 1 if len(task_list) > 0 else 0
-                    st.current_task_row = 1 if len(task_list) > 0 else 0
-                    st.start_task_id = 1 if len(task_list) > 0 else 0
-                    st.end_task_id = min(len(task_list), st.latest_max_capacity) if len(task_list) > 0 else 0
-                    
-                    # Show success message
-                    success_msg = "Dev mode disabled. Original tasks and categories restored."
-                    sf.safe_move(stdscr, st.latest_max_y - 2, 1)
-                    pr.clear_bottom_bar_except_status(stdscr)
-                    attr = clr.get_color_pair_by_str("green") | curses.A_BOLD
-                    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, success_msg, attr)
-                    stdscr.refresh()
-                    time.sleep(1.5)
-                    sf.safe_move(stdscr, st.latest_max_y - 2, 1)
-                    pr.clear_bottom_bar_except_status(stdscr)
-                    
-                    # Return updated categories and category ID
-                    return task_list, categories
+                st.IS_DEV_MODE = False
+                import todoism.due as due
+                task_list = tsk.load_tasks()
+                due.add_due_key_if_missing(task_list)
+                tsk.save_tasks(task_list)
+                categories = cat.load_categories()
+                st.current_category_id = 0
+                
+                # Reset view
+                st.current_task_id = 1 if len(task_list) > 0 else 0
+                st.current_task_row = 1 if len(task_list) > 0 else 0
+                st.start_task_id = 1 if len(task_list) > 0 else 0
+                st.end_task_id = min(len(task_list), st.latest_max_capacity) if len(task_list) > 0 else 0
+                
+                # Show success message
+                success_msg = "Dev mode disabled. Original tasks and categories restored."
+                sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
+                attr = clr.get_color_pair_by_str("green") | curses.A_BOLD
+                sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, success_msg, attr)
+                stdscr.refresh()
+                time.sleep(1.5)
+                sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
+                
+                # Return updated categories and category ID
+                return task_list, categories
         except ImportError:
             # Test module not found (likely PyPI installation)
-            max_y, max_x = stdscr.getmaxyx()
             warning_msg = "Dev mode not available in installation"
             sf.safe_move(stdscr, st.latest_max_y - 2, 1)
             pr.clear_bottom_bar_except_status(stdscr)

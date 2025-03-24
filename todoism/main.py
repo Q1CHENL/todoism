@@ -1,11 +1,11 @@
 import time
 import curses
+
 import todoism.edit as ed
 import todoism.task as tsk
 import todoism.print as pr
 import todoism.preference as pref
 import todoism.command as cmd
-import todoism.cli as cli
 import todoism.category as cat
 import todoism.navigate as nv
 import todoism.message as msg
@@ -13,20 +13,8 @@ import todoism.keycode as kc
 import todoism.color as clr
 import todoism.state as st
 import todoism.search as srch
-import todoism.backup as bkp
 import todoism.safe as sf
 import todoism.due as due 
-
-def _exit():
-    # Always backup normal data on exit
-    bkp.backup_normal_data()
-    try:
-        import test.test as test_module
-        if test_module.is_dev_mode_active():
-            test_module.exit_dev_mode()
-    except ImportError:
-        # No test module found (PyPI installation), continue with normal exit
-        pass
 
 def _quit_search(stdscr, task_list):
     st.searching = False
@@ -407,9 +395,7 @@ def main(stdscr):
                 _quit_search(stdscr, task_list)
                 should_repaint = True
                 continue
-            _exit()
             break
-        
         if key == ord(':'):
             command = _handle_command_input(stdscr)
             if command == "":

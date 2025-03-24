@@ -92,6 +92,6 @@ def run():
             ts.load_dev_mode()
             curses.wrapper(main.main)
         else:
-            print("Dev mode not available in installation")
+            print("Dev mode not available in PyPi Installation!")
     else:
         curses.wrapper(main.main)

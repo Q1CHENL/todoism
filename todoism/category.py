@@ -6,20 +6,10 @@ MAX_CATEGORY_COUNT = 128
 SIDEBAR_WIDTH = 16
 NAME_INDENT = 2
 
-def get_categories_file_path():
-    """Get the correct categories file path based on whether dev mode is active"""
-    try:
-        import test.test as test
-        if test.is_dev_mode_active():
-            return pref.test_categories_file_path
-        return pref.categories_file_path
-    except ImportError:
-        return pref.categories_file_path
-
 def load_categories():
     """Load categories from file"""
     try:
-        with open(get_categories_file_path(), 'r') as file:
+        with open(pref.get_categories_path(), 'r') as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         # If categories file doesn't exist, create it with default "All Tasks"
@@ -29,7 +19,7 @@ def load_categories():
 
 def save_categories(category_list):
     """Save categories to the categories.json file"""
-    with open(get_categories_file_path(), 'w') as file:
+    with open(pref.get_categories_path(), 'w') as file:
         json.dump(category_list, file, indent=4)
 
 def create_category(name, color="blue"):

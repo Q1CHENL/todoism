@@ -1,11 +1,6 @@
-import os
 import json
 import uuid
 import todoism.preference as pref
-import todoism.task as tsk
-
-# Flag file to mark that we're in dev mode
-dev_mode_flag_path = os.path.join(pref.config_dir, "dev_mode_active")
 
 def generate_test_tasks():
     """Generate a fresh set of test tasks with proper UUIDs and category_id"""
@@ -330,60 +325,19 @@ def generate_test_categories():
     ]
     return test_categories
 
-def is_dev_mode_active():
-    """Check if dev mode is currently active"""
-    return os.path.exists(dev_mode_flag_path)
-
 def load_dev_mode():
     """Load test tasks and categories"""
-    create_dev_mode_flag()
-    
+
     # Generate test data
     test_tasks = generate_test_tasks()
     test_categories = generate_test_categories()
-    
-    import todoism.category as cat
-    
+        
     # Save test categories
-    with open(pref.test_categories_file_path, 'w') as file:
+    with open(pref.TEST_CATEGORIES_FILE_PATH, 'w') as file:
         json.dump(test_categories, file, indent=4)
     
     # Save test tasks - only write to the test file path
-    with open(pref.test_tasks_file_path, 'w') as file:
+    with open(pref.TEST_TASKS_FILE_PATH, 'w') as file:
         json.dump(test_tasks, file, indent=4)
     
     return True
-
-def exit_dev_mode():
-    """Exit dev mode - just remove the flag, no restoration"""
-    # Just remove the dev mode flag
-    remove_dev_mode_flag()
-    return True
-
-def create_dev_mode_flag():
-    """Create the dev mode flag file"""
-    dev_mode_flag_path = os.path.join(pref.config_dir, "dev_mode_active")
-    try:
-        with open(dev_mode_flag_path, 'w') as f:
-            f.write('1')
-        return True
-    except Exception as e:
-        print(f"Error creating dev mode flag: {e}")
-        return False
-
-def remove_dev_mode_flag():
-    """Remove the dev mode flag file"""
-    dev_mode_flag_path = os.path.join(pref.config_dir, "dev_mode_active")
-    try:
-        if os.path.exists(dev_mode_flag_path):
-            os.remove(dev_mode_flag_path)
-        return True
-    except Exception as e:
-        print(f"Error removing dev mode flag: {e}")
-        return False
-
-if __name__ == "__main__":
-    # When run directly, generate and save test data
-    load_dev_mode()
-    print("Dev mode enabled. Test tasks and categories created.")
-
