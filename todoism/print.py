@@ -276,7 +276,6 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ')
         sf.safe_addstr(stdscr, row, due_pos, due_str, (attr_done if is_done else 0) | attr_due)
-        sf.safe_addstr(stdscr, row, st.latest_max_x - 2, ' ')
         sf.safe_addstr(stdscr, row, st.latest_max_x - 1, '│')
 
 def print_whole_view(stdscr, categories, category_start_index):
