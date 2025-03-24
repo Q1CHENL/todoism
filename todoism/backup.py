@@ -1,5 +1,6 @@
 import os
 import shutil
+
 import todoism.preference as pref
 
 BACKUP_TASKS_PATH = os.path.join(pref.CONFIG_DIR, "tasks_backup.json")

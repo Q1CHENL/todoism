@@ -1,4 +1,3 @@
-import re
 import os
 import argparse
 import curses

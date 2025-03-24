@@ -1,5 +1,6 @@
 import curses
 from datetime import datetime
+
 import todoism.strikethrough as stk
 import todoism.message as msg
 import todoism.color as clr

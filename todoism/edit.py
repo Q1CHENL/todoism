@@ -1,4 +1,5 @@
 import curses
+
 import todoism.print as pr
 import todoism.task as tsk
 import todoism.keycode as kc

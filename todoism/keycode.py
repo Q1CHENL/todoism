@@ -1,6 +1,7 @@
 import json
-import curses
 import time
+import curses
+
 import todoism.print as pr
 import todoism.message as msg
 import todoism.preference as pref

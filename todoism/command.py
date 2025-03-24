@@ -1,5 +1,5 @@
-import curses
 import time
+import curses
 import webbrowser
 
 import todoism.task as tsk
@@ -277,7 +277,7 @@ def execute_command(stdscr, command: str, task_list: list):
     elif command == "dev":
         # Hidden command for developers - load test data
         try:
-            if st.IS_DEV_MODE:
+            if st.is_dev_mode:
                 warning_msg = "Already in dev mode or another instance in running!"
                 sf.safe_move(stdscr, st.latest_max_capacity, 1)
                 pr.clear_bottom_bar_except_status(stdscr)
@@ -290,7 +290,7 @@ def execute_command(stdscr, command: str, task_list: list):
             else:
                 import test.test as ts
                 if ts.load_dev_mode():
-                    st.IS_DEV_MODE = True
+                    st.is_dev_mode = True
                     task_list = tsk.load_tasks()
                     categories = cat.load_categories()
                     st.current_category_id = 0
@@ -332,7 +332,7 @@ def execute_command(stdscr, command: str, task_list: list):
         try:
             import test.test as ts
             
-            if not st.IS_DEV_MODE:
+            if not st.is_dev_mode:
                 warning_msg = "Not in dev mode - nothing to restore!"
                 sf.safe_move(stdscr, st.latest_max_y - 2, 1)
                 pr.clear_bottom_bar_except_status(stdscr)
@@ -343,7 +343,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 sf.safe_move(stdscr, st.latest_max_y - 2, 1)
                 pr.clear_bottom_bar_except_status(stdscr)
             else:
-                st.IS_DEV_MODE = False
+                st.is_dev_mode = False
                 import todoism.due as due
                 task_list = tsk.load_tasks()
                 due.add_due_key_if_missing(task_list)

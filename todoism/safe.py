@@ -1,4 +1,5 @@
 import curses
+
 import todoism.color as clr
 
 def safe_addstr(stdscr, y: int, x: int, text: str, attr=0) -> bool:

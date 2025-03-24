@@ -1,6 +1,7 @@
 import json
 import uuid
 from datetime import datetime
+
 import todoism.preference as pref
 import todoism.state as st
 import todoism.backup as bkp

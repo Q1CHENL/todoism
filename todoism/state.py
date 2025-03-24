@@ -16,19 +16,18 @@ latest_max_capacity = 0
 start_task_id = 1
 end_task_id = 1
 
-# Current mode
-adding_task = False
-editing_task = False
-searching = False
-
 # Current row in task panel
 current_task_row = 1
-
-filtered_tasks = []
 
 task_cnt = 0
 cat_cnt = 0
 
-focus_manager = None
+# Current mode
+adding_task = False
+editing_task = False
+searching = False
+is_dev_mode = False
 
-IS_DEV_MODE = False
+filtered_tasks = []
+
+focus_manager = None

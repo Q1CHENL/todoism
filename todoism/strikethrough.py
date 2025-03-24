@@ -1,4 +1,5 @@
 import json
+
 import todoism.preference as pref
 
 def set_strikethrough(enabled):

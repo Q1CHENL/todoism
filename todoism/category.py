@@ -1,4 +1,5 @@
 import json
+
 import todoism.preference as pref
 
 MAX_CATEGORY_NAME_LENGTH = 12

@@ -1,5 +1,6 @@
 import os
 import json
+
 import todoism.state as st
 
 HOME_DIR = os.path.expanduser("~")
@@ -32,16 +33,16 @@ default_settings = {
 }
 
 def get_tasks_path():
-    return TEST_TASKS_FILE_PATH if st.IS_DEV_MODE else TASKS_FILE_PATH
+    return TEST_TASKS_FILE_PATH if st.is_dev_mode else TASKS_FILE_PATH
 
 def get_categories_path():
-    return TEST_CATEGORIES_FILE_PATH if st.IS_DEV_MODE else CATEGORIES_FILE_PATH
+    return TEST_CATEGORIES_FILE_PATH if st.is_dev_mode else CATEGORIES_FILE_PATH
 
 def get_purged_path():
-    return TEST_PURGED_FILE_PATH if st.IS_DEV_MODE else PURGED_FILE_PATH
+    return TEST_PURGED_FILE_PATH if st.is_dev_mode else PURGED_FILE_PATH
 
 def get_settings_path():
-    return TEST_SETTINGS_PATH if st.IS_DEV_MODE else SETTINGS_PATH
+    return TEST_SETTINGS_PATH if st.is_dev_mode else SETTINGS_PATH
 
 def setup_default_settings():
     """
