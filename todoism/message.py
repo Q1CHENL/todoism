@@ -10,10 +10,10 @@ help_msg = '''
 │                                                                                             │
 │   Short commands:                            Key bindings:                                  │
 │   a - Create new task/category               Tab - Toggle focus bewteen tasks and sidebar   │
-│   d - Mark task as done                      Double Backspace - delete task                 │
-│   e - Edit task/category                     ESC - Quit adding/editing task                 │
-│   f - Mark task as flagged                   Enter - Finish adding/editing task             │
-│   q - Quit this help message/pref/todoism    Up/Down Arrow Keys - Navigate through tasks    │
+│   d - Mark task as done                      Double Backspace - delete task/category        │
+│   e - Edit task/category                     ESC - Cancel adding/editing/search             │
+│   f - Mark task as flagged                   Enter - Finish adding/editing, confirm search  │
+│   q - Quit this help/pref/search/todoism     Up/Down Arrow Keys - Navigate through tasks    │
 │                                              CTRL + Left/Right - Move by word               │
 │   Vim-like long commands:                    CTRL + Shift + Left/Right - Select by word     │
 │   :help - Show this help message             ALT + Left/Right - Jump to start/end of text   │
@@ -22,7 +22,7 @@ help_msg = '''
 │   :edit <task_id> - Edit task                - Click on task/category: Select item          │
 │   :done <task_id> - Mark task as done        - Click on done/flag: Toggle status            │
 │   :purge - Purge done tasks in current cat.  - Click on blank area: Toggle focus            │
-│   :purge all - Purge all done tasks          - Wheel scroll Up/Down: Navigate on tasks/cats │
+│   :purge all - Purge all done tasks          - Wheel scroll: Navigate through tasks/cats    │
 │                                                                                             │
 │   To add due date to a task:                 To search for tasks:                           │
 │   Add [<due date>] at the end of the task    /<search term>                                 │
