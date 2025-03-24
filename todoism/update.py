@@ -1,4 +1,4 @@
-def check_for_updates():
+def check_for_updates() -> bool:
     """
     Check if a newer version of todoism is available on PyPI.
     Uses cached results to improve speed.
