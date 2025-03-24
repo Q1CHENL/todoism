@@ -17,18 +17,18 @@ A powerful yet easy-to-use todo TUI
 > [!NOTE]
 > Some terminal does not support mouse click or strike through effect.
 > E.g **Ptyxis** (new default terminal for GNOME 47) does not fully support strikethrough effect.
-> You can turn it off use command `:st off`, as specified in the help message.
+> You can turn it off in **preference panel** (open with `:pref` as specified in the help message)
 
 ### Keycode recording
 
 When you first start todoism, you'll be prompted to record key combinations for text navigation.
 
-- CTRL + LEFT: Move cursor one word left when editing text
-- CTRL + RIGHT: Move cursor one word right when editing text
-- CTRL + SHIFT + LEFT: Select text from cursor position to one word left
-- CTRL + SHIFT + RIGHT: Select text from cursor position to one word right
-- ALT + LEFT: Move cursor to the beginning of the text
-- ALT + RIGHT: Move cursor to the end of the text
+- **CTRL + LEFT**: Move cursor one word left when editing text
+- **CTRL + RIGHT**: Move cursor one word right when editing text
+- **CTRL + SHIFT + LEFT**: Select text from cursor position to one word left
+- **CTRL + SHIFT + RIGHT**: Select text from cursor position to one word right
+- **ALT + LEFT**: Move cursor to the beginning of the text
+- **ALT + RIGHT**: Move cursor to the end of the text
 
 ## Develop
 
