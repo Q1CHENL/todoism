@@ -149,7 +149,7 @@ def main(stdscr):
     st.focus_manager = nv.FocusManager()
     sidebar_scroller = nv.SidebarScroller(len(categories), st.latest_max_capacity)
     
-    update_available, current_version, latest_version = up.check_for_updates()
+    update_available = up.check_for_updates()
     if update_available:
         pr.print_outer_frame(stdscr)
         pr.print_msg(stdscr, msg.NEW_VERSION_MSG)
