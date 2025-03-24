@@ -728,3 +728,8 @@ def main(stdscr):
                         task_list = cmd.handle_delete(task_list)
                     tsk.save_tasks(task_list)
                     should_repaint = True
+
+def run():
+    import todoism.cli as cli
+    cli.run()
+    
