@@ -41,7 +41,7 @@ pref_panel = '''
 │                                       │
 │   Strikethrough: on|off               │
 │                                       │
-│   Color: blue|purple|red|yellow|green │
+│   Color: purple|cyan|blue|red|yellow  │
 │                                       │
 │   Date format: Y-M-D|D-M-Y|M-D-Y      │
 │                                       │

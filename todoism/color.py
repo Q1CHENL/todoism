@@ -12,7 +12,7 @@ color_set = {
     "red": [1, 196],
     "yellow": [2, 226],
     "green": [3, 41],
-    "cyan": [4, curses.COLOR_CYAN],
+    "cyan": [4, 37],
     "blue": [5, 39],
     "purple": [6, 141],
     "white": [7, 231],
