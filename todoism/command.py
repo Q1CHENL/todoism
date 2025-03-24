@@ -137,8 +137,8 @@ def execute_command(stdscr, command: str, task_list: list):
                 return task_list, None
             elif ch == curses.KEY_MOUSE:
                 _, mouse_x, mouse_y, _, button_state = curses.getmouse()
-                link_y = (st.latest_max_y - len(msg.help_msg.strip().split('\n'))) // 2 + 5
-                link_x = (st.latest_max_x - len(msg.help_msg.strip().split('\n')[0])) // 2 + 39
+                link_y = (st.latest_max_y - len(msg.HELP_MSG.strip().split('\n'))) // 2 + 5
+                link_x = (st.latest_max_x - len(msg.HELP_MSG.strip().split('\n')[0])) // 2 + 39
                 link_width = len("Github page")
                 if (mouse_y == link_y and 
                     link_x <= mouse_x < link_x + link_width):
@@ -173,7 +173,7 @@ def execute_command(stdscr, command: str, task_list: list):
             pr.print_pref_panel(stdscr, selection_index)
             
             # Get the current preference item
-            line = msg.pref_panel.strip().split('\n')[selection_index + 2].strip().split(':')
+            line = msg.PREF_PANEL.strip().split('\n')[selection_index + 2].strip().split(':')
             preference_type = line[0].strip()
             
             # Handle different preference types
@@ -405,7 +405,7 @@ def execute_command(stdscr, command: str, task_list: list):
 def open_help_page(stdscr):
     stdscr.clear()
     pr.print_outer_frame(stdscr)
-    pr.print_msg(stdscr, msg.help_msg)
+    pr.print_msg(stdscr, msg.HELP_MSG)
     pr.print_q_to_close(stdscr, "help")
 
 def open_pref_panel(stdscr, selection_index):

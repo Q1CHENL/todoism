@@ -34,7 +34,7 @@ def record_key_codes(stdscr):
     stdscr.timeout(-1)
 
     pr.print_outer_frame(stdscr)
-    pr.print_msg(stdscr, msg.keycode_msg)
+    pr.print_msg(stdscr, msg.KEYCODE_MSG)
     while True:
         st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
         if st.latest_max_x != st.old_max_x or st.latest_max_y != st.old_max_y:
@@ -42,7 +42,7 @@ def record_key_codes(stdscr):
             st.old_max_y = st.latest_max_y
             stdscr.clear()
             pr.print_outer_frame(stdscr)
-            pr.print_msg(stdscr, msg.keycode_msg)
+            pr.print_msg(stdscr, msg.KEYCODE_MSG)
         ch = stdscr.getch()
         if ch == ord('q'):
             return False
@@ -55,33 +55,33 @@ def record_key_codes(stdscr):
     key_definitions = [
         {
             "name": "ctrl+left",
-            "prompt_msg": msg.keycode_recording_ctrl_left_msg,
-            "feedback_msg": msg.keycode_feedback_ctrl_left_msg
+            "prompt_msg": msg.KEYCODE_RECORDING_CTRL_LEFT_MSG,
+            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_LEFT_MSG
         },
         {
             "name": "ctrl+right",
-            "prompt_msg": msg.keycode_recording_ctrl_right_msg,
-            "feedback_msg": msg.keycode_feedback_ctrl_right_msg
+            "prompt_msg": msg.KEYCODE_RECORDING_CTRL_RIGHT_MSG,
+            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_RIGHT_MSG
         },
         {
             "name": "ctrl+shift+left",
-            "prompt_msg": msg.keycode_recording_ctrl_shift_left_msg,
-            "feedback_msg": msg.keycode_feedback_ctrl_shift_left_msg
+            "prompt_msg": msg.KEYCODE_RECORDING_CTRL_SHIFT_LEFT_MSG,
+            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_SHIFT_LEFT_MSG
         },
         {
             "name": "ctrl+shift+right", 
-            "prompt_msg": msg.keycode_recording_ctrl_shift_right_msg,
-            "feedback_msg": msg.keycode_feedback_ctrl_shift_right_msg
+            "prompt_msg": msg.KEYCODE_RECORDING_CTRL_SHIFT_RIGHT_MSG,
+            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_SHIFT_RIGHT_MSG
         },
         {
             "name": "alt+left",
-            "prompt_msg": msg.keycode_recording_alt_left_msg,
-            "feedback_msg": msg.keycode_feedback_alt_left_msg
+            "prompt_msg": msg.KEYCODE_RECORDING_ALT_LEFT_MSG,
+            "feedback_msg": msg.KEYCODE_FEEDBACK_ALT_LEFT_MSG
         },
         {
             "name": "alt+right",
-            "prompt_msg": msg.keycode_recording_alt_right_msg,
-            "feedback_msg": msg.keycode_feedback_alt_right_msg
+            "prompt_msg": msg.KEYCODE_RECORDING_ALT_RIGHT_MSG,
+            "feedback_msg": msg.KEYCODE_FEEDBACK_ALT_RIGHT_MSG
         }
     ]
     
@@ -102,7 +102,7 @@ def record_key_codes(stdscr):
             # Handle restart/quit during key recording
             if ch == ord('r'):
                 restart_session = True
-                open_new_record_stage(stdscr, msg.keycode_restart_msg)
+                open_new_record_stage(stdscr, msg.KEYCODE_RESTART_MSG)
                 time.sleep(1)
                 break
             elif ch == ord('q'):
@@ -120,7 +120,7 @@ def record_key_codes(stdscr):
                     break
                 elif ch == ord('r'):
                     restart_session = True
-                    open_new_record_stage(stdscr, msg.keycode_restart_msg)
+                    open_new_record_stage(stdscr, msg.KEYCODE_RESTART_MSG)
                     time.sleep(1)
                     break
                 elif ch == ord('q'):
@@ -137,7 +137,7 @@ def record_key_codes(stdscr):
                 save_key_code(key, code)
             
             # Show completion message
-            open_new_record_stage(stdscr, msg.keycode_completion_msg)
+            open_new_record_stage(stdscr, msg.KEYCODE_COMPLETION_MSG)
             time.sleep(1)
             return True
 

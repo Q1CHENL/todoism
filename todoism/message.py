@@ -1,6 +1,6 @@
 # This file contains all message templates for the application
 
-help_msg = '''
+HELP_MSG = '''
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                             │
 │                                       todoism v1.21.5                                       │
@@ -34,7 +34,7 @@ help_msg = '''
 └─────────────────────────────────────────────────────────────────────────────────────────────┘
 '''
 
-pref_panel = '''
+PREF_PANEL = '''
 ┌───────────────────────────────────────┐
 │                                       │
 │   Strikethrough: on|off               │
@@ -55,26 +55,26 @@ pref_panel = '''
 
 '''
 
-no_tasks_found_msg = '''
+NO_TASKS_FOUND_MSG = '''
 ┌────────────────────────────┐
 │      No tasks found :)     │
 └────────────────────────────┘
 '''
 
-empty_msg = '''
+EMPTY_MSG = '''
 ┌──────────────────────────────────┐
 │      No active tasks here :)     │
 └──────────────────────────────────┘
 '''
 
-limit_msg = '''
+LIMIT_MSG = '''
 ┌────────────────────────────────────────┐
 │  You already have 1024 tasks in hand.  │
 │  Maybe try to deal with them first :)  │
 └────────────────────────────────────────┘
 '''
 
-keycode_msg = '''
+KEYCODE_MSG = '''
 ┌───────────────────────────────────────────────────────────┐
 │ Welcome!                                                  │
 │ Let's set up keycodes for todoism to work properly!       │
@@ -95,7 +95,7 @@ keycode_msg = '''
 '''
 
 # Key recording message templates - fixed indentation and formatting
-keycode_recording_ctrl_left_msg = '''
+KEYCODE_RECORDING_CTRL_LEFT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Keycode Recording (1/6)                           │
 │                                                   │
@@ -106,7 +106,7 @@ keycode_recording_ctrl_left_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_recording_ctrl_right_msg = '''
+KEYCODE_RECORDING_CTRL_RIGHT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Keycode Recording (2/6)                           │
 │                                                   │
@@ -117,7 +117,7 @@ keycode_recording_ctrl_right_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_recording_ctrl_shift_left_msg = '''
+KEYCODE_RECORDING_CTRL_SHIFT_LEFT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Keycode Recording (3/6)                           │
 │                                                   │
@@ -128,7 +128,7 @@ keycode_recording_ctrl_shift_left_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_recording_ctrl_shift_right_msg = '''
+KEYCODE_RECORDING_CTRL_SHIFT_RIGHT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Keycode Recording (4/6)                           │
 │                                                   │
@@ -139,7 +139,7 @@ keycode_recording_ctrl_shift_right_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_recording_alt_left_msg = '''
+KEYCODE_RECORDING_ALT_LEFT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Keycode Recording (5/6)                           │
 │                                                   │
@@ -150,7 +150,7 @@ keycode_recording_alt_left_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_recording_alt_right_msg = '''
+KEYCODE_RECORDING_ALT_RIGHT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Keycode Recording (6/6)                           │
 │                                                   │
@@ -162,7 +162,7 @@ keycode_recording_alt_right_msg = '''
 '''
 
 # Replace formatting placeholders with static text
-keycode_feedback_ctrl_left_msg = '''
+KEYCODE_FEEDBACK_CTRL_LEFT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Left                             │
 │                                                   │
@@ -173,7 +173,7 @@ keycode_feedback_ctrl_left_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_feedback_ctrl_right_msg = '''
+KEYCODE_FEEDBACK_CTRL_RIGHT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Right                            │
 │                                                   │
@@ -184,7 +184,7 @@ keycode_feedback_ctrl_right_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_feedback_ctrl_shift_left_msg = '''
+KEYCODE_FEEDBACK_CTRL_SHIFT_LEFT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Shift + Left                     │
 │                                                   │
@@ -195,7 +195,7 @@ keycode_feedback_ctrl_shift_left_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_feedback_ctrl_shift_right_msg = '''
+KEYCODE_FEEDBACK_CTRL_SHIFT_RIGHT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Shift + Right                    │
 │                                                   │
@@ -206,7 +206,7 @@ keycode_feedback_ctrl_shift_right_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_feedback_alt_left_msg = '''
+KEYCODE_FEEDBACK_ALT_LEFT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Alt + Left                              │
 │                                                   │
@@ -217,7 +217,7 @@ keycode_feedback_alt_left_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_feedback_alt_right_msg = '''
+KEYCODE_FEEDBACK_ALT_RIGHT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Alt + Right                             │
 │                                                   │
@@ -228,7 +228,7 @@ keycode_feedback_alt_right_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_completion_msg = '''
+KEYCODE_COMPLETION_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Key codes successfully saved!                     │
 │                                                   │
@@ -236,7 +236,7 @@ keycode_completion_msg = '''
 └───────────────────────────────────────────────────┘
 '''
 
-keycode_restart_msg = '''
+KEYCODE_RESTART_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Restarting key recording...                       │
 └───────────────────────────────────────────────────┘

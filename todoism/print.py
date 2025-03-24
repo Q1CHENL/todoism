@@ -309,7 +309,7 @@ def print_pref_panel(stdscr, current_selection_index=0):
     """
     
     # Get preference panel content
-    pref_content_lines = msg.pref_panel.strip().split("\n")
+    pref_content_lines = msg.PREF_PANEL.strip().split("\n")
 
     # Calculate available width - adapt to screen size
     original_width = len(pref_content_lines[0]) if pref_content_lines else 0
