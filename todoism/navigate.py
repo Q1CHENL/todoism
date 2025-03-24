@@ -65,17 +65,17 @@ class SidebarScroller:
             self.start_index = max(0, self.total_items - self.visible_height)
         return self.start_index
 
-def keydown_update(task_cnt, should_repaint):
+def keydown_update(should_repaint):
     """Scroll one line down with improved edge case handling"""
     # Don't do anything if we're already at the last task
-    if st.current_task_id == task_cnt:
+    if st.current_task_id == st.task_cnt:
         return False
         
     # Move selection down one task
     st.current_task_id += 1
     
     # Handle scrolling if needed
-    if task_cnt > st.latest_max_capacity and st.current_task_row == st.latest_max_capacity:
+    if st.task_cnt > st.latest_max_capacity and st.current_task_row == st.latest_max_capacity:
         # We need to scroll the view down
         st.start_task_id += 1
         st.end_task_id += 1
@@ -84,8 +84,8 @@ def keydown_update(task_cnt, should_repaint):
         st.current_task_row += 1
     
     # Double-check that everything is in bounds after scrolling
-    if st.end_task_id > task_cnt:
-        st.end_task_id = task_cnt
+    if st.end_task_id > st.task_cnt:
+        st.end_task_id = st.task_cnt
         st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
         
     # Make sure row is consistent with current_task_id and start
@@ -93,7 +93,7 @@ def keydown_update(task_cnt, should_repaint):
     
     return should_repaint
                 
-def keyup_update(task_cnt, should_repaint):
+def keyup_update(should_repaint):
     """Scroll one line up with improved edge case handling"""
     # Don't do anything if we're already at the first task
     if st.current_task_id == 1:
@@ -103,7 +103,7 @@ def keyup_update(task_cnt, should_repaint):
     st.current_task_id -= 1
     
     # Handle scrolling if needed
-    if task_cnt >= st.latest_max_capacity and st.start_task_id > 1 and st.current_task_row == 1:
+    if st.task_cnt >= st.latest_max_capacity and st.start_task_id > 1 and st.current_task_row == 1:
         # We need to scroll the view up
         st.start_task_id = st.start_task_id - 1
         st.end_task_id = st.end_task_id - 1
@@ -114,7 +114,7 @@ def keyup_update(task_cnt, should_repaint):
     # Double-check that everything is in bounds after scrolling
     if st.start_task_id < 1:
         st.start_task_id = 1
-        st.end_task_id = min(st.start_task_id + st.latest_max_capacity - 1, task_cnt)
+        st.end_task_id = min(st.start_task_id + st.latest_max_capacity - 1, st.task_cnt)
         
     # Make sure row is consistent with current_task_id and start
     st.current_task_row =  st.current_task_id - st.start_task_id + 1

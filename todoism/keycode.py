@@ -1,6 +1,7 @@
 import json
-import curses
 import time
+import curses
+
 import todoism.print as pr
 import todoism.message as msg
 import todoism.preference as pref
@@ -21,12 +22,12 @@ def record_key_codes(stdscr):
     """Record key codes for special key combinations"""
     curses.curs_set(0)
     key_codes = {
-        'ctrl+left': 0,
-        'ctrl+right': 0,
-        'ctrl+shift+left': 0,
-        'ctrl+shift+right': 0,
-        'alt+left': 0,
-        'alt+right': 0
+        "ctrl+left": 0,
+        "ctrl+right": 0,
+        "ctrl+shift+left": 0,
+        "ctrl+shift+right": 0,
+        "alt+left": 0,
+        "alt+right": 0
     }
 
     # Set timeout to non-blocking
@@ -53,40 +54,38 @@ def record_key_codes(stdscr):
     # Key combination definitions
     key_definitions = [
         {
-            'name': 'ctrl+left',
-            'prompt_msg': msg.keycode_recording_ctrl_left_msg,
-            'feedback_msg': msg.keycode_feedback_ctrl_left_msg
+            "name": "ctrl+left",
+            "prompt_msg": msg.keycode_recording_ctrl_left_msg,
+            "feedback_msg": msg.keycode_feedback_ctrl_left_msg
         },
         {
-            'name': 'ctrl+right',
-            'prompt_msg': msg.keycode_recording_ctrl_right_msg,
-            'feedback_msg': msg.keycode_feedback_ctrl_right_msg
+            "name": "ctrl+right",
+            "prompt_msg": msg.keycode_recording_ctrl_right_msg,
+            "feedback_msg": msg.keycode_feedback_ctrl_right_msg
         },
         {
-            'name': 'ctrl+shift+left',
-            'prompt_msg': msg.keycode_recording_ctrl_shift_left_msg,
-            'feedback_msg': msg.keycode_feedback_ctrl_shift_left_msg
+            "name": "ctrl+shift+left",
+            "prompt_msg": msg.keycode_recording_ctrl_shift_left_msg,
+            "feedback_msg": msg.keycode_feedback_ctrl_shift_left_msg
         },
         {
-            'name': 'ctrl+shift+right', 
-            'prompt_msg': msg.keycode_recording_ctrl_shift_right_msg,
-            'feedback_msg': msg.keycode_feedback_ctrl_shift_right_msg
+            "name": "ctrl+shift+right", 
+            "prompt_msg": msg.keycode_recording_ctrl_shift_right_msg,
+            "feedback_msg": msg.keycode_feedback_ctrl_shift_right_msg
         },
         {
-            'name': 'alt+left',
-            'prompt_msg': msg.keycode_recording_alt_left_msg,
-            'feedback_msg': msg.keycode_feedback_alt_left_msg
+            "name": "alt+left",
+            "prompt_msg": msg.keycode_recording_alt_left_msg,
+            "feedback_msg": msg.keycode_feedback_alt_left_msg
         },
         {
-            'name': 'alt+right',
-            'prompt_msg': msg.keycode_recording_alt_right_msg,
-            'feedback_msg': msg.keycode_feedback_alt_right_msg
+            "name": "alt+right",
+            "prompt_msg": msg.keycode_recording_alt_right_msg,
+            "feedback_msg": msg.keycode_feedback_alt_right_msg
         }
     ]
     
     while True:
-        pr.clear_inner_content(stdscr)
-
         # Reset all key codes at start of new recording session
         for key in key_codes:
             key_codes[key] = 0
@@ -96,8 +95,8 @@ def record_key_codes(stdscr):
         # Process each key combination
         for key_def in key_definitions:
             
-            key_name = key_def['name']            
-            open_new_record_stage(stdscr, key_def['prompt_msg'])
+            key_name = key_def["name"]            
+            open_new_record_stage(stdscr, key_def["prompt_msg"])
             
             ch = stdscr.getch()
             # Handle restart/quit during key recording
@@ -112,7 +111,7 @@ def record_key_codes(stdscr):
             # Record the key code
             key_codes[key_name] = ch
 
-            open_new_record_stage(stdscr, key_def['feedback_msg'])
+            open_new_record_stage(stdscr, key_def["feedback_msg"])
 
             # Wait for Enter to continue, or handle restart/quit
             while True:
@@ -144,30 +143,30 @@ def record_key_codes(stdscr):
 
 def open_new_record_stage(stdscr, msg):
     """Open a new record stage"""
-    pr.clear_inner_content(stdscr)
+    pr.clear_all_except_outer_frames(stdscr)
     pr.print_outer_frame(stdscr)
     pr.print_msg(stdscr, msg)
+    stdscr.refresh()
 
 def need_key_recording():
     """Check if we need to record key codes (all keys are 0)"""
     try:
-        with open(pref.settings_path, "r") as settings_file:
+        with open(pref.get_settings_path(), "r") as settings_file:
             settings = json.load(settings_file)
-            return (settings.get('ctrl+shift+left', 0) == 0 and
-                    settings.get('ctrl+shift+right', 0) == 0 and
-                    settings.get('ctrl+left', 0) == 0 and
-                    settings.get('ctrl+right', 0) == 0 and
-                    settings.get('alt+left', 0) == 0 and
-                    settings.get('alt+right', 0) == 0)
+            return (settings.get("ctrl+shift+left", 0) == 0 and
+                    settings.get("ctrl+shift+right", 0) == 0 and
+                    settings.get("ctrl+left", 0) == 0 and
+                    settings.get("ctrl+right", 0) == 0 and
+                    settings.get("alt+left", 0) == 0 and
+                    settings.get("alt+right", 0) == 0)
     except FileNotFoundError:
         pref.setup_default_settings()
         return True
 
-
 def save_key_code(key_name, code):
     """Save a recorded key code to settings"""
     try:
-        with open(pref.settings_path, "r+") as settings_file:
+        with open(pref.get_settings_path(), "r+") as settings_file:
             settings = json.load(settings_file)
             settings[key_name] = code
             settings_file.seek(0)
@@ -176,27 +175,38 @@ def save_key_code(key_name, code):
     except FileNotFoundError:
         pref.setup_default_settings()
 
-
 def get_key_codes():
     """Get all key codes from settings"""
     try:
-        with open(pref.settings_path, "r") as settings_file:
+        with open(pref.get_settings_path(), "r") as settings_file:
             settings = json.load(settings_file)
             return {
-                'ctrl+left': settings.get('ctrl+left', 0),
-                'ctrl+right': settings.get('ctrl+right', 0),
-                'ctrl+shift+left': settings.get('ctrl+shift+left', 0),
-                'ctrl+shift+right': settings.get('ctrl+shift+right', 0),
-                'alt+left': settings.get('alt+left', 0),
-                'alt+right': settings.get('alt+right', 0)
+                "ctrl+left": settings.get("ctrl+left", 0),
+                "ctrl+right": settings.get("ctrl+right", 0),
+                "ctrl+shift+left": settings.get("ctrl+shift+left", 0),
+                "ctrl+shift+right": settings.get("ctrl+shift+right", 0),
+                "alt+left": settings.get("alt+left", 0),
+                "alt+right": settings.get("alt+right", 0)
             }
     except FileNotFoundError:
         pref.setup_default_settings()
         return {
-            'ctrl+left': 0,
-            'ctrl+right': 0,
-            'ctrl+shift+left': 0,
-            'ctrl+shift+right': 0,
-            'alt+left': 0,
-            'alt+right': 0
+            "ctrl+left": 0,
+            "ctrl+right": 0,
+            "ctrl+shift+left": 0,
+            "ctrl+shift+right": 0,
+            "alt+left": 0,
+            "alt+right": 0
         }
+
+def setup_keycodes():
+    """Setup key codes from settings"""
+    global CTRL_LEFT, CTRL_RIGHT, CTRL_SHIFT_LEFT, CTRL_SHIFT_RIGHT, ALT_LEFT, ALT_RIGHT
+    
+    key_codes = get_key_codes()
+    CTRL_LEFT = key_codes["ctrl+left"]
+    CTRL_RIGHT = key_codes["ctrl+right"]
+    CTRL_SHIFT_LEFT = key_codes["ctrl+shift+left"]
+    CTRL_SHIFT_RIGHT = key_codes["ctrl+shift+right"]
+    ALT_LEFT = key_codes["alt+left"]
+    ALT_RIGHT = key_codes["alt+right"]

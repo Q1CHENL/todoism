@@ -1,6 +1,6 @@
-import curses
-import copy
 import time
+import curses
+import webbrowser
 
 import todoism.task as tsk
 import todoism.edit as ed
@@ -13,113 +13,110 @@ import todoism.strikethrough as stk
 import todoism.keycode as kc
 import todoism.category as cat
 import todoism.state as st
+import todoism.safe as sf
 
-def purge(task_list, purged_list):
+def purge(task_list, category_id=0):
     """
-    purge completed tasks
+    purge completed tasks, appending to existing purged tasks
     """
+    newly_purged = []
     remained = []
+    
+    def purged_cond(task, category_id):
+        return task["status"] if category_id == 0 else task["status"] is True and task["category_id"]
+    
     for t in task_list:
-        if t['status'] is False:
+        if purged_cond(t, category_id):
+            newly_purged.append(t)            
+        else:
             remained.append(t)
-        else:
-            purged_list.append(t)
     tsk.reassign_task_ids(remained)
-    tsk.save_tasks(purged_list, pref.purged_file_path)
-    return remained, []
+    purged_tasks = tsk.load_purged_tasks()
+    purged_tasks.extend(newly_purged)
+    tsk.save_tasks(purged_tasks, pref.get_purged_path())
+    return remained
 
+def handle_delete(task_list, task_id=0):
+    task_id = st.current_task_id if task_id == 0 else task_id
+    task_uuid = st.filtered_tasks[task_id - 1].get("uuid")
+    purged_tasks = tsk.load_purged_tasks()
+    purged_tasks.append(st.filtered_tasks[task_id - 1])
+    tsk.save_tasks(purged_tasks, pref.get_purged_path())
+    task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
+    if st.searching:
+        st.filtered_tasks = [task for task in st.filtered_tasks if task["uuid"] != task_uuid]
+    else:
+        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+    nv.post_deletion_update(len(task_list))
+    return task_list
 
-def sort(task_list, key) -> list:
-    marked = []
-    not_marked = []
-    for t in task_list:
-        if t[key] is True:
-            marked.append(t)
-        else:
-            not_marked.append(t)
-    return marked + not_marked
-
-
-def execute_command(
-        stdscr, 
-        command, 
-        task_list, 
-        done_list, 
-        purged_list,
-        ):
+def execute_command(stdscr, command: str, task_list: list):
     command_recognized = False    
-    if command.startswith("done "):
-        tasks_sperated_by_comma = command[5:].split(' ')
-        if len(tasks_sperated_by_comma) == 1:
-            ids_to_done = tasks_sperated_by_comma[0].split(',')
-            if all(i.isdigit() for i in ids_to_done):
-                for id_to_done in ids_to_done:
-                    index_to_done = int(id_to_done) - 1
-                    if 0 <= index_to_done < len(task_list):
-                        done_list.append(copy.copy(task_list[index_to_done]))
-                        task_uuid = st.filtered_tasks[index_to_done].get('uuid')
-                        tsk.done_task_by_uuid(task_list, task_uuid)
-        command_recognized = True
-    elif command.startswith("flag "):
-        tasks_sperated_by_comma = command[5:].split(' ')
-        if len(tasks_sperated_by_comma) == 1:
-            ids_to_flag = tasks_sperated_by_comma[0].split(',')
-            if all(i.isdigit() for i in ids_to_flag):
-                for id_to_flag in ids_to_flag:
-                    index_to_flag = int(id_to_flag) - 1
-                    if 0 <= index_to_flag < len(task_list):
-                        tsk.flag_task_by_uuid(task_list, task_list[index_to_flag]['uuid'])
-        command_recognized = True
+    if command.startswith("done"):
+        parts = command.split()
+        if len(parts) == 2 and parts[1].isdigit():
+            command_recognized = True
+            id = int(parts[1])
+            if 1 <= id <= len(st.filtered_tasks):
+                index = id - 1
+                tsk.flip_by_key(index, "status", task_list)
+            return task_list, None
+        else:
+            command_recognized = False
+    elif command.startswith("flag"):
+        parts = command.split()
+        if len(parts) == 2 and parts[1].isdigit():
+            command_recognized = True
+            id = int(parts[1])
+            if 1 <= id <= len(st.filtered_tasks):
+                index = id - 1
+                tsk.flip_by_key(index, "flagged", task_list)
+            return task_list, None
+        else:
+            command_recognized = False
     elif command == "purge":
         original_cnt = len(task_list)
-        displayed_task_cnt = st.end_task_id - st.start_task_id + 1
-        task_list, done_list = purge(task_list, purged_list)
+        task_list = purge(task_list, st.current_category_id)
         tsk.save_tasks(task_list)
-        # change current id to 1 if some tasks were purged
         if len(task_list) < original_cnt:
-            # temporary solution: back to top
             st.current_task_id = 1
             st.current_task_row = 1
             st.start_task_id = 1
-            if len(task_list) > displayed_task_cnt:
-                st.end_task_id = displayed_task_cnt
-            else:
-                st.end_task_id = len(task_list)
-        command_recognized = True
-    elif command.startswith("del "):
+            st.end_task_id = min(len(task_list), st.latest_max_capacity)
+        return task_list, None
+    elif command == ("purge all"):
+        task_list = purge(task_list)
+        tsk.save_tasks(task_list)
+        return task_list, None
+    elif command.startswith("del"):
         parts = command.split()
-        if len(parts) > 1 and parts[1].isdigit():
+        if len(parts) == 2 and parts[1].isdigit():
+            command_recognized = True
             task_id = int(parts[1])
             if 1 <= task_id <= len(task_list):
-                task_uuid = task_list[task_id - 1].get('uuid')
-                task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
-                # Update current_task_id, current_task_row, start, end after deletion
-                nv.post_deletion_update(len(task_list))
-        command_recognized = True
-    elif command.startswith("edit "):
-        task_id = command[5:]
-        if task_id.isdigit() and int(task_id) <= len(task_list):
-            st.latest_max_capacity = stdscr.getmaxyx()[0] - 1    
-            edit_id = int(task_id)
-
-            curses.echo()
-            curses.curs_set(1)
-            st.current_task_row = edit_id - st.start_task_id + 1
-            if len(task_list) and edit_id >= st.start_task_id and edit_id <= st.end_task_id:
-                st.current_task_id, st.current_task_row, st.start_task_id, st.end_task_id = ed.edit_and_save(
-                    stdscr, 
-                    task_list, 
-                    edit_id,
-                    st.current_task_row,
-                    st.start_task_id,
-                    st.end_task_id,
-                    edit_id - st.start_task_id + 1,
-                    len(task_list[edit_id - 1]['description']) + tsk.TASK_INDENT_IN_TASK_PANEL,
-                    st.latest_max_capacity
-                )
-            curses.curs_set(0)
-            curses.noecho()      
-        command_recognized = True
+                task_list = handle_delete(task_list, task_id)
+            return task_list, None
+        else:
+            command_recognized = False
+    elif command.startswith("edit"):
+        parts = command.split()
+        if len(parts) == 2 and parts[1].isdigit():
+            command_recognized = True
+            task_id = int(parts[1])
+            if 1 <= task_id <= len(task_list):
+                st.latest_max_capacity = stdscr.getmaxyx()[0] - 1
+                pr.print_task_entry(stdscr, st.filtered_tasks[st.current_task_id-1], st.current_task_row, False, cat.SIDEBAR_WIDTH)
+                st.current_task_id = int(task_id)
+                st.current_task_row = st.current_task_id - st.start_task_id + 1
+                if len(task_list) and st.current_task_id >= st.start_task_id and st.current_task_id <= st.end_task_id:
+                    curses.echo()
+                    curses.curs_set(1)
+                    task_list = ed.handle_edit(stdscr, task_list)
+                    curses.curs_set(0)
+                    curses.noecho()
+                    return task_list, None
+        else:
+            command_recognized = False
     elif command == "help":
         open_help_page(stdscr)
         st.old_max_x = st.latest_max_x
@@ -135,13 +132,22 @@ def execute_command(
 
             ch = stdscr.getch()
             if ch == ord('q'):
-                break
-        stdscr.timeout(old_timeout)
-        return task_list, done_list
+                stdscr.timeout(old_timeout)
+                pr.clear_bottom_bar(stdscr)
+                return task_list, None
+            elif ch == curses.KEY_MOUSE:
+                _, mouse_x, mouse_y, _, button_state = curses.getmouse()
+                link_y = (st.latest_max_y - len(msg.help_msg.strip().split('\n'))) // 2 + 5
+                link_x = (st.latest_max_x - len(msg.help_msg.strip().split('\n')[0])) // 2 + 39
+                link_width = len("Github page")
+                if (mouse_y == link_y and 
+                    link_x <= mouse_x < link_x + link_width):
+                    webbrowser.open("https://github.com/Q1CHENL/todoism")
+                    continue
+
     elif command == "pref":
         selection_index = 0
         open_pref_panel(stdscr, selection_index)
-        command_recognized = True
         old_timeout = 500  
         stdscr.timeout(-1)
         quit = False
@@ -151,6 +157,7 @@ def execute_command(
         
         while True:
             if quit:
+                pr.clear_bottom_bar(stdscr)
                 break                
             # Keep selection index in valid range
             if selection_index > 10:
@@ -163,7 +170,6 @@ def execute_command(
                 st.old_max_y = st.latest_max_y
                 open_pref_panel(stdscr, selection_index)
                         
-            # Display the preference panel with current selection
             pr.print_pref_panel(stdscr, selection_index)
             
             # Get the current preference item
@@ -171,7 +177,7 @@ def execute_command(
             preference_type = line[0].strip()
             
             # Handle different preference types
-            if preference_type == "│   Tag":
+            if preference_type == "│   Tag in All Tasks":
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     # Toggle Tag setting
@@ -199,21 +205,18 @@ def execute_command(
                 elif ch == ord('q'):
                     quit = True
             
-            elif preference_type == "│   Color":
+            elif preference_type == "│   Theme":
                 # Get currently selected color
-                colors = ["blue", "red", "yellow", "green"]
+                colors = ["purple", "cyan", "blue", "red", "yellow"]
                 current_color = clr.get_theme_color_str()
                 color_index = colors.index(current_color) if current_color in colors else 0
                 
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    # Cycle through colors
                     color_index = (color_index + 1) % len(colors)
                     clr.set_theme_color(colors[color_index])
-                    # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
-                    # Update color pair for selection
-                    curses.init_pair(9, curses.COLOR_BLACK, clr.get_theme_color_curses())
+                    curses.init_pair(clr.SELECTION_COLOR_PAIR_NUM, clr.get_color_code_by_str("black"), clr.get_theme_color_curses())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -232,7 +235,6 @@ def execute_command(
                     pref.set_date_format(date_formats[date_index])
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
-                    tsk.update_all_task_date_format(task_list, current_format)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -243,7 +245,7 @@ def execute_command(
             elif preference_type.startswith("│   Sort by flagged"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    pref.set_sort_flagged(not pref.get_sort_flagged())
+                    pref.set_sort_by_flagged(not pref.get_sort_by_flagged())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -253,7 +255,7 @@ def execute_command(
             elif preference_type.startswith("│   Sort by done"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    pref.set_sort_done(not pref.get_sort_done())
+                    pref.set_sort_by_done(not pref.get_sort_by_done())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -269,38 +271,26 @@ def execute_command(
                     selection_index += 2
                 elif ch == ord('q'):
                     quit = True
-        
         # Restore original timeout
         stdscr.timeout(old_timeout)
-    elif command.startswith("tag "):
-        tag = command[4:]
-        if tag == "on":
-            pref.set_tag(True)
-            command_recognized = True
-        elif tag == "off":
-            pref.set_tag(False)
-            command_recognized = True
-    elif command == 'dev':
+        return task_list, None
+    elif command == "dev":
         # Hidden command for developers - load test data
         try:
-            import test.test as test_module
-            
-            if test_module.is_dev_mode_active():
-                max_y, max_x = stdscr.getmaxyx()
-                sidebar_width = 16
-                warning_msg = "Already in dev mode!"
-                stdscr.move(st.latest_max_capacity, sidebar_width)
-                stdscr.clrtoeol()
-                yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
-                stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-                stdscr.addstr(st.latest_max_capacity, sidebar_width, warning_msg)
-                stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
+            if st.is_dev_mode:
+                warning_msg = "Already in dev mode or another instance in running!"
+                sf.safe_move(stdscr, st.latest_max_capacity, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
+                attr = clr.get_color_pair_by_str("yellow") | curses.A_BOLD
+                sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
                 stdscr.refresh()
                 time.sleep(1)
-                stdscr.move(st.latest_max_capacity, sidebar_width)
-                stdscr.clrtoeol()
+                sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
             else:
-                if test_module.load_dev_mode():
+                import test.test as ts
+                if ts.load_dev_mode():
+                    st.is_dev_mode = True
                     task_list = tsk.load_tasks()
                     categories = cat.load_categories()
                     st.current_category_id = 0
@@ -312,139 +302,114 @@ def execute_command(
                     st.end_task_id = min(len(task_list), st.latest_max_capacity)
                     
                     # Show success message
-                    max_y, max_x = stdscr.getmaxyx()
-                    sidebar_width = 16
                     success_msg = "Dev mode enabled. Test tasks and categories loaded. Will auto-restore on exit."
-                    stdscr.move(st.latest_max_capacity, sidebar_width)
-                    stdscr.clrtoeol()
-                    green_pair_num = clr.get_color_pair_num_by_str_text("green")
-                    stdscr.attron(curses.color_pair(green_pair_num) | curses.A_BOLD)
-                    stdscr.addstr(st.latest_max_capacity, sidebar_width, success_msg)
-                    stdscr.attroff(curses.color_pair(green_pair_num) | curses.A_BOLD)
+                    sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                    pr.clear_bottom_bar_except_status(stdscr)
+                    attr = clr.get_color_pair_by_str("green") | curses.A_BOLD
+                    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, success_msg, attr)
                     stdscr.refresh()
                     time.sleep(1.5)
-                    stdscr.move(st.latest_max_capacity, sidebar_width)
-                    stdscr.clrtoeol()
+                    sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                    pr.clear_bottom_bar_except_status(stdscr)
                     
                     # Return updated categories and category ID
-                    return task_list, done_list, categories
+                    return task_list, categories
         except ImportError:
             # Test module not found (likely PyPI installation)
-            max_y, max_x = stdscr.getmaxyx()
-            sidebar_width = 16
             warning_msg = "Dev mode not available in installation."
-            stdscr.move(st.latest_max_capacity, sidebar_width)
-            stdscr.clrtoeol()
-            yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
-            stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-            stdscr.addstr(st.latest_max_capacity, sidebar_width, warning_msg)
-            stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
+            sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+            pr.clear_bottom_bar_except_status(stdscr)
+            attr = clr.get_color_pair_by_str("yellow") | curses.A_BOLD
+            sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
             stdscr.refresh()
             time.sleep(1.5)
-            stdscr.move(st.latest_max_capacity, sidebar_width)
-            stdscr.clrtoeol()
+            sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+            pr.clear_bottom_bar_except_status(stdscr)
         command_recognized = True
         
     elif command == "restore":
         # Hidden command for developers - restore real data
         try:
-            import test.test as test_module
+            import test.test as ts
             
-            if not test_module.is_dev_mode_active():
-                max_y, max_x = stdscr.getmaxyx()
-                sidebar_width = 16
+            if not st.is_dev_mode:
                 warning_msg = "Not in dev mode - nothing to restore!"
-                stdscr.move(st.latest_max_capacity, sidebar_width)
-                stdscr.clrtoeol()
-                yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
-                stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-                stdscr.addstr(st.latest_max_capacity, sidebar_width, warning_msg)
-                stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
+                sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
+                attr = clr.get_color_pair_by_str("yellow") | curses.A_BOLD
+                sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
                 stdscr.refresh()
                 time.sleep(1)
-                stdscr.move(st.latest_max_capacity, sidebar_width)
-                stdscr.clrtoeol()
+                sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
             else:
-                if test_module.exit_dev_mode():
-                    task_list = tsk.load_tasks()
-                    categories = cat.load_categories()
-                    st.current_category_id = 0
-                    
-                    # Reset view
-                    st.current_task_id = 1 if len(task_list) > 0 else 0
-                    st.current_task_row = 1 if len(task_list) > 0 else 0
-                    st.start_task_id = 1 if len(task_list) > 0 else 0
-                    st.end_task_id = min(len(task_list), st.latest_max_capacity) if len(task_list) > 0 else 0
-                    
-                    # Show success message
-                    max_y, max_x = stdscr.getmaxyx()
-                    sidebar_width = 16
-                    success_msg = "Dev mode disabled. Original tasks and categories restored."
-                    stdscr.move(st.latest_max_capacity, sidebar_width)
-                    stdscr.clrtoeol()
-                    green_pair_num = clr.get_color_pair_num_by_str_text("green")
-                    stdscr.attron(curses.color_pair(green_pair_num) | curses.A_BOLD)
-                    stdscr.addstr(st.latest_max_capacity, sidebar_width, success_msg)
-                    stdscr.attroff(curses.color_pair(green_pair_num) | curses.A_BOLD)
-                    stdscr.refresh()
-                    time.sleep(1.5)
-                    stdscr.move(st.latest_max_capacity, sidebar_width)
-                    stdscr.clrtoeol()
-                    
-                    # Return updated categories and category ID
-                    return task_list, done_list, categories
+                st.is_dev_mode = False
+                import todoism.due as due
+                task_list = tsk.load_tasks()
+                due.add_due_key_if_missing(task_list)
+                tsk.save_tasks(task_list)
+                categories = cat.load_categories()
+                st.current_category_id = 0
+                
+                # Reset view
+                st.current_task_id = 1 if len(task_list) > 0 else 0
+                st.current_task_row = 1 if len(task_list) > 0 else 0
+                st.start_task_id = 1 if len(task_list) > 0 else 0
+                st.end_task_id = min(len(task_list), st.latest_max_capacity) if len(task_list) > 0 else 0
+                
+                # Show success message
+                success_msg = "Dev mode disabled. Original tasks and categories restored."
+                sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
+                attr = clr.get_color_pair_by_str("green") | curses.A_BOLD
+                sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, success_msg, attr)
+                stdscr.refresh()
+                time.sleep(1.5)
+                sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+                pr.clear_bottom_bar_except_status(stdscr)
+                
+                # Return updated categories and category ID
+                return task_list, categories
         except ImportError:
             # Test module not found (likely PyPI installation)
-            max_y, max_x = stdscr.getmaxyx()
-            sidebar_width = 16
             warning_msg = "Dev mode not available in installation"
-            stdscr.move(st.latest_max_capacity, sidebar_width)
-            stdscr.clrtoeol()
-            yellow_pair_num = clr.get_color_pair_num_by_str_text("yellow")
-            stdscr.attron(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
-            stdscr.addstr(st.latest_max_capacity, sidebar_width, warning_msg)
-            stdscr.attroff(curses.color_pair(yellow_pair_num) | curses.A_BOLD)
+            sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+            pr.clear_bottom_bar_except_status(stdscr)
+            attr = clr.get_color_pair_by_str("yellow") | curses.A_BOLD
+            sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
             stdscr.refresh()
             time.sleep(1.5)
-            stdscr.move(st.latest_max_capacity, sidebar_width)
-            stdscr.clrtoeol()
+            sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+            pr.clear_bottom_bar_except_status(stdscr)
         command_recognized = True
         
     elif command.strip() == "":
-        command_recognized = True
+        return task_list, None
 
     if not command_recognized and command.strip():
-        max_y, max_x = stdscr.getmaxyx()
-        sidebar_width = 16
         error_msg = f"Invalid command: '{command}'. Type command 'help' for help."
-        
-        # Clear the line first
-        stdscr.move(st.latest_max_capacity, sidebar_width)
-        stdscr.clrtoeol()
-        
-        red_pair_num = clr.get_color_pair_num_by_str_text("red")
-        stdscr.attron(curses.color_pair(red_pair_num) | curses.A_BOLD)
-        stdscr.addstr(st.latest_max_capacity, sidebar_width, error_msg)
-        stdscr.attroff(curses.color_pair(red_pair_num) | curses.A_BOLD)
+        # Clear the line first, error might occur if resized small
+        sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+        pr.clear_bottom_bar_except_status(stdscr)
+        attr = clr.get_color_pair_by_str("red") | curses.A_BOLD
+        sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, error_msg, attr)
         stdscr.refresh()
-        
         time.sleep(1.5)
-        
         # Clear the error message
-        stdscr.move(st.latest_max_capacity, sidebar_width)
-        stdscr.clrtoeol()
+        sf.safe_move(stdscr, st.latest_max_y - 2, 1)
+        pr.clear_bottom_bar_except_status(stdscr)
         stdscr.refresh()
-    
-    return task_list, done_list
+
+    return task_list, None
 
 def open_help_page(stdscr):
     stdscr.clear()
     pr.print_outer_frame(stdscr)
     pr.print_msg(stdscr, msg.help_msg)
-    pr.print_q_to_close(stdscr, "help", st.latest_max_x, st.latest_max_y)
+    pr.print_q_to_close(stdscr, "help")
 
 def open_pref_panel(stdscr, selection_index):
     stdscr.clear()
     pr.print_pref_panel(stdscr, selection_index)
     pr.print_outer_frame(stdscr)
-    pr.print_q_to_close(stdscr, "preferences", st.latest_max_x, st.latest_max_y)
+    pr.print_q_to_close(stdscr, "preferences")

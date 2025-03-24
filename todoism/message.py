@@ -1,66 +1,70 @@
 # This file contains all message templates for the application
 
 help_msg = '''
-┌──────────────────────────────────────────────────┐
-│                                                  │
-│   Short commands:                                │
-│   a - Create new task/category                   │
-│   d - Mark task as done                          │
-│   e - Edit task/category                         │
-│   f - Mark task as flagged                       │
-│   q - Quit this help message/pref panel/todoism  │
-│                                                  │
-│   Key bindings:                                  │
-│   Tab - Toggle focus bewteen tasks and sidebar   │
-│   Double Backspace - delete task                 │
-│   ESC - quit adding/editing task                 │
-│   Enter - finish adding/editing task             │
-│   Up/Down Arrow Keys - navigate through tasks    │
-│   Mouse Click:                                   │
-│    - on task: Select task                        │
-│    - on category: Select category                │
-│    - on done: Toggle task completion             │
-│    - on flag: Toggle task flag                   │
-│    - on blank area: toggle focus                 │
-│                                                  │
-│   Vim-like long commands:                        │
-│   (:<command> [args])                            │
-│   :help - Show this help message                 │
-│   :pref - Open preference panel                  │
-│   :del <task_id> - Delete task                   │
-│   :edit <task_id> - Edit task                    │
-│   :done <task_id> - Mark task as done            │
-│   :purge - Purge all done tasks                  │
-│                                                  │
-└──────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                             │
+│                                       todoism v1.21.5                                       │
+│                                                                                             │
+│                               Visit Github page for more info                               │
+│                                                                                             │
+│                                                                                             │
+│   Short commands:                            Key bindings:                                  │
+│   a - Create new task/category               Tab - Toggle focus bewteen tasks and sidebar   │
+│   d - Mark task as done                      Double Backspace - delete task/category        │
+│   e - Edit task/category                     ESC - Cancel adding/editing/search             │
+│   f - Mark task as flagged                   Enter - Finish adding/editing, confirm search  │
+│   q - Quit this help/pref/search/todoism     Up/Down Arrow Keys - Navigate through tasks    │
+│                                              CTRL + Left/Right - Move by word               │
+│   Vim-like long commands:                    CTRL + Shift + Left/Right - Select by word     │
+│   :help - Show this help message             ALT + Left/Right - Jump to start/end of text   │
+│   :pref - Open preference panel                                                             │
+│   :del <task_id> - Delete task               Mouse Operations:                              │
+│   :edit <task_id> - Edit task                - Click on task/category: Select item          │
+│   :done <task_id> - Mark task as done        - Click on done/flag: Toggle status            │
+│   :purge - Purge done tasks in current cat.  - Click on blank area: Toggle focus            │
+│   :purge all - Purge all done tasks          - Wheel scroll: Navigate through tasks/cats    │
+│                                                                                             │
+│   To add due date to a task:                 To search for tasks:                           │
+│   Add [<due date>] at the end of the task    /<search term>                                 │
+│   Supported formats:                                                                        │
+│   - [yyyy-mm-dd hh:mm]    - [hh:mm]                                                         │
+│   - [yyyy-mm-dd]          - [mm-dd hh:mm]                                                   │
+│   - [mm-dd] or [dd-mm]                                                                      │
+│                                                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘
 '''
 
 pref_panel = '''
-┌────────────────────────────────────┐
-│                                    │
-│   Tag: on|off                      │
-│                                    │
-│   Strikethrough: on|off            │
-│                                    │
-│   Color: blue|red|yellow|green     │
-│                                    │
-│   Date format: Y-M-D|D-M-Y|M-D-Y   │
-│                                    │
-│   Sort by flagged: on|off          │
-│                                    │
-│   Sort by done: on|off             │
-│                                    │
-│   (Press Tab to toggle options)    │
-│                                    │
-└────────────────────────────────────┘
+┌───────────────────────────────────────┐
+│                                       │
+│   Strikethrough: on|off               │
+│                                       │
+│   Tag in All Tasks: on|off            │
+│                                       │
+│   Theme: purple|cyan|blue|red|yellow  │
+│                                       │
+│   Date format: Y-M-D|D-M-Y|M-D-Y      │
+│                                       │
+│   Sort by flagged: on|off             │
+│                                       │
+│   Sort by done: on|off                │
+│                                       │
+│   (Press Tab to toggle options)       │
+│                                       │
+└───────────────────────────────────────┘
 
 '''
 
+no_tasks_found_msg = '''
+┌────────────────────────────┐
+│      No tasks found :)     │
+└────────────────────────────┘
+'''
+
 empty_msg = '''
-┌──────────────────────────────────────────────────────┐
-│       Hmm, it seems there are no active tasks        │
-│     Take a break, or create some to get busy :)      │
-└──────────────────────────────────────────────────────┘
+┌──────────────────────────────────┐
+│      No active tasks here :)     │
+└──────────────────────────────────┘
 '''
 
 limit_msg = '''
@@ -93,7 +97,7 @@ keycode_msg = '''
 # Key recording message templates - fixed indentation and formatting
 keycode_recording_ctrl_left_msg = '''
 ┌───────────────────────────────────────────────────┐
-│ Keycode Recording (1/4)                           │
+│ Keycode Recording (1/6)                           │
 │                                                   │
 │ Press Ctrl + Left key combination                 │
 │                                                   │
@@ -104,7 +108,7 @@ keycode_recording_ctrl_left_msg = '''
 
 keycode_recording_ctrl_right_msg = '''
 ┌───────────────────────────────────────────────────┐
-│ Keycode Recording (2/4)                           │
+│ Keycode Recording (2/6)                           │
 │                                                   │
 │ Press Ctrl + Right key combination                │
 │                                                   │
@@ -115,7 +119,7 @@ keycode_recording_ctrl_right_msg = '''
 
 keycode_recording_ctrl_shift_left_msg = '''
 ┌───────────────────────────────────────────────────┐
-│ Keycode Recording (3/4)                           │
+│ Keycode Recording (3/6)                           │
 │                                                   │
 │ Press Ctrl + Shift + Left key combination         │
 │                                                   │
@@ -126,7 +130,7 @@ keycode_recording_ctrl_shift_left_msg = '''
 
 keycode_recording_ctrl_shift_right_msg = '''
 ┌───────────────────────────────────────────────────┐
-│ Keycode Recording (4/4)                           │
+│ Keycode Recording (4/6)                           │
 │                                                   │
 │ Press Ctrl + Shift + Right key combination        │
 │                                                   │
