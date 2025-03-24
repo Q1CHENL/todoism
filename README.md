@@ -17,7 +17,7 @@ A powerful yet easy-to-use todo TUI
 > [!NOTE]
 > Some terminal does not support mouse click or strike through effect.
 > E.g **Ptyxis** (new default terminal for GNOME 47) does not fully support strikethrough effect.
-> You can turn it off use command `:st off`, as specified in the help message.
+> You can turn it off in **preference panel** (open with `:pref` as specified in the help message)
 
 ### Keycode recording
 
@@ -36,14 +36,6 @@ When you first start todoism, you'll be prompted to record key combinations for 
 - Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in pip installation.
 - Installation is at `~/.local/bin/todoism` and `~/.local/bin/todo`
 - Tasks, settings, backups and test files are stored in `~/.todoism/`
-
-> [!CAUTION]
-> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions is not yet implemented. **v1.21 and ealier versions are perticularly deprecated.**
-
-## Develop
-
-- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode, not available in PyPI installation)
-- Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in PyPI installation.
 
 > [!CAUTION]
 > Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions may not be fully supported. Please backup your data (located in `~/.todoism/`) when needed.
