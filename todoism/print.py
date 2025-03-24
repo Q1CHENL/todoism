@@ -47,7 +47,7 @@ def clear_bottom_bar(stdscr):
     
 def print_github_page_line(stdscr, line):
     sf.safe_appendstr(stdscr, line[:line.find("Github page")])
-    attr = clr.get_theme_color_pair() | curses.A_UNDERLINE
+    attr = clr.get_theme_color_pair_for_text() | curses.A_UNDERLINE
     sf.safe_appendstr(stdscr, "Github page", attr)
     sf.safe_appendstr(stdscr, line[line.find("Github page") + len("Github page"):])
 
@@ -211,7 +211,7 @@ def print_category(stdscr, category, y, is_selected=False):
     if is_selected and st.focus_manager.is_sidebar_focused():
         attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM)
     elif is_selected and not st.focus_manager.is_sidebar_focused():
-        attr = clr.get_theme_color_pair() | curses.A_BOLD
+        attr = clr.get_theme_color_pair_for_text() | curses.A_BOLD
             
     sf.safe_addstr(stdscr, y, 1, ' ', attr)
     # Display name with fixed width - now at position 2 (after the left frame)
@@ -261,7 +261,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         visible_text = stk.apply(visible_text)
         
     task_id = task["id"]
-    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM)
+    attr = clr.get_theme_color_pair_for_selection()
     attr_done = curses.A_DIM
     
     if is_selected:
@@ -273,12 +273,9 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         sf.safe_addstr(stdscr, row, due_pos, due_str, attr)
         sf.safe_addstr(stdscr, row, st.latest_max_x - 1, ' ', attr)
     else:
-        attr_due = clr.get_theme_color_pair() if task["due"] != "" else 0
+        attr_due = clr.get_theme_color_pair_for_text() if task["due"] != "" else 0
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
         sf.safe_addstr(stdscr, row, total_indent, visible_text, (attr_done if is_done else 0) | attr_due)
-        # Fill remaining space with spaces
-        for _ in range(available_width - len(visible_text) + 1):
-            sf.safe_appendstr(stdscr, ' ')
         sf.safe_addstr(stdscr, row, due_pos, due_str, (attr_done if is_done else 0) | attr_due)
         sf.safe_addstr(stdscr, row, st.latest_max_x - 1, '│')
 
@@ -369,12 +366,12 @@ def print_pref_panel(stdscr, current_selection_index=0):
         elif "Theme:" in line and current_color in line:
             pos = line.find(current_color)
             print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, 
-                                         current_color, clr.get_theme_color_pair())
+                                         current_color, clr.get_theme_color_pair_for_text())
                 
         elif "Date format:" in line and current_date_format in line:
             pos = line.find(current_date_format)
             print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, 
-                                         current_date_format, clr.get_theme_color_pair())
+                                         current_date_format, clr.get_theme_color_pair_for_text())
             
         elif "Sort by flagged:" in line:
             value = "on" if sort_by_flagged else "off"

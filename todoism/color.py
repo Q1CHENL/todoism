@@ -64,8 +64,12 @@ def get_theme_color_str() -> str:
         pref.setup_default_settings()
         return curses.COLOR_BLUE
 
-def get_theme_color_pair() -> int:
+def get_theme_color_pair_for_text() -> int:
     return get_color_pair_by_str(get_theme_color_str())
+
+def get_theme_color_pair_for_selection() -> int:
+    curses.init_pair(SELECTION_COLOR_PAIR_NUM, get_color_code_by_str("black"), get_theme_color_curses())
+    return curses.color_pair(SELECTION_COLOR_PAIR_NUM)
 
 def get_color_pair_by_str(color: str) -> int:
     return curses.color_pair(get_color_pair_num_by_str(color))
