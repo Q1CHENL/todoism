@@ -356,7 +356,7 @@ def print_pref_panel(stdscr, current_selection_index=0):
             continue
         
         # Process and draw content lines
-        if "Tag:" in line:
+        if "Tag in All Tasks:" in line:
             value = "on" if tag_enabled else "off"
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
@@ -366,7 +366,7 @@ def print_pref_panel(stdscr, current_selection_index=0):
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)                
                 
-        elif "Color:" in line and current_color in line:
+        elif "Theme:" in line and current_color in line:
             pos = line.find(current_color)
             print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center_offset_y, 
                                          current_color, clr.get_theme_color_pair())
@@ -410,7 +410,6 @@ def print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, cente
         
     if value == "on":
         attr = clr.get_color_pair_by_str("green")
-        # attr = curses.init_pair(100, curses.COLOR_WHITE, clr.get)
         sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x + pos, value[:st.latest_max_x-(center_offset_x+pos)-1], attr)
     else:  # "off"
         attr = clr.get_color_pair_by_str("red")

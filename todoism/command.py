@@ -177,7 +177,7 @@ def execute_command(stdscr, command: str, task_list: list):
             preference_type = line[0].strip()
             
             # Handle different preference types
-            if preference_type == "│   Tag":
+            if preference_type == "│   Tag in All Tasks":
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     # Toggle Tag setting
@@ -205,7 +205,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 elif ch == ord('q'):
                     quit = True
             
-            elif preference_type == "│   Color":
+            elif preference_type == "│   Theme":
                 # Get currently selected color
                 colors = ["purple", "cyan", "blue", "red", "yellow"]
                 current_color = clr.get_theme_color_str()

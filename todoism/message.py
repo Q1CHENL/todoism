@@ -37,11 +37,11 @@ help_msg = '''
 pref_panel = '''
 ┌───────────────────────────────────────┐
 │                                       │
-│   Tag: on|off                         │
-│                                       │
 │   Strikethrough: on|off               │
 │                                       │
-│   Color: purple|cyan|blue|red|yellow  │
+│   Tag in All Tasks: on|off            │
+│                                       │
+│   Theme: purple|cyan|blue|red|yellow  │
 │                                       │
 │   Date format: Y-M-D|D-M-Y|M-D-Y      │
 │                                       │
