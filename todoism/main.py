@@ -15,6 +15,7 @@ import todoism.state as st
 import todoism.search as srch
 import todoism.safe as sf
 import todoism.due as due 
+import todoism.update as up
 
 def _quit_search(stdscr, task_list):
     st.searching = False
@@ -148,6 +149,32 @@ def main(stdscr):
     st.focus_manager = nv.FocusManager()
     sidebar_scroller = nv.SidebarScroller(len(categories), st.latest_max_capacity)
     
+    update_available = up.check_for_updates()
+    if update_available:
+        pr.print_outer_frame(stdscr)
+        pr.print_msg(stdscr, msg.NEW_VERSION_MSG)
+
+        # Wait for user response
+        while True:
+            key = stdscr.getch()
+            if key == ord('q'):
+                break
+            elif key == ord('u'):
+                success = up.update_todoism()
+                if success:
+                    pr.clear_all_except_outer_frames(stdscr)
+                    pr.print_msg(stdscr, msg.UPDATE_SUCCESS_MSG)
+                    stdscr.refresh()
+                    while True:
+                        key = stdscr.getch()
+                        if key == curses.KEY_ENTER or key == kc.ENTER:
+                            return
+                else:
+                    pr.clear_all_except_outer_frames(stdscr)
+                    pr.print_msg(stdscr, msg.UPDATE_FAILURE_MSG)
+                    stdscr.refresh()
+                    time.sleep(2)
+                    break
     
     while True:
         if not st.searching:

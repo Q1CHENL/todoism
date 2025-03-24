@@ -16,7 +16,7 @@ add_mode  = 1
 edit_mode = 2
 
 def print_version():
-    print("todoism v1.21.4")
+    print("todoism v1.21.5")
 
 def print_q_to_close(stdscr, page):
     hint = f"Press 'q' to close {page}"
@@ -63,7 +63,7 @@ def print_msg(stdscr, msg, x_offset=0, attr=0):
     """Print a message box with proper centering in the task area with optional highlighting"""
     
     lines = msg.split('\n')
-    width = len(lines[1])
+    width = len(lines[1]) if len(lines) > 1 else len(lines[0])
     # Calculate available width for task area (total width minus sidebar)
     available_width = max(0, st.latest_max_x - x_offset)
     center_offset_x = max(0, (available_width - width) // 2)
@@ -287,7 +287,7 @@ def print_whole_view(stdscr, categories, category_start_index):
     
     clear_task_panel(stdscr)
     if st.task_cnt == 0:
-        message = msg.empty_msg if not st.searching else msg.no_tasks_found_msg
+        message = msg.EMPTY_MSG if not st.searching else msg.NO_TASKS_FOUND_MSG
         print_msg_in_task_panel(stdscr, message, cat.SIDEBAR_WIDTH)
     else:
         print_task_entries(stdscr, cat.SIDEBAR_WIDTH)

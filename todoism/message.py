@@ -241,3 +241,38 @@ KEYCODE_RESTART_MSG = '''
 │ Restarting key recording...                       │
 └───────────────────────────────────────────────────┘
 '''
+
+NEW_VERSION_MSG = '''
+┌───────────────────────────────────────────────────┐
+│ New version of todoism is available!              │
+│                                                   │
+│ Press 'u' to update now                           │
+│ Press 'q' to proceed without updating             │
+└───────────────────────────────────────────────────┘
+'''
+
+UPDATE_SUCCESS_MSG = '''
+┌────────────────────────────────────────────┐
+│    Sucessfully updated todoism v1.21.5!    │
+│                                            │
+│    What's new:                             │
+│    - Search tasks with '/'                 │
+│    - Add due date to tasks                 │
+│    - New purple theme color                │
+│    - New bottom status bar                 │
+│                                            │
+│    Exiting...                              │
+│    Please restart todoism                  │
+└────────────────────────────────────────────┘
+'''
+
+UPDATE_FAILURE_MSG = '''
+┌─────────────────────────────────────────────────────┐
+│   Failed to update todoism. Some error occurred.    │
+│                                                     │
+│   Check your internet connection and try again.     │
+│   Or visit Github page to update manually.          │
+│                                                     │
+│   Will proceed with current version...              │
+└─────────────────────────────────────────────────────┘
+'''
