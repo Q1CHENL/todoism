@@ -36,7 +36,7 @@ When you first start todoism, you'll be prompted to record key combinations for 
 - Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in PyPI installation.
 
 > [!CAUTION]
-> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions may not be fully supported. Please backup your data (located in `~/.todoism/`) when needed.
+> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions may not be fully supported. Please backup your data (located in `~/.todoism/`) when needed. **v1.21 and lower versions are perticularly deprecated!**
 
 ## Contribute
 
