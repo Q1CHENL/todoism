@@ -261,8 +261,8 @@ UPDATE_SUCCESS_MSG = '''
 │    - New purple theme color                │
 │    - New bottom status bar                 │
 │                                            │
-│    Exiting...                              │
 │    Please restart todoism                  │
+│    Press 'q' to exit.                      │
 └────────────────────────────────────────────┘
 '''
 

@@ -97,10 +97,12 @@ def update_todoism() -> bool:
     Update todoism package while preserving user data files.
     
     Returns: success (bool): True if update was successful
-
     """
     import subprocess
     import sys
+    import os
+    import json
+    import time
     
     try:
         # Try user installation first (no admin privileges needed)
@@ -113,8 +115,32 @@ def update_todoism() -> bool:
             process = subprocess.run(pip_command, capture_output=True, text=True)
             
             if process.returncode != 0:
-                return (False, f"Update failed: {process.stderr}")
+                return False
         
+        # Update was successful - update the cache to avoid showing update message again
+        cache_dir = os.path.join(os.path.expanduser("~"), ".todoism")
+        cache_file = os.path.join(cache_dir, "update_cache.json")
+        
+        try:
+            # Get current installed version based on Python version
+            if sys.version_info >= (3, 8):
+                import importlib.metadata
+                current_version = importlib.metadata.version("todoism")
+            else:
+                import pkg_resources
+                current_version = pkg_resources.get_distribution("todoism").version
+                
+            with open(cache_file, 'w') as f:
+                json.dump({
+                    'timestamp': time.time(),
+                    'update_available': False,
+                    'current_version': current_version,
+                    'latest_version': current_version
+                }, f)
+        except Exception:
+            # Silent failure for cache update - not critical
+            pass
+            
         return True
     except Exception as e:
         return False
