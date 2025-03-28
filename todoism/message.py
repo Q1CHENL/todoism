@@ -3,7 +3,7 @@
 HELP_MSG = '''
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                             │
-│                                       todoism v1.21.5                                       │
+│                                       todoism v1.21.6                                       │
 │                                                                                             │
 │                               Visit Github page for more info                               │
 │                                                                                             │
@@ -252,7 +252,7 @@ NEW_VERSION_MSG = '''
 
 UPDATE_SUCCESS_MSG = '''
 ┌────────────────────────────────────────────┐
-│    Sucessfully updated todoism v1.21.5!    │
+│    Sucessfully updated todoism v1.21.6!    │
 │                                            │
 │    What's new:                             │
 │    - Search tasks with '/'                 │
