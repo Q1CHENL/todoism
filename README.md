@@ -4,8 +4,8 @@ A powerful yet easy-to-use todo TUI
 
 ## Screenshots
 
-![UI](./assets/screenshot-v1.21.5.png)
-![UI](./assets/screenshot-v1.21.5-help.png)
+![UI](./assets/screenshot-latest.png)
+![UI](./assets/screenshot-help-latest.png)
 
 ## Highlights
 
