@@ -358,7 +358,7 @@ def main(stdscr):
                         should_repaint = nv.keydown_update(True)
                     continue
 
-                elif mouse_x < cat.SIDEBAR_WIDTH:
+                elif mouse_x < cat.SIDEBAR_WIDTH and button_state & curses.BUTTON1_PRESSED:
                     if st.searching:
                         continue
                     if not st.focus_manager.is_sidebar_focused():
@@ -378,7 +378,7 @@ def main(stdscr):
                                 should_repaint = True
                     continue
                 
-                if mouse_x >= cat.SIDEBAR_WIDTH:
+                if mouse_x >= cat.SIDEBAR_WIDTH and button_state & curses.BUTTON1_PRESSED:
                     if not st.focus_manager.is_tasks_focused():
                         st.focus_manager.toggle_focus()
                         should_repaint = True
