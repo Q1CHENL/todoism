@@ -247,7 +247,7 @@ NEW_VERSION_MSG = '''
 │ New version of todoism is available!              │
 │                                                   │
 │ Press 'u' to update now                           │
-│ Press 'q' to proceed without updating             │
+│ Press Enter to proceed without updating           │
 └───────────────────────────────────────────────────┘
 '''
 
@@ -261,8 +261,7 @@ UPDATE_SUCCESS_MSG = '''
 │    - New purple theme color                │
 │    - New bottom status bar                 │
 │                                            │
-│    Exiting...                              │
-│    Please restart todoism                  │
+│    Please press 'q' to exit and restart.   │
 └────────────────────────────────────────────┘
 '''
 

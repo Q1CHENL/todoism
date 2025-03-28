@@ -158,7 +158,7 @@ def main(stdscr):
         # Wait for user response
         while True:
             key = stdscr.getch()
-            if key == ord('q'):
+            if key == kc.ENTER or curses.KEY_ENTER:
                 break
             elif key == ord('u'):
                 success = up.update_todoism()
@@ -168,7 +168,7 @@ def main(stdscr):
                     stdscr.refresh()
                     while True:
                         key = stdscr.getch()
-                        if key == curses.KEY_ENTER or key == kc.ENTER:
+                        if key == ord('q'):
                             return
                 else:
                     pr.clear_all_except_outer_frames(stdscr)
