@@ -47,7 +47,7 @@ def handle_delete(task_list, task_id=0):
         st.filtered_tasks = [task for task in st.filtered_tasks if task["uuid"] != task_uuid]
     else:
         st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-    nv.post_deletion_update(len(task_list))
+    nv.post_deletion_update(len(task_list) + 1)
     return task_list
 
 def execute_command(stdscr, command: str, task_list: list):
