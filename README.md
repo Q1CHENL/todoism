@@ -7,6 +7,15 @@ A powerful yet easy-to-use todo TUI
 ![UI](./assets/screenshot-v1.21.5.png)
 ![UI](./assets/screenshot-v1.21.5-help.png)
 
+## Highlights
+
+- Simple, intuitive interface
+- Mouse support: click & scroll
+- Easy task search
+- Customizable: theme, sorting, and more
+- Common Keyboard shortcuts support for editing
+- Vim-like commands available for convenience
+
 ## Install and use
 
 - Install: `pip install todoism`
