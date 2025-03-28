@@ -155,7 +155,8 @@ def main(stdscr):
     if update_available:
         pr.print_outer_frame(stdscr)
         pr.print_msg(stdscr, msg.NEW_VERSION_MSG)
-
+        
+        stdscr.timout(-1)
         # Wait for user response
         while True:
             key = stdscr.getch()
@@ -177,6 +178,7 @@ def main(stdscr):
                     stdscr.refresh()
                     time.sleep(2)
                     break
+        stdscr.timeout(500)
     
     while True:
         if not st.searching:
