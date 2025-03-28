@@ -4,8 +4,17 @@ A powerful yet easy-to-use todo TUI
 
 ## Screenshots
 
-![UI](./assets/screenshot-v1.21.5.png)
-![UI](./assets/screenshot-v1.21.5-help.png)
+![UI](./assets/screenshot-latest.png)
+![UI](./assets/screenshot-help-latest.png)
+
+## Highlights
+
+- Simple, intuitive interface
+- Mouse support: click & scroll
+- Easy task search
+- Customizable: theme, sorting, and more
+- Common Keyboard shortcuts support for editing
+- Vim-like commands available for convenience
 
 ## Install and use
 
@@ -36,7 +45,7 @@ When you first start todoism, you'll be prompted to record key combinations for 
 - Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in PyPI installation.
 
 > [!CAUTION]
-> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions may not be fully supported. Please backup your data (located in `~/.todoism/`) when needed.
+> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions may not be fully supported. Please backup your data (located in `~/.todoism/`) when needed. **v1.21 and lower versions are perticularly deprecated!**
 
 ## Contribute
 
