@@ -30,7 +30,7 @@ def _handle_command_input(stdscr):
     sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ":")
     stdscr.refresh()
     command = stdscr.getstr().decode("utf-8")
-    stdscr.timeout(100)
+    stdscr.timeout(500)
     curses.curs_set(0)
     curses.noecho()
     return command
@@ -123,8 +123,9 @@ def main(stdscr):
     tsk.reassign_task_ids(task_list)
     categories = cat.load_categories()
         
-    # Set a timeout for getch() to make it non-blocking (500ms)q
-    stdscr.timeout(100)
+    # Set a timeout for getch() to make it non-blocking (500ms)
+    # 500ms makes sure double backspaces work
+    stdscr.timeout(500)
     last_time_update = time.time()
     
     should_repaint = True
@@ -480,7 +481,7 @@ def main(stdscr):
                     sf.safe_move(stdscr, st.latest_max_y - 2, 2)
                     stdscr.refresh()
             
-            stdscr.timeout(100)
+            stdscr.timeout(500)
             curses.curs_set(0)
             
             if query == "":
@@ -724,8 +725,8 @@ def main(stdscr):
                     should_repaint = nv.keydown_update(True)
                 
             elif key == curses.KEY_BACKSPACE or key == kc.BACKSPACE:
-                k = stdscr.getch()
-                if k == curses.KEY_BACKSPACE or k == kc.BACKSPACE:
+                second_key = stdscr.getch()
+                if second_key == curses.KEY_BACKSPACE or second_key == kc.BACKSPACE:
                     if len(st.filtered_tasks) > 0:
                         task_list = cmd.handle_delete(task_list)
                     tsk.save_tasks(task_list)
