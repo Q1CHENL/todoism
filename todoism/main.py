@@ -30,7 +30,7 @@ def _handle_command_input(stdscr):
     sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, ":")
     stdscr.refresh()
     command = stdscr.getstr().decode("utf-8")
-    stdscr.timeout(500)
+    stdscr.timeout(100)
     curses.curs_set(0)
     curses.noecho()
     return command
@@ -99,7 +99,8 @@ def main(stdscr):
     stdscr.keypad(True)  # enable e.g arrow keys
     stdscr.scrollok(True)
     curses.curs_set(0)
-    curses.set_escdelay(25)
+    curses.set_escdelay(25) # faster escape key
+    curses.mouseinterval(0) # faster mouse click
     stdscr.clear()
     stdscr.refresh()
     curses.start_color()
@@ -122,8 +123,8 @@ def main(stdscr):
     tsk.reassign_task_ids(task_list)
     categories = cat.load_categories()
         
-    # Set a timeout for getch() to make it non-blocking (500ms)
-    stdscr.timeout(500)
+    # Set a timeout for getch() to make it non-blocking (500ms)q
+    stdscr.timeout(100)
     last_time_update = time.time()
     
     should_repaint = True
@@ -479,7 +480,7 @@ def main(stdscr):
                     sf.safe_move(stdscr, st.latest_max_y - 2, 2)
                     stdscr.refresh()
             
-            stdscr.timeout(500)
+            stdscr.timeout(100)
             curses.curs_set(0)
             
             if query == "":
