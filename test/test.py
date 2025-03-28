@@ -60,7 +60,6 @@ def generate_test_tasks():
             "flagged": False,
             "category_id": 0
         },
-        # Additional tasks
         {
             "id": 7,
             "uuid": str(uuid.uuid4()),
@@ -330,15 +329,12 @@ def load_dev_mode():
     """Load test tasks and categories"""
     st.is_dev_mode = True
 
-    # Generate test data
     test_tasks = generate_test_tasks()
     test_categories = generate_test_categories()
         
-    # Save test categories
     with open(pref.TEST_CATEGORIES_FILE_PATH, 'w') as file:
         json.dump(test_categories, file, indent=4)
     
-    # Save test tasks - only write to the test file path
     with open(pref.TEST_TASKS_FILE_PATH, 'w') as file:
         json.dump(test_tasks, file, indent=4)
     

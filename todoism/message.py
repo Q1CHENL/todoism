@@ -94,7 +94,6 @@ KEYCODE_MSG = '''
 └───────────────────────────────────────────────────────────┘
 '''
 
-# Key recording message templates - fixed indentation and formatting
 KEYCODE_RECORDING_CTRL_LEFT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Keycode Recording (1/6)                           │
