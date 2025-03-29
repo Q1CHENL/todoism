@@ -99,6 +99,8 @@ def execute_command(stdscr, command: str, task_list: list):
         else:
             command_recognized = False
     elif command.startswith("edit"):
+        if st.focus_manager.is_sidebar_focused():
+            return task_list, None
         parts = command.split()
         if len(parts) == 2 and parts[1].isdigit():
             command_recognized = True
