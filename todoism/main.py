@@ -546,6 +546,7 @@ def main(stdscr):
                         _restore_state(task_list)
                         st.cat_cnt = len(categories)
                         pr.print_msg_in_task_panel(stdscr, msg.EMPTY_MSG, cat.SIDEBAR_WIDTH)
+                        pr.print_status_bar(stdscr)
                 else:
                     st.current_category_id = old_cat_id
                     should_repaint = True

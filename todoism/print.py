@@ -162,6 +162,8 @@ def print_status_bar(stdscr):
     percent_text = f"({percent_value:.0f}%)"
     
     color_text = "red" if percent_value < 33 else "yellow" if percent_value < 67 else "green"
+    if percent_value == 0 and st.task_cnt == 0:
+        color_text = "green"
     color_pair = clr.get_color_pair_by_str(color_text)
     
     # Add command hint at the beginning (dimmed)
