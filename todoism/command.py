@@ -109,11 +109,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 st.current_task_id = int(task_id)
                 st.current_task_row = st.current_task_id - st.start_task_id + 1
                 if len(task_list) and st.current_task_id >= st.start_task_id and st.current_task_id <= st.end_task_id:
-                    curses.echo()
-                    curses.curs_set(1)
                     task_list = ed.handle_edit(stdscr, task_list)
-                    curses.curs_set(0)
-                    curses.noecho()
                     return task_list, None
         else:
             command_recognized = False

@@ -195,7 +195,7 @@ def main(stdscr):
         st.old_max_x = st.latest_max_x
         st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
         st.old_max_capacity = st.latest_max_capacity
-        st.latest_max_capacity = st.latest_max_y - 2 - 2
+        st.latest_max_capacity = st.latest_max_y - 4
         
         # Prevent error when window is vertically too small
         if st.latest_max_capacity < 0:
@@ -208,82 +208,76 @@ def main(stdscr):
             # Update sidebar view
             sidebar_scroller.update_visible_height(st.latest_max_capacity)
             
+            if st.task_cnt <= 0:
+                continue
+            
             # Update task view
-            if st.task_cnt > 0:
-                if is_growing:
-                    # WINDOW GROWING: Show maximum possible tasks while keeping current selection visible
-                    # Step 1: First attempt to fill from bottom
-                    # Calculate how many more tasks we could show with new size
-                    potential_end = min(st.task_cnt, st.start_task_id + st.latest_max_capacity - 1)
-
-                    # Step 2: If we still have space after showing more at bottom, 
-                    # show more at top too (if possible)
-                    if potential_end - st.start_task_id + 1 < st.latest_max_capacity and st.start_task_id > 1:
-                        # Calculate how much space is still available after filling bottom
-                        remaining_space = st.latest_max_capacity - (potential_end - st.start_task_id + 1)
-
-                        # Fill from top with remaining space
-                        new_start = max(1, st.start_task_id - remaining_space)
-
-                        # Update start and end
-                        st.start_task_id = new_start
-                        st.end_task_id = min(st.task_cnt, st.start_task_id + st.latest_max_capacity - 1)
-                    else:
-                        # Just extend end as much as possible
-                        st.end_task_id = potential_end
-
-                    # Step 3: Special case for when we're near the end of the list
-                    # If we're not showing the maximum possible tasks, pull the window up
-                    visible_count = st.end_task_id - st.start_task_id + 1
-                    if visible_count < st.latest_max_capacity and st.end_task_id < st.task_cnt:
-                        # We have empty space but more tasks below - adjust both ends
-                        st.end_task_id = min(st.task_cnt, st.end_task_id + (st.latest_max_capacity - visible_count))
-                        visible_count = st.end_task_id - st.start_task_id + 1
-
-                        if visible_count < st.latest_max_capacity and st.start_task_id > 1:
-                            # Still have space? Pull up from top too
-                            spaces_to_fill = st.latest_max_capacity - visible_count
-                            st.start_task_id = max(1, st.start_task_id - spaces_to_fill)
-                            st.end_task_id = min(st.task_cnt, st.start_task_id + st.latest_max_capacity - 1)
-
-                    # Step 4: Special case when we're at the end of the list
-                    # If end is at max and we have space, pull window up
-                    if st.end_task_id == st.task_cnt and st.end_task_id - st.start_task_id + 1 < st.latest_max_capacity and st.start_task_id > 1:
-                        # Calculate how many more items we could show at top
-                        available_slots = st.latest_max_capacity - (st.end_task_id - st.start_task_id + 1)
-                        new_start = max(1, st.start_task_id - available_slots)
-                        st.start_task_id = new_start
-
-                    # Make sure current task stays visible by adjusting view if needed
-                    if st.current_task_id < st.start_task_id:
-                        # If current task would be above visible area, adjust view
-                        st.start_task_id = st.current_task_id
-                        st.end_task_id = min(st.task_cnt, st.start_task_id + st.latest_max_capacity - 1)
-                    elif st.current_task_id > st.end_task_id:
-                        # If current task would be below visible area, adjust view
-                        st.end_task_id = st.current_task_id
-                        st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
-
-                    # Update current_task_row based on adjusted start/end
-                    st.current_task_row = st.current_task_id - st.start_task_id + 1
+            if is_growing:
+                # WINDOW GROWING: Show maximum possible tasks while keeping current selection visible
+                # Step 1: First attempt to fill from bottom
+                # Calculate how many more tasks we could show with new size
+                potential_end = min(st.task_cnt, st.start_task_id + st.latest_max_capacity - 1)
+                # Step 2: If we still have space after showing more at bottom, 
+                # show more at top too (if possible)
+                if potential_end - st.start_task_id + 1 < st.latest_max_capacity and st.start_task_id > 1:
+                    # Calculate how much space is still available after filling bottom
+                    remaining_space = st.latest_max_capacity - (potential_end - st.start_task_id + 1)
+                    # Fill from top with remaining space
+                    new_start = max(1, st.start_task_id - remaining_space)
+                    # Update start and end
+                    st.start_task_id = new_start
+                    st.end_task_id = min(st.task_cnt, st.start_task_id + st.latest_max_capacity - 1)
                 else:
-                    # WINDOW SHRINKING: Keep current task visible but reduce what's shown
-                    # Make sure end doesn't exceed capacity from start
-                    if st.end_task_id > st.start_task_id + st.latest_max_capacity - 1:
-                        st.end_task_id = st.start_task_id + st.latest_max_capacity - 1
-                        
-                    # If end exceeds task count, adjust both end and start
-                    if st.end_task_id > st.task_cnt:
-                        st.end_task_id = st.task_cnt
-                        st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
-                        
-                    # Make sure current task is still visible by adjusting start if needed
-                    if st.current_task_id < st.start_task_id:
-                        st.start_task_id = st.current_task_id
-                        st.end_task_id = min(st.start_task_id + st.latest_max_capacity - 1, st.task_cnt)
-                    elif st.current_task_id > st.end_task_id:
-                        st.end_task_id = st.current_task_id
-                        st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
+                    # Just extend end as much as possible
+                    st.end_task_id = potential_end
+                # Step 3: Special case for when we're near the end of the list
+                # If we're not showing the maximum possible tasks, pull the window up
+                visible_count = st.end_task_id - st.start_task_id + 1
+                if visible_count < st.latest_max_capacity and st.end_task_id < st.task_cnt:
+                    # We have empty space but more tasks below - adjust both ends
+                    st.end_task_id = min(st.task_cnt, st.end_task_id + (st.latest_max_capacity - visible_count))
+                    visible_count = st.end_task_id - st.start_task_id + 1
+                    if visible_count < st.latest_max_capacity and st.start_task_id > 1:
+                        # Still have space? Pull up from top too
+                        spaces_to_fill = st.latest_max_capacity - visible_count
+                        st.start_task_id = max(1, st.start_task_id - spaces_to_fill)
+                        st.end_task_id = min(st.task_cnt, st.start_task_id + st.latest_max_capacity - 1)
+                # Step 4: Special case when we're at the end of the list
+                # If end is at max and we have space, pull window up
+                if st.end_task_id == st.task_cnt and st.end_task_id - st.start_task_id + 1 < st.latest_max_capacity and st.start_task_id > 1:
+                    # Calculate how many more items we could show at top
+                    available_slots = st.latest_max_capacity - (st.end_task_id - st.start_task_id + 1)
+                    new_start = max(1, st.start_task_id - available_slots)
+                    st.start_task_id = new_start
+                # Make sure current task stays visible by adjusting view if needed
+                if st.current_task_id < st.start_task_id:
+                    # If current task would be above visible area, adjust view
+                    st.start_task_id = st.current_task_id
+                    st.end_task_id = min(st.task_cnt, st.start_task_id + st.latest_max_capacity - 1)
+                elif st.current_task_id > st.end_task_id:
+                    # If current task would be below visible area, adjust view
+                    st.end_task_id = st.current_task_id
+                    st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
+                # Update current_task_row based on adjusted start/end
+                st.current_task_row = st.current_task_id - st.start_task_id + 1
+            else:
+                # WINDOW SHRINKING: Keep current task visible but reduce what's shown
+                # Make sure end doesn't exceed capacity from start
+                if st.end_task_id > st.start_task_id + st.latest_max_capacity - 1:
+                    st.end_task_id = st.start_task_id + st.latest_max_capacity - 1
+                    
+                # If end exceeds task count, adjust both end and start
+                if st.end_task_id > st.task_cnt:
+                    st.end_task_id = st.task_cnt
+                    st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
+                    
+                # Make sure current task is still visible by adjusting start if needed
+                if st.current_task_id < st.start_task_id:
+                    st.start_task_id = st.current_task_id
+                    st.end_task_id = min(st.start_task_id + st.latest_max_capacity - 1, st.task_cnt)
+                elif st.current_task_id > st.end_task_id:
+                    st.end_task_id = st.current_task_id
+                    st.start_task_id = max(1, st.end_task_id - st.latest_max_capacity + 1)
                         
         if _window_resized():
             should_repaint = True
@@ -298,23 +292,18 @@ def main(stdscr):
             
         if should_repaint:
             tsk.reassign_task_ids(st.filtered_tasks)
-            if st.searching and not st.focus_manager.is_tasks_focused(): 
-                st.focus_manager.toggle_focus()
-            if st.focus_manager.is_tasks_focused():
-                if st.task_cnt > 0:
-                    if st.current_task_id > st.task_cnt:
-                        st.current_task_id = st.task_cnt
-                        st.current_task_row = min(st.current_task_row, st.latest_max_capacity)
-                    
-                    # Render the whole view
-                    pr.print_whole_view(stdscr, categories, sidebar_scroller.start_index)
-                    
-                else:
-                    pr.print_whole_view(stdscr, categories, sidebar_scroller.start_index)
-            else:
-                pr.print_whole_view(stdscr, categories, sidebar_scroller.start_index)
             if st.searching:
+                if not st.focus_manager.is_tasks_focused(): 
+                    st.focus_manager.toggle_focus()
                 pr.print_q_to_close(stdscr, "search")
+                
+            if st.focus_manager.is_tasks_focused():
+                if st.task_cnt > 0 and st.current_task_id > st.task_cnt:
+                    st.current_task_id = st.task_cnt
+                    st.current_task_row = min(st.current_task_row, st.latest_max_capacity)
+                    
+            pr.print_whole_view(stdscr, categories, sidebar_scroller.start_index)
+                
             should_repaint = False
             stdscr.refresh()
             
