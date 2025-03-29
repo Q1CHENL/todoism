@@ -276,6 +276,8 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         attr_due = clr.get_theme_color_pair_for_text() if task["due"] != "" else 0
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
         sf.safe_addstr(stdscr, row, total_indent, visible_text, (attr_done if is_done else 0) | attr_due)
+        for _ in range(available_width - len(visible_text) + 1):
+            sf.safe_appendstr(stdscr, ' ')
         sf.safe_addstr(stdscr, row, due_pos, due_str, (attr_done if is_done else 0) | attr_due)
         sf.safe_addstr(stdscr, row, st.latest_max_x - 1, '│')
 
