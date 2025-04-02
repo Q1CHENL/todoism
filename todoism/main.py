@@ -156,7 +156,7 @@ def main(stdscr):
         pr.print_outer_frame(stdscr)
         pr.print_msg(stdscr, msg.NEW_VERSION_MSG)
         
-        stdscr.timout(-1)
+        stdscr.timeout(-1)
         # Wait for user response
         while True:
             key = stdscr.getch()
@@ -164,18 +164,15 @@ def main(stdscr):
                 break
             elif key == ord('u'):
                 success = up.update_todoism()
+                pr.clear_all_except_outer_frames(stdscr)
+                pr.print_msg(stdscr, msg.UPDATE_SUCCESS_MSG if success else msg.UPDATE_FAILURE_MSG)
+                stdscr.refresh()
                 if success:
-                    pr.clear_all_except_outer_frames(stdscr)
-                    pr.print_msg(stdscr, msg.UPDATE_SUCCESS_MSG)
-                    stdscr.refresh()
                     while True:
                         key = stdscr.getch()
                         if key == ord('q'):
                             return
                 else:
-                    pr.clear_all_except_outer_frames(stdscr)
-                    pr.print_msg(stdscr, msg.UPDATE_FAILURE_MSG)
-                    stdscr.refresh()
                     time.sleep(2)
                     break
         stdscr.timeout(500)
