@@ -604,7 +604,23 @@ def main(stdscr):
                         _restore_state(task_list)
                     
                     should_repaint = True
-                
+                    
+            elif key == kc.ALT_LEFT:
+                if len(categories) > 0:
+                    st.current_category_id = categories[0]["id"]
+                    sidebar_scroller.current_index = 0
+                    sidebar_scroller.start_index = 0
+                    _restore_state(task_list)
+                    should_repaint = True
+                    
+            elif key == kc.ALT_RIGHT:
+                if len(categories) > 0:
+                    st.current_category_id = categories[-1]["id"]
+                    sidebar_scroller.current_index = len(categories) - 1
+                    sidebar_scroller.start_index = max(0, len(categories) - st.latest_max_capacity)
+                    _restore_state(task_list)
+                    should_repaint = True
+                    
         elif st.focus_manager.is_tasks_focused():
             if key == ord('a'):
                 if st.searching:
@@ -719,6 +735,22 @@ def main(stdscr):
                     if len(st.filtered_tasks) > 0:
                         task_list = cmd.handle_delete(task_list)
                     tsk.save_tasks(task_list)
+                    should_repaint = True
+            elif key == kc.ALT_LEFT:
+                if st.task_cnt > 0:
+                    st.current_task_id = 1
+                    st.current_task_row = 1
+                    st.start_task_id = 1
+                    st.end_task_id = min(st.latest_max_capacity, st.task_cnt)
+                    task_scroll_offset = 0
+                    should_repaint = True
+            elif key == kc.ALT_RIGHT:
+                if st.task_cnt > 0:
+                    st.current_task_id = st.task_cnt
+                    st.current_task_row = min(st.task_cnt, st.latest_max_capacity)
+                    st.start_task_id = max(1, st.task_cnt - st.latest_max_capacity + 1)
+                    st.end_task_id = st.task_cnt
+                    task_scroll_offset = 0
                     should_repaint = True
 
 def run():
