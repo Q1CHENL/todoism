@@ -180,6 +180,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 if ch == kc.TAB:
                     # Toggle Tag setting
                     pref.set_tag(not pref.get_tag())
+                    st.tag = not st.tag
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
@@ -244,6 +245,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     pref.set_sort_by_flagged(not pref.get_sort_by_flagged())
+                    st.sort_by_flagged = not st.sort_by_flagged
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -254,6 +256,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     pref.set_sort_by_done(not pref.get_sort_by_done())
+                    st.sort_by_done = not st.sort_by_done
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:

@@ -77,20 +77,20 @@ def _sort_by_tag(categories):
     tsk.reassign_task_ids(st.filtered_tasks)
     
 def _sort_by_flagged_done_tag(categories):
-    if pref.get_sort_by_done():
+    if st.sort_by_done:
         st.filtered_tasks = tsk.sort(st.filtered_tasks, "status")
         tsk.reassign_task_ids(st.filtered_tasks)
-    if pref.get_sort_by_flagged():
+    if st.sort_by_flagged:
         st.filtered_tasks = tsk.sort(st.filtered_tasks, "flagged")
         tsk.reassign_task_ids(st.filtered_tasks)
     _sort_by_tag(categories)
 
 def _task_not_marked(task):
-    if pref.get_sort_by_done() and pref.get_sort_by_flagged():
+    if st.sort_by_done and st.sort_by_flagged:
         return not task["status"] and not task["flagged"]
-    elif pref.get_sort_by_done():
+    elif st.sort_by_done:
         return not task["status"]
-    elif pref.get_sort_by_flagged():
+    elif st.sort_by_flagged:
         return not task["flagged"]
     else:
         return False
@@ -113,6 +113,8 @@ def main(stdscr):
     kc.setup_keycodes()
 
     pref.update_preferences()    
+    pref.load_preferences()
+    
     # Enable mouse support
     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
 
@@ -150,6 +152,7 @@ def main(stdscr):
     
     st.focus_manager = nv.FocusManager()
     sidebar_scroller = nv.SidebarScroller(len(categories), st.latest_max_capacity)
+    old_cat_id = st.current_category_id
     
     update_available = up.check_for_updates()
     if update_available:
@@ -178,7 +181,8 @@ def main(stdscr):
         stdscr.timeout(500)
     
     while True:
-        if not st.searching:
+        if not st.searching and old_cat_id != st.current_category_id:
+            old_cat_id = st.current_category_id
             st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
         tsk.reassign_task_ids(st.filtered_tasks)
         

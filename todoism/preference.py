@@ -53,6 +53,20 @@ def setup_default_settings():
         json.dump(default_settings, file, indent=4)
     return default_settings
 
+def load_preferences():
+    """
+    Load settings from the settings.json file.
+    If the file doesn't exist or is invalid, create a new one with default settings.
+    """
+    try:
+        with open(get_settings_path(), 'r') as file:
+            preferences = json.load(file)
+            st.sort_by_done = preferences.get("sort_by_done", False)
+            st.sort_by_flagged = preferences.get("sort_by_flagged", False)
+            st.tag = preferences.get("tag", True)
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+
 def update_preferences():
     """
     Update settings file with new entries when program is updated.
