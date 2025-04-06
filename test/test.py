@@ -275,6 +275,411 @@ def generate_test_tasks():
             "status": False,
             "flagged": False,
             "category_id": 7  # Home
+        },
+        {
+            "id": 31,
+            "uuid": str(uuid.uuid4()),
+            "description": "Prepare for the upcoming presentation",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 1  # Work
+        },
+        {
+            "id": 32,
+            "uuid": str(uuid.uuid4()),
+            "description": "Plan a family gathering",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 10  # Family
+        },
+        {
+            "id": 33,
+            "uuid": str(uuid.uuid4()),
+            "description": "Schedule a car maintenance appointment",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 3  # Health
+        },
+        {
+            "id": 34,
+            "uuid": str(uuid.uuid4()),
+            "description": "Buy ingredients for dinner",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 4  # Shopping
+        },
+        {
+            "id": 35,
+            "uuid": str(uuid.uuid4()),
+            "description": "Complete online course module",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 5  # Learning
+        },
+        {
+            "id": 36,
+            "uuid": str(uuid.uuid4()),
+            "description": "Book flight tickets for vacation",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 6  # Travel
+        },
+        {
+            "id": 37,
+            "uuid": str(uuid.uuid4()),
+            "description": "Organize workspace",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 7  # Home
+        },
+        {
+            "id": 38,
+            "uuid": str(uuid.uuid4()),
+            "description": "Research new health trends",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 3  # Health
+        },
+        {
+            "id": 39,
+            "uuid": str(uuid.uuid4()),
+            "description": "Plan a weekend trip",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 6  # Travel
+        },
+        {
+            "id": 40,
+            "uuid": str(uuid.uuid4()),
+            "description": "Attend a workshop on productivity",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 5  # Learning
+        },
+        {
+            "id": 41,
+            "uuid": str(uuid.uuid4()),
+            "description": "Update personal budget",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 13  # Finance
+        },
+        {
+            "id": 42,
+            "uuid": str(uuid.uuid4()),
+            "description": "Finish reading a book",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 5  # Learning
+        },
+        {
+            "id": 43,
+            "uuid": str(uuid.uuid4()),
+            "description": "Prepare for a job interview",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 9  # Career
+        },
+        {
+            "id": 44,
+            "uuid": str(uuid.uuid4()),
+            "description": "Plan a surprise party",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 10  # Family
+        },
+        {
+            "id": 45,
+            "uuid": str(uuid.uuid4()),
+            "description": "Create a workout schedule",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 8  # Fitness
+        },
+        {
+            "id": 46,
+            "uuid": str(uuid.uuid4()),
+            "description": "Attend a networking event",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 9  # Career
+        },
+        {
+            "id": 47,
+            "uuid": str(uuid.uuid4()),
+            "description": "Visit a museum",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 6  # Travel
+        },
+        {
+            "id": 48,
+            "uuid": str(uuid.uuid4()),
+            "description": "Start a new hobby",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 5  # Learning
+        },
+        {
+            "id": 49,
+            "uuid": str(uuid.uuid4()),
+            "description": "Plan a family vacation",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 6  # Travel
+        },
+        {
+            "id": 50,
+            "uuid": str(uuid.uuid4()),
+            "description": "Organize a community event",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 1  # Work
+        },
+        {
+            "id": 51,
+            "uuid": str(uuid.uuid4()),
+            "description": "Create a vision board",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 2  # Personal
+        },
+        {
+            "id": 52,
+            "uuid": str(uuid.uuid4()),
+            "description": "Attend a cooking class",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 5  # Learning
+        },
+        {
+            "id": 53,
+            "uuid": str(uuid.uuid4()),
+            "description": "Volunteer for a local charity",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 2  # Personal
+        },
+        {
+            "id": 54,
+            "uuid": str(uuid.uuid4()),
+            "description": "Join a book club",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 5  # Learning
+        },
+        {
+            "id": 55,
+            "uuid": str(uuid.uuid4()),
+            "description": "Plan a family reunion",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 2  # Personal
+        },
+        {
+            "id": 56,
+            "uuid": str(uuid.uuid4()),
+            "description": "Create a personal website",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 9  # Career
+        },
+        {
+            "id": 57,
+            "uuid": str(uuid.uuid4()),
+            "description": "Attend a fitness class",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 8  # Fitness
+        },
+        {
+            "id": 58,
+            "uuid": str(uuid.uuid4()),
+            "description": "Start a blog",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 5  # Learning
+        },
+        {
+            "id": 59,
+            "uuid": str(uuid.uuid4()),
+            "description": "Create a meal plan",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 4  # Shopping
+        },
+        {
+            "id": 60,
+            "uuid": str(uuid.uuid4()),
+            "description": "Plan a weekend getaway",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 6  # Travel
+        },
+        {
+            "id": 61,
+            "uuid": str(uuid.uuid4()),
+            "description": "Attend a seminar on personal finance",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 5  # Learning
+        },
+        {
+            "id": 62,
+            "uuid": str(uuid.uuid4()),
+            "description": "Create a scrapbook",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 2  # Personal
+        },
+        {
+            "id": 63,
+            "uuid": str(uuid.uuid4()),
+            "description": "Plan a road trip",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 6  # Travel
+        },
+        {
+            "id": 64,
+            "uuid": str(uuid.uuid4()),
+            "description": "Attend a workshop on coding",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 5  # Learning
+        },
+        {
+            "id": 65,
+            "uuid": str(uuid.uuid4()),
+            "description": "Create a family photo album",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 2  # Personal
+        },
+        {
+            "id": 66,
+            "uuid": str(uuid.uuid4()),
+            "description": "Plan a charity event",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 1  # Work
+        },
+        {
+            "id": 67,
+            "uuid": str(uuid.uuid4()),
+            "description": "Attend a yoga class",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 8  # Fitness
+        },
+        {
+            "id": 68,
+            "uuid": str(uuid.uuid4()),
+            "description": "Create a personal development plan",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 5  # Learning
+        },
+        {
+            "id": 69,
+            "uuid": str(uuid.uuid4()),
+            "description": "Plan a family movie night",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 2  # Personal
+        },
+        {
+            "id": 70,
+            "uuid": str(uuid.uuid4()),
+            "description": "Organize a neighborhood clean-up",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 1  # Work
+        },
+        {
+            "id": 71,
+            "uuid": str(uuid.uuid4()),
+            "description": "Learn a new programming language",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 15  # Technology
+        },
+        {
+            "id": 72,
+            "uuid": str(uuid.uuid4()),
+            "description": "Participate in a community clean-up",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 11  # Community
+        },
+        {
+            "id": 73,
+            "uuid": str(uuid.uuid4()),
+            "description": "Start a garden",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 16  # Environment
+        },
+        {
+            "id": 74,
+            "uuid": str(uuid.uuid4()),
+            "description": "Enroll in a public speaking course",
+            "due": "",
+            "status": False,
+            "flagged": True,
+            "category_id": 18  # Education
+        },
+        {
+            "id": 75,
+            "uuid": str(uuid.uuid4()),
+            "description": "Adopt a pet from a shelter",
+            "due": "",
+            "status": False,
+            "flagged": False,
+            "category_id": 19  # Pets
         }
     ]
     return test_tasks
@@ -321,6 +726,46 @@ def generate_test_categories():
         {
             "id": 9,
             "name": "Career"
+        },
+        {
+            "id": 10,
+            "name": "Family"
+        },
+        {
+            "id": 11,
+            "name": "Community"
+        },
+        {
+            "id": 12,
+            "name": "Hobbies"
+        },
+        {
+            "id": 13,
+            "name": "Finance"
+        },
+        {
+            "id": 14,
+            "name": "Self-Care"
+        },
+        {
+            "id": 15,
+            "name": "Technology"
+        },
+        {
+            "id": 16,
+            "name": "Environment"
+        },
+        {
+            "id": 17,
+            "name": "Social"
+        },
+        {
+            "id": 18,
+            "name": "Education"
+        },
+        {
+            "id": 19,
+            "name": "Pets"
         }
     ]
     return test_categories
