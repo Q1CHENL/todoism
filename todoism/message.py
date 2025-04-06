@@ -3,7 +3,7 @@
 HELP_MSG = '''
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                              │
-│                                       todoism v1.21.6                                        │
+│                                       todoism v1.21.7                                        │
 │                                                                                              │
 │                               Visit Github page for more info                                │
 │                                                                                              │
@@ -252,13 +252,11 @@ NEW_VERSION_MSG = '''
 
 UPDATE_SUCCESS_MSG = '''
 ┌────────────────────────────────────────────┐
-│    Sucessfully updated todoism v1.21.6!    │
+│    Sucessfully updated todoism v1.21.7!    │
 │                                            │
 │    What's new:                             │
-│    - Search tasks with '/'                 │
-│    - Add due date to tasks                 │
-│    - New purple theme color                │
-│    - New bottom status bar                 │
+│    - ALT+LEFT/RIGHT to jump to top/bottom  │
+│    - Performance improvements              │
 │                                            │
 │    Please press 'q' to exit and restart.   │
 └────────────────────────────────────────────┘
