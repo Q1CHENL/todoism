@@ -315,6 +315,7 @@ def main(stdscr):
                 continue
             st.focus_manager.toggle_focus()
             should_repaint = True
+            curses.flushinp()
             continue
             
         if key == curses.KEY_MOUSE:
@@ -332,6 +333,7 @@ def main(stdscr):
                     elif st.task_cnt > 0:
                         task_scroll_offset = 0
                         should_repaint = nv.keyup_update(True)
+                    curses.flushinp()
                     continue
             
                 elif button_state & curses.BUTTON5_PRESSED:  # Scroll down
@@ -345,6 +347,7 @@ def main(stdscr):
                     elif st.task_cnt > 0:
                         task_scroll_offset = 0
                         should_repaint = nv.keydown_update(True)
+                    curses.flushinp()
                     continue
 
                 elif mouse_x < cat.SIDEBAR_WIDTH and button_state & curses.BUTTON1_PRESSED:
@@ -723,11 +726,13 @@ def main(stdscr):
                 task_scroll_offset = 0
                 if st.task_cnt > 0:
                     should_repaint = nv.keyup_update(True)
+                curses.flushinp()
                     
             elif key == curses.KEY_DOWN:
                 task_scroll_offset = 0
                 if st.task_cnt > 0:
                     should_repaint = nv.keydown_update(True)
+                curses.flushinp()
                 
             elif key == curses.KEY_BACKSPACE or key == kc.BACKSPACE:
                 second_key = stdscr.getch()
