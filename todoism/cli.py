@@ -2,6 +2,7 @@ import os
 import argparse
 import curses
 import importlib.util
+
 import todoism.task as tsk
 import todoism.print as pr
 import todoism.main as main
@@ -83,7 +84,7 @@ def run():
         tsk.delete_task_cli(args.id)
     elif args.command == "list":
         todos = tsk.load_tasks()
-        pr.print_all_cli(todos)
+        pr.print_tasks_cli(todos)
     
     if hasattr(args, "dev") and args.dev:
         if is_dev_environment():

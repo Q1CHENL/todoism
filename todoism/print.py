@@ -195,7 +195,6 @@ def print_status_bar(stdscr):
     sf.safe_appendstr(stdscr, padding)
     sf.safe_appendstr(stdscr, datetime_str)
 
-
 def print_category_entries(stdscr, categories, start_index):
     """Print the category sidebar"""
     
@@ -391,7 +390,6 @@ def print_pref_panel(stdscr, current_selection_index=0):
             # Print other lines without special formatting
             sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x, line[:st.latest_max_x-center_offset_x-1])
 
-
 def print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value):
     """Safely print a preference line with on/off value highlighted"""
 
@@ -448,7 +446,7 @@ def print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center
     if suffix_pos < st.latest_max_x and len(suffix) > 0:
         sf.safe_addstr(stdscr, y + center_offset_y + 1, suffix_pos, suffix[:st.latest_max_x-suffix_pos-1])
 
-def print_all_cli(todos):
+def print_tasks_cli(todos):
     if len(todos) == 0:
         print("no todos yet")
         exit(0)

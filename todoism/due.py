@@ -29,7 +29,6 @@ def parse_due_date(description: str) -> Tuple[str, str]:
 
     return "", description.strip()
 
-
 def add_due_key_if_missing(task_list: list):
     """
     Add a 'due' key with an empty string value to each task

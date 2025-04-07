@@ -409,6 +409,7 @@ def main(stdscr):
                 should_repaint = True
                 continue
             break
+        
         if key == ord(':'):
             command = _handle_command_input(stdscr)
             if command == "":
