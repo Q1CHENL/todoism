@@ -45,7 +45,8 @@ When you first start todoism, you'll be prompted to record key combinations for 
 
 ## Develop
 
-- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode, not available in PyPI installation)
+- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode. Add `--profile` to enable profiling. (`--dev` and `--profile` are not available in PyPI installation)
+
 - Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in PyPI installation.
 
 > [!CAUTION]
