@@ -527,6 +527,11 @@ def print_sidebar_task_panel_separator(stdscr):
 def print_separator_connector_top(stdscr):
     sf.safe_addstr(stdscr, 0, 15, "┬")
 
+def bottom_right_corner(stdscr):
+    # Trick for last char (bottom right) error in cursor window
+    sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
+    sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
+
 def print_frame_all(stdscr):
     print_top_left_corner(stdscr)
     print_bottom_left_corner(stdscr)
@@ -543,9 +548,7 @@ def print_frame_all(stdscr):
     print_2nd_bottom_right_corner(stdscr)
     print_right_frame_2nd(stdscr)
     print_sidebar_task_panel_separator(stdscr)
-    # Trick for last char (bottom right) error in cursor window    
-    sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
-    sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    print_bottom_right_corner(stdscr)
 
 def print_outer_frame(stdscr):
     print_top_left_corner(stdscr)
@@ -559,6 +562,5 @@ def print_outer_frame(stdscr):
     print_right_frame_2nd(stdscr)
     sf.safe_addstr(stdscr, st.latest_max_y - 3, st.latest_max_x - 1, "│")
     print_bottom_frame(stdscr)
-    # Trick for last char (bottom right) error in cursor window
-    sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
-    sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    print_bottom_right_corner(stdscr)
+    
