@@ -16,7 +16,7 @@ add_mode  = 1
 edit_mode = 2
 
 def print_version():
-    print("todoism v1.21.6")
+    print("todoism v1.21.7")
 
 def print_q_to_close(stdscr, page):
     hint = f"Press 'q' to close {page}"
@@ -162,10 +162,12 @@ def print_status_bar(stdscr):
     percent_text = f"({percent_value:.0f}%)"
     
     color_text = "red" if percent_value < 33 else "yellow" if percent_value < 67 else "green"
+    if percent_value == 0 and st.task_cnt == 0:
+        color_text = "green"
     color_pair = clr.get_color_pair_by_str(color_text)
     
     # Add command hint at the beginning (dimmed)
-    hint_text = ":help for info or '/' to search for tasks"
+    hint_text = ":help or '/' to search"
     sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, hint_text, curses.A_DIM)
     
     # Split the status into parts for coloring
@@ -276,6 +278,8 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         attr_due = clr.get_theme_color_pair_for_text() if task["due"] != "" else 0
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
         sf.safe_addstr(stdscr, row, total_indent, visible_text, (attr_done if is_done else 0) | attr_due)
+        for _ in range(available_width - len(visible_text) + 1):
+            sf.safe_appendstr(stdscr, ' ')
         sf.safe_addstr(stdscr, row, due_pos, due_str, (attr_done if is_done else 0) | attr_due)
         sf.safe_addstr(stdscr, row, st.latest_max_x - 1, '│')
 

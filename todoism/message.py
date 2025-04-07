@@ -1,37 +1,37 @@
 # This file contains all message templates for the application
 
 HELP_MSG = '''
-┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                                                                             │
-│                                       todoism v1.21.6                                       │
-│                                                                                             │
-│                               Visit Github page for more info                               │
-│                                                                                             │
-│                                                                                             │
-│   Short commands:                            Key bindings:                                  │
-│   a - Create new task/category               Tab - Toggle focus bewteen tasks and sidebar   │
-│   d - Mark task as done                      Double Backspace - delete task/category        │
-│   e - Edit task/category                     ESC - Cancel adding/editing/search             │
-│   f - Mark task as flagged                   Enter - Finish adding/editing, confirm search  │
-│   q - Quit this help/pref/search/todoism     Up/Down Arrow Keys - Navigate through tasks    │
-│                                              CTRL + Left/Right - Move by word               │
-│   Vim-like long commands:                    CTRL + Shift + Left/Right - Select by word     │
-│   :help - Show this help message             ALT + Left/Right - Jump to start/end of text   │
-│   :pref - Open preference panel                                                             │
-│   :del <task_id> - Delete task               Mouse Operations:                              │
-│   :edit <task_id> - Edit task                - Click on task/category: Select item          │
-│   :done <task_id> - Mark task as done        - Click on done/flag: Toggle status            │
-│   :purge - Purge done tasks in current cat.  - Click on blank area: Toggle focus            │
-│   :purge all - Purge all done tasks          - Wheel scroll: Navigate through tasks/cats    │
-│                                                                                             │
-│   To add due date to a task:                 To search for tasks:                           │
-│   Add [<due date>] at the end of the task    /<search term>                                 │
-│   Supported formats:                                                                        │
-│   - [yyyy-mm-dd hh:mm]    - [hh:mm]                                                         │
-│   - [yyyy-mm-dd]          - [mm-dd hh:mm]                                                   │
-│   - [mm-dd] or [dd-mm]                                                                      │
-│                                                                                             │
-└─────────────────────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                              │
+│                                       todoism v1.21.7                                        │
+│                                                                                              │
+│                               Visit Github page for more info                                │
+│                                                                                              │
+│                                                                                              │
+│   Short commands:                            Key bindings:                                   │
+│   a - Create new task/category               Tab - Toggle focus bewteen tasks and sidebar    │
+│   d - Mark task as done                      Double Backspace - delete task/category         │
+│   e - Edit task/category                     ESC - Cancel adding/editing/search              │
+│   f - Mark task as flagged                   Enter - Finish adding/editing, confirm search   │
+│   q - Quit this help/pref/search/todoism     Up/Down Arrow Keys - Navigate through tasks     │
+│                                              CTRL + Left/Right - Move by word                │
+│   Vim-like long commands:                    CTRL + Shift + Left/Right - Select by word      │
+│   :help - Show this help message             ALT + Left/Right                                │
+│   :pref - Open preference panel                  - Jump to start/end of text                 │
+│   :del <task_id> - Delete task                   - Jump to top/bottom                        │
+│   :edit <task_id> - Edit task                                                                │
+│   :done <task_id> - Mark task as done        Mouse Operations:                               │
+│   :purge - Purge done tasks in current cat.  - Click on task/category: Select item           │
+│   :purge all - Purge all done tasks          - Click on done/flag: Toggle status             │
+│                                              - Click on blank area: Toggle focus             │
+│   To add due date to a task:                 - Wheel scroll: Navigate through tasks/cats     │
+│   Add [<due date>] at the end of the task                                                    │
+│   Supported formats:                         To search for tasks:                            │
+│   - [yyyy-mm-dd hh:mm]    - [hh:mm]          /<search term>                                  │
+│   - [yyyy-mm-dd]          - [mm-dd hh:mm]                                                    │
+│   - [mm-dd] or [dd-mm]                                                                       │
+│                                                                                              │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
 '''
 
 PREF_PANEL = '''
@@ -252,13 +252,11 @@ NEW_VERSION_MSG = '''
 
 UPDATE_SUCCESS_MSG = '''
 ┌────────────────────────────────────────────┐
-│    Sucessfully updated todoism v1.21.6!    │
+│    Sucessfully updated todoism v1.21.7!    │
 │                                            │
 │    What's new:                             │
-│    - Search tasks with '/'                 │
-│    - Add due date to tasks                 │
-│    - New purple theme color                │
-│    - New bottom status bar                 │
+│    - ALT+LEFT/RIGHT to jump to top/bottom  │
+│    - Performance improvements              │
 │                                            │
 │    Please press 'q' to exit and restart.   │
 └────────────────────────────────────────────┘

@@ -31,3 +31,9 @@ is_dev_mode = False
 filtered_tasks = []
 
 focus_manager = None
+
+sort_by_done = False
+sort_by_flagged = False
+sort_by_tag = False
+
+tag = False

@@ -99,6 +99,8 @@ def execute_command(stdscr, command: str, task_list: list):
         else:
             command_recognized = False
     elif command.startswith("edit"):
+        if st.focus_manager.is_sidebar_focused():
+            return task_list, None
         parts = command.split()
         if len(parts) == 2 and parts[1].isdigit():
             command_recognized = True
@@ -109,11 +111,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 st.current_task_id = int(task_id)
                 st.current_task_row = st.current_task_id - st.start_task_id + 1
                 if len(task_list) and st.current_task_id >= st.start_task_id and st.current_task_id <= st.end_task_id:
-                    curses.echo()
-                    curses.curs_set(1)
                     task_list = ed.handle_edit(stdscr, task_list)
-                    curses.curs_set(0)
-                    curses.noecho()
                     return task_list, None
         else:
             command_recognized = False
@@ -182,6 +180,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 if ch == kc.TAB:
                     # Toggle Tag setting
                     pref.set_tag(not pref.get_tag())
+                    st.tag = not st.tag
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
@@ -246,6 +245,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     pref.set_sort_by_flagged(not pref.get_sort_by_flagged())
+                    st.sort_by_flagged = not st.sort_by_flagged
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -256,6 +256,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     pref.set_sort_by_done(not pref.get_sort_by_done())
+                    st.sort_by_done = not st.sort_by_done
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
