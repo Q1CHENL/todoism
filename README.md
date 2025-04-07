@@ -36,8 +36,12 @@ When you first start todoism, you'll be prompted to record key combinations for 
 - **CTRL + RIGHT**: Move cursor one word right when editing text
 - **CTRL + SHIFT + LEFT**: Select text from cursor position to one word left
 - **CTRL + SHIFT + RIGHT**: Select text from cursor position to one word right
-- **ALT + LEFT**: Move cursor to the beginning of the text
-- **ALT + RIGHT**: Move cursor to the end of the text
+- **ALT + LEFT**:
+  - Move cursor to the beginning of the text
+  - Jump to top task/category
+- **ALT + RIGHT**:
+  - Move cursor to the end of the text
+  - Jump to bottom task/category
 
 ## Develop
 
