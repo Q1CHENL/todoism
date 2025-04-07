@@ -60,6 +60,9 @@ def parse_args():
         parser.add_argument("--dev",
             action="store_true",
             help="run in development mode (only available in dev environment)")
+        parser.add_argument("--profile",
+            action="store_true",
+            help="enable profiling for performance analysis")
     
     return parser.parse_args()
 
@@ -67,7 +70,7 @@ def validate_text(text):
     if not text or not text.strip():
         raise argparse.ArgumentTypeError("Todo text cannot be empty")
     return text.strip()
-
+    
 def run():
     args = parse_args()
     
@@ -81,12 +84,33 @@ def run():
     elif args.command == "list":
         todos = tsk.load_tasks()
         pr.print_all_cli(todos)
-    elif hasattr(args, "dev") and args.dev:
+    
+    if hasattr(args, "dev") and args.dev:
         if is_dev_environment():
             import test.test as ts
             ts.load_dev_mode()
-            curses.wrapper(main.main)
         else:
             print("Dev mode not available in PyPi Installation!")
+    
+    if hasattr(args, "profile") and args.profile:
+        if is_dev_environment():
+            import cProfile
+            import pstats
+
+            profile_file = "todoism_profile.prof"
+            profiler = cProfile.Profile()
+            profiler.enable()
+
+            curses.wrapper(main.main)
+
+            profiler.disable()
+            profiler.dump_stats(profile_file)
+
+            p = pstats.Stats(profile_file)
+            p.sort_stats('cumulative').print_stats(30)
+            print(f"\nProfile data saved to: {profile_file}")
+            return
+        else:
+            print("Profile mode not available in PyPi Installation!")
     else:
         curses.wrapper(main.main)
