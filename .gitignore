@@ -3,5 +3,6 @@ test.json
 dist
 build
 *.egg-info
+*.prof
 .cursorrules
 .vscode
