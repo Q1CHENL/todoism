@@ -168,7 +168,7 @@ def print_status_bar(stdscr):
     
     # Add command hint at the beginning (dimmed)
     hint_text = ":help or '/' to search"
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, hint_text, curses.A_DIM)
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, hint_text, clr.get_color_pair_by_str("grey"))
     
     # Split the status into parts for coloring
     status_prefix = f"Done: {done_cnt}/{st.task_cnt} "
@@ -262,24 +262,32 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         visible_text = stk.apply(visible_text)
         
     task_id = task["id"]
-    attr = clr.get_theme_color_pair_for_selection()
-    attr_done = curses.A_DIM
+    attr_selection = clr.get_theme_color_pair_for_selection()
+    attr_non_selection = 0
+    if task["due"] != "":
+        if is_done:
+            attr_non_selection = clr.get_dimmed_color_pair(clr.get_theme_color_str())
+        else:
+            attr_non_selection = clr.get_theme_color_pair_for_text()
+    else:
+        if is_done:
+            attr_non_selection = clr.get_color_pair_by_str("grey")
+        else:
+            attr_non_selection = 0
     
     if is_selected:
-        sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ", attr)
-        sf.safe_addstr(stdscr, row, total_indent, visible_text, attr)
-        # Fill remaining space with spaces
+        sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ", attr_selection)
+        sf.safe_addstr(stdscr, row, total_indent, visible_text, attr_selection)
         for _ in range(available_width - len(visible_text) + 1):
-            sf.safe_appendstr(stdscr, ' ', attr)
-        sf.safe_addstr(stdscr, row, due_pos, due_str, attr)
-        sf.safe_addstr(stdscr, row, st.latest_max_x - 1, ' ', attr)
+            sf.safe_appendstr(stdscr, ' ', attr_selection)
+        sf.safe_addstr(stdscr, row, due_pos, due_str, attr_selection)
+        sf.safe_addstr(stdscr, row, st.latest_max_x - 1, ' ', attr_selection)
     else:
-        attr_due = clr.get_theme_color_pair_for_text() if task["due"] != "" else 0
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
-        sf.safe_addstr(stdscr, row, total_indent, visible_text, (attr_done if is_done else 0) | attr_due)
+        sf.safe_addstr(stdscr, row, total_indent, visible_text, attr_non_selection)
         for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ')
-        sf.safe_addstr(stdscr, row, due_pos, due_str, (attr_done if is_done else 0) | attr_due)
+        sf.safe_addstr(stdscr, row, due_pos, due_str, attr_non_selection)
         sf.safe_addstr(stdscr, row, st.latest_max_x - 1, '│')
 
 def print_whole_view(stdscr, categories, category_start_index):
