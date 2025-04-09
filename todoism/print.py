@@ -142,14 +142,15 @@ def print_editing_entry(stdscr, entry, text_key, y, is_selected=False, scroll_le
     visible_start_index = scroll_left
     visible_end_index = min(total_text_length, scroll_left + available_width - 1)
     visible_text = entry[text_key][visible_start_index:visible_end_index + 1]
-
-    sf.safe_addstr(stdscr, y, text_start_pos, visible_text, curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
+    
+    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM) | (curses.A_BOLD if st.bold_text else 0)
+    sf.safe_addstr(stdscr, y, text_start_pos, visible_text, attr)
 
     trailing_blank_space_num = available_width - len(visible_text) + 1    
     for _ in range(trailing_blank_space_num):
         sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
 
-    sf.safe_appendstr(stdscr, due_str, curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
+    sf.safe_appendstr(stdscr, due_str, attr)
     sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
     sf.safe_addstr(stdscr, y, st.latest_max_x - 1, '│')
 
@@ -213,7 +214,8 @@ def print_category(stdscr, category, y, is_selected=False):
         attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM)
     elif is_selected and not st.focus_manager.is_sidebar_focused():
         attr = clr.get_theme_color_pair_for_text() | curses.A_BOLD
-            
+    attr = attr | (curses.A_BOLD if st.bold_text else 0)
+    
     sf.safe_addstr(stdscr, y, 1, ' ', attr)
     # Display name with fixed width - now at position 2 (after the left frame)
     sf.safe_addstr(stdscr, y, 2, category["name"], attr)
@@ -261,9 +263,11 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     if is_done and stk.get_strikethrough() and not is_selected:
         visible_text = stk.apply(visible_text)
         
+    attr_bold = curses.A_BOLD if st.bold_text else 0
     task_id = task["id"]
-    attr_selection = clr.get_theme_color_pair_for_selection()
+    attr_selection = clr.get_theme_color_pair_for_selection() | attr_bold
     attr_non_selection = 0
+    
     if task["due"] != "":
         if is_done:
             attr_non_selection = clr.get_dimmed_color_pair(clr.get_theme_color_str())
@@ -274,6 +278,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
             attr_non_selection = clr.get_color_pair_by_str("grey")
         else:
             attr_non_selection = 0
+    attr_non_selection = attr_non_selection | attr_bold
     
     if is_selected:
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ", attr_selection)
@@ -373,6 +378,11 @@ def print_pref_panel(stdscr, current_selection_index=0):
             value = "on" if strikethrough_enabled else "off"
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)                
+        
+        elif "Bold Text:" in line:
+            value = "on" if st.bold_text else "off"
+            pos = line.find(value)
+            print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
                 
         elif "Theme:" in line and current_color in line:
             pos = line.find(current_color)

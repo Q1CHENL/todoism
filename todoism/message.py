@@ -39,6 +39,8 @@ PREF_PANEL = '''
 │                                       │
 │   Strikethrough: on|off               │
 │                                       │
+│   Bold Text: on|off                   │
+│                                       │
 │   Tag in All Tasks: on|off            │
 │                                       │
 │   Theme: purple|cyan|blue|red|yellow  │
