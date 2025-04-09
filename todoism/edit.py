@@ -64,6 +64,7 @@ def highlight_selection(stdscr, task, text_key, y, selection_start_idx_in_text, 
     # Only highlight visible portion
     visible_selection_start_idx_in_text = max(min_pos, scroll_offset)
     visible_selection_end_idx_in_text = min(max_pos, scroll_offset + max_visible_width)
+    attr = curses.A_REVERSE | (curses.A_BOLD if st.bold_text else 0)
     
     # Apply highlighting to each visible character
     for i in range(visible_selection_start_idx_in_text, visible_selection_end_idx_in_text):
@@ -78,7 +79,7 @@ def highlight_selection(stdscr, task, text_key, y, selection_start_idx_in_text, 
             screen_pos = tsk.TASK_INDENT_IN_TASK_PANEL + cat.SIDEBAR_WIDTH + (i - scroll_offset)  # Task position with sidebar offset
             
         if i - scroll_offset >= 0:  # Ensure we only render visible chars
-            sf.safe_addstr(stdscr, y, screen_pos, task[text_key][i], curses.A_REVERSE)
+            sf.safe_addstr(stdscr, y, screen_pos, task[text_key][i], attr)
 
 def edit(stdscr, entry, text_key, mode, initial_scroll=0):
     """

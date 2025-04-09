@@ -17,11 +17,12 @@ TEST_PURGED_FILE_PATH = os.path.join(CONFIG_DIR, "purged_test.json")
 TEST_TASKS_FILE_PATH = os.path.join(CONFIG_DIR, "tasks_test.json")
 TEST_CATEGORIES_FILE_PATH = os.path.join(CONFIG_DIR, "categories_test.json")
 
-default_settings = {
+default_settings = { 
     "date_format": "Y-M-D",
     "selected_color": "purple",
     "tag": True,
     "strikethrough": True,
+    "bold": False,
     "sort_by_flagged": False,
     "sort_by_done": False,
     "ctrl+left": 0,
@@ -64,6 +65,7 @@ def load_preferences():
             st.sort_by_done = preferences.get("sort_by_done", False)
             st.sort_by_flagged = preferences.get("sort_by_flagged", False)
             st.tag = preferences.get("tag", True)
+            st.bold_text = preferences.get("bold", False)
     except (FileNotFoundError, json.JSONDecodeError):
         pass
 
@@ -201,4 +203,28 @@ def set_sort_by_done(enabled):
             
     except FileNotFoundError:
         setup_default_settings()
-              
+
+def get_bold():
+    """Get bold setting"""
+    try:
+        with open(get_settings_path(), 'r') as settings_file:
+            settings = json.load(settings_file)
+            return settings.get('bold', False)
+    except FileNotFoundError:
+        setup_default_settings()
+        return False
+
+def set_bold(enabled):
+    """Set bold setting"""
+    try:
+        with open(get_settings_path(), 'r') as settings_file:
+            settings = json.load(settings_file)
+        
+        settings['bold'] = enabled
+        
+        # Write the entire file at once to avoid corruption
+        with open(get_settings_path(), 'w') as settings_file:
+            json.dump(settings, settings_file, indent=4)
+            
+    except FileNotFoundError:
+        setup_default_settings()

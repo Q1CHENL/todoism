@@ -179,8 +179,8 @@ def execute_command(stdscr, command: str, task_list: list):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     # Toggle Tag setting
-                    pref.set_tag(not pref.get_tag())
                     st.tag = not st.tag
+                    pref.set_tag(st.tag)
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
@@ -189,7 +189,22 @@ def execute_command(stdscr, command: str, task_list: list):
                     selection_index += 2
                 elif ch == ord('q'):
                     quit = True
-            
+                    
+            elif preference_type == "│   Bold Text":
+                ch = stdscr.getch()
+                if ch == kc.TAB:
+                    # Toggle bold setting
+                    st.bold_text = not st.bold_text
+                    pref.set_bold(st.bold_text)
+                    # Refresh to show the change
+                    pr.print_pref_panel(stdscr, selection_index)
+                elif ch == curses.KEY_UP:
+                    selection_index -= 2
+                elif ch == curses.KEY_DOWN:
+                    selection_index += 2
+                elif ch == ord('q'):
+                    quit = True
+                    
             elif preference_type == "│   Strikethrough":
                 ch = stdscr.getch()
                 if ch == kc.TAB:
@@ -252,6 +267,7 @@ def execute_command(stdscr, command: str, task_list: list):
                     selection_index += 2
                 elif ch == ord('q'):
                     quit = True
+                    
             elif preference_type.startswith("│   Sort by done"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
