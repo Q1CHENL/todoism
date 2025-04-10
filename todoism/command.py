@@ -176,10 +176,8 @@ def execute_command(stdscr, command: str, task_list: list):
             if preference_type == "│   Strikethrough":
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    # Toggle strikethrough setting
                     st.strikethrough = not st.strikethrough
                     pref.set_bool_setting("strikethrough", st.strikethrough)
-                    # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
@@ -192,10 +190,8 @@ def execute_command(stdscr, command: str, task_list: list):
             elif preference_type == "│   Tag in All Tasks":
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    # Toggle Tag setting
                     st.tag = not st.tag
                     pref.set_bool_setting("tag", st.tag)
-                    # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
@@ -207,10 +203,8 @@ def execute_command(stdscr, command: str, task_list: list):
             elif preference_type == "│   Bold Text":
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    # Toggle bold setting
                     st.bold_text = not st.bold_text
                     pref.set_bool_setting("bold_text", st.bold_text)
-                    # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
@@ -220,7 +214,6 @@ def execute_command(stdscr, command: str, task_list: list):
                     quit = True
                     
             elif preference_type == "│   Theme":
-                # Get currently selected color
                 colors = ["purple", "cyan", "blue", "red", "yellow"]
                 current_color = clr.get_theme_color_str()
                 color_index = colors.index(current_color) if current_color in colors else 0
@@ -241,13 +234,11 @@ def execute_command(stdscr, command: str, task_list: list):
             elif preference_type == "│   Date format":
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    # Get current date format and cycle through options
                     date_formats = ["Y-M-D", "D-M-Y", "M-D-Y"]
                     current_format = pref.get_date_format()
                     date_index = date_formats.index(current_format) if current_format in date_formats else 0
                     date_index = (date_index + 1) % len(date_formats)
                     pref.set_date_format(date_formats[date_index])
-                    # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
