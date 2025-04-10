@@ -630,7 +630,7 @@ def main(stdscr):
                 if st.searching:
                     continue
                 if st.task_cnt == tsk.MAX_TASK_COUNT:
-                    pr.print_msg(stdscr, msg.limit_msg)
+                    pr.print_msg(stdscr, msg.LIMIT_MSG)
                     time.sleep(1.2)
                     continue
                 
