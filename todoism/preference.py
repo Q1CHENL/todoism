@@ -24,6 +24,7 @@ default_settings = {
     "strikethrough": True,
     "sort_by_flagged": False,
     "sort_by_done": False,
+    "bold_text": False,
     "ctrl+left": 0,
     "ctrl+right": 0,
     "ctrl+shift+left": 0,
@@ -137,31 +138,6 @@ def set_bool_setting(setting_name: str, value: bool):
             
         settings[setting_name] = value
         
-        with open(get_settings_path(), 'w') as settings_file:
-            json.dump(settings, settings_file, indent=4)
-            
-    except FileNotFoundError:
-        setup_default_settings()
-    
-def get_sort_by_done():
-    """Get sort done tasks setting"""
-    try:
-        with open(get_settings_path(), 'r') as settings_file:
-            settings = json.load(settings_file)
-            return settings.get('sort_by_done', False)
-    except FileNotFoundError:
-        setup_default_settings()
-        return False
-    
-def set_sort_by_done(enabled):
-    """Set sort done tasks setting"""
-    try:
-        with open(get_settings_path(), 'r') as settings_file:
-            settings = json.load(settings_file)
-        
-        settings['sort_by_done'] = enabled
-        
-        # Write the entire file at once to avoid corruption
         with open(get_settings_path(), 'w') as settings_file:
             json.dump(settings, settings_file, indent=4)
             

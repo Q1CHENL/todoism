@@ -209,7 +209,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 if ch == kc.TAB:
                     # Toggle bold setting
                     st.bold_text = not st.bold_text
-                    pref.set_bool_setting("tag", st.tag)
+                    pref.set_bool_setting("bold_text", st.bold_text)
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
