@@ -159,7 +159,7 @@ def main(stdscr):
         stdscr.timeout(-1)
         while True:
             key = stdscr.getch()
-            if key == kc.ENTER or curses.KEY_ENTER:
+            if key == kc.ENTER or key == curses.KEY_ENTER:
                 break
             elif key == ord('u'):
                 success = up.update_todoism()
