@@ -30,7 +30,8 @@ default_settings = {
     "ctrl+shift+left": 0,
     "ctrl+shift+right": 0,
     "alt+left": 0,
-    "alt+right": 0
+    "alt+right": 0,
+    "last_update_check": 0
 }
 
 def get_tasks_path():
