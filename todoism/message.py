@@ -269,7 +269,8 @@ UPDATE_FAILURE_MSG = '''
 │   Failed to update todoism. Some error occurred.    │
 │                                                     │
 │   Check your internet connection and try again.     │
-│   Or visit Github page to update manually.          │
+│   Or run 'pip install todoism --upgrade'            │
+│   to update manually.                               │
 │                                                     │
 │   Will proceed with current version...              │
 └─────────────────────────────────────────────────────┘
