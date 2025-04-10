@@ -24,9 +24,9 @@ A powerful yet easy-to-use todo TUI
 - Use: Invoke help message using command `:help` to see commonly used operations and commands
 
 > [!NOTE]
-> Some terminal does not support mouse click or strike through effect.
-> E.g **Ptyxis** (new default terminal for GNOME 47) does not fully support strikethrough effect.
-> You can turn it off in **preference panel** (open with `:pref` as specified in the help message)
+> Some terminals does not support mouse click or strike through effect.
+> **Ptyxis** (new default terminal for GNOME 47) does not fully support strikethrough effect. **Ghostty** does not has good support for bold text.
+> You can turn them off in **preference panel** (open with `:pref` as specified in the help message)
 
 ### Keycode recording
 
@@ -43,9 +43,13 @@ When you first start todoism, you'll be prompted to record key combinations for 
   - Move cursor to the end of the text
   - Jump to bottom task/category
 
+> [!NOTE]
+> Some terminals like **Ghostty** may have built-in key bindings that conflict with the above. You need to disable them before recording.
+
 ## Develop
 
-- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode, not available in PyPI installation)
+- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode. Add `--profile` to enable profiling. (`--dev` and `--profile` are not available in PyPI installation)
+
 - Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in PyPI installation.
 
 > [!CAUTION]

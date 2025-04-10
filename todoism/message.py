@@ -3,7 +3,7 @@
 HELP_MSG = '''
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                              │
-│                                       todoism v1.21.7                                        │
+│                                       todoism v1.21.8                                        │
 │                                                                                              │
 │                               Visit Github page for more info                                │
 │                                                                                              │
@@ -38,6 +38,8 @@ PREF_PANEL = '''
 ┌───────────────────────────────────────┐
 │                                       │
 │   Strikethrough: on|off               │
+│                                       │
+│   Bold Text: on|off                   │
 │                                       │
 │   Tag in All Tasks: on|off            │
 │                                       │
@@ -252,11 +254,11 @@ NEW_VERSION_MSG = '''
 
 UPDATE_SUCCESS_MSG = '''
 ┌────────────────────────────────────────────┐
-│    Sucessfully updated todoism v1.21.7!    │
+│    Sucessfully updated todoism v1.21.8!    │
 │                                            │
 │    What's new:                             │
-│    - ALT+LEFT/RIGHT to jump to top/bottom  │
-│    - Performance improvements              │
+│    - Bold text support                     │
+│    - Various Bug fixes and improvements    │
 │                                            │
 │    Please press 'q' to exit and restart.   │
 └────────────────────────────────────────────┘

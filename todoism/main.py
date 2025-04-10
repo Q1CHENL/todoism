@@ -62,36 +62,33 @@ def _window_resized():
 
 def _sort_by_tag(categories):
     marked = []
-    for i, task in enumerate(st.filtered_tasks):
-        if _task_not_marked(task):
-            marked = st.filtered_tasks[:i]
-            break
-    if len(st.filtered_tasks) > 0 and not _task_not_marked(st.filtered_tasks[len(st.filtered_tasks) - 1]):
-            marked = st.filtered_tasks
     not_marked = []
+    for i, task in enumerate(st.filtered_tasks):
+        if _task_marked(task):
+            marked.append(task)
+        else:
+            not_marked.append(task)
+    not_marked_sorted_by_tag = []
     for c in categories:
-        for task in st.filtered_tasks: 
-            if _task_not_marked(task) and c["id"] == task["category_id"]:
-                    not_marked.append(task)
-    st.filtered_tasks = marked + not_marked
-    tsk.reassign_task_ids(st.filtered_tasks)
+        for task in not_marked: 
+            if c["id"] == task["category_id"]:
+                    not_marked_sorted_by_tag.append(task)
+    st.filtered_tasks = marked + not_marked_sorted_by_tag
     
 def _sort_by_flagged_done_tag(categories):
     if st.sort_by_done:
         st.filtered_tasks = tsk.sort(st.filtered_tasks, "status")
-        tsk.reassign_task_ids(st.filtered_tasks)
     if st.sort_by_flagged:
         st.filtered_tasks = tsk.sort(st.filtered_tasks, "flagged")
-        tsk.reassign_task_ids(st.filtered_tasks)
     _sort_by_tag(categories)
 
-def _task_not_marked(task):
+def _task_marked(task):
     if st.sort_by_done and st.sort_by_flagged:
-        return not task["status"] and not task["flagged"]
+        return task["status"] or task["flagged"]
     elif st.sort_by_done:
-        return not task["status"]
+        return task["status"]
     elif st.sort_by_flagged:
-        return not task["flagged"]
+        return task["flagged"]
     else:
         return False
     
@@ -160,10 +157,9 @@ def main(stdscr):
         pr.print_msg(stdscr, msg.NEW_VERSION_MSG)
         
         stdscr.timeout(-1)
-        # Wait for user response
         while True:
             key = stdscr.getch()
-            if key == kc.ENTER or curses.KEY_ENTER:
+            if key == kc.ENTER or key == curses.KEY_ENTER:
                 break
             elif key == ord('u'):
                 success = up.update_todoism()
@@ -184,9 +180,9 @@ def main(stdscr):
         if not st.searching and old_cat_id != st.current_category_id:
             old_cat_id = st.current_category_id
             st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-        tsk.reassign_task_ids(st.filtered_tasks)
         
         _sort_by_flagged_done_tag(categories)
+        tsk.reassign_task_ids(st.filtered_tasks)
         
         st.task_cnt = len(st.filtered_tasks)
         st.cat_cnt = len(categories)
@@ -292,7 +288,6 @@ def main(stdscr):
             last_time_update = current_time
             
         if should_repaint:
-            tsk.reassign_task_ids(st.filtered_tasks)
             if st.searching:
                 if not st.focus_manager.is_tasks_focused(): 
                     st.focus_manager.toggle_focus()
@@ -414,6 +409,7 @@ def main(stdscr):
                 should_repaint = True
                 continue
             break
+        
         if key == ord(':'):
             command = _handle_command_input(stdscr)
             if command == "":
@@ -466,6 +462,7 @@ def main(stdscr):
                     
                     pr.clear_task_panel(stdscr)
                     _sort_by_flagged_done_tag(categories)
+                    tsk.reassign_task_ids(st.filtered_tasks)
                     pr.print_task_entries(stdscr, cat.SIDEBAR_WIDTH)
                     sf.safe_move(stdscr, st.latest_max_y - 2, len(query) + 2)
                     stdscr.refresh()
@@ -633,7 +630,7 @@ def main(stdscr):
                 if st.searching:
                     continue
                 if st.task_cnt == tsk.MAX_TASK_COUNT:
-                    pr.print_msg(stdscr, msg.limit_msg)
+                    pr.print_msg(stdscr, msg.LIMIT_MSG)
                     time.sleep(1.2)
                     continue
                 

@@ -1,7 +1,6 @@
 import curses
 from datetime import datetime
 
-import todoism.strikethrough as stk
 import todoism.message as msg
 import todoism.color as clr
 import todoism.category as cat
@@ -16,7 +15,7 @@ add_mode  = 1
 edit_mode = 2
 
 def print_version():
-    print("todoism v1.21.7")
+    print("todoism v1.21.8")
 
 def print_q_to_close(stdscr, page):
     hint = f"Press 'q' to close {page}"
@@ -142,14 +141,16 @@ def print_editing_entry(stdscr, entry, text_key, y, is_selected=False, scroll_le
     visible_start_index = scroll_left
     visible_end_index = min(total_text_length, scroll_left + available_width - 1)
     visible_text = entry[text_key][visible_start_index:visible_end_index + 1]
+    
+    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM) |(curses.A_BOLD if st.bold_text else 0)
 
-    sf.safe_addstr(stdscr, y, text_start_pos, visible_text, curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
+    sf.safe_addstr(stdscr, y, text_start_pos, visible_text, attr)
 
     trailing_blank_space_num = available_width - len(visible_text) + 1    
     for _ in range(trailing_blank_space_num):
         sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
 
-    sf.safe_appendstr(stdscr, due_str, curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
+    sf.safe_appendstr(stdscr, due_str, attr)
     sf.safe_appendstr(stdscr, ' ', curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM))
     sf.safe_addstr(stdscr, y, st.latest_max_x - 1, '│')
 
@@ -168,7 +169,7 @@ def print_status_bar(stdscr):
     
     # Add command hint at the beginning (dimmed)
     hint_text = ":help or '/' to search"
-    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, hint_text, curses.A_DIM)
+    sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, hint_text, clr.get_color_pair_by_str("grey"))
     
     # Split the status into parts for coloring
     status_prefix = f"Done: {done_cnt}/{st.task_cnt} "
@@ -195,7 +196,6 @@ def print_status_bar(stdscr):
     sf.safe_appendstr(stdscr, padding)
     sf.safe_appendstr(stdscr, datetime_str)
 
-
 def print_category_entries(stdscr, categories, start_index):
     """Print the category sidebar"""
     
@@ -214,6 +214,7 @@ def print_category(stdscr, category, y, is_selected=False):
         attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM)
     elif is_selected and not st.focus_manager.is_sidebar_focused():
         attr = clr.get_theme_color_pair_for_text() | curses.A_BOLD
+    attr = attr | (curses.A_BOLD if st.bold_text else 0)
             
     sf.safe_addstr(stdscr, y, 1, ' ', attr)
     # Display name with fixed width - now at position 2 (after the left frame)
@@ -248,7 +249,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     # Handle text display
     text = task["description"]
 
-    if (st.current_category_id == 0 or st.searching) and pref.get_tag():
+    if (st.current_category_id == 0 or st.searching) and st.tag:
         cat_id_of_current_task = task["category_id"]
         if cat_id_of_current_task != 0:
             text = "[" + cat.get_category_by_id(cat_id_of_current_task)["name"] +  "] " + text
@@ -259,28 +260,38 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         visible_text = text
         
     is_done = task.get("status", False)
-    if is_done and stk.get_strikethrough() and not is_selected:
-        visible_text = stk.apply(visible_text)
+    if is_done and st.strikethrough and not is_selected:
+        visible_text = pref.apply_strikethrough(visible_text)
         
     task_id = task["id"]
-    attr = clr.get_theme_color_pair_for_selection()
-    attr_done = curses.A_DIM
+    attr_selection = clr.get_theme_color_pair_for_selection()
+    attr_selection = attr_selection | (curses.A_BOLD if st.bold_text else 0)
+    attr_non_selection = 0
+    if task["due"] != "":
+        if is_done:
+            attr_non_selection = clr.get_dimmed_color_pair(clr.get_theme_color_str())
+        else:
+            attr_non_selection = clr.get_theme_color_pair_for_text()
+    else:
+        if is_done:
+            attr_non_selection = clr.get_color_pair_by_str("grey")
+        else:
+            attr_non_selection = 0
+    attr_non_selection = attr_non_selection | (curses.A_BOLD if st.bold_text else 0)
     
     if is_selected:
-        sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ", attr)
-        sf.safe_addstr(stdscr, row, total_indent, visible_text, attr)
-        # Fill remaining space with spaces
+        sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ", attr_selection)
+        sf.safe_addstr(stdscr, row, total_indent, visible_text, attr_selection)
         for _ in range(available_width - len(visible_text) + 1):
-            sf.safe_appendstr(stdscr, ' ', attr)
-        sf.safe_addstr(stdscr, row, due_pos, due_str, attr)
-        sf.safe_addstr(stdscr, row, st.latest_max_x - 1, ' ', attr)
+            sf.safe_appendstr(stdscr, ' ', attr_selection)
+        sf.safe_addstr(stdscr, row, due_pos, due_str, attr_selection)
+        sf.safe_addstr(stdscr, row, st.latest_max_x - 1, ' ', attr_selection)
     else:
-        attr_due = clr.get_theme_color_pair_for_text() if task["due"] != "" else 0
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ")
-        sf.safe_addstr(stdscr, row, total_indent, visible_text, (attr_done if is_done else 0) | attr_due)
+        sf.safe_addstr(stdscr, row, total_indent, visible_text, attr_non_selection)
         for _ in range(available_width - len(visible_text) + 1):
             sf.safe_appendstr(stdscr, ' ')
-        sf.safe_addstr(stdscr, row, due_pos, due_str, (attr_done if is_done else 0) | attr_due)
+        sf.safe_addstr(stdscr, row, due_pos, due_str, attr_non_selection)
         sf.safe_addstr(stdscr, row, st.latest_max_x - 1, '│')
 
 def print_whole_view(stdscr, categories, category_start_index):
@@ -322,12 +333,8 @@ def print_pref_panel(stdscr, current_selection_index=0):
     center_offset_y = max(0, (st.latest_max_y - len(pref_content_lines)) // 2) - 1
     
     # Get current preference values for coloring
-    tag_enabled = pref.get_tag()
-    strikethrough_enabled = stk.get_strikethrough()
     current_color = clr.get_theme_color_str()
     current_date_format = pref.get_date_format()
-    sort_by_flagged = pref.get_sort_by_flagged()
-    sort_by_done = pref.get_sort_by_done()
     
     # Format each line with ">" for selected item
     # Adapt line width to available space
@@ -358,14 +365,24 @@ def print_pref_panel(stdscr, current_selection_index=0):
         
         # Process and draw content lines
         if "Tag in All Tasks:" in line:
-            value = "on" if tag_enabled else "off"
+            value = "on" if st.tag else "off"
+            pos = line.find(value)
+            print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
+
+        elif "Bold Text:" in line:
+            value = "on" if st.bold_text else "off"
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
                 
         elif "Strikethrough:" in line:
-            value = "on" if strikethrough_enabled else "off"
+            value = "on" if st.strikethrough else "off"
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)                
+        
+        elif "Bold Text:" in line:
+            value = "on" if st.bold_text else "off"
+            pos = line.find(value)
+            print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
                 
         elif "Theme:" in line and current_color in line:
             pos = line.find(current_color)
@@ -378,19 +395,18 @@ def print_pref_panel(stdscr, current_selection_index=0):
                                          current_date_format, clr.get_theme_color_pair_for_text())
             
         elif "Sort by flagged:" in line:
-            value = "on" if sort_by_flagged else "off"
+            value = "on" if st.sort_by_flagged else "off"
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
             
         elif "Sort by done:" in line:
-            value = "on" if sort_by_done else "off"
+            value = "on" if st.sort_by_done else "off"
             pos = line.rfind(value)  # reverse find because done contains "on" as well
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
             
         else:
             # Print other lines without special formatting
             sf.safe_addstr(stdscr, y + center_offset_y + 1, center_offset_x, line[:st.latest_max_x-center_offset_x-1])
-
 
 def print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value):
     """Safely print a preference line with on/off value highlighted"""
@@ -448,7 +464,7 @@ def print_pref_line_with_highlight(stdscr, y, pos, line, center_offset_x, center
     if suffix_pos < st.latest_max_x and len(suffix) > 0:
         sf.safe_addstr(stdscr, y + center_offset_y + 1, suffix_pos, suffix[:st.latest_max_x-suffix_pos-1])
 
-def print_all_cli(todos):
+def print_tasks_cli(todos):
     if len(todos) == 0:
         print("no todos yet")
         exit(0)
@@ -527,6 +543,11 @@ def print_sidebar_task_panel_separator(stdscr):
 def print_separator_connector_top(stdscr):
     sf.safe_addstr(stdscr, 0, 15, "┬")
 
+def bottom_right_corner(stdscr):
+    # Trick for last char (bottom right) error in cursor window
+    sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
+    sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
+
 def print_frame_all(stdscr):
     print_top_left_corner(stdscr)
     print_bottom_left_corner(stdscr)
@@ -543,9 +564,7 @@ def print_frame_all(stdscr):
     print_2nd_bottom_right_corner(stdscr)
     print_right_frame_2nd(stdscr)
     print_sidebar_task_panel_separator(stdscr)
-    # Trick for last char (bottom right) error in cursor window    
-    sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
-    sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    print_bottom_right_corner(stdscr)
 
 def print_outer_frame(stdscr):
     print_top_left_corner(stdscr)
@@ -559,6 +578,5 @@ def print_outer_frame(stdscr):
     print_right_frame_2nd(stdscr)
     sf.safe_addstr(stdscr, st.latest_max_y - 3, st.latest_max_x - 1, "│")
     print_bottom_frame(stdscr)
-    # Trick for last char (bottom right) error in cursor window
-    sf.safe_addstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "┘")
-    sf.safe_insstr(stdscr, st.latest_max_y - 1, st.latest_max_x - 2, "─")
+    print_bottom_right_corner(stdscr)
+    

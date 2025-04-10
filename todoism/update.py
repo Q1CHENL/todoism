@@ -1,40 +1,50 @@
+import os
+import json
+import time
+import todoism.preference as pref
+
 def check_for_updates() -> bool:
     """
     Check if a newer version of todoism is available on PyPI.
-    Uses cached results to improve speed.
+    Checks at most once per day and uses settings.json to store the last check time.
     """
     import sys
     import urllib.request
-    import json
     import re
-    import os
-    import time
     
-    # Cache path for update check results
-    cache_dir = os.path.join(os.path.expanduser("~"), ".todoism")
-    cache_file = os.path.join(cache_dir, "update_cache.json")
-    os.makedirs(cache_dir, exist_ok=True)
+    settings_path = pref.get_settings_path()
     
-    # Only check once per day
-    check_required = True
-    if os.path.exists(cache_file):
-        try:
-            with open(cache_file, 'r') as f:
-                cache = json.load(f)
-                last_check = cache.get('timestamp', 0)
-                current_time = time.time()
-                # If checked within last 24 hours, use cached result
-                if current_time - last_check < 86400:  # 24 hours
-                    check_required = False
-                    return cache.get('update_available', False)
-        except (json.JSONDecodeError, IOError):
-            pass
-            
-    if not check_required:
-        return False
+    # Only check once per day - if we've checked recently, skip network request
+    current_time = time.time()
     
     try:
-        # Get current installed version based on Python version
+        with open(settings_path, 'r') as f:
+            settings = json.load(f)
+            last_check = settings.get('last_update_check', 0)
+            # If checked within last 24 hours, skip check
+            if current_time - last_check < 86400:  # 24 hours
+                return False  # Don't show update notification if we checked recently
+    except (json.JSONDecodeError, FileNotFoundError):
+        # If settings file is missing or invalid, we'll create/update it below
+        pass
+            
+    # Update the timestamp in settings regardless of check result
+    try:
+        with open(settings_path, 'r') as f:
+            try:
+                settings = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):
+                settings = pref.default_settings
+        
+        settings['last_update_check'] = current_time
+        
+        with open(settings_path, 'w') as f:
+            json.dump(settings, f, indent=4)
+    except Exception:
+        pass
+    
+    try:
+        # Get current installed version
         if sys.version_info >= (3, 8):
             import importlib.metadata
             current_version = importlib.metadata.version("todoism")
@@ -42,7 +52,7 @@ def check_for_updates() -> bool:
             import pkg_resources
             current_version = pkg_resources.get_distribution("todoism").version
         
-        # Query PyPI with shorter timeout
+        # Query PyPI with short timeout to not block the app
         req = urllib.request.Request(
             "https://pypi.org/pypi/todoism/json",
             headers={"User-Agent": "todoism-update-check"}
@@ -54,50 +64,34 @@ def check_for_updates() -> bool:
             # Use packaging's version parser for accurate comparison
             try:
                 from packaging import version
-                update_available = version.parse(latest_version) > version.parse(current_version)
+                return version.parse(latest_version) > version.parse(current_version)
             except ImportError:
-                # Fallback to simpler parsing
+                # Fallback to simpler parsing if packaging module not available
                 def parse_version(v):
                     return [int(x) for x in re.findall(r'\d+', v)]
                 
                 current_parts = parse_version(current_version)
                 latest_parts = parse_version(latest_version)
                 
-                update_available = False
                 for i in range(max(len(current_parts), len(latest_parts))):
                     current_part = current_parts[i] if i < len(current_parts) else 0
                     latest_part = latest_parts[i] if i < len(latest_parts) else 0
                     
                     if latest_part > current_part:
-                        update_available = True
-                        break
+                        return True
                     elif current_part > latest_part:
-                        update_available = False
-                        break
-            
-            # Cache the result
-            try:
-                with open(cache_file, 'w') as f:
-                    json.dump({
-                        'timestamp': time.time(),
-                        'update_available': update_available,
-                        'current_version': current_version,
-                        'latest_version': latest_version
-                    }, f)
-            except IOError:
-                pass
-                    
-            return update_available
+                        return False
+                        
+                return False  # Versions are equal
     except Exception:
         # Silent failure - don't interrupt startup
         return False
     
 def update_todoism() -> bool:
     """
-    Update todoism package while preserving user data files.
+    Update todoism package.
     
     Returns: success (bool): True if update was successful
-
     """
     import subprocess
     import sys
@@ -113,8 +107,22 @@ def update_todoism() -> bool:
             process = subprocess.run(pip_command, capture_output=True, text=True)
             
             if process.returncode != 0:
-                return (False, f"Update failed: {process.stderr}")
-        
+                return False
+                
+        # Reset the last update check time to force a fresh check on next run
+        try:
+            settings_path = pref.get_settings_path()
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            # Remove the timestamp to force a fresh check
+            settings['last_update_check'] = 0
+            
+            with open(settings_path, 'w') as f:
+                json.dump(settings, f, indent=4)
+        except Exception:
+            pass
+            
         return True
-    except Exception as e:
+    except Exception:
         return False
