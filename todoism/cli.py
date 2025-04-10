@@ -85,33 +85,33 @@ def run():
     elif args.command == "list":
         todos = tsk.load_tasks()
         pr.print_tasks_cli(todos)
-    
-    if hasattr(args, "dev") and args.dev:
-        if is_dev_environment():
-            import test.test as ts
-            ts.load_dev_mode()
-        else:
-            print("Dev mode not available in PyPi Installation!")
-    
-    if hasattr(args, "profile") and args.profile:
-        if is_dev_environment():
-            import cProfile
-            import pstats
-
-            profile_file = "todoism_profile.prof"
-            profiler = cProfile.Profile()
-            profiler.enable()
-
-            curses.wrapper(main.main)
-
-            profiler.disable()
-            profiler.dump_stats(profile_file)
-
-            p = pstats.Stats(profile_file)
-            p.sort_stats('cumulative').print_stats(30)
-            print(f"\nProfile data saved to: {profile_file}")
-            return
-        else:
-            print("Profile mode not available in PyPi Installation!")
     else:
-        curses.wrapper(main.main)
+        if hasattr(args, "dev") and args.dev:
+            if is_dev_environment():
+                import test.test as ts
+                ts.load_dev_mode()
+            else:
+                print("Dev mode not available in PyPi Installation!")
+        
+        if hasattr(args, "profile") and args.profile:
+            if is_dev_environment():
+                import cProfile
+                import pstats
+    
+                profile_file = "todoism_profile.prof"
+                profiler = cProfile.Profile()
+                profiler.enable()
+    
+                curses.wrapper(main.main)
+    
+                profiler.disable()
+                profiler.dump_stats(profile_file)
+    
+                p = pstats.Stats(profile_file)
+                p.sort_stats('cumulative').print_stats(30)
+                print(f"\nProfile data saved to: {profile_file}")
+                return
+            else:
+                print("Profile mode not available in PyPi Installation!")
+        else:
+            curses.wrapper(main.main)
