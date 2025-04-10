@@ -1,7 +1,6 @@
 import curses
 from datetime import datetime
 
-import todoism.strikethrough as stk
 import todoism.message as msg
 import todoism.color as clr
 import todoism.category as cat
@@ -143,7 +142,8 @@ def print_editing_entry(stdscr, entry, text_key, y, is_selected=False, scroll_le
     visible_end_index = min(total_text_length, scroll_left + available_width - 1)
     visible_text = entry[text_key][visible_start_index:visible_end_index + 1]
     
-    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM) | (curses.A_BOLD if st.bold_text else 0)
+    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM) |(curses.A_BOLD if st.bold_text else 0)
+
     sf.safe_addstr(stdscr, y, text_start_pos, visible_text, attr)
 
     trailing_blank_space_num = available_width - len(visible_text) + 1    
@@ -215,7 +215,7 @@ def print_category(stdscr, category, y, is_selected=False):
     elif is_selected and not st.focus_manager.is_sidebar_focused():
         attr = clr.get_theme_color_pair_for_text() | curses.A_BOLD
     attr = attr | (curses.A_BOLD if st.bold_text else 0)
-    
+            
     sf.safe_addstr(stdscr, y, 1, ' ', attr)
     # Display name with fixed width - now at position 2 (after the left frame)
     sf.safe_addstr(stdscr, y, 2, category["name"], attr)
@@ -249,7 +249,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     # Handle text display
     text = task["description"]
 
-    if (st.current_category_id == 0 or st.searching) and pref.get_tag():
+    if (st.current_category_id == 0 or st.searching) and st.tag:
         cat_id_of_current_task = task["category_id"]
         if cat_id_of_current_task != 0:
             text = "[" + cat.get_category_by_id(cat_id_of_current_task)["name"] +  "] " + text
@@ -260,14 +260,13 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
         visible_text = text
         
     is_done = task.get("status", False)
-    if is_done and stk.get_strikethrough() and not is_selected:
-        visible_text = stk.apply(visible_text)
+    if is_done and st.strikethrough and not is_selected:
+        visible_text = pref.apply_strikethrough(visible_text)
         
-    attr_bold = curses.A_BOLD if st.bold_text else 0
     task_id = task["id"]
-    attr_selection = clr.get_theme_color_pair_for_selection() | attr_bold
+    attr_selection = clr.get_theme_color_pair_for_selection()
+    attr_selection = attr_selection | (curses.A_BOLD if st.bold_text else 0)
     attr_non_selection = 0
-    
     if task["due"] != "":
         if is_done:
             attr_non_selection = clr.get_dimmed_color_pair(clr.get_theme_color_str())
@@ -278,7 +277,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
             attr_non_selection = clr.get_color_pair_by_str("grey")
         else:
             attr_non_selection = 0
-    attr_non_selection = attr_non_selection | attr_bold
+    attr_non_selection = attr_non_selection | (curses.A_BOLD if st.bold_text else 0)
     
     if is_selected:
         sf.safe_addstr(stdscr, row, x_offset, f"{task_id:2d} ", attr_selection)
@@ -334,12 +333,8 @@ def print_pref_panel(stdscr, current_selection_index=0):
     center_offset_y = max(0, (st.latest_max_y - len(pref_content_lines)) // 2) - 1
     
     # Get current preference values for coloring
-    tag_enabled = pref.get_tag()
-    strikethrough_enabled = stk.get_strikethrough()
     current_color = clr.get_theme_color_str()
     current_date_format = pref.get_date_format()
-    sort_by_flagged = pref.get_sort_by_flagged()
-    sort_by_done = pref.get_sort_by_done()
     
     # Format each line with ">" for selected item
     # Adapt line width to available space
@@ -370,12 +365,17 @@ def print_pref_panel(stdscr, current_selection_index=0):
         
         # Process and draw content lines
         if "Tag in All Tasks:" in line:
-            value = "on" if tag_enabled else "off"
+            value = "on" if st.tag else "off"
+            pos = line.find(value)
+            print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
+
+        elif "Bold Text:" in line:
+            value = "on" if st.bold_text else "off"
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
                 
         elif "Strikethrough:" in line:
-            value = "on" if strikethrough_enabled else "off"
+            value = "on" if st.strikethrough else "off"
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)                
         
@@ -395,12 +395,12 @@ def print_pref_panel(stdscr, current_selection_index=0):
                                          current_date_format, clr.get_theme_color_pair_for_text())
             
         elif "Sort by flagged:" in line:
-            value = "on" if sort_by_flagged else "off"
+            value = "on" if st.sort_by_flagged else "off"
             pos = line.find(value)
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
             
         elif "Sort by done:" in line:
-            value = "on" if sort_by_done else "off"
+            value = "on" if st.sort_by_done else "off"
             pos = line.rfind(value)  # reverse find because done contains "on" as well
             print_pref_line_on_off_adaptive(stdscr, y, pos, line, center_offset_x, center_offset_y, value)
             

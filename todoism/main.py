@@ -62,18 +62,18 @@ def _window_resized():
 
 def _sort_by_tag(categories):
     marked = []
-    for i, task in enumerate(st.filtered_tasks):
-        if _task_not_marked(task):
-            marked = st.filtered_tasks[:i]
-            break
-        if i == len(st.filtered_tasks) - 1:
-            marked = st.filtered_tasks
     not_marked = []
+    for i, task in enumerate(st.filtered_tasks):
+        if _task_marked(task):
+            marked.append(task)
+        else:
+            not_marked.append(task)
+    not_marked_sorted_by_tag = []
     for c in categories:
-        for task in st.filtered_tasks: 
-            if _task_not_marked(task) and c["id"] == task["category_id"]:
-                    not_marked.append(task)
-    st.filtered_tasks = marked + not_marked
+        for task in not_marked: 
+            if c["id"] == task["category_id"]:
+                    not_marked_sorted_by_tag.append(task)
+    st.filtered_tasks = marked + not_marked_sorted_by_tag
     
 def _sort_by_flagged_done_tag(categories):
     if st.sort_by_done:
@@ -82,13 +82,13 @@ def _sort_by_flagged_done_tag(categories):
         st.filtered_tasks = tsk.sort(st.filtered_tasks, "flagged")
     _sort_by_tag(categories)
 
-def _task_not_marked(task):
+def _task_marked(task):
     if st.sort_by_done and st.sort_by_flagged:
-        return not task["status"] and not task["flagged"]
+        return task["status"] or task["flagged"]
     elif st.sort_by_done:
-        return not task["status"]
+        return task["status"]
     elif st.sort_by_flagged:
-        return not task["flagged"]
+        return task["flagged"]
     else:
         return False
     

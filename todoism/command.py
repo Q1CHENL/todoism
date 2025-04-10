@@ -9,7 +9,6 @@ import todoism.message as msg
 import todoism.preference as pref
 import todoism.navigate as nv
 import todoism.color as clr
-import todoism.strikethrough as stk
 import todoism.keycode as kc
 import todoism.category as cat
 import todoism.state as st
@@ -158,8 +157,8 @@ def execute_command(stdscr, command: str, task_list: list):
                 pr.clear_bottom_bar(stdscr)
                 break                
             # Keep selection index in valid range
-            if selection_index > 10:
-                selection_index = 10
+            if selection_index > 12:
+                selection_index = 12
             elif selection_index < 0:
                 selection_index = 0
             st.latest_max_y, st.latest_max_x = stdscr.getmaxyx()
@@ -174,13 +173,28 @@ def execute_command(stdscr, command: str, task_list: list):
             line = msg.PREF_PANEL.strip().split('\n')[selection_index + 2].strip().split(':')
             preference_type = line[0].strip()
             
+            if preference_type == "│   Strikethrough":
+                ch = stdscr.getch()
+                if ch == kc.TAB:
+                    # Toggle strikethrough setting
+                    st.strikethrough = not st.strikethrough
+                    pref.set_bool_setting("strikethrough", st.strikethrough)
+                    # Refresh to show the change
+                    pr.print_pref_panel(stdscr, selection_index)
+                elif ch == curses.KEY_UP:
+                    selection_index -= 2
+                elif ch == curses.KEY_DOWN:
+                    selection_index += 2
+                elif ch == ord('q'):
+                    quit = True
+            
             # Handle different preference types
-            if preference_type == "│   Tag in All Tasks":
+            elif preference_type == "│   Tag in All Tasks":
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     # Toggle Tag setting
                     st.tag = not st.tag
-                    pref.set_tag(st.tag)
+                    pref.set_bool_setting("tag", st.tag)
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
@@ -195,7 +209,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 if ch == kc.TAB:
                     # Toggle bold setting
                     st.bold_text = not st.bold_text
-                    pref.set_bold(st.bold_text)
+                    pref.set_bool_setting("tag", st.tag)
                     # Refresh to show the change
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
@@ -205,20 +219,6 @@ def execute_command(stdscr, command: str, task_list: list):
                 elif ch == ord('q'):
                     quit = True
                     
-            elif preference_type == "│   Strikethrough":
-                ch = stdscr.getch()
-                if ch == kc.TAB:
-                    # Toggle strikethrough setting
-                    stk.set_strikethrough(not stk.get_strikethrough())
-                    # Refresh to show the change
-                    pr.print_pref_panel(stdscr, selection_index)
-                elif ch == curses.KEY_UP:
-                    selection_index -= 2
-                elif ch == curses.KEY_DOWN:
-                    selection_index += 2
-                elif ch == ord('q'):
-                    quit = True
-            
             elif preference_type == "│   Theme":
                 # Get currently selected color
                 colors = ["purple", "cyan", "blue", "red", "yellow"]
@@ -259,8 +259,8 @@ def execute_command(stdscr, command: str, task_list: list):
             elif preference_type.startswith("│   Sort by flagged"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    pref.set_sort_by_flagged(not pref.get_sort_by_flagged())
                     st.sort_by_flagged = not st.sort_by_flagged
+                    pref.set_bool_setting("sort_by_flagged", st.sort_by_flagged)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -271,8 +271,8 @@ def execute_command(stdscr, command: str, task_list: list):
             elif preference_type.startswith("│   Sort by done"):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
-                    pref.set_sort_by_done(not pref.get_sort_by_done())
                     st.sort_by_done = not st.sort_by_done
+                    pref.set_bool_setting("sort_by_done", st.sort_by_done)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
