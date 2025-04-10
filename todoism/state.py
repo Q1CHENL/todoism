@@ -37,3 +37,5 @@ sort_by_flagged = False
 sort_by_tag = False
 
 tag = False
+bold_text = False
+strikethrough = False
