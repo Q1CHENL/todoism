@@ -333,8 +333,8 @@ def print_pref_panel(stdscr, current_selection_index=0):
     center_offset_y = max(0, (st.latest_max_y - len(pref_content_lines)) // 2) - 1
     
     # Get current preference values for coloring
-    current_color = pref.get_str_setting("selected_color")
-    current_date_format = pref.get_str_setting("date_format")
+    current_color = st.theme_color
+    current_date_format = st.date_format
     
     # Format each line with ">" for selected item
     # Adapt line width to available space
