@@ -63,13 +63,15 @@ def load_preferences():
     try:
         with open(get_settings_path(), 'r') as file:
             preferences = json.load(file)
+            st.theme_color = preferences.get("selected_color", "blue")
+            st.date_format = preferences.get("date_format", "Y-M-D")
             st.sort_by_done = preferences.get("sort_by_done", False)
             st.sort_by_flagged = preferences.get("sort_by_flagged", False)
             st.tag = preferences.get("tag", True)
             st.strikethrough = preferences.get("strikethrough", True)
             st.bold_text = preferences.get("bold_text", False)
     except (FileNotFoundError, json.JSONDecodeError):
-        pass
+        setup_default_settings()
 
 def update_preferences():
     """
@@ -102,49 +104,33 @@ def update_preferences():
     except Exception as _:
         # If anything goes wrong, return default settings
         return setup_default_settings()
-
-def get_date_format():
-    """Get date format setting"""
-    try:
-        with open(get_settings_path(), 'r') as settings_file:
-            settings = json.load(settings_file)
-            return settings.get('date_format', "Y-M-D")
-    except FileNotFoundError:
-        setup_default_settings()
-        return "Y-M-D"
-
-def set_date_format(format_string):
-    """Set date format setting"""
-    if format_string not in ["Y-M-D", "D-M-Y", "M-D-Y"]:
-        format_string = "Y-M-D"
-
-    try:
-        with open(get_settings_path(), 'r') as settings_file:
-            settings = json.load(settings_file)
-        
-        settings['date_format'] = format_string
-        
-        # Write the entire file at once to avoid corruption
-        with open(get_settings_path(), 'w') as settings_file:
-            json.dump(settings, settings_file, indent=4)
-            
-    except FileNotFoundError:
-        setup_default_settings()
         
 def set_bool_setting(setting_name: str, value: bool):
     """Set a boolean setting in the settings file."""
     try:
-        with open(get_settings_path(), 'r') as settings_file:
+        with open(get_settings_path(), 'r+') as settings_file:
             settings = json.load(settings_file)
-            
-        settings[setting_name] = value
-        
-        with open(get_settings_path(), 'w') as settings_file:
+            settings[setting_name] = value
+            settings_file.seek(0)
             json.dump(settings, settings_file, indent=4)
+            settings_file.truncate()
             
     except FileNotFoundError:
         setup_default_settings()
+        
+def set_str_setting(setting_name: str, value: str):
+    """Set a string setting in the settings file."""
+    try:
+        with open(get_settings_path(), 'r+') as settings_file:
+            settings = json.load(settings_file)
+            settings[setting_name] = value
+            settings_file.seek(0)
+            json.dump(settings, settings_file, indent=4)
+            settings_file.truncate()
             
+    except (FileNotFoundError, json.JSONDecodeError):
+        setup_default_settings()
+                    
 def apply_strikethrough(text: str) -> str:
     if not text:
         return ""

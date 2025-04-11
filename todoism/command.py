@@ -8,7 +8,7 @@ import todoism.print as pr
 import todoism.message as msg
 import todoism.preference as pref
 import todoism.navigate as nv
-import todoism.color as clr
+import todoism.theme as thm
 import todoism.keycode as kc
 import todoism.category as cat
 import todoism.state as st
@@ -220,15 +220,16 @@ def execute_command(stdscr, command: str, task_list: list):
                     
             elif preference_type == "│   Theme":
                 colors = ["purple", "cyan", "blue", "red", "yellow"]
-                current_color = clr.get_theme_color_str()
+                current_color = st.theme_color
                 color_index = colors.index(current_color) if current_color in colors else 0
                 
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     color_index = (color_index + 1) % len(colors)
-                    clr.set_theme_color(colors[color_index])
+                    st.theme_color = colors[color_index]
+                    pref.set_str_setting("selected_color", colors[color_index])
                     pr.print_pref_panel(stdscr, selection_index)
-                    curses.init_pair(clr.SELECTION_COLOR_PAIR_NUM, clr.get_color_code_by_str("black"), clr.get_theme_color_curses())
+                    curses.init_pair(thm.SELECTION_COLOR_PAIR_NUM, thm.get_color_code_by_str("black"), thm.get_theme_color_curses())
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
                 elif ch == curses.KEY_DOWN:
@@ -240,10 +241,11 @@ def execute_command(stdscr, command: str, task_list: list):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     date_formats = ["Y-M-D", "D-M-Y", "M-D-Y"]
-                    current_format = pref.get_date_format()
+                    current_format = st.date_format
                     date_index = date_formats.index(current_format) if current_format in date_formats else 0
                     date_index = (date_index + 1) % len(date_formats)
-                    pref.set_date_format(date_formats[date_index])
+                    st.date_format = date_formats[date_index]
+                    pref.set_str_setting("date_format", date_formats[date_index])
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2
@@ -294,7 +296,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 warning_msg = "Already in dev mode or another instance in running!"
                 sf.safe_move(stdscr, st.latest_max_capacity, 1)
                 pr.clear_bottom_bar_except_status(stdscr)
-                attr = clr.get_color_pair_by_str("yellow") | curses.A_BOLD
+                attr = thm.get_color_pair_by_str("yellow") | curses.A_BOLD
                 sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
                 stdscr.refresh()
                 time.sleep(1)
@@ -318,7 +320,7 @@ def execute_command(stdscr, command: str, task_list: list):
                     success_msg = "Dev mode enabled. Test tasks and categories loaded. Will auto-restore on exit."
                     sf.safe_move(stdscr, st.latest_max_y - 2, 1)
                     pr.clear_bottom_bar_except_status(stdscr)
-                    attr = clr.get_color_pair_by_str("green") | curses.A_BOLD
+                    attr = thm.get_color_pair_by_str("green") | curses.A_BOLD
                     sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, success_msg, attr)
                     stdscr.refresh()
                     time.sleep(1.5)
@@ -332,7 +334,7 @@ def execute_command(stdscr, command: str, task_list: list):
             warning_msg = "Dev mode not available in installation."
             sf.safe_move(stdscr, st.latest_max_y - 2, 1)
             pr.clear_bottom_bar_except_status(stdscr)
-            attr = clr.get_color_pair_by_str("yellow") | curses.A_BOLD
+            attr = thm.get_color_pair_by_str("yellow") | curses.A_BOLD
             sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
             stdscr.refresh()
             time.sleep(1.5)
@@ -349,7 +351,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 warning_msg = "Not in dev mode - nothing to restore!"
                 sf.safe_move(stdscr, st.latest_max_y - 2, 1)
                 pr.clear_bottom_bar_except_status(stdscr)
-                attr = clr.get_color_pair_by_str("yellow") | curses.A_BOLD
+                attr = thm.get_color_pair_by_str("yellow") | curses.A_BOLD
                 sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
                 stdscr.refresh()
                 time.sleep(1)
@@ -374,7 +376,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 success_msg = "Dev mode disabled. Original tasks and categories restored."
                 sf.safe_move(stdscr, st.latest_max_y - 2, 1)
                 pr.clear_bottom_bar_except_status(stdscr)
-                attr = clr.get_color_pair_by_str("green") | curses.A_BOLD
+                attr = thm.get_color_pair_by_str("green") | curses.A_BOLD
                 sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, success_msg, attr)
                 stdscr.refresh()
                 time.sleep(1.5)
@@ -388,7 +390,7 @@ def execute_command(stdscr, command: str, task_list: list):
             warning_msg = "Dev mode not available in installation"
             sf.safe_move(stdscr, st.latest_max_y - 2, 1)
             pr.clear_bottom_bar_except_status(stdscr)
-            attr = clr.get_color_pair_by_str("yellow") | curses.A_BOLD
+            attr = thm.get_color_pair_by_str("yellow") | curses.A_BOLD
             sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, warning_msg, attr)
             stdscr.refresh()
             time.sleep(1.5)
@@ -404,7 +406,7 @@ def execute_command(stdscr, command: str, task_list: list):
         # Clear the line first, error might occur if resized small
         sf.safe_move(stdscr, st.latest_max_y - 2, 1)
         pr.clear_bottom_bar_except_status(stdscr)
-        attr = clr.get_color_pair_by_str("red") | curses.A_BOLD
+        attr = thm.get_color_pair_by_str("red") | curses.A_BOLD
         sf.safe_addstr(stdscr, st.latest_max_y - 2, 1, error_msg, attr)
         stdscr.refresh()
         time.sleep(1.5)

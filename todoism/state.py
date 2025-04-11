@@ -32,10 +32,10 @@ current_cat_tasks = []
 
 focus_manager = None
 
-sort_by_done = False
-sort_by_flagged = False
-sort_by_tag = False
-
+theme_color = "blue"
+date_format = "Y-M-D"
 tag = False
-bold_text = False
 strikethrough = False
+sort_by_flagged = False
+sort_by_done = False
+bold_text = False

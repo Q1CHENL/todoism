@@ -1,6 +1,6 @@
 import curses
 
-import todoism.color as clr
+import todoism.theme as thm
 
 def safe_addstr(stdscr, y: int, x: int, text: str, attr=0) -> bool:
     """
@@ -21,7 +21,7 @@ def safe_addstr(stdscr, y: int, x: int, text: str, attr=0) -> bool:
             stdscr.addstr(y, x, text, attr)
             stdscr.attroff(attr)
         else:
-            bkg_color_pair = clr.get_bkg_color_pair()
+            bkg_color_pair = thm.get_bkg_color_pair()
             stdscr.addstr(y, x, text, bkg_color_pair)
             stdscr.attroff(bkg_color_pair)
         return True
@@ -36,7 +36,7 @@ def safe_appendstr(stdscr, text: str, attr=0) -> bool:
             stdscr.addstr(text, attr)
             stdscr.attroff(attr)
         else:
-            bkg_color_pair = clr.get_bkg_color_pair()
+            bkg_color_pair = thm.get_bkg_color_pair()
             stdscr.addstr(text, bkg_color_pair)
             stdscr.attroff(bkg_color_pair)
         return True
@@ -50,7 +50,7 @@ def safe_addch(stdscr, y: int, x: int, ch: str, attr=0) -> bool:
             stdscr.addch(y, x, ch, attr)
             stdscr.attroff(attr)
         else:
-            bkg_color_pair = clr.get_bkg_color_pair()
+            bkg_color_pair = thm.get_bkg_color_pair()
             stdscr.addch(y, x, ch, bkg_color_pair)
             stdscr.attroff(bkg_color_pair)
         return True
@@ -72,7 +72,7 @@ def safe_insstr(stdscr, y: int, x: int, text: str, attr=0) -> bool:
             stdscr.insstr(y, x, text, attr)
             stdscr.attroff(attr)
         else:
-            bkg_color_pair = clr.get_bkg_color_pair()
+            bkg_color_pair = thm.get_bkg_color_pair()
             stdscr.insstr(y, x, text, bkg_color_pair)
             stdscr.attroff(bkg_color_pair)
         return True

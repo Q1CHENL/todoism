@@ -10,7 +10,7 @@ import todoism.category as cat
 import todoism.navigate as nv
 import todoism.message as msg
 import todoism.keycode as kc
-import todoism.color as clr
+import todoism.theme as thm
 import todoism.state as st
 import todoism.search as srch
 import todoism.safe as sf
@@ -101,8 +101,8 @@ def main(stdscr):
     stdscr.clear()
     stdscr.refresh()
     curses.start_color()
-    clr.setup_color_pairs()
-    stdscr.bkgd(' ', clr.get_bkg_color_pair())
+    thm.setup_color_pairs()
+    stdscr.bkgd(' ', thm.get_bkg_color_pair())
     
     if kc.need_key_recording():
         if not kc.record_key_codes(stdscr):
@@ -742,6 +742,7 @@ def main(stdscr):
                         task_list = cmd.handle_delete(task_list)
                     tsk.save_tasks(task_list)
                     should_repaint = True
+                    
             elif key == kc.ALT_LEFT:
                 if st.task_cnt > 0:
                     st.current_task_id = 1
@@ -750,6 +751,7 @@ def main(stdscr):
                     st.end_task_id = min(st.latest_max_capacity, st.task_cnt)
                     task_scroll_offset = 0
                     should_repaint = True
+                    
             elif key == kc.ALT_RIGHT:
                 if st.task_cnt > 0:
                     st.current_task_id = st.task_cnt
