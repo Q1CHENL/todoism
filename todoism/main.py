@@ -742,6 +742,7 @@ def main(stdscr):
                         task_list = cmd.handle_delete(task_list)
                     tsk.save_tasks(task_list)
                     should_repaint = True
+                    
             elif key == kc.ALT_LEFT:
                 if st.task_cnt > 0:
                     st.current_task_id = 1
@@ -750,6 +751,7 @@ def main(stdscr):
                     st.end_task_id = min(st.latest_max_capacity, st.task_cnt)
                     task_scroll_offset = 0
                     should_repaint = True
+                    
             elif key == kc.ALT_RIGHT:
                 if st.task_cnt > 0:
                     st.current_task_id = st.task_cnt

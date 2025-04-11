@@ -142,7 +142,7 @@ def print_editing_entry(stdscr, entry, text_key, y, is_selected=False, scroll_le
     visible_end_index = min(total_text_length, scroll_left + available_width - 1)
     visible_text = entry[text_key][visible_start_index:visible_end_index + 1]
     
-    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM) |(curses.A_BOLD if st.bold_text else 0)
+    attr = curses.color_pair(clr.SELECTION_COLOR_PAIR_NUM) | (curses.A_BOLD if st.bold_text else 0)
 
     sf.safe_addstr(stdscr, y, text_start_pos, visible_text, attr)
 

@@ -69,7 +69,7 @@ def load_preferences():
             st.strikethrough = preferences.get("strikethrough", True)
             st.bold_text = preferences.get("bold_text", False)
     except (FileNotFoundError, json.JSONDecodeError):
-        pass
+        setup_default_settings()
 
 def update_preferences():
     """
