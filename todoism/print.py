@@ -174,7 +174,7 @@ def print_status_bar(stdscr):
     # Split the status into parts for coloring
     status_prefix = f"Done: {done_cnt}/{st.task_cnt} "
     
-    current_date_format = pref.get_str_setting("date_format")
+    current_date_format = st.date_format
     current_datetime = datetime.now()
     date_str = ""
     if current_date_format == "Y-M-D":
@@ -269,7 +269,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     attr_non_selection = 0
     if task["due"] != "":
         if is_done:
-            attr_non_selection = clr.get_dimmed_color_pair(pref.get_str_setting("selected_color"))
+            attr_non_selection = clr.get_dimmed_color_pair(st.theme_color)
         else:
             attr_non_selection = clr.get_theme_color_pair_for_text()
     else:
@@ -333,8 +333,8 @@ def print_pref_panel(stdscr, current_selection_index=0):
     center_offset_y = max(0, (st.latest_max_y - len(pref_content_lines)) // 2) - 1
     
     # Get current preference values for coloring
-    current_color = pref.get_str_setting("selected_color")
-    current_date_format = pref.get_str_setting("date_format")
+    current_color = st.theme_color
+    current_date_format = st.date_format
     
     # Format each line with ">" for selected item
     # Adapt line width to available space

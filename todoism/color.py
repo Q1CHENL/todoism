@@ -1,6 +1,8 @@
 import json
 import curses
 import random
+
+import todoism.state as st
 import todoism.preference as pref
 
 SELECTION_COLOR_PAIR_NUM = 100
@@ -41,7 +43,7 @@ def get_theme_color_curses() -> int:
         return curses.COLOR_BLUE
 
 def get_theme_color_pair_for_text() -> int:
-    return get_color_pair_by_str(pref.get_str_setting("selected_color"))
+    return get_color_pair_by_str(st.theme_color)
 
 def get_theme_color_pair_for_selection() -> int:
     curses.init_pair(SELECTION_COLOR_PAIR_NUM, get_color_code_by_str("black"), get_theme_color_curses())
