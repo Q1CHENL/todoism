@@ -142,7 +142,7 @@ def delete_task_by_uuid(task_list, task_uuid):
     return task_list
 
 def flip_by_key(task_index, key: str, task_list):
-    st.filtered_tasks[task_index][key] = not st.filtered_tasks[task_index][key]
+    st.current_cat_tasks[task_index][key] = not st.current_cat_tasks[task_index][key]
     save_tasks(task_list)
     
 def sort(task_list, key) -> list:

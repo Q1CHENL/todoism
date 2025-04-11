@@ -28,7 +28,7 @@ editing_task = False
 searching = False
 is_dev_mode = False
 
-filtered_tasks = []
+current_cat_tasks = []
 
 focus_manager = None
 
