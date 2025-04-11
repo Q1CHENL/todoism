@@ -42,15 +42,15 @@ def purge(task_list, category_id=0):
 
 def handle_delete(task_list, task_id=0):
     task_id = st.current_task_id if task_id == 0 else task_id
-    task_uuid = st.filtered_tasks[task_id - 1].get("uuid")
+    task_uuid = st.current_cat_tasks[task_id - 1].get("uuid")
     purged_tasks = tsk.load_purged_tasks()
-    purged_tasks.append(st.filtered_tasks[task_id - 1])
+    purged_tasks.append(st.current_cat_tasks[task_id - 1])
     tsk.save_tasks(purged_tasks, pref.get_purged_path())
     task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
     if st.searching:
-        st.filtered_tasks = [task for task in st.filtered_tasks if task["uuid"] != task_uuid]
+        st.current_cat_tasks = [task for task in st.current_cat_tasks if task["uuid"] != task_uuid]
     else:
-        st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+        st.current_cat_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
     nv.post_deletion_update(len(task_list) + 1)
     return task_list
 
@@ -61,7 +61,7 @@ def execute_command(stdscr, command: str, task_list: list):
         if len(parts) == 2 and parts[1].isdigit():
             command_recognized = True
             id = int(parts[1])
-            if 1 <= id <= len(st.filtered_tasks):
+            if 1 <= id <= len(st.current_cat_tasks):
                 index = id - 1
                 tsk.flip_by_key(index, "status", task_list)
             return task_list, None
@@ -72,7 +72,7 @@ def execute_command(stdscr, command: str, task_list: list):
         if len(parts) == 2 and parts[1].isdigit():
             command_recognized = True
             id = int(parts[1])
-            if 1 <= id <= len(st.filtered_tasks):
+            if 1 <= id <= len(st.current_cat_tasks):
                 index = id - 1
                 tsk.flip_by_key(index, "flagged", task_list)
             return task_list, None
@@ -111,7 +111,7 @@ def execute_command(stdscr, command: str, task_list: list):
             task_id = int(parts[1])
             if 1 <= task_id <= len(task_list):
                 st.latest_max_capacity = stdscr.getmaxyx()[0] - 1
-                pr.print_task_entry(stdscr, st.filtered_tasks[st.current_task_id-1], st.current_task_row, False, cat.SIDEBAR_WIDTH)
+                pr.print_task_entry(stdscr, st.current_cat_tasks[st.current_task_id-1], st.current_task_row, False, cat.SIDEBAR_WIDTH)
                 st.current_task_id = int(task_id)
                 st.current_task_row = st.current_task_id - st.start_task_id + 1
                 if len(task_list) and st.current_task_id >= st.start_task_id and st.current_task_id <= st.end_task_id:

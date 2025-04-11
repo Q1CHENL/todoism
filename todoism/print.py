@@ -156,7 +156,7 @@ def print_editing_entry(stdscr, entry, text_key, y, is_selected=False, scroll_le
 
 def print_status_bar(stdscr):
     """Print centered status bar with progress, percentage, date and time"""
-    done_cnt = tsk.done_count(st.filtered_tasks)
+    done_cnt = tsk.done_count(st.current_cat_tasks)
     
     # Calculate percentage
     percent_value = (done_cnt/st.task_cnt)*100 if st.task_cnt > 0 else 0
@@ -228,8 +228,8 @@ def print_task_entries(stdscr, x_offset=0):
     """Print tasks with horizontal offset to accommodate sidebar"""
 
     sidebar_focused = st.focus_manager.is_sidebar_focused()
-    if st.filtered_tasks and st.start_task_id > 0:
-        for i, task in enumerate(st.filtered_tasks[st.start_task_id - 1:st.end_task_id]):
+    if st.current_cat_tasks and st.start_task_id > 0:
+        for i, task in enumerate(st.current_cat_tasks[st.start_task_id - 1:st.end_task_id]):
             row = i + 1  # +1 due to status bar
             is_selected = st.start_task_id + i == st.current_task_id and not sidebar_focused and not st.adding_task 
             print_task_entry(stdscr, task, row, is_selected=is_selected, x_offset=x_offset)

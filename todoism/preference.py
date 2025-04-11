@@ -99,7 +99,7 @@ def update_preferences():
                 json.dump(current_settings, file, indent=4)
                 
         return current_settings
-    except Exception as e:
+    except Exception as _:
         # If anything goes wrong, return default settings
         return setup_default_settings()
 
