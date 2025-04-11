@@ -220,13 +220,13 @@ def execute_command(stdscr, command: str, task_list: list):
                     
             elif preference_type == "│   Theme":
                 colors = ["purple", "cyan", "blue", "red", "yellow"]
-                current_color = clr.get_theme_color_str()
+                current_color = pref.get_str_setting("selected_color")
                 color_index = colors.index(current_color) if current_color in colors else 0
                 
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     color_index = (color_index + 1) % len(colors)
-                    clr.set_theme_color(colors[color_index])
+                    pref.set_str_setting("selected_color", colors[color_index])
                     pr.print_pref_panel(stdscr, selection_index)
                     curses.init_pair(clr.SELECTION_COLOR_PAIR_NUM, clr.get_color_code_by_str("black"), clr.get_theme_color_curses())
                 elif ch == curses.KEY_UP:
@@ -240,10 +240,10 @@ def execute_command(stdscr, command: str, task_list: list):
                 ch = stdscr.getch()
                 if ch == kc.TAB:
                     date_formats = ["Y-M-D", "D-M-Y", "M-D-Y"]
-                    current_format = pref.get_date_format()
+                    current_format = pref.get_str_setting("date_format")
                     date_index = date_formats.index(current_format) if current_format in date_formats else 0
                     date_index = (date_index + 1) % len(date_formats)
-                    pref.set_date_format(date_formats[date_index])
+                    pref.set_str_setting("date_format", date_formats[date_index])
                     pr.print_pref_panel(stdscr, selection_index)
                 elif ch == curses.KEY_UP:
                     selection_index -= 2

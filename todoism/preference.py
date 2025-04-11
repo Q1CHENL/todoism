@@ -102,34 +102,6 @@ def update_preferences():
     except Exception as _:
         # If anything goes wrong, return default settings
         return setup_default_settings()
-
-def get_date_format():
-    """Get date format setting"""
-    try:
-        with open(get_settings_path(), 'r') as settings_file:
-            settings = json.load(settings_file)
-            return settings.get('date_format', "Y-M-D")
-    except FileNotFoundError:
-        setup_default_settings()
-        return "Y-M-D"
-
-def set_date_format(format_string):
-    """Set date format setting"""
-    if format_string not in ["Y-M-D", "D-M-Y", "M-D-Y"]:
-        format_string = "Y-M-D"
-
-    try:
-        with open(get_settings_path(), 'r') as settings_file:
-            settings = json.load(settings_file)
-        
-        settings['date_format'] = format_string
-        
-        # Write the entire file at once to avoid corruption
-        with open(get_settings_path(), 'w') as settings_file:
-            json.dump(settings, settings_file, indent=4)
-            
-    except FileNotFoundError:
-        setup_default_settings()
         
 def set_bool_setting(setting_name: str, value: bool):
     """Set a boolean setting in the settings file."""
@@ -144,7 +116,35 @@ def set_bool_setting(setting_name: str, value: bool):
             
     except FileNotFoundError:
         setup_default_settings()
+        
+def set_str_setting(setting_name: str, value: str):
+    """Set a string setting in the settings file."""
+    try:
+        with open(get_settings_path(), 'r+') as settings_file:
+            settings = json.load(settings_file)
+            settings[setting_name] = value
+            settings_file.seek(0)
+            json.dump(settings, settings_file, indent=4)
+            settings_file.truncate()
             
+    except (FileNotFoundError, json.JSONDecodeError):
+        setup_default_settings()
+        
+def get_str_setting(setting_name: str) -> str:
+    """Get a string setting from the settings file."""
+    try:
+        with open(get_settings_path(), 'r') as settings_file:
+            settings = json.load(settings_file)
+            return settings.get(setting_name)
+    except FileNotFoundError:
+        setup_default_settings()
+        if setting_name == "date_format":
+            return "Y-M-D"
+        elif setting_name == "selected_color":
+            return "purple"
+        else:
+            return ""
+                    
 def apply_strikethrough(text: str) -> str:
     if not text:
         return ""
