@@ -22,18 +22,23 @@ def purge(task_list, category_id=0):
     remained = []
     
     def purged_cond(task, category_id):
-        return task["status"] if category_id == 0 else task["status"] is True and task["category_id"]
+        return task["status"] if category_id == 0 else task["status"] is True and task["category_id"] == category_id
     
-    for t in task_list:
+    for t in st.current_cat_tasks:
         if purged_cond(t, category_id):
-            newly_purged.append(t)            
+            newly_purged.append(t)
         else:
             remained.append(t)
+            
+    for t in newly_purged:
+        task_list = tsk.delete_task_by_uuid(task_list, t["uuid"])
+        
     tsk.reassign_task_ids(remained)
+    st.current_cat_tasks = remained
     purged_tasks = tsk.load_purged_tasks()
     purged_tasks.extend(newly_purged)
     tsk.save_tasks(purged_tasks, pref.get_purged_path())
-    return remained
+    return task_list
 
 def handle_delete(task_list, task_id=0):
     task_id = st.current_task_id if task_id == 0 else task_id
@@ -74,10 +79,10 @@ def execute_command(stdscr, command: str, task_list: list):
         else:
             command_recognized = False
     elif command == "purge":
-        original_cnt = len(task_list)
-        task_list = purge(task_list, st.current_category_id)
+        original_cnt = st.task_cnt
+        task_list = purge(task_list,st.current_category_id)
         tsk.save_tasks(task_list)
-        if len(task_list) < original_cnt:
+        if len(st.current_cat_tasks) < original_cnt:
             st.current_task_id = 1
             st.current_task_row = 1
             st.start_task_id = 1
