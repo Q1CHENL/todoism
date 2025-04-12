@@ -347,3 +347,23 @@ UPDATE_FAILURE_MSG = '''
 │   Will proceed with current version...              │
 └─────────────────────────────────────────────────────┘
 '''
+
+def keycode_summary():
+    """Constructs a message for the given keycode"""
+    import todoism.keycode as kc
+    msg =  f"""
+    ┌───────────────────────────────────────────────┐
+    │   CTRL + LEFT: {kc.CTRL_LEFT}                            │
+    │                                               │
+    │   CTRL + RIGHT: {kc.CTRL_RIGHT}                           │
+    │                                               │
+    │   CTRL + SHIFT + LEFT: {kc.CTRL_SHIFT_LEFT}                    │
+    │                                               │
+    │   CTRL + SHIFT + RIGHT: {kc.CTRL_SHIFT_RIGHT}                   │
+    │                                               │
+    │   ALT + LEFT: {kc.ALT_LEFT}                             │
+    │                                               │
+    │   ALT + RIGHT: {kc.ALT_RIGHT}                            │
+    └───────────────────────────────────────────────┘
+    """
+    return msg

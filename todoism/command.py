@@ -124,9 +124,18 @@ def execute_command(stdscr, command: str, task_list: list):
         if len(parts) == 2:
             if parts[1] == "record":
                 command_recognized = True
-                pr.clear_all_except_outer_frames(stdscr)
+                stdscr.clear()
                 kc.record_key_codes(stdscr)
                 kc.setup_keycodes()
+                return task_list, None
+            elif parts[1] == "show":
+                command_recognized = True
+                open_keycode_summary(stdscr)
+                pr.print_q_to_close(stdscr, "keycode")
+                while True:
+                    ch = stdscr.getch()
+                    if ch == ord('q'):
+                        break
                 return task_list, None
         else:
             command_recognized = False
@@ -441,3 +450,9 @@ def open_pref_panel(stdscr, selection_index):
     pr.print_pref_panel(stdscr, selection_index)
     pr.print_outer_frame(stdscr)
     pr.print_q_to_close(stdscr, "preferences")
+
+def open_keycode_summary(stdscr):
+    stdscr.clear()
+    pr.print_msg(stdscr, msg.keycode_summary())
+    pr.print_outer_frame(stdscr)
+    pr.print_q_to_close(stdscr, "keycode")
