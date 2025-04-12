@@ -119,6 +119,17 @@ def execute_command(stdscr, command: str, task_list: list):
                     return task_list, None
         else:
             command_recognized = False
+    elif command.startswith("keycode"):
+        parts = command.split()
+        if len(parts) == 2:
+            if parts[1] == "record":
+                command_recognized = True
+                pr.clear_all_except_outer_frames(stdscr)
+                kc.record_key_codes(stdscr)
+                kc.setup_keycodes()
+                return task_list, None
+        else:
+            command_recognized = False
     elif command == "help":
         open_help_page(stdscr)
         st.old_max_x = st.latest_max_x
@@ -306,6 +317,7 @@ def execute_command(stdscr, command: str, task_list: list):
                 import test.test as ts
                 if ts.load_dev_mode():
                     st.is_dev_mode = True
+                    pref.load_preferences()
                     task_list = tsk.load_tasks()
                     categories = cat.load_categories()
                     st.current_category_id = 0
@@ -360,6 +372,7 @@ def execute_command(stdscr, command: str, task_list: list):
             else:
                 st.is_dev_mode = False
                 import todoism.due as due
+                pref.load_preferences()
                 task_list = tsk.load_tasks()
                 due.add_due_key_if_missing(task_list)
                 tsk.save_tasks(task_list)

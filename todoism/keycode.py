@@ -18,18 +18,20 @@ ESC = 27
 ENTER = 10
 TAB = 9
 
+DEFAULT_KEY_CODES = {
+    "ctrl+left": 0,
+    "ctrl+right": 0,
+    "ctrl+shift+left": 0,
+    "ctrl+shift+right": 0,
+    "alt+left": 0,
+    "alt+right": 0
+}
+
 def record_key_codes(stdscr):
     """Record key codes for special key combinations"""
     curses.curs_set(0)
-    key_codes = {
-        "ctrl+left": 0,
-        "ctrl+right": 0,
-        "ctrl+shift+left": 0,
-        "ctrl+shift+right": 0,
-        "alt+left": 0,
-        "alt+right": 0
-    }
-
+    key_codes = DEFAULT_KEY_CODES.copy()
+    
     # Set timeout to non-blocking
     stdscr.timeout(-1)
 
@@ -56,32 +58,38 @@ def record_key_codes(stdscr):
         {
             "name": "ctrl+left",
             "prompt_msg": msg.KEYCODE_RECORDING_CTRL_LEFT_MSG,
-            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_LEFT_MSG
+            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_LEFT_MSG,
+            "feedback_msg_skipped": msg.KEYCODE_FEEDBACK_CTRL_LEFT_MSG_SKIPPED
         },
         {
             "name": "ctrl+right",
             "prompt_msg": msg.KEYCODE_RECORDING_CTRL_RIGHT_MSG,
-            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_RIGHT_MSG
+            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_RIGHT_MSG,
+            "feedback_msg_skipped": msg.KEYCODE_FEEDBACK_CTRL_RIGHT_MSG_SKIPPED
         },
         {
             "name": "ctrl+shift+left",
             "prompt_msg": msg.KEYCODE_RECORDING_CTRL_SHIFT_LEFT_MSG,
-            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_SHIFT_LEFT_MSG
+            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_SHIFT_LEFT_MSG,
+            "feedback_msg_skipped": msg.KEYCODE_FEEDBACK_CTRL_SHIFT_LEFT_MSG_SKIPPED
         },
         {
             "name": "ctrl+shift+right", 
             "prompt_msg": msg.KEYCODE_RECORDING_CTRL_SHIFT_RIGHT_MSG,
-            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_SHIFT_RIGHT_MSG
+            "feedback_msg": msg.KEYCODE_FEEDBACK_CTRL_SHIFT_RIGHT_MSG,
+            "feedback_msg_skipped": msg.KEYCODE_FEEDBACK_CTRL_SHIFT_RIGHT_MSG_SKIPPED
         },
         {
             "name": "alt+left",
             "prompt_msg": msg.KEYCODE_RECORDING_ALT_LEFT_MSG,
-            "feedback_msg": msg.KEYCODE_FEEDBACK_ALT_LEFT_MSG
+            "feedback_msg": msg.KEYCODE_FEEDBACK_ALT_LEFT_MSG,
+            "feedback_msg_skipped": msg.KEYCODE_FEEDBACK_ALT_LEFT_MSG_SKIPPED
         },
         {
             "name": "alt+right",
             "prompt_msg": msg.KEYCODE_RECORDING_ALT_RIGHT_MSG,
-            "feedback_msg": msg.KEYCODE_FEEDBACK_ALT_RIGHT_MSG
+            "feedback_msg": msg.KEYCODE_FEEDBACK_ALT_RIGHT_MSG,
+            "feedback_msg_skipped": msg.KEYCODE_FEEDBACK_ALT_RIGHT_MSG_SKIPPED
         }
     ]
     
@@ -97,9 +105,10 @@ def record_key_codes(stdscr):
             
             key_name = key_def["name"]            
             open_new_record_stage(stdscr, key_def["prompt_msg"])
-            
+            feedback_msg_name = "feedback_msg"
             ch = stdscr.getch()
-            # Handle restart/quit during key recording
+            if ch == ENTER:
+                feedback_msg_name = "feedback_msg_skipped"
             if ch == ord('r'):
                 restart_session = True
                 open_new_record_stage(stdscr, msg.KEYCODE_RESTART_MSG)
@@ -107,11 +116,11 @@ def record_key_codes(stdscr):
                 break
             elif ch == ord('q'):
                 return False
-                
-            # Record the key code
-            key_codes[key_name] = ch
 
-            open_new_record_stage(stdscr, key_def["feedback_msg"])
+            # Record the key code
+            if feedback_msg_name == "feedback_msg":
+                key_codes[key_name] = ch
+            open_new_record_stage(stdscr, key_def[feedback_msg_name])
 
             # Wait for Enter to continue, or handle restart/quit
             while True:
@@ -190,14 +199,7 @@ def get_key_codes():
             }
     except FileNotFoundError:
         pref.setup_default_settings()
-        return {
-            "ctrl+left": 0,
-            "ctrl+right": 0,
-            "ctrl+shift+left": 0,
-            "ctrl+shift+right": 0,
-            "alt+left": 0,
-            "alt+right": 0
-        }
+        return DEFAULT_KEY_CODES.copy()
 
 def setup_keycodes():
     """Setup key codes from settings"""
