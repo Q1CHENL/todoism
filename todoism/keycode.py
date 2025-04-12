@@ -18,17 +18,19 @@ ESC = 27
 ENTER = 10
 TAB = 9
 
+DEFAULT_KEY_CODES = {
+    "ctrl+left": 0,
+    "ctrl+right": 0,
+    "ctrl+shift+left": 0,
+    "ctrl+shift+right": 0,
+    "alt+left": 0,
+    "alt+right": 0
+}
+
 def record_key_codes(stdscr):
     """Record key codes for special key combinations"""
     curses.curs_set(0)
-    key_codes = {
-        "ctrl+left": 0,
-        "ctrl+right": 0,
-        "ctrl+shift+left": 0,
-        "ctrl+shift+right": 0,
-        "alt+left": 0,
-        "alt+right": 0
-    }
+    key_codes = DEFAULT_KEY_CODES.copy()
     
     # Set timeout to non-blocking
     stdscr.timeout(-1)
@@ -197,14 +199,7 @@ def get_key_codes():
             }
     except FileNotFoundError:
         pref.setup_default_settings()
-        return {
-            "ctrl+left": 0,
-            "ctrl+right": 0,
-            "ctrl+shift+left": 0,
-            "ctrl+shift+right": 0,
-            "alt+left": 0,
-            "alt+right": 0
-        }
+        return DEFAULT_KEY_CODES.copy()
 
 def setup_keycodes():
     """Setup key codes from settings"""
