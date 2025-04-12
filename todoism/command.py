@@ -119,6 +119,17 @@ def execute_command(stdscr, command: str, task_list: list):
                     return task_list, None
         else:
             command_recognized = False
+    elif command.startswith("keycode"):
+        parts = command.split()
+        if len(parts) == 2:
+            if parts[1] == "record":
+                command_recognized = True
+                pr.clear_all_except_outer_frames(stdscr)
+                kc.record_key_codes(stdscr)
+                kc.setup_keycodes()
+                return task_list, None
+        else:
+            command_recognized = False
     elif command == "help":
         open_help_page(stdscr)
         st.old_max_x = st.latest_max_x
