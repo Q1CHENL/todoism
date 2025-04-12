@@ -23,8 +23,9 @@ HELP_MSG = '''
 │   :done <task_id> - Mark task as done        Mouse Operations:                               │
 │   :purge - Purge done tasks in current cat.  - Click on task/category: Select item           │
 │   :purge all - Purge all done tasks          - Click on done/flag: Toggle status             │
-│                                              - Click on blank area: Toggle focus             │
-│   To add due date to a task:                 - Wheel scroll: Navigate through tasks/cats     │
+│   :keycode record - record keycodes          - Click on blank area: Toggle focus             │
+│                                              - Wheel scroll: Navigate through tasks/cats     │
+│   To add due date to a task:                                                                 │
 │   Add [<due date>] at the end of the task                                                    │
 │   Supported formats:                         To search for tasks:                            │
 │   - [yyyy-mm-dd hh:mm]    - [hh:mm]          /<search term>                                  │
@@ -102,6 +103,7 @@ KEYCODE_RECORDING_CTRL_LEFT_MSG = '''
 │                                                   │
 │ Press Ctrl + Left key combination                 │
 │                                                   │
+│ Press Enter to skip                               │
 │ Press 'r' to restart the recording process        │
 │ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
@@ -113,6 +115,7 @@ KEYCODE_RECORDING_CTRL_RIGHT_MSG = '''
 │                                                   │
 │ Press Ctrl + Right key combination                │
 │                                                   │
+│ Press Enter to skip                               │
 │ Press 'r' to restart the recording process        │
 │ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
@@ -124,6 +127,7 @@ KEYCODE_RECORDING_CTRL_SHIFT_LEFT_MSG = '''
 │                                                   │
 │ Press Ctrl + Shift + Left key combination         │
 │                                                   │
+│ Press Enter to skip                               │
 │ Press 'r' to restart the recording process        │
 │ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
@@ -135,6 +139,7 @@ KEYCODE_RECORDING_CTRL_SHIFT_RIGHT_MSG = '''
 │                                                   │
 │ Press Ctrl + Shift + Right key combination        │
 │                                                   │
+│ Press Enter to skip                               │
 │ Press 'r' to restart the recording process        │
 │ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
@@ -146,6 +151,7 @@ KEYCODE_RECORDING_ALT_LEFT_MSG = '''
 │                                                   │
 │ Press Alt + Left key combination                  │
 │                                                   │
+│ Press Enter to skip                               │
 │ Press 'r' to restart the recording process        │
 │ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
@@ -157,12 +163,12 @@ KEYCODE_RECORDING_ALT_RIGHT_MSG = '''
 │                                                   │
 │ Press Alt + Right key combination                 │
 │                                                   │
+│ Press Enter to skip                               │
 │ Press 'r' to restart the recording process        │
 │ Press 'q' to quit (your settings won't be saved)  │
 └───────────────────────────────────────────────────┘
 '''
 
-# Replace formatting placeholders with static text
 KEYCODE_FEEDBACK_CTRL_LEFT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Ctrl + Left                             │
@@ -221,6 +227,72 @@ KEYCODE_FEEDBACK_ALT_LEFT_MSG = '''
 KEYCODE_FEEDBACK_ALT_RIGHT_MSG = '''
 ┌───────────────────────────────────────────────────┐
 │ Recorded: Alt + Right                             │
+│                                                   │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
+└───────────────────────────────────────────────────┘
+'''
+
+KEYCODE_FEEDBACK_CTRL_LEFT_MSG_SKIPPED = '''
+┌───────────────────────────────────────────────────┐
+│ Skipped: Ctrl + Left                              │
+│                                                   │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
+└───────────────────────────────────────────────────┘
+'''
+
+KEYCODE_FEEDBACK_CTRL_RIGHT_MSG_SKIPPED = '''
+┌───────────────────────────────────────────────────┐
+│ Skipped: Ctrl + Right                             │
+│                                                   │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
+└───────────────────────────────────────────────────┘
+'''
+
+KEYCODE_FEEDBACK_CTRL_SHIFT_LEFT_MSG_SKIPPED = '''
+┌───────────────────────────────────────────────────┐
+│ Skipped: Ctrl + Shift + Left                      │
+│                                                   │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
+└───────────────────────────────────────────────────┘
+'''
+
+KEYCODE_FEEDBACK_CTRL_SHIFT_RIGHT_MSG_SKIPPED = '''
+┌───────────────────────────────────────────────────┐
+│ Skipped: Ctrl + Shift + Right                     │
+│                                                   │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
+└───────────────────────────────────────────────────┘
+'''
+
+KEYCODE_FEEDBACK_ALT_LEFT_MSG_SKIPPED = '''
+┌───────────────────────────────────────────────────┐
+│ Skipped: Alt + Left                               │
+│                                                   │
+│ Press Enter to continue                           │
+│                                                   │
+│ Press 'r' to restart the recording process        │
+│ Press 'q' to quit (your settings won't be saved)  │
+└───────────────────────────────────────────────────┘
+'''
+
+KEYCODE_FEEDBACK_ALT_RIGHT_MSG_SKIPPED = '''
+┌───────────────────────────────────────────────────┐
+│ Skipped: Alt + Right                              │
 │                                                   │
 │ Press Enter to continue                           │
 │                                                   │
