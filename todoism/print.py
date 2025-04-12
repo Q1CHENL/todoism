@@ -110,7 +110,7 @@ def print_task_symbols(stdscr, task, y, is_selected=False):
     # Add space between flag and status
     sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 3 + 1, ' ', attr_space)
 
-    if task.get("status", False):
+    if task.get("done", False):
         sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5, '✓', attr_bkg if is_selected else attr_green)
     else:
         sf.safe_addstr(stdscr, y, cat.SIDEBAR_WIDTH + 5, ' ', attr_space)
@@ -259,7 +259,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     else:
         visible_text = text
         
-    is_done = task.get("status", False)
+    is_done = task.get("done", False)
     if is_done and st.strikethrough and not is_selected:
         visible_text = pref.apply_strikethrough(visible_text)
         
@@ -478,10 +478,10 @@ def print_tasks_cli(todos):
         id_part = f'#{todo["id"]:02d}'
 
         flag_symbol = flag_color % "⚑ " if todo.get("flagged") else "  "
-        check_symbol = check_color % "✓ " if todo.get("status") else "  "
+        check_symbol = check_color % "✓ " if todo.get("done") else "  "
         
         description = todo["description"]
-        if todo.get("status"):
+        if todo.get("done"):
             description = done_fmt % description
             
         todo_line = f'{id_part} {flag_symbol}{check_symbol}{description} ({todo["due"]})'

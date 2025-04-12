@@ -22,7 +22,7 @@ def purge(task_list, category_id=0):
     remained = []
     
     def purged_cond(task, category_id):
-        return task["status"] if category_id == 0 else task["status"] is True and task["category_id"] == category_id
+        return task["done"] if category_id == 0 else task["done"] is True and task["category_id"] == category_id
     
     for t in st.current_cat_tasks:
         if purged_cond(t, category_id):
@@ -63,7 +63,7 @@ def execute_command(stdscr, command: str, task_list: list):
             id = int(parts[1])
             if 1 <= id <= len(st.current_cat_tasks):
                 index = id - 1
-                tsk.flip_by_key(index, "status", task_list)
+                tsk.flip_by_key(index, "done", task_list)
             return task_list, None
         else:
             command_recognized = False

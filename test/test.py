@@ -11,7 +11,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Implement dev mode",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 0
         },
@@ -20,7 +20,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Sort by flagged or done",
             "due": "",
-            "status": True,
+            "done": True,
             "flagged": False,
             "category_id": 0
         },
@@ -29,7 +29,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Auto update todoism",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 0
         },
@@ -38,7 +38,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Work category task example",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 1
         },
@@ -47,7 +47,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Personal category task example",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 2
         },
@@ -56,7 +56,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Very long task description for testing text wrapping and scrolling behavior in the todoism terminal user interface",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 0
         },
@@ -65,7 +65,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Call dentist for appointment",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 3  # Health
         },
@@ -74,7 +74,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Buy groceries for the week",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 4  # Shopping
         },
@@ -83,7 +83,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Finish quarterly report",
             "due": "",
-            "status": True,
+            "done": True,
             "flagged": False,
             "category_id": 1  # Work
         },
@@ -92,7 +92,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Research new programming language",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 5  # Learning
         },
@@ -101,7 +101,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Plan weekend trip",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 6  # Travel
         },
@@ -110,7 +110,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Fix bathroom sink",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 7  # Home
         },
@@ -119,7 +119,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Schedule team meeting",
             "due": "",
-            "status": True,
+            "done": True,
             "flagged": False,
             "category_id": 1  # Work
         },
@@ -128,7 +128,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Create weekly workout plan",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 8  # Fitness
         },
@@ -137,7 +137,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Read new book on productivity",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 5  # Learning
         },
@@ -146,7 +146,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Update resume",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 9  # Career
         },
@@ -155,7 +155,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Pay monthly bills",
             "due": "",
-            "status": True,
+            "done": True,
             "flagged": False,
             "category_id": 2  # Personal
         },
@@ -164,7 +164,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Organize digital files",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 0
         },
@@ -173,7 +173,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Order birthday gift for mom",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 4  # Shopping
         },
@@ -182,7 +182,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Sign up for new fitness class",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 8  # Fitness
         },
@@ -191,7 +191,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Finish home improvement project",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 7  # Home
         },
@@ -200,7 +200,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Research vacation destinations",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 6  # Travel
         },
@@ -209,7 +209,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Attend dental checkup",
             "due": "",
-            "status": True,
+            "done": True,
             "flagged": False,
             "category_id": 3  # Health
         },
@@ -218,7 +218,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Complete online course",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 5  # Learning
         },
@@ -227,7 +227,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Review annual budget",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 2  # Personal
         },
@@ -236,7 +236,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Prepare presentation for client meeting",
             "due": "",
-            "status": False, 
+            "done": False, 
             "flagged": True,
             "category_id": 1  # Work
         },
@@ -245,7 +245,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Another task with very long description to test horizontal scrolling and ensure proper text display in the terminal interface",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 9  # Career
         },
@@ -254,7 +254,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Buy new workout equipment",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 8  # Fitness
         },
@@ -263,7 +263,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Schedule annual doctor checkup",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 3  # Health
         },
@@ -272,7 +272,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Clean garage",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 7  # Home
         },
@@ -281,7 +281,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Prepare for the upcoming presentation",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 1  # Work
         },
@@ -290,7 +290,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Plan a family gathering",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 10  # Family
         },
@@ -299,7 +299,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Schedule a car maintenance appointment",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 3  # Health
         },
@@ -308,7 +308,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Buy ingredients for dinner",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 4  # Shopping
         },
@@ -317,7 +317,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Complete online course module",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 5  # Learning
         },
@@ -326,7 +326,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Book flight tickets for vacation",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 6  # Travel
         },
@@ -335,7 +335,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Organize workspace",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 7  # Home
         },
@@ -344,7 +344,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Research new health trends",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 3  # Health
         },
@@ -353,7 +353,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Plan a weekend trip",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 6  # Travel
         },
@@ -362,7 +362,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Attend a workshop on productivity",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 5  # Learning
         },
@@ -371,7 +371,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Update personal budget",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 13  # Finance
         },
@@ -380,7 +380,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Finish reading a book",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 5  # Learning
         },
@@ -389,7 +389,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Prepare for a job interview",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 9  # Career
         },
@@ -398,7 +398,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Plan a surprise party",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 10  # Family
         },
@@ -407,7 +407,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Create a workout schedule",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 8  # Fitness
         },
@@ -416,7 +416,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Attend a networking event",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 9  # Career
         },
@@ -425,7 +425,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Visit a museum",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 6  # Travel
         },
@@ -434,7 +434,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Start a new hobby",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 5  # Learning
         },
@@ -443,7 +443,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Plan a family vacation",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 6  # Travel
         },
@@ -452,7 +452,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Organize a community event",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 1  # Work
         },
@@ -461,7 +461,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Create a vision board",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 2  # Personal
         },
@@ -470,7 +470,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Attend a cooking class",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 5  # Learning
         },
@@ -479,7 +479,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Volunteer for a local charity",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 2  # Personal
         },
@@ -488,7 +488,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Join a book club",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 5  # Learning
         },
@@ -497,7 +497,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Plan a family reunion",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 2  # Personal
         },
@@ -506,7 +506,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Create a personal website",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 9  # Career
         },
@@ -515,7 +515,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Attend a fitness class",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 8  # Fitness
         },
@@ -524,7 +524,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Start a blog",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 5  # Learning
         },
@@ -533,7 +533,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Create a meal plan",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 4  # Shopping
         },
@@ -542,7 +542,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Plan a weekend getaway",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 6  # Travel
         },
@@ -551,7 +551,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Attend a seminar on personal finance",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 5  # Learning
         },
@@ -560,7 +560,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Create a scrapbook",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 2  # Personal
         },
@@ -569,7 +569,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Plan a road trip",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 6  # Travel
         },
@@ -578,7 +578,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Attend a workshop on coding",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 5  # Learning
         },
@@ -587,7 +587,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Create a family photo album",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 2  # Personal
         },
@@ -596,7 +596,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Plan a charity event",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 1  # Work
         },
@@ -605,7 +605,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Attend a yoga class",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 8  # Fitness
         },
@@ -614,7 +614,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Create a personal development plan",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 5  # Learning
         },
@@ -623,7 +623,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Plan a family movie night",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 2  # Personal
         },
@@ -632,7 +632,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Organize a neighborhood clean-up",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 1  # Work
         },
@@ -641,7 +641,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Learn a new programming language",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 15  # Technology
         },
@@ -650,7 +650,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Participate in a community clean-up",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 11  # Community
         },
@@ -659,7 +659,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Start a garden",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 16  # Environment
         },
@@ -668,7 +668,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Enroll in a public speaking course",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": True,
             "category_id": 18  # Education
         },
@@ -677,7 +677,7 @@ def generate_test_tasks():
             "uuid": str(uuid.uuid4()),
             "description": "Adopt a pet from a shelter",
             "due": "",
-            "status": False,
+            "done": False,
             "flagged": False,
             "category_id": 19  # Pets
         }
