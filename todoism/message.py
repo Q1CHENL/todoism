@@ -24,11 +24,12 @@ HELP_MSG = '''
 │   :purge - Purge done tasks in current cat.  - Click on task/category: Select item           │
 │   :purge all - Purge all done tasks          - Click on done/flag: Toggle status             │
 │   :keycode record - record keycodes          - Click on blank area: Toggle focus             │
-│                                              - Wheel scroll: Navigate through tasks/cats     │
-│   To add due date to a task:                                                                 │
-│   Add [<due date>] at the end of the task                                                    │
-│   Supported formats:                         To search for tasks:                            │
-│   - [yyyy-mm-dd hh:mm]    - [hh:mm]          /<search term>                                  │
+│   :keycode show - show keycodes              - Wheel scroll: Navigate through tasks/cats     │
+│                                                                                              │
+│   To add due date to a task:                 To search for tasks:                            │
+│   Add [<due date>] at the end of the task    /<search term>                                  │
+│   Supported formats:                                                                         │
+│   - [yyyy-mm-dd hh:mm]    - [hh:mm]                                                          │
 │   - [yyyy-mm-dd]          - [mm-dd hh:mm]                                                    │
 │   - [mm-dd] or [dd-mm]                                                                       │
 │                                                                                              │
@@ -347,3 +348,23 @@ UPDATE_FAILURE_MSG = '''
 │   Will proceed with current version...              │
 └─────────────────────────────────────────────────────┘
 '''
+
+def keycode_summary():
+    """Constructs a message for the given keycode"""
+    import todoism.keycode as kc
+    msg =  f"""
+    ┌───────────────────────────────────────────────┐
+    │   CTRL + LEFT: {kc.CTRL_LEFT}                            │
+    │                                               │
+    │   CTRL + RIGHT: {kc.CTRL_RIGHT}                           │
+    │                                               │
+    │   CTRL + SHIFT + LEFT: {kc.CTRL_SHIFT_LEFT}                    │
+    │                                               │
+    │   CTRL + SHIFT + RIGHT: {kc.CTRL_SHIFT_RIGHT}                   │
+    │                                               │
+    │   ALT + LEFT: {kc.ALT_LEFT}                             │
+    │                                               │
+    │   ALT + RIGHT: {kc.ALT_RIGHT}                            │
+    └───────────────────────────────────────────────┘
+    """
+    return msg
