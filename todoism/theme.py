@@ -22,11 +22,26 @@ color_set = {
     "grey": [9, 244]
 }
 
+# Sort of cache for color pairs to prevent generating new colors each time
+choosed_colors = {}
+
 def setup_color_pairs():
     for color in color_set.values():
         curses.init_pair(color[0], color[1], get_color_code_by_str("black"))
     curses.init_pair(BACKGROUND_COLOR_PAIR_NUM, get_color_code_by_str("white"), get_color_code_by_str("black"))
     curses.init_pair(SELECTION_COLOR_PAIR_NUM, get_color_code_by_str("black"), get_theme_color_curses())
+
+def get_random_color_pair(include_black=False):
+    # This commented block is optional, it adds readability and eliminates extra
+    # list comprehension for each extra call with same arg. It can be removed
+    # if aesthetics > common sense, I can't choose one so will leave it as is
+
+    # choosed_color = choosed_colors.get(include_black)
+    # if choosed_color is not None:
+    #     return choosed_color
+
+    pairs = [color_set[key] for key in color_set if key != "black" or include_black]
+    return choosed_colors.setdefault(include_black, random.choice(pairs))
 
 def get_theme_color_curses() -> int:
     try:
@@ -34,7 +49,7 @@ def get_theme_color_curses() -> int:
             settings = json.load(settings_file)
             color = settings["selected_color"]
             if color == "random":
-                return random.choice(list(color_set.values()))
+                return get_random_color_pair()[1]
             return color_set[color][1]
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
         color_str = pref.setup_default_settings()["selected_color"]
@@ -46,6 +61,7 @@ def get_theme_color_pair_for_text() -> int:
     return get_color_pair_by_str(st.theme_color)
 
 def get_theme_color_pair_for_selection() -> int:
+    # Surely there is a reson for init_pair call for selection color again?
     curses.init_pair(SELECTION_COLOR_PAIR_NUM, get_color_code_by_str("black"), get_theme_color_curses())
     return curses.color_pair(SELECTION_COLOR_PAIR_NUM)
 
@@ -53,6 +69,8 @@ def get_color_pair_by_str(color: str) -> int:
     return curses.color_pair(get_color_pair_num_by_str(color))
 
 def get_color_pair_num_by_str(color: str) -> int:
+    if color == "random":
+        return get_random_color_pair()[0]
     return color_set[color][0]
     
 def get_bkg_color_pair() -> int:
