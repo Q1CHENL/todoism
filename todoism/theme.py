@@ -1,6 +1,5 @@
 import json
 import curses
-import random
 
 import todoism.state as st
 import todoism.preference as pref
@@ -33,8 +32,8 @@ def get_theme_color_curses() -> int:
         with open(pref.get_settings_path(), 'r') as settings_file:
             settings = json.load(settings_file)
             color = settings["selected_color"]
-            if color == "random":
-                return random.choice(list(color_set.values()))
+            if color not in color_set:
+                color = "blue"
             return color_set[color][1]
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
         color_str = pref.setup_default_settings()["selected_color"]
