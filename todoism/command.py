@@ -158,8 +158,8 @@ def execute_command(stdscr, command: str, task_list: list):
                 pr.clear_bottom_bar(stdscr)
                 return task_list, None
             elif ch == curses.KEY_MOUSE:
-                _, mouse_x, mouse_y, _, button_state = curses.getmouse()
-                link_y = (st.latest_max_y - len(msg.HELP_MSG.strip().split('\n'))) // 2 + 5
+                _, mouse_x, mouse_y, _, _ = curses.getmouse()
+                link_y = (st.latest_max_y - len(msg.HELP_MSG.strip().split('\n'))) // 2 + 10
                 link_x = (st.latest_max_x - len(msg.HELP_MSG.strip().split('\n')[0])) // 2 + 39
                 link_width = len("Github page")
                 if (mouse_y == link_y and 
