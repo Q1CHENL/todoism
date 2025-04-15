@@ -12,7 +12,6 @@ HELP_MSG = '''
 │                                                                                              │
 │                               Visit Github page for more info                                │
 │                                                                                              │
-│                                                                                              │
 │   Short commands:                            Key bindings:                                   │
 │   a - Create new task/category               Tab - Toggle focus bewteen tasks and sidebar    │
 │   d - Mark task as done                      Double Backspace - delete task/category         │
@@ -31,12 +30,9 @@ HELP_MSG = '''
 │   :keycode record - record keycodes          - Click on blank area: Toggle focus             │
 │   :keycode show - show keycodes              - Wheel scroll: Navigate through tasks/cats     │
 │                                                                                              │
-│   To add due date to a task:                 To search for tasks:                            │
-│   Add [<due date>] at the end of the task    /<search term>                                  │
-│   Supported formats:                                                                         │
-│   - [yyyy-mm-dd hh:mm]    - [hh:mm]                                                          │
-│   - [yyyy-mm-dd]          - [mm-dd hh:mm]                                                    │
-│   - [mm-dd] or [dd-mm]                                                                       │
+│   To add due date to a task:                                                                 │
+│   Add [<due date>] at the end of the task    - [mm-dd hh:mm]  - [yyyy-mm-dd]  - [hh:mm]      │
+│   Supported formats:                         - [mm-dd] or [dd-mm]  - [yyyy-mm-dd hh:mm]      │
 │                                                                                              │
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 '''
