@@ -770,6 +770,25 @@ def generate_test_categories():
     ]
     return test_categories
 
+def generate_test_settings():
+    return { 
+    "date_format": "Y-M-D",
+    "selected_color": "purple",
+    "tag": True,
+    "strikethrough": True,
+    "sort_by_flagged": False,
+    "sort_by_done": False,
+    "bold_text": False,
+    "ctrl+left": 0,
+    "ctrl+right": 0,
+    "ctrl+shift+left": 0,
+    "ctrl+shift+right": 0,
+    "alt+left": 0,
+    "alt+right": 0,
+    "last_update_check": 0
+}
+
+
 def load_dev_mode():
     """Load test tasks and categories"""
     st.is_dev_mode = True
