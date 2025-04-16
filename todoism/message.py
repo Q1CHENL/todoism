@@ -3,10 +3,14 @@
 HELP_MSG = '''
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                              │
-│                                       todoism v1.21.8                                        │
+│                  ████████╗ ██████╗ ██████╗  ██████╗ ██╗███████╗███╗   ███╗                   │
+│                  ╚══██╔══╝██╔═══██╗██╔══██╗██╔═══██╗██║██╔════╝████╗ ████║                   │
+│                     ██║   ██║   ██║██║  ██║██║   ██║██║███████╗██╔████╔██║                   │
+│                     ██║   ██║   ██║██║  ██║██║   ██║██║╚════██║██║╚██╔╝██║                   │
+│                     ██║   ╚██████╔╝██████╔╝╚██████╔╝██║███████║██║ ╚═╝ ██║                   │
+│                     ╚═╝    ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝╚══════╝╚═╝     ╚═╝                   │
 │                                                                                              │
 │                               Visit Github page for more info                                │
-│                                                                                              │
 │                                                                                              │
 │   Short commands:                            Key bindings:                                   │
 │   a - Create new task/category               Tab - Toggle focus bewteen tasks and sidebar    │
@@ -26,12 +30,9 @@ HELP_MSG = '''
 │   :keycode record - record keycodes          - Click on blank area: Toggle focus             │
 │   :keycode show - show keycodes              - Wheel scroll: Navigate through tasks/cats     │
 │                                                                                              │
-│   To add due date to a task:                 To search for tasks:                            │
-│   Add [<due date>] at the end of the task    /<search term>                                  │
-│   Supported formats:                                                                         │
-│   - [yyyy-mm-dd hh:mm]    - [hh:mm]                                                          │
-│   - [yyyy-mm-dd]          - [mm-dd hh:mm]                                                    │
-│   - [mm-dd] or [dd-mm]                                                                       │
+│   To add due date to a task:                                                                 │
+│   Add [<due date>] at the end of the task    - [mm-dd hh:mm]  - [yyyy-mm-dd]  - [hh:mm]      │
+│   Supported formats:                         - [mm-dd] or [dd-mm]  - [yyyy-mm-dd hh:mm]      │
 │                                                                                              │
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 '''
@@ -80,6 +81,14 @@ LIMIT_MSG = '''
 
 KEYCODE_MSG = '''
 ┌───────────────────────────────────────────────────────────┐
+│                                                           │
+│ ████████╗ ██████╗ ██████╗  ██████╗ ██╗███████╗███╗   ███╗ │
+│ ╚══██╔══╝██╔═══██╗██╔══██╗██╔═══██╗██║██╔════╝████╗ ████║ │
+│    ██║   ██║   ██║██║  ██║██║   ██║██║███████╗██╔████╔██║ │
+│    ██║   ██║   ██║██║  ██║██║   ██║██║╚════██║██║╚██╔╝██║ │
+│    ██║   ╚██████╔╝██████╔╝╚██████╔╝██║███████║██║ ╚═╝ ██║ │
+│    ╚═╝    ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝╚══════╝╚═╝     ╚═╝ │
+│                                                           │
 │ Welcome!                                                  │
 │ Let's set up keycodes for todoism to work properly!       │
 │                                                           │
@@ -326,15 +335,22 @@ NEW_VERSION_MSG = '''
 '''
 
 UPDATE_SUCCESS_MSG = '''
-┌────────────────────────────────────────────┐
-│    Sucessfully updated todoism v1.21.8!    │
-│                                            │
-│    What's new:                             │
-│    - Bold text support                     │
-│    - Various Bug fixes and improvements    │
-│                                            │
-│    Please press 'q' to exit and restart.   │
-└────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────┐
+│ ████████╗ ██████╗ ██████╗  ██████╗ ██╗███████╗███╗   ███╗ │
+│ ╚══██╔══╝██╔═══██╗██╔══██╗██╔═══██╗██║██╔════╝████╗ ████║ │
+│    ██║   ██║   ██║██║  ██║██║   ██║██║███████╗██╔████╔██║ │
+│    ██║   ██║   ██║██║  ██║██║   ██║██║╚════██║██║╚██╔╝██║ │
+│    ██║   ╚██████╔╝██████╔╝╚██████╔╝██║███████║██║ ╚═╝ ██║ │
+│    ╚═╝    ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝╚══════╝╚═╝     ╚═╝ │
+│                                                           │
+│          Sucessfully updated to todoism v1.21.8!          │
+│                                                           │
+│          What's new:                                      │
+│          - Bold text support                              │
+│          - Various Bug fixes and improvements             │
+│                                                           │
+│          Please press 'q' to exit and restart.            │
+└───────────────────────────────────────────────────────────┘
 '''
 
 UPDATE_FAILURE_MSG = '''

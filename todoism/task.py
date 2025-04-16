@@ -13,7 +13,7 @@ MAX_TASK_COUNT = 1024
 def done_count(task_list):
     count = 0
     for t in task_list:
-        if t["status"] is True:
+        if t["done"] is True:
             count = count + 1
     return count        
 
@@ -33,6 +33,15 @@ def load_purged_tasks():
         purged_tasks = []
     return purged_tasks
 
+def repair_tasks():
+    task_list = load_tasks()
+    for task in task_list:
+        if "done" not in task:
+            if "status" in task:
+                task["done"] = task["status"]
+                del task["status"]
+    save_tasks(task_list)
+
 def create_new_task(task_id, task_description="", flagged=False, category_id=0, due=""):
     """Create a new task with UUID and optional category assignment"""
     return {
@@ -41,7 +50,7 @@ def create_new_task(task_id, task_description="", flagged=False, category_id=0, 
         "description": task_description,
         "due": due,
         "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "status": False,
+        "done": False,
         "flagged": flagged,
         "category_id": category_id
     }
@@ -120,8 +129,8 @@ def update_existing_tasks():
             task["due"] = ""
             modified = True
         
-        if "created" not in task:
-            task["created"] = ""
+        if "creation_date" not in task:
+            task["creation_date"] = ""
             modified = True
     
     if modified:

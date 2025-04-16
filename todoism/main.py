@@ -77,16 +77,16 @@ def _sort_by_tag(categories):
     
 def _sort_by_flagged_done_tag(categories):
     if st.sort_by_done:
-        st.current_cat_tasks = tsk.sort(st.current_cat_tasks, "status")
+        st.current_cat_tasks = tsk.sort(st.current_cat_tasks, "done")
     if st.sort_by_flagged:
         st.current_cat_tasks = tsk.sort(st.current_cat_tasks, "flagged")
     _sort_by_tag(categories)
 
 def _task_marked(task):
     if st.sort_by_done and st.sort_by_flagged:
-        return task["status"] or task["flagged"]
+        return task["done"] or task["flagged"]
     elif st.sort_by_done:
-        return task["status"]
+        return task["done"]
     elif st.sort_by_flagged:
         return task["flagged"]
     else:
@@ -109,6 +109,7 @@ def main(stdscr):
             return
     kc.setup_keycodes()
 
+    tsk.repair_tasks()
     pref.update_preferences()    
     pref.load_preferences()
     
@@ -393,7 +394,7 @@ def main(stdscr):
                                     tsk.flip_by_key(task_index, "flagged", task_list)
                             elif status_x_start <= mouse_x <= status_x_end:
                                 if st.current_cat_tasks:
-                                    tsk.flip_by_key(task_index, "status", task_list)
+                                    tsk.flip_by_key(task_index, "done", task_list)
                             else:
                                 st.current_task_id = clicked_task_id
                                 st.current_task_row = clicked_task_row
@@ -691,7 +692,7 @@ def main(stdscr):
             elif key == ord('d') or key == ord(' '):
                 if st.current_cat_tasks and st.current_task_id > 0:
                     task_idx = st.current_task_id - 1
-                    tsk.flip_by_key(task_idx, "status", task_list)
+                    tsk.flip_by_key(task_idx, "done", task_list)
                     should_repaint = True
                     
             elif key == ord('e'):
