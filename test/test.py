@@ -787,19 +787,3 @@ def generate_test_settings():
     "alt+right": 0,
     "last_update_check": 0
 }
-
-
-def load_dev_mode():
-    """Load test tasks and categories"""
-    st.is_dev_mode = True
-
-    test_tasks = generate_test_tasks()
-    test_categories = generate_test_categories()
-        
-    with open(pref.TEST_CATEGORIES_FILE_PATH, 'w') as file:
-        json.dump(test_categories, file, indent=4)
-    
-    with open(pref.TEST_TASKS_FILE_PATH, 'w') as file:
-        json.dump(test_tasks, file, indent=4)
-    
-    return True

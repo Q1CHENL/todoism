@@ -24,4 +24,3 @@ for filename, data in files.items():
     path = out_dir / filename
     path.write_text(json.dumps(data, indent=4))
     os.chmod(path, 0o644)  # rw-r--r--
-    print(f"Wrote {path.resolve()} with mode 644")
