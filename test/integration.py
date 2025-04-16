@@ -7,7 +7,7 @@ import pyautogui
 # --- Configuration ---
 TODOISM_PATH = "/home/qichen/Dev/todoism"
 TASK_TEXT = "Clean the kitchen"
-TODOISM_COMMAND = f"cd {TODOISM_PATH} && python3 -m todoism --dev; exec zsh"
+TODOISM_COMMAND = f"cd {TODOISM_PATH} && python3 test/generate.py && python3 -m todoism --dev; exec zsh"
 TODOISM_LAUNCH_WAIT = 2
 KEY_DELAY = 0.3
 ACTION_DELAY = 1.0

@@ -10,7 +10,7 @@ NAME_INDENT = 2
 def load_categories():
     """Load categories from file"""
     try:
-        with open(pref.CATEGORIES_FILE_PATH, 'r') as file:
+        with open(pref.get_categories_file_path(), 'r') as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         # If categories file doesn't exist, create it with default "All Tasks"
@@ -20,7 +20,7 @@ def load_categories():
 
 def save_categories(category_list):
     """Save categories to the categories.json file"""
-    with open(pref.CATEGORIES_FILE_PATH, 'w') as file:
+    with open(pref.get_categories_file_path(), 'w') as file:
         json.dump(category_list, file, indent=4)
 
 def create_category(name, color="blue"):

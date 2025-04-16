@@ -37,7 +37,7 @@ def purge(task_list, category_id=0):
     st.current_cat_tasks = remained
     purged_tasks = tsk.load_purged_tasks()
     purged_tasks.extend(newly_purged)
-    tsk.save_tasks(purged_tasks, pref.PURGED_FILE_PATH)
+    tsk.save_tasks(purged_tasks, pref.get_purged_file_path())
     return task_list
 
 def handle_delete(task_list, task_id=0):
@@ -45,7 +45,7 @@ def handle_delete(task_list, task_id=0):
     task_uuid = st.current_cat_tasks[task_id - 1].get("uuid")
     purged_tasks = tsk.load_purged_tasks()
     purged_tasks.append(st.current_cat_tasks[task_id - 1])
-    tsk.save_tasks(purged_tasks, pref.PURGED_FILE_PATH)
+    tsk.save_tasks(purged_tasks, pref.get_purged_file_path())
     task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
     if st.searching:
         st.current_cat_tasks = [task for task in st.current_cat_tasks if task["uuid"] != task_uuid]

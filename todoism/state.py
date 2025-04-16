@@ -38,3 +38,5 @@ strikethrough = False
 sort_by_flagged = False
 sort_by_done = False
 bold_text = False
+
+dev_mode = False

@@ -12,7 +12,7 @@ PURGED_FILE_PATH = os.path.join(CONFIG_DIR, "purged.json")
 TASKS_FILE_PATH = os.path.join(CONFIG_DIR, "tasks.json")
 CATEGORIES_FILE_PATH = os.path.join(CONFIG_DIR, "categories.json")
 
-default_settings = { 
+default_settings = {
     "date_format": "Y-M-D",
     "selected_color": "purple",
     "tag": True,
@@ -28,6 +28,18 @@ default_settings = {
     "alt+right": 0,
     "last_update_check": 0
 }
+
+def get_tasks_file_path() -> str:
+    return TASKS_FILE_PATH if st.dev_mode else os.path.join("..", "test/tasks.json")
+
+def get_categories_file_path() -> str:
+    return CATEGORIES_FILE_PATH if st.dev_mode else os.path.join("..", "test/categories.json")
+
+def get_purged_file_path() -> str:
+    return PURGED_FILE_PATH if st.dev_mode else os.path.join("..", "test/purged.json")
+
+def get_settings_file_path() -> str:
+    return SETTINGS_PATH if st.dev_mode else os.path.join("..", "test/settings.json")
 
 def setup_default_settings():
     """
