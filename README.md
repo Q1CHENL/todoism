@@ -48,18 +48,23 @@ When you first start todoism, you'll be prompted to record key combinations for 
 
 ## Develop
 
-- Run with docker in dev mode with test files:
-  - Build docker image: `docker build -t ubuntu-todoism .`
-  - Run in project root: `./test/todocker.sh`
+- Run with docker in dev mode with test files (run in project root):
 
-- Or run `python -m todoism --dev` directly (not recommended). Add `--profile` to enable profiling. (`--dev` and `--profile` are not available in PyPI installation)
+  1. Build docker image: `docker build -t ubuntu-todoism .`
+  2. Run `./test/todocker.sh`
 
-- Normal Configuration and data files are located in `~/.todoism/`. Test ones are in `test/.todoism`
+- Or run `python -m todoism --dev` directly (for using debugger)
+
+  - Add `--profile` to enable profiling
+  - Flag `--dev` and `--profile` are not available in PyPI installation
 
 - Automated integration test (Experimental):
-  - Install `wmctrl` with your package manager
-  - Run `python test/integration.py` in project root
-  - Read the instructions printed in the terminal carefully
+
+  1. Install `wmctrl` with your package manager (for auto window focus)
+  2. Run `python test/integration.py` in project root
+  3. Read the instructions printed in the terminal carefully
+
+- Normal Configuration and data files are located in `~/.todoism/`. Test ones are in `test/.todoism`
 
 > [!CAUTION]
 > Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions may not be fully supported. Please backup your data when needed. **v1.21 and lower versions are perticularly deprecated!**
