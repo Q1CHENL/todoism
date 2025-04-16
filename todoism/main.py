@@ -34,16 +34,6 @@ def _handle_command_input(stdscr):
     curses.curs_set(0)
     curses.noecho()
     return command
-
-def _handle_dev_restore(categories, task_list, sidebar_scroller):
-    sidebar_scroller.update_total(len(categories))
-    for i, c in enumerate(categories):
-        if c["id"] == st.current_category_id:
-            sidebar_scroller.current_index = i
-            break
-        
-    st.current_cat_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-    return categories  
     
 def _restore_task_panel(task_list, categories):
     _restore_state(task_list)
@@ -418,9 +408,6 @@ def main(stdscr):
                 continue
             task_list, cats = cmd.execute_command(stdscr, command, task_list)
             pr.clear_bottom_bar_except_status(stdscr)
-            # Check if we have newly loaded categories in the result (special case for dev/restore)
-            if cats is not None:
-                categories = _handle_dev_restore(cats, task_list, sidebar_scroller)
             should_repaint = True
         
         if key == ord('/'):

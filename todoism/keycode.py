@@ -159,7 +159,7 @@ def open_new_record_stage(stdscr, msg):
 def need_key_recording():
     """Check if we need to record key codes (all keys are 0)"""
     try:
-        with open(pref.get_settings_path(), "r") as settings_file:
+        with open(pref.SETTINGS_PATH, "r") as settings_file:
             settings = json.load(settings_file)
             return (settings.get("ctrl+shift+left", 0) == 0 and
                     settings.get("ctrl+shift+right", 0) == 0 and
@@ -174,7 +174,7 @@ def need_key_recording():
 def save_key_code(key_name, code):
     """Save a recorded key code to settings"""
     try:
-        with open(pref.get_settings_path(), "r+") as settings_file:
+        with open(pref.SETTINGS_PATH, "r+") as settings_file:
             settings = json.load(settings_file)
             settings[key_name] = code
             settings_file.seek(0)
@@ -186,7 +186,7 @@ def save_key_code(key_name, code):
 def get_key_codes():
     """Get all key codes from settings"""
     try:
-        with open(pref.get_settings_path(), "r") as settings_file:
+        with open(pref.SETTINGS_PATH, "r") as settings_file:
             settings = json.load(settings_file)
             return {
                 "ctrl+left": settings.get("ctrl+left", 0),

@@ -269,7 +269,7 @@ def print_task_entry(stdscr, task, row, is_selected=False, x_offset=0):
     attr_non_selection = 0
     if task["due"] != "":
         if is_done:
-            attr_non_selection = thm.get_dimmed_color_pair(pref.get_str_setting("selected_color"))
+            attr_non_selection = thm.get_dimmed_color_pair(st.theme_color)
         else:
             attr_non_selection = thm.get_theme_color_pair_for_text()
     else:

@@ -20,14 +20,14 @@ def done_count(task_list):
 def load_tasks():
     """Load tasks from file"""
     try:
-        with open(pref.get_tasks_path(), 'r') as file:
+        with open(pref.TASKS_FILE_PATH, 'r') as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
 def load_purged_tasks():
     try:
-        with open(pref.get_purged_path(), 'r') as f:
+        with open(pref.PURGED_FILE_PATH, 'r') as f:
             purged_tasks = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         purged_tasks = []
@@ -60,7 +60,7 @@ def save_tasks(task_list, custom_path=None):
     import fcntl
     import os
     
-    file_path = custom_path if custom_path else pref.get_tasks_path()
+    file_path = custom_path if custom_path else pref.TASKS_FILE_PATH
     lock_path = file_path + '.lock'
     
     try:

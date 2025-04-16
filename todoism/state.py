@@ -26,7 +26,6 @@ cat_cnt = 0
 adding_task = False
 editing_task = False
 searching = False
-is_dev_mode = False
 
 current_cat_tasks = []
 

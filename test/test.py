@@ -1,7 +1,4 @@
-import json
 import uuid
-import todoism.preference as pref
-import todoism.state as st
 
 def generate_test_tasks():
     """Generate a fresh set of test tasks with proper UUIDs and category_id"""
@@ -689,7 +686,7 @@ def generate_test_categories():
     test_categories = [
         {
             "id": 0,
-            "name": "All Tasks"
+            "name": "All Tasks"  # Changed from "All ???" to "All Tasks"
         },
         {
             "id": 1,
@@ -770,17 +767,20 @@ def generate_test_categories():
     ]
     return test_categories
 
-def load_dev_mode():
-    """Load test tasks and categories"""
-    st.is_dev_mode = True
-
-    test_tasks = generate_test_tasks()
-    test_categories = generate_test_categories()
-        
-    with open(pref.TEST_CATEGORIES_FILE_PATH, 'w') as file:
-        json.dump(test_categories, file, indent=4)
-    
-    with open(pref.TEST_TASKS_FILE_PATH, 'w') as file:
-        json.dump(test_tasks, file, indent=4)
-    
-    return True
+def generate_test_settings():
+    return { 
+    "date_format": "Y-M-D",
+    "selected_color": "purple",
+    "tag": True,
+    "strikethrough": True,
+    "sort_by_flagged": False,
+    "sort_by_done": False,
+    "bold_text": False,
+    "ctrl+left": 0,
+    "ctrl+right": 0,
+    "ctrl+shift+left": 0,
+    "ctrl+shift+right": 0,
+    "alt+left": 0,
+    "alt+right": 0,
+    "last_update_check": 0
+}

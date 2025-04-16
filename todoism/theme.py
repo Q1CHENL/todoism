@@ -29,7 +29,7 @@ def setup_color_pairs():
 
 def get_theme_color_curses() -> int:
     try:
-        with open(pref.get_settings_path(), 'r') as settings_file:
+        with open(pref.SETTINGS_PATH, 'r') as settings_file:
             settings = json.load(settings_file)
             color = settings["selected_color"]
             if color not in color_set:

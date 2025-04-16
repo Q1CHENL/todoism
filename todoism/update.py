@@ -11,7 +11,7 @@ def check_for_updates() -> bool:
     import urllib.request
     import re
     
-    settings_path = pref.get_settings_path()
+    settings_path = pref.SETTINGS_PATH
     
     # Only check once per day - if we've checked recently, skip network request
     current_time = time.time()
@@ -110,7 +110,7 @@ def update_todoism() -> bool:
                 
         # Reset the last update check time to force a fresh check on next run
         try:
-            settings_path = pref.get_settings_path()
+            settings_path = pref.SETTINGS_PATH
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
             

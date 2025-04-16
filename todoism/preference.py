@@ -12,11 +12,6 @@ PURGED_FILE_PATH = os.path.join(CONFIG_DIR, "purged.json")
 TASKS_FILE_PATH = os.path.join(CONFIG_DIR, "tasks.json")
 CATEGORIES_FILE_PATH = os.path.join(CONFIG_DIR, "categories.json")
 
-TEST_SETTINGS_PATH = os.path.join(CONFIG_DIR, "settings_test.json")
-TEST_PURGED_FILE_PATH = os.path.join(CONFIG_DIR, "purged_test.json")
-TEST_TASKS_FILE_PATH = os.path.join(CONFIG_DIR, "tasks_test.json")
-TEST_CATEGORIES_FILE_PATH = os.path.join(CONFIG_DIR, "categories_test.json")
-
 default_settings = { 
     "date_format": "Y-M-D",
     "selected_color": "purple",
@@ -34,24 +29,12 @@ default_settings = {
     "last_update_check": 0
 }
 
-def get_tasks_path():
-    return TEST_TASKS_FILE_PATH if st.is_dev_mode else TASKS_FILE_PATH
-
-def get_categories_path():
-    return TEST_CATEGORIES_FILE_PATH if st.is_dev_mode else CATEGORIES_FILE_PATH
-
-def get_purged_path():
-    return TEST_PURGED_FILE_PATH if st.is_dev_mode else PURGED_FILE_PATH
-
-def get_settings_path():
-    return TEST_SETTINGS_PATH if st.is_dev_mode else SETTINGS_PATH
-
 def setup_default_settings():
     """
     setup default settings if no settings.json were found
     """
     
-    with open(get_settings_path(), 'w') as file:
+    with open(SETTINGS_PATH, 'w') as file:
         json.dump(default_settings, file, indent=4)
     return default_settings
 
@@ -61,7 +44,7 @@ def load_preferences():
     If the file doesn't exist or is invalid, create a new one with default settings.
     """
     try:
-        with open(get_settings_path(), 'r') as file:
+        with open(SETTINGS_PATH, 'r') as file:
             preferences = json.load(file)
             st.theme_color = preferences.get("selected_color", "blue")
             st.date_format = preferences.get("date_format", "Y-M-D")
@@ -82,7 +65,7 @@ def update_preferences():
         
         # Try to read current settings
         try:
-            with open(get_settings_path(), 'r') as file:
+            with open(SETTINGS_PATH, 'r') as file:
                 current_settings = json.load(file)
         except (FileNotFoundError, json.JSONDecodeError):
             # If settings file doesn't exist or is invalid, create default
@@ -97,7 +80,7 @@ def update_preferences():
                 
         # Save updated settings if changes were made
         if updated:
-            with open(get_settings_path(), 'w') as file:
+            with open(SETTINGS_PATH, 'w') as file:
                 json.dump(current_settings, file, indent=4)
                 
         return current_settings
@@ -108,7 +91,7 @@ def update_preferences():
 def set_bool_setting(setting_name: str, value: bool):
     """Set a boolean setting in the settings file."""
     try:
-        with open(get_settings_path(), 'r+') as settings_file:
+        with open(SETTINGS_PATH, 'r+') as settings_file:
             settings = json.load(settings_file)
             settings[setting_name] = value
             settings_file.seek(0)
@@ -121,7 +104,7 @@ def set_bool_setting(setting_name: str, value: bool):
 def set_str_setting(setting_name: str, value: str):
     """Set a string setting in the settings file."""
     try:
-        with open(get_settings_path(), 'r+') as settings_file:
+        with open(SETTINGS_PATH, 'r+') as settings_file:
             settings = json.load(settings_file)
             settings[setting_name] = value
             settings_file.seek(0)

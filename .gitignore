@@ -5,4 +5,7 @@ build
 *.egg-info
 *.prof
 .cursorrules
-.vscode
+.vscode/
+.todoism/
+.github/
+.pytest_cache/
