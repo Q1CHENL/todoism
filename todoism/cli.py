@@ -86,6 +86,10 @@ def run():
         todos = tsk.load_tasks()
         pr.print_tasks_cli(todos)
     else:
+        if hasattr(args, "dev") and args.dev:
+            if is_dev_environment():
+                import todoism.state as st
+                st.dev_mode = True
         if hasattr(args, "profile") and args.profile:
             if is_dev_environment():
                 import cProfile

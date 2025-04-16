@@ -31,16 +31,16 @@ default_settings = {
 }
 
 def get_tasks_file_path() -> str:
-    return TASKS_FILE_PATH if st.dev_mode else os.path.join(ROOT_DIR, "test/.todoism/tasks.json")
+    return os.path.join(ROOT_DIR, "test/.todoism/tasks.json") if st.dev_mode else TASKS_FILE_PATH
 
 def get_categories_file_path() -> str:
-    return CATEGORIES_FILE_PATH if st.dev_mode else os.path.join(ROOT_DIR, "test/.todoism/categories.json")
+    return os.path.join(ROOT_DIR, "test/.todoism/categories.json") if st.dev_mode else CATEGORIES_FILE_PATH
 
 def get_purged_file_path() -> str:
-    return PURGED_FILE_PATH if st.dev_mode else os.path.join(ROOT_DIR, "test/.todoism/purged.json")
+    return os.path.join(ROOT_DIR, "test/.todoism/purged.json") if st.dev_mode else PURGED_FILE_PATH
 
 def get_settings_file_path() -> str:
-    return SETTINGS_PATH if st.dev_mode else os.path.join(ROOT_DIR, "test/.todoism/settings.json")
+    return os.path.join(ROOT_DIR, "test/.todoism/settings.json") if st.dev_mode else SETTINGS_PATH
 
 def setup_default_settings():
     """
