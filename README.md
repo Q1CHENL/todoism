@@ -44,7 +44,7 @@ When you first start todoism, you'll be prompted to record key combinations for 
   - Jump to bottom task/category
 
 > [!NOTE]
-> Some terminals like **Ghostty** may have built-in key bindings that conflict with the above. You need to disable them before recording.
+> Some terminals like **Ghostty** and **kitty** may have built-in key bindings that conflict with the above. You need to disable them before recording.
 
 ## Develop
 
