@@ -6,8 +6,11 @@ import time
 import os
 import psutil
 import pyautogui
+from todoism.preference import default_settings
+
 
 # --- Configuration ---
+TEST_SETTINGS_PATH = os.path.join("test/.todoism", "settings_temp.json")
 TASK_TEXT = "Clean the kitchen"
 TODOISM_COMMAND = "python3 -c \"import shutil, os; target='test/.todoism'; print(f'Safely cleaning {target}'); [os.remove(os.path.join(target, f)) for f in os.listdir(target) if os.path.isfile(os.path.join(target, f))]\" && python3 test/generate.py && python3 -m todoism --dev; exec zsh"
 TODOISM_LAUNCH_WAIT = 1
@@ -15,58 +18,15 @@ KEY_DELAY = 0.2
 ACTION_DELAY = 0.3
 POST_TASK_VIEW_DELAY = 2.0
 
-# --- Special Key Handling ---
-def get_special_key_codes():
-    """Get the special key codes from the settings file"""
-    try:
-        # First try the dev mode location
-        settings_path = os.path.join("test", ".todoism", "settings.json")
-        if not os.path.exists(settings_path):
-            # If not found, try the user's home directory
-            settings_path = os.path.expanduser("~/.todoism/settings.json")
-        
-        if os.path.exists(settings_path):
-            with open(settings_path, 'r') as f:
-                settings = json.load(f)
-                return {
-                    'ctrl_left': settings.get("ctrl+left", 0),
-                    'ctrl_right': settings.get("ctrl+right", 0),
-                    'ctrl_shift_left': settings.get("ctrl+shift+left", 0),
-                    'ctrl_shift_right': settings.get("ctrl+shift+right", 0),
-                    'alt_left': settings.get("alt+left", 0),
-                    'alt_right': settings.get("alt+right", 0)
-                }
-    except (json.JSONDecodeError, FileNotFoundError) as e:
-        print(f"Warning: Could not load key codes from settings: {e}")
-    
-    # Return defaults if we couldn't load from settings
-    return {'ctrl_left': 0, 'ctrl_right': 0, 'ctrl_shift_left': 0, 
-            'ctrl_shift_right': 0, 'alt_left': 0, 'alt_right': 0}
+# Create a temporary settings_temp.json for integration tests
+def create_test_settings():
+    os.makedirs("test/.todoism", exist_ok=True)
+    with open(TEST_SETTINGS_PATH, 'w') as _f:
+        json.dump(default_settings, _f, indent=4)
 
-def emulate_special_key(key_name):
-    """Emulate a special key combination using the key code"""
-    key_codes = get_special_key_codes()
-    code = key_codes.get(key_name, 0)
-    
-    if code == 0:
-        print(f"⚠️ Warning: No key code found for {key_name}, using fallback")
-        # Fallback to standard PyAutoGUI key combinations
-        if key_name == 'ctrl_left':
-            pyautogui.hotkey('ctrl', 'left')
-        elif key_name == 'ctrl_right':
-            pyautogui.hotkey('ctrl', 'right')
-        elif key_name == 'ctrl_shift_left':
-            pyautogui.hotkey('ctrl', 'shift', 'left')
-        elif key_name == 'ctrl_shift_right':
-            pyautogui.hotkey('ctrl', 'shift', 'right')
-        elif key_name == 'alt_left':
-            pyautogui.hotkey('alt', 'left')
-        elif key_name == 'alt_right':
-            pyautogui.hotkey('alt', 'right')
-    else:
-        # If we have a key code, use it directly
-        print(f"🔑 Sending special key {key_name} with code {code}")
-        pyautogui.press(str(code))
+def delete_test_settings():
+    if os.path.exists(TEST_SETTINGS_PATH):
+        os.remove(TEST_SETTINGS_PATH)
 
 # --- Keycode Recording Logic ---
 def handle_keycode_recording():
@@ -181,13 +141,7 @@ def launch_todoism():
 def keycode_needs_recording():
     """Check if keycodes need to be recorded"""
     try:
-        settings_path = os.path.join("test", ".todoism", "settings.json")
-        if not os.path.exists(settings_path):
-            settings_path = os.path.expanduser("~/.todoism/settings.json")
-        
-        if not os.path.exists(settings_path):
-            return True
-            
+        settings_path = TEST_SETTINGS_PATH
         with open(settings_path, 'r') as f:
             settings = json.load(f)
             # Check if any of the key codes are 0
@@ -197,7 +151,8 @@ def keycode_needs_recording():
                    settings.get("ctrl+shift+right", 0) == 0 and
                    settings.get("alt+left", 0) == 0 and
                    settings.get("alt+right", 0) == 0)
-    except Exception as _:
+    except FileNotFoundError as _:
+        create_test_settings()
         return True
 
 def emulate_keys():
@@ -317,3 +272,4 @@ if __name__ == "__main__":
     launch_todoism()
     time.sleep(TODOISM_LAUNCH_WAIT)
     emulate_keys()
+    delete_test_settings()
