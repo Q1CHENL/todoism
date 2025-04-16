@@ -5,6 +5,7 @@ import todoism.state as st
 
 HOME_DIR = os.path.expanduser("~")
 CONFIG_DIR = os.path.join(HOME_DIR, ".todoism")
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.makedirs(CONFIG_DIR, exist_ok=True)
 
 SETTINGS_PATH = os.path.join(CONFIG_DIR, "settings.json")
@@ -30,16 +31,16 @@ default_settings = {
 }
 
 def get_tasks_file_path() -> str:
-    return TASKS_FILE_PATH if st.dev_mode else os.path.join("..", "test/tasks.json")
+    return TASKS_FILE_PATH if st.dev_mode else os.path.join(ROOT_DIR, "test/.todoism/tasks.json")
 
 def get_categories_file_path() -> str:
-    return CATEGORIES_FILE_PATH if st.dev_mode else os.path.join("..", "test/categories.json")
+    return CATEGORIES_FILE_PATH if st.dev_mode else os.path.join(ROOT_DIR, "test/.todoism/categories.json")
 
 def get_purged_file_path() -> str:
-    return PURGED_FILE_PATH if st.dev_mode else os.path.join("..", "test/purged.json")
+    return PURGED_FILE_PATH if st.dev_mode else os.path.join(ROOT_DIR, "test/.todoism/purged.json")
 
 def get_settings_file_path() -> str:
-    return SETTINGS_PATH if st.dev_mode else os.path.join("..", "test/settings.json")
+    return SETTINGS_PATH if st.dev_mode else os.path.join(ROOT_DIR, "test/.todoism/settings.json")
 
 def setup_default_settings():
     """
