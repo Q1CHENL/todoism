@@ -158,7 +158,7 @@ def keycode_needs_recording():
 def emulate_keys():
     print("[INFO] Actions will be printed here in this terminal window.")
     time.sleep(TODOISM_LAUNCH_WAIT)
-    print(f"⏳ Waiting for todoism to load...")
+    print("⏳ Waiting for todoism to load...")
     time.sleep(TODOISM_LAUNCH_WAIT)
     
     # First handle keycode recording if needed
@@ -166,7 +166,7 @@ def emulate_keys():
         handle_keycode_recording()
     
     # Resume waiting to ensure the main todoism interface is loaded
-    print(f"⏳ Waiting for main interface...")
+    print("⏳ Waiting for main interface...")
     time.sleep(TODOISM_LAUNCH_WAIT)
 
     print("\n🤖 Sending keys with pyautogui...")
