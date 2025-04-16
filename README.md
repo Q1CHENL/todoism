@@ -48,13 +48,22 @@ When you first start todoism, you'll be prompted to record key combinations for 
 
 ## Develop
 
-- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode. Add `--profile` to enable profiling. (`--dev` and `--profile` are not available in PyPI installation)
+- Run with docker in dev mode with test files:
+  - Build docker image: `docker build -t ubuntu-todoism .`
+  - Run in project root: `./test/todocker.sh`
 
-- Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in PyPI installation.
+- Or run `python -m todoism --dev` directly (not recommended). Add `--profile` to enable profiling. (`--dev` and `--profile` are not available in PyPI installation)
+
+- Normal Configuration and data files are located in `~/.todoism/`. Test ones are in `test/.todoism`
+
+- Automated integration test (Experimental):
+  - Install `wmctrl` with your package manager
+  - Run `python test/integration.py` in project root
+  - Read the instructions printed in the terminal carefully
 
 > [!CAUTION]
-> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions may not be fully supported. Please backup your data (located in `~/.todoism/`) when needed. **v1.21 and lower versions are perticularly deprecated!**
+> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions may not be fully supported. Please backup your data when needed. **v1.21 and lower versions are perticularly deprecated!**
 
 ## Contribute
 
-Issues and PRs are welcome! Todoism uses curses library as its main tech stack. Please refer to the library [docs](https://docs.python.org/3/library/curses.html#module-curses) and [how-to](https://docs.python.org/3/howto/curses.html) to get started.
+Issues and PRs are welcome! Todoism is built from scratch with curses library. Please refer to the curses [docs](https://docs.python.org/3/library/curses.html#module-curses) and [how-to](https://docs.python.org/3/howto/curses.html) to get started.
