@@ -5,6 +5,7 @@ import time
 import pyautogui
 import os
 import json
+import psutil
 
 # --- Configuration ---
 TASK_TEXT = "Clean the kitchen"
@@ -113,12 +114,49 @@ def handle_keycode_recording():
 
 # --- Supported Terminals ---
 TERMINALS = [
-    ("gnome-terminal", ["gnome-terminal", "--title=todoism-dev", "--", "zsh", "-c", TODOISM_COMMAND]),
-    ("kitty", ["kitty", "-T", "todoism-dev", "zsh", "-c", TODOISM_COMMAND]),
-    ("alacritty", ["alacritty", "-t", "todoism-dev", "-e", "zsh", "-c", TODOISM_COMMAND]),
-    ("xterm", ["xterm", "-T", "todoism-dev", "-e", "zsh", "-c", TODOISM_COMMAND]),
-    ("konsole", ["konsole", "--new-tab", "-p", "tabtitle=todoism-dev", "-e", "zsh", "-c", TODOISM_COMMAND]),
+    ("gnome-terminal", ["gnome-terminal", "--title=todoism-dev", "--", "zsh", "-c", "TODOISM_COMMAND"]),
+    ("kitty", ["kitty", "-T", "todoism-dev", "zsh", "-c", "TODOISM_COMMAND"]),
+    ("alacritty", ["alacritty", "-t", "todoism-dev", "-e", "zsh", "-c", "TODOISM_COMMAND"]),
+    ("xterm", ["xterm", "-T", "todoism-dev", "-e", "zsh", "-c", "TODOISM_COMMAND"]),
+    ("konsole", ["konsole", "--new-tab", "-p", "tabtitle=todoism-dev", "-e", "zsh", "-c", "TODOISM_COMMAND"]),
+    ("iterm2", ["iterm2", "-T", "todoism-dev", "zsh", "-c", "TODOISM_COMMAND"]),
 ]
+
+def detect_current_terminal():
+    """
+    Attempt to detect the current terminal emulator by traversing the parent process tree.
+    Returns the terminal name if detected, else None.
+    """
+    try:
+        p = psutil.Process(os.getppid())
+        while p:
+            name = p.name().lower()
+            for term, _ in TERMINALS:
+                if term in name:
+                    return term
+            p = p.parent()
+    except Exception as e:
+        print(f"[WARN] Could not detect terminal emulator: {e}")
+    return None
+
+def find_terminal():
+    # Try to detect the current terminal emulator first
+    detected = detect_current_terminal()
+    if detected:
+        for name, cmd in TERMINALS:
+            if name == detected and shutil.which(name):
+                print(f"[INFO] Detected current terminal emulator: {name}")
+                # Replace placeholder with actual command if present
+                actual_cmd = [c if c != "TODOISM_COMMAND" else TODOISM_COMMAND for c in cmd]
+                return (name, actual_cmd)
+        print(f"[WARN] Detected terminal '{detected}' not found in system. Falling back.")
+    # Fallback to first available terminal
+    for name, cmd in TERMINALS:
+        if shutil.which(name):
+            actual_cmd = [c if c != "TODOISM_COMMAND" else TODOISM_COMMAND for c in cmd]
+            return (name, actual_cmd)
+    print("\033[91m[ERROR] No supported terminal emulator found.\033[0m")
+    sys.exit(1)
 
 def focus_window(window_title_substring="todoism-dev"):
     print(f"🎯 Focusing window containing title: {window_title_substring}")
@@ -136,18 +174,10 @@ def focus_window(window_title_substring="todoism-dev"):
         print(f"❌ wmctrl failed: {e}")
         sys.exit(1)
 
-def find_terminal():
-    for name, cmd in TERMINALS:
-        if shutil.which(name):
-            print(f"✅ Found terminal: {name}")
-            return cmd
-    print("❌ No supported terminal emulator found.")
-    sys.exit(1)
-
 def launch_todoism():
     cmd = find_terminal()
-    print(f"🚀 Launching: {' '.join(cmd)}")
-    subprocess.Popen(cmd)
+    print(f"🚀 Launching: {' '.join(cmd[1])}")
+    subprocess.Popen(cmd[1])
 
 def keycode_needs_recording():
     """Check if keycodes need to be recorded"""
