@@ -15,7 +15,7 @@ add_mode  = 1
 edit_mode = 2
 
 def print_version():
-    print("todoism v1.21.8")
+    print("todoism v1.21.9")
 
 def print_q_to_close(stdscr, page):
     hint = f"Press 'q' to close {page}"

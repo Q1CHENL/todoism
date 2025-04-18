@@ -343,10 +343,12 @@ UPDATE_SUCCESS_MSG = '''
 │    ██║   ╚██████╔╝██████╔╝╚██████╔╝██║███████║██║ ╚═╝ ██║ │
 │    ╚═╝    ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝╚══════╝╚═╝     ╚═╝ │
 │                                                           │
-│          Sucessfully updated to todoism v1.21.8!          │
+│          Sucessfully updated to todoism v1.21.9!          │
 │                                                           │
 │          What's new:                                      │
-│          - Bold text support                              │
+│          - New commands :keycode                          │
+│            - :keycode record                              │
+│            - :keycode show                                │
 │          - Various Bug fixes and improvements             │
 │                                                           │
 │          Please press 'q' to exit and restart.            │
