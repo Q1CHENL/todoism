@@ -5,6 +5,7 @@ import todoism.state as st
 
 HOME_DIR = os.path.expanduser("~")
 CONFIG_DIR = os.path.join(HOME_DIR, ".todoism")
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.makedirs(CONFIG_DIR, exist_ok=True)
 
 SETTINGS_PATH = os.path.join(CONFIG_DIR, "settings.json")
@@ -12,12 +13,7 @@ PURGED_FILE_PATH = os.path.join(CONFIG_DIR, "purged.json")
 TASKS_FILE_PATH = os.path.join(CONFIG_DIR, "tasks.json")
 CATEGORIES_FILE_PATH = os.path.join(CONFIG_DIR, "categories.json")
 
-TEST_SETTINGS_PATH = os.path.join(CONFIG_DIR, "settings_test.json")
-TEST_PURGED_FILE_PATH = os.path.join(CONFIG_DIR, "purged_test.json")
-TEST_TASKS_FILE_PATH = os.path.join(CONFIG_DIR, "tasks_test.json")
-TEST_CATEGORIES_FILE_PATH = os.path.join(CONFIG_DIR, "categories_test.json")
-
-default_settings = { 
+default_settings = {
     "date_format": "Y-M-D",
     "selected_color": "purple",
     "tag": True,
@@ -31,27 +27,28 @@ default_settings = {
     "ctrl+shift+right": 0,
     "alt+left": 0,
     "alt+right": 0,
-    "last_update_check": 0
+    "last_update_check": 0,
+    "last_run_version": None
 }
 
-def get_tasks_path():
-    return TEST_TASKS_FILE_PATH if st.is_dev_mode else TASKS_FILE_PATH
+def get_tasks_file_path() -> str:
+    return os.path.join(ROOT_DIR, "test/.todoism/tasks.json") if st.dev_mode else TASKS_FILE_PATH
 
-def get_categories_path():
-    return TEST_CATEGORIES_FILE_PATH if st.is_dev_mode else CATEGORIES_FILE_PATH
+def get_categories_file_path() -> str:
+    return os.path.join(ROOT_DIR, "test/.todoism/categories.json") if st.dev_mode else CATEGORIES_FILE_PATH
 
-def get_purged_path():
-    return TEST_PURGED_FILE_PATH if st.is_dev_mode else PURGED_FILE_PATH
+def get_purged_file_path() -> str:
+    return os.path.join(ROOT_DIR, "test/.todoism/purged.json") if st.dev_mode else PURGED_FILE_PATH
 
-def get_settings_path():
-    return TEST_SETTINGS_PATH if st.is_dev_mode else SETTINGS_PATH
+def get_settings_file_path() -> str:
+    return os.path.join(ROOT_DIR, "test/.todoism/settings.json") if st.dev_mode else SETTINGS_PATH
 
 def setup_default_settings():
     """
     setup default settings if no settings.json were found
     """
     
-    with open(get_settings_path(), 'w') as file:
+    with open(get_settings_file_path(), 'w') as file:
         json.dump(default_settings, file, indent=4)
     return default_settings
 
@@ -61,15 +58,17 @@ def load_preferences():
     If the file doesn't exist or is invalid, create a new one with default settings.
     """
     try:
-        with open(get_settings_path(), 'r') as file:
+        with open(get_settings_file_path(), 'r') as file:
             preferences = json.load(file)
+            st.theme_color = preferences.get("selected_color", "blue")
+            st.date_format = preferences.get("date_format", "Y-M-D")
             st.sort_by_done = preferences.get("sort_by_done", False)
             st.sort_by_flagged = preferences.get("sort_by_flagged", False)
             st.tag = preferences.get("tag", True)
             st.strikethrough = preferences.get("strikethrough", True)
             st.bold_text = preferences.get("bold_text", False)
     except (FileNotFoundError, json.JSONDecodeError):
-        pass
+        setup_default_settings()
 
 def update_preferences():
     """
@@ -80,7 +79,7 @@ def update_preferences():
         
         # Try to read current settings
         try:
-            with open(get_settings_path(), 'r') as file:
+            with open(get_settings_file_path(), 'r') as file:
                 current_settings = json.load(file)
         except (FileNotFoundError, json.JSONDecodeError):
             # If settings file doesn't exist or is invalid, create default
@@ -95,56 +94,40 @@ def update_preferences():
                 
         # Save updated settings if changes were made
         if updated:
-            with open(get_settings_path(), 'w') as file:
+            with open(get_settings_file_path(), 'w') as file:
                 json.dump(current_settings, file, indent=4)
                 
         return current_settings
-    except Exception as e:
+    except Exception as _:
         # If anything goes wrong, return default settings
         return setup_default_settings()
-
-def get_date_format():
-    """Get date format setting"""
-    try:
-        with open(get_settings_path(), 'r') as settings_file:
-            settings = json.load(settings_file)
-            return settings.get('date_format', "Y-M-D")
-    except FileNotFoundError:
-        setup_default_settings()
-        return "Y-M-D"
-
-def set_date_format(format_string):
-    """Set date format setting"""
-    if format_string not in ["Y-M-D", "D-M-Y", "M-D-Y"]:
-        format_string = "Y-M-D"
-
-    try:
-        with open(get_settings_path(), 'r') as settings_file:
-            settings = json.load(settings_file)
-        
-        settings['date_format'] = format_string
-        
-        # Write the entire file at once to avoid corruption
-        with open(get_settings_path(), 'w') as settings_file:
-            json.dump(settings, settings_file, indent=4)
-            
-    except FileNotFoundError:
-        setup_default_settings()
         
 def set_bool_setting(setting_name: str, value: bool):
     """Set a boolean setting in the settings file."""
     try:
-        with open(get_settings_path(), 'r') as settings_file:
+        with open(get_settings_file_path(), 'r+') as settings_file:
             settings = json.load(settings_file)
-            
-        settings[setting_name] = value
-        
-        with open(get_settings_path(), 'w') as settings_file:
+            settings[setting_name] = value
+            settings_file.seek(0)
             json.dump(settings, settings_file, indent=4)
+            settings_file.truncate()
             
     except FileNotFoundError:
         setup_default_settings()
+        
+def set_str_setting(setting_name: str, value: str):
+    """Set a string setting in the settings file."""
+    try:
+        with open(get_settings_file_path(), 'r+') as settings_file:
+            settings = json.load(settings_file)
+            settings[setting_name] = value
+            settings_file.seek(0)
+            json.dump(settings, settings_file, indent=4)
+            settings_file.truncate()
             
+    except (FileNotFoundError, json.JSONDecodeError):
+        setup_default_settings()
+                    
 def apply_strikethrough(text: str) -> str:
     if not text:
         return ""

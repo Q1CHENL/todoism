@@ -4,8 +4,8 @@ A powerful yet easy-to-use todo TUI
 
 ## Screenshots
 
-![UI](./assets/screenshot-latest.png)
-![UI](./assets/screenshot-help-latest.png)
+![screenshot](https://raw.githubusercontent.com/Q1CHENL/todoism/v1.21.9-release/assets/screenshot-latest.png)
+![screenshot-help](https://raw.githubusercontent.com/Q1CHENL/todoism/v1.21.9-release/assets/screenshot-help-latest.png)
 
 ## Highlights
 
@@ -44,17 +44,37 @@ When you first start todoism, you'll be prompted to record key combinations for 
   - Jump to bottom task/category
 
 > [!NOTE]
-> Some terminals like **Ghostty** may have built-in key bindings that conflict with the above. You need to disable them before recording.
+> Some terminals like **Ghostty** and **kitty** may have built-in key bindings that conflict with the above. You need to disable them before recording.
 
 ## Develop
 
-- Run as module: `python -m todoism`, or `python -m todoism --dev` to run in dev mode. Add `--profile` to enable profiling. (`--dev` and `--profile` are not available in PyPI installation)
+- Run with docker in dev mode with test files (run in **project root**):
 
-- Use `:dev` and `:restore` to toggle between dev and normal mode, not specified in help message, not available in PyPI installation.
+  1. Build docker image: `docker build -t ubuntu-todoism .`
+  2. Run `./test/todocker.sh`
+
+  - Add `--profile` to enable profiling
+
+- Or run `python -m todoism --dev` directly (for using debugger)
+
+  - Add `--profile` to enable profiling
+
+> Flag `--dev` and `--profile` are not available in PyPI installation
+
+- Automated integration test (Experimental):
+
+  1. Install `wmctrl` with your package manager (for auto window focus)
+  2. Run `python test/integration.py` in **project root**
+
+  - Add `--profile` to enable profiling
+
+  3. Read the instructions printed in the terminal carefully
+
+- Normal Configuration and data files are located in `~/.todoism/`. Test ones are in `test/.todoism`
 
 > [!CAUTION]
-> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions may not be fully supported. Please backup your data (located in `~/.todoism/`) when needed. **v1.21 and lower versions are perticularly deprecated!**
+> Todoism is currently under active development and backwards compatibility is not guaranteed as I refine features and data structures. Automatic data migration (tasks, categories, settings) between versions may not be fully supported. Please backup your data when needed. **v1.21 and lower versions are perticularly deprecated!**
 
 ## Contribute
 
-Issues and PRs are welcome! Todoism uses curses library as its main tech stack. Please refer to the library [docs](https://docs.python.org/3/library/curses.html#module-curses) and [how-to](https://docs.python.org/3/howto/curses.html) to get started.
+Issues and PRs are welcome! Todoism is built from scratch with curses library. Please refer to the curses [docs](https://docs.python.org/3/library/curses.html#module-curses) and [how-to](https://docs.python.org/3/howto/curses.html) to get started.

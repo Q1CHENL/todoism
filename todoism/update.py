@@ -1,7 +1,19 @@
-import os
 import json
 import time
 import todoism.preference as pref
+
+def get_current_version() -> str:
+    """
+    Get the current version of todoism.
+    Returns: current_version (str): Current version of todoism
+    """
+    import sys
+    if sys.version_info >= (3, 8):
+        import importlib.metadata
+        return importlib.metadata.version("todoism")
+    else:
+        import pkg_resources
+        return pkg_resources.get_distribution("todoism").version
 
 def check_for_updates() -> bool:
     """
@@ -12,7 +24,7 @@ def check_for_updates() -> bool:
     import urllib.request
     import re
     
-    settings_path = pref.get_settings_path()
+    settings_path = pref.get_settings_file_path()
     
     # Only check once per day - if we've checked recently, skip network request
     current_time = time.time()
@@ -64,6 +76,9 @@ def check_for_updates() -> bool:
             # Use packaging's version parser for accurate comparison
             try:
                 from packaging import version
+                parsed_version = version.parse(current_version)
+                if parsed_version.is_prerelease:
+                    return False
                 return version.parse(latest_version) > version.parse(current_version)
             except ImportError:
                 # Fallback to simpler parsing if packaging module not available
@@ -111,7 +126,7 @@ def update_todoism() -> bool:
                 
         # Reset the last update check time to force a fresh check on next run
         try:
-            settings_path = pref.get_settings_path()
+            settings_path = pref.get_settings_file_path()
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
             

@@ -157,8 +157,8 @@ def edit(stdscr, entry, text_key, mode, initial_scroll=0):
             # Clear the debug area
             sf.safe_addstr(stdscr, 0, 0, ' ' * min(len(debug_info) + 5, st.latest_max_x))
             # Display debug info
-            import todoism.color as clr
-            attr = curses.color_pair(clr.get_color_pair_num_by_str_text("red"))
+            import todoism.theme as thm
+            attr = curses.color_pair(thm.get_color_pair_num_by_str_text("red"))
             sf.safe_addstr(stdscr, 0, 0, debug_info, attr)
             # Restore cursor position
             sf.safe_move(stdscr, current_y, current_x)
@@ -537,24 +537,24 @@ def handle_edit(stdscr, task_list):
     current_task_idx = st.current_task_id - 1
     description = edit(
         stdscr, 
-        st.filtered_tasks[current_task_idx],
+        st.current_cat_tasks[current_task_idx],
         "description",
         pr.edit_mode
     )
     if description == "":
-        task_uuid = st.filtered_tasks[current_task_idx]["uuid"]
+        task_uuid = st.current_cat_tasks[current_task_idx]["uuid"]
         task_list = tsk.delete_task_by_uuid(task_list, task_uuid)
         if st.searching:
-            st.filtered_tasks = [task for task in st.filtered_tasks if task["uuid"] != task_uuid]
+            st.current_cat_tasks = [task for task in st.current_cat_tasks if task["uuid"] != task_uuid]
         else:
-            st.filtered_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
-        st.task_cnt = len(st.filtered_tasks)
+            st.current_cat_tasks = tsk.get_tasks_by_category_id(task_list, st.current_category_id)
+        st.task_cnt = len(st.current_cat_tasks)
         nv.post_deletion_update(st.task_cnt + 1)
     else:
         import todoism.due as due
         due_date, description = due.parse_due_date(description)
-        st.filtered_tasks[current_task_idx]["description"] = description
-        st.filtered_tasks[current_task_idx]["due"] = due_date
+        st.current_cat_tasks[current_task_idx]["description"] = description
+        st.current_cat_tasks[current_task_idx]["due"] = due_date
         
     tsk.save_tasks(task_list)
     return task_list

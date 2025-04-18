@@ -13,25 +13,34 @@ MAX_TASK_COUNT = 1024
 def done_count(task_list):
     count = 0
     for t in task_list:
-        if t["status"] is True:
+        if t["done"] is True:
             count = count + 1
     return count        
 
 def load_tasks():
     """Load tasks from file"""
     try:
-        with open(pref.get_tasks_path(), 'r') as file:
+        with open(pref.get_tasks_file_path(), 'r') as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
 def load_purged_tasks():
     try:
-        with open(pref.get_purged_path(), 'r') as f:
+        with open(pref.get_purged_file_path(), 'r') as f:
             purged_tasks = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         purged_tasks = []
     return purged_tasks
+
+def repair_tasks():
+    task_list = load_tasks()
+    for task in task_list:
+        if "done" not in task:
+            if "status" in task:
+                task["done"] = task["status"]
+                del task["status"]
+    save_tasks(task_list)
 
 def create_new_task(task_id, task_description="", flagged=False, category_id=0, due=""):
     """Create a new task with UUID and optional category assignment"""
@@ -41,7 +50,7 @@ def create_new_task(task_id, task_description="", flagged=False, category_id=0, 
         "description": task_description,
         "due": due,
         "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "status": False,
+        "done": False,
         "flagged": flagged,
         "category_id": category_id
     }
@@ -51,7 +60,7 @@ def save_tasks(task_list, custom_path=None):
     import fcntl
     import os
     
-    file_path = custom_path if custom_path else pref.get_tasks_path()
+    file_path = custom_path if custom_path else pref.get_tasks_file_path()
     lock_path = file_path + '.lock'
     
     try:
@@ -120,8 +129,8 @@ def update_existing_tasks():
             task["due"] = ""
             modified = True
         
-        if "created" not in task:
-            task["created"] = ""
+        if "creation_date" not in task:
+            task["creation_date"] = ""
             modified = True
     
     if modified:
@@ -142,7 +151,7 @@ def delete_task_by_uuid(task_list, task_uuid):
     return task_list
 
 def flip_by_key(task_index, key: str, task_list):
-    st.filtered_tasks[task_index][key] = not st.filtered_tasks[task_index][key]
+    st.current_cat_tasks[task_index][key] = not st.current_cat_tasks[task_index][key]
     save_tasks(task_list)
     
 def sort(task_list, key) -> list:

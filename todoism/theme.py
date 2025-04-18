@@ -1,6 +1,7 @@
 import json
 import curses
-import random
+
+import todoism.state as st
 import todoism.preference as pref
 
 SELECTION_COLOR_PAIR_NUM = 100
@@ -26,26 +27,13 @@ def setup_color_pairs():
     curses.init_pair(BACKGROUND_COLOR_PAIR_NUM, get_color_code_by_str("white"), get_color_code_by_str("black"))
     curses.init_pair(SELECTION_COLOR_PAIR_NUM, get_color_code_by_str("black"), get_theme_color_curses())
 
-def set_theme_color(color: str):
-    if color not in color_set and color != "random":
-        return
-    try:
-        with open(pref.get_settings_path(), "r+") as settings_file:
-            settings = json.load(settings_file)
-            settings["selected_color"] = color
-            settings_file.seek(0)  # move pointer back to beginning
-            json.dump(settings, settings_file, indent=4)
-            settings_file.truncate()
-    except FileNotFoundError:
-        pref.setup_default_settings()
-
 def get_theme_color_curses() -> int:
     try:
-        with open(pref.get_settings_path(), 'r') as settings_file:
+        with open(pref.get_settings_file_path(), 'r') as settings_file:
             settings = json.load(settings_file)
             color = settings["selected_color"]
-            if color == "random":
-                return random.choice(list(color_set.values()))
+            if color not in color_set:
+                color = "blue"
             return color_set[color][1]
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
         color_str = pref.setup_default_settings()["selected_color"]
@@ -53,20 +41,8 @@ def get_theme_color_curses() -> int:
     except Exception:
         return curses.COLOR_BLUE
 
-def get_theme_color_str() -> str:
-    try:
-        with open(pref.get_settings_path(), 'r') as settings_file:
-            settings = json.load(settings_file)
-            color = settings["selected_color"]
-            if color == "random":
-                return random.choice(list(color_set.keys()))
-            return color
-    except FileNotFoundError:
-        pref.setup_default_settings()
-        return curses.COLOR_BLUE
-
 def get_theme_color_pair_for_text() -> int:
-    return get_color_pair_by_str(get_theme_color_str())
+    return get_color_pair_by_str(st.theme_color)
 
 def get_theme_color_pair_for_selection() -> int:
     curses.init_pair(SELECTION_COLOR_PAIR_NUM, get_color_code_by_str("black"), get_theme_color_curses())

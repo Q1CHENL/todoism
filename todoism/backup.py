@@ -10,12 +10,12 @@ def backup_data():
     """Backup normal tasks and categories"""
     try:
         success = True
-        if os.path.exists(pref.get_tasks_path()):
-            shutil.copy2(pref.get_tasks_path(), BACKUP_TASKS_PATH)
+        if os.path.exists(pref.get_tasks_file_path()):
+            shutil.copy2(pref.get_tasks_file_path(), BACKUP_TASKS_PATH)
         else:
             success = False
-        if os.path.exists(pref.get_categories_path()):
-            shutil.copy2(pref.get_categories_path(), BACKUP_CATEGORIES_PATH)
+        if os.path.exists(pref.get_categories_file_path()):
+            shutil.copy2(pref.get_categories_file_path(), BACKUP_CATEGORIES_PATH)
         else:
             success = False            
         return success
