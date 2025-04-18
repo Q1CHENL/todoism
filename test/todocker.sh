@@ -10,5 +10,4 @@ docker run --rm -it \
   -w /workspace \
   -v "$PWD":/workspace:Z \
   ubuntu-todoism \
-  python3 -m todoism --dev
-  
+  python3 -m todoism --dev "$@"
