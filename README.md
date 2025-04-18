@@ -4,8 +4,8 @@ A powerful yet easy-to-use todo TUI
 
 ## Screenshots
 
-![UI](./assets/screenshot-latest.png)
-![UI](./assets/screenshot-help-latest.png)
+![screenshot](https://raw.githubusercontent.com/Q1CHENL/todoism/v1.21.9-release/assets/screenshot-latest.png)
+![screenshot-help](https://raw.githubusercontent.com/Q1CHENL/todoism/v1.21.9-release/assets/screenshot-help-latest.png)
 
 ## Highlights
 
