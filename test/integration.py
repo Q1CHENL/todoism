@@ -10,23 +10,38 @@ from todoism.preference import default_settings
 
 
 # --- Configuration ---
-TEST_SETTINGS_PATH = os.path.join("test/.todoism", "settings_temp.json")
+TEST_SETTINGS_PATH = os.path.join("test/.todoism", "settings.json")
+BACKUP_SETTINGS_PATH = os.path.join("test/.todoism", "settings.json.backup")
 TASK_TEXT = "Clean the kitchen"
-TODOISM_COMMAND = "python3 -c \"import shutil, os; target='test/.todoism'; print(f'Safely cleaning {target}'); [os.remove(os.path.join(target, f)) for f in os.listdir(target) if os.path.isfile(os.path.join(target, f))]\" && python3 test/generate.py && python3 -m todoism --dev; exec zsh"
+TODOISM_COMMAND = "python3 -c \"import shutil, os; target='test/.todoism'; print(f'Safely cleaning {target}'); [os.remove(os.path.join(target, f)) for f in os.listdir(target) if os.path.isfile(os.path.join(target, f)) and not f.endswith('.backup')]\" && python3 test/generate.py && python3 -m todoism --dev; exec zsh"
 TODOISM_LAUNCH_WAIT = 1
 KEY_DELAY = 0.2
 ACTION_DELAY = 0.3
 POST_TASK_VIEW_DELAY = 2.0
 
-# Create a temporary settings_temp.json for integration tests
-def create_test_settings():
-    os.makedirs("test/.todoism", exist_ok=True)
-    with open(TEST_SETTINGS_PATH, 'w') as _f:
-        json.dump(default_settings, _f, indent=4)
-
-def delete_test_settings():
+# Backup and restore functions
+def backup_settings():
+    """Backup original settings.json if it exists"""
+    os.makedirs(os.path.dirname(TEST_SETTINGS_PATH), exist_ok=True)
     if os.path.exists(TEST_SETTINGS_PATH):
-        os.remove(TEST_SETTINGS_PATH)
+        shutil.copy2(TEST_SETTINGS_PATH, BACKUP_SETTINGS_PATH)
+        return True
+    return False
+
+def setup_test_settings():
+    """Create test settings.json with default values"""
+    os.makedirs(os.path.dirname(TEST_SETTINGS_PATH), exist_ok=True)
+    with open(TEST_SETTINGS_PATH, 'w') as f:
+        json.dump(default_settings, f, indent=4)
+
+def restore_settings():
+    """Restore original settings.json if backup exists"""
+    print("🔄 Restoring original settings...")
+    if os.path.exists(BACKUP_SETTINGS_PATH):
+        shutil.copy2(BACKUP_SETTINGS_PATH, TEST_SETTINGS_PATH)
+        os.remove(BACKUP_SETTINGS_PATH)
+    else:
+        print("ℹ️ No backup found, keeping test settings")
 
 # --- Keycode Recording Logic ---
 def handle_keycode_recording():
@@ -152,7 +167,7 @@ def keycode_needs_recording():
                    settings.get("alt+left", 0) == 0 and
                    settings.get("alt+right", 0) == 0)
     except FileNotFoundError as _:
-        create_test_settings()
+        setup_test_settings()
         return True
 
 def emulate_keys():
@@ -259,6 +274,10 @@ if __name__ == "__main__":
     print("[INFO] Make sure Caps Lock is OFF")
     print("[INFO] Press ENTER to confirm and start the test...")
     
+    # Backup original settings and set up test settings
+    backup_settings()
+    setup_test_settings()
+    
     while True:
         try:
             user_input = input()
@@ -268,8 +287,15 @@ if __name__ == "__main__":
                 print("\033[38;5;202m[INFO] Please press only ENTER to start.\033[0m")
         except KeyboardInterrupt:
             print("\nAborted by user.")
+            restore_settings()  # Restore settings even on abort
             exit(1)
-    launch_todoism()
-    time.sleep(TODOISM_LAUNCH_WAIT)
-    emulate_keys()
-    delete_test_settings()
+    
+    try:
+        launch_todoism()
+        time.sleep(TODOISM_LAUNCH_WAIT)
+        emulate_keys()
+    except Exception as e:
+        print(f"\n❌ Test failed: {e}")
+    finally:
+        # Always restore settings, even if test fails
+        restore_settings()
