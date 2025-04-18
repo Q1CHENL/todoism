@@ -334,7 +334,7 @@ NEW_VERSION_MSG = '''
 └───────────────────────────────────────────────────┘
 '''
 
-UPDATE_SUCCESS_MSG = '''
+WELCOME_MSG = '''
 ┌───────────────────────────────────────────────────────────┐
 │ ████████╗ ██████╗ ██████╗  ██████╗ ██╗███████╗███╗   ███╗ │
 │ ╚══██╔══╝██╔═══██╗██╔══██╗██╔═══██╗██║██╔════╝████╗ ████║ │
@@ -343,28 +343,34 @@ UPDATE_SUCCESS_MSG = '''
 │    ██║   ╚██████╔╝██████╔╝╚██████╔╝██║███████║██║ ╚═╝ ██║ │
 │    ╚═╝    ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝╚══════╝╚═╝     ╚═╝ │
 │                                                           │
-│          Sucessfully updated to todoism v1.21.9!          │
-│                                                           │
-│          What's new:                                      │
+│          What's new in v1.21.9:                           │
 │          - New commands :keycode                          │
 │            - :keycode record                              │
 │            - :keycode show                                │
 │          - Various Bug fixes and improvements             │
 │                                                           │
-│          Please press 'q' to exit and restart.            │
+│          Press Enter to continue.                         │
 └───────────────────────────────────────────────────────────┘
 '''
 
+UPDATE_SUCCESS_MSG = '''
+┌────────────────────────────────────────┐
+│ todoism updated successfully!          │
+│                                        │
+│ Please press 'q' to exit and restart.  │
+└────────────────────────────────────────┘
+'''
+
 UPDATE_FAILURE_MSG = '''
-┌─────────────────────────────────────────────────────┐
-│   Failed to update todoism. Some error occurred.    │
-│                                                     │
-│   Check your internet connection and try again.     │
-│   Or run 'pip install todoism --upgrade'            │
-│   to update manually.                               │
-│                                                     │
-│   Will proceed with current version...              │
-└─────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────┐
+│ Failed to update todoism. Some error occurred. │
+│                                                │
+│ Check your internet connection and try again.  │
+│ Or run 'pip install todoism --upgrade'         │
+│ to update manually.                            │
+│                                                │
+│ Will proceed with current version...           │
+└────────────────────────────────────────────────┘
 '''
 
 def keycode_summary():
