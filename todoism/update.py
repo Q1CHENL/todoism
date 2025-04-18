@@ -63,6 +63,9 @@ def check_for_updates() -> bool:
             # Use packaging's version parser for accurate comparison
             try:
                 from packaging import version
+                parsed_version = version.parse(current_version)
+                if parsed_version.is_prerelease:
+                    return False
                 return version.parse(latest_version) > version.parse(current_version)
             except ImportError:
                 # Fallback to simpler parsing if packaging module not available
