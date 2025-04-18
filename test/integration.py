@@ -6,16 +6,29 @@ import time
 import os
 import psutil
 import pyautogui
+import argparse
 from todoism.preference import default_settings
 
+
+# Parse command line arguments
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run integration tests for todoism")
+    parser.add_argument("--profile", action="store_true", help="Enable profiling")
+    return parser.parse_args()
+
+# Get command line args
+args = parse_args()
+
+# Construct additional arguments string
+additional_args = " --profile" if args.profile else ""
 
 # --- Configuration ---
 TEST_SETTINGS_PATH = os.path.join("test/.todoism", "settings.json")
 BACKUP_SETTINGS_PATH = os.path.join("test/.todoism", "settings.json.backup")
 SYNC_FILE = os.path.join("test/.todoism", "sync_ready.tmp")
 TASK_TEXT = "Clean the kitchen"
-TODOISM_COMMAND = """
-python3 -c \"import shutil, os; target='test/.todoism'; print(f'Safely cleaning {target}'); [os.remove(os.path.join(target, f)) for f in os.listdir(target) if os.path.isfile(os.path.join(target, f)) and not f.endswith('.backup')];
+TODOISM_COMMAND = f"""
+python3 -c \"import shutil, os; target='test/.todoism'; print(f'Safely cleaning {{target}}'); [os.remove(os.path.join(target, f)) for f in os.listdir(target) if os.path.isfile(os.path.join(target, f)) and not f.endswith('.backup')];
 print('\\033[38;5;202m[INFO] This test window will be focused. Please do not interact with other windows, as real key inputs will be emulated!\\033[0m');
 print('[INFO] Logs will be printed in the in old terminal window.');
 print('[INFO] Make sure Caps Lock is OFF');
@@ -24,7 +37,7 @@ input();
 # Create sync file to signal the main process
 with open('test/.todoism/sync_ready.tmp', 'w') as f:
     f.write('ready');\" && 
-python3 test/generate.py && python3 -m todoism --dev; exec zsh
+python3 test/generate.py && python3 -m todoism --dev{additional_args}; exec zsh
 """
 TODOISM_LAUNCH_WAIT = 1
 KEY_DELAY = 0.2

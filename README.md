@@ -65,6 +65,9 @@ When you first start todoism, you'll be prompted to record key combinations for 
 
   1. Install `wmctrl` with your package manager (for auto window focus)
   2. Run `python test/integration.py` in **project root**
+
+  - Add `--profile` to enable profiling
+
   3. Read the instructions printed in the terminal carefully
 
 - Normal Configuration and data files are located in `~/.todoism/`. Test ones are in `test/.todoism`
