@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "todoism"
-version = "1.21.9rc1"
+version = "1.21.9.post3"
 description = "A powerful yet easy-to-use todo TUI"
 authors = [
     { name = "Qichen Liu", email = "liuqichne@email.com" }
