@@ -9,6 +9,6 @@ docker run --rm -it \
   -e TERM=xterm-256color \
   -w /workspace \
   -v "$PWD":/workspace:Z \
-  -v "$PWD/test/.todoism":/home/user/.todoism:Z \
   ubuntu-todoism \
-  python3 -m todoism
+  python3 -m todoism --dev
+  
