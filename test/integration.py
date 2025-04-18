@@ -12,8 +12,20 @@ from todoism.preference import default_settings
 # --- Configuration ---
 TEST_SETTINGS_PATH = os.path.join("test/.todoism", "settings.json")
 BACKUP_SETTINGS_PATH = os.path.join("test/.todoism", "settings.json.backup")
+SYNC_FILE = os.path.join("test/.todoism", "sync_ready.tmp")
 TASK_TEXT = "Clean the kitchen"
-TODOISM_COMMAND = "python3 -c \"import shutil, os; target='test/.todoism'; print(f'Safely cleaning {target}'); [os.remove(os.path.join(target, f)) for f in os.listdir(target) if os.path.isfile(os.path.join(target, f)) and not f.endswith('.backup')]\" && python3 test/generate.py && python3 -m todoism --dev; exec zsh"
+TODOISM_COMMAND = """
+python3 -c \"import shutil, os; target='test/.todoism'; print(f'Safely cleaning {target}'); [os.remove(os.path.join(target, f)) for f in os.listdir(target) if os.path.isfile(os.path.join(target, f)) and not f.endswith('.backup')];
+print('\\033[38;5;202m[INFO] This test window will be focused. Please do not interact with other windows, as real key inputs will be emulated!\\033[0m');
+print('[INFO] Logs will be printed in the in old terminal window.');
+print('[INFO] Make sure Caps Lock is OFF');
+print('[INFO] Press ENTER to confirm and start the test...');
+input();
+# Create sync file to signal the main process
+with open('test/.todoism/sync_ready.tmp', 'w') as f:
+    f.write('ready');\" && 
+python3 test/generate.py && python3 -m todoism --dev; exec zsh
+"""
 TODOISM_LAUNCH_WAIT = 1
 KEY_DELAY = 0.2
 ACTION_DELAY = 0.3
@@ -111,18 +123,36 @@ def find_terminal():
     print("\033[91m[ERROR] No supported terminal emulator found.\033[0m")
     sys.exit(1)
 
-def focus_window(window_title_substring="todoism-dev"):
+def _get_window_id(window_title_substring="todoism-dev"):
+    """
+    Helper function to get window ID with the given title substring
+    Returns window ID if found, None otherwise
+    """
     try:
         output = subprocess.check_output(["wmctrl", "-l"]).decode()
         for line in output.splitlines():
             if window_title_substring.lower() in line.lower():
-                win_id = line.split()[0]
-                subprocess.run(["wmctrl", "-ia", win_id])
-                return
-        print("\033[91m[ERROR] Target window not found. Aborting test.\033[0m")
-        sys.exit(1)
+                return line.split()[0]
+        return None
     except Exception as e:
         print(f"❌ wmctrl failed: {e}")
+        return None
+
+def window_exists(window_title_substring="todoism-dev"):
+    """Check if a window with the given title substring exists"""
+    return _get_window_id(window_title_substring) is not None
+
+def focus_window(window_title_substring="todoism-dev"):
+    """Focus the window with the given title substring"""
+    win_id = _get_window_id(window_title_substring)
+    if win_id is None:
+        print("\033[91m[ERROR] Target window not found. Aborting test.\033[0m")
+        sys.exit(1)
+        
+    try:
+        subprocess.run(["wmctrl", "-ia", win_id])
+    except Exception as e:
+        print(f"❌ wmctrl focus failed: {e}")
         sys.exit(1)
 
 def press_key(key, desc=None):
@@ -270,32 +300,41 @@ def emulate_keys():
     print("\n✅ All done!")
 
 if __name__ == "__main__":
-    print("\033[38;5;202m[INFO] The test window will be focused. Please do not interact with other windows, as real key inputs will be emulated!\033[0m")
-    print("[INFO] Make sure Caps Lock is OFF")
-    print("[INFO] Press ENTER to confirm and start the test...")
-    
     # Backup original settings and set up test settings
     backup_settings()
     setup_test_settings()
     
-    while True:
-        try:
-            user_input = input()
-            if user_input == '':
-                break
-            else:
-                print("\033[38;5;202m[INFO] Please press only ENTER to start.\033[0m")
-        except KeyboardInterrupt:
-            print("\nAborted by user.")
-            restore_settings()  # Restore settings even on abort
-            exit(1)
+    # Ensure sync file doesn't exist from previous runs
+    if os.path.exists(SYNC_FILE):
+        os.remove(SYNC_FILE)
     
     try:
         launch_todoism()
+        
+        # First check if window was created
+        time.sleep(1)  # Give window some time to appear
+        if not window_exists():
+            print("\033[91m[ERROR] Target window not found. Aborting test.\033[0m")
+            sys.exit(1)
+            
+        print("⏳ Waiting for user to press ENTER in the test window...")
+        
+        # Wait for sync file to appear (indicating Enter was pressed in the new window)
+        while not os.path.exists(SYNC_FILE):
+            # Check if window still exists
+            if not window_exists():
+                print("\033[91m[INFO] Test window was closed. Aborting test.\033[0m")
+                sys.exit(0)
+            time.sleep(0.5)
+        
+        print("✅ User confirmed in test window, starting emulation...")
         time.sleep(TODOISM_LAUNCH_WAIT)
         emulate_keys()
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
     finally:
+        # Clean up sync file
+        if os.path.exists(SYNC_FILE):
+            os.remove(SYNC_FILE)
         # Always restore settings, even if test fails
         restore_settings()
