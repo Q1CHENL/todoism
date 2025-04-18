@@ -27,7 +27,8 @@ default_settings = {
     "ctrl+shift+right": 0,
     "alt+left": 0,
     "alt+right": 0,
-    "last_update_check": 0
+    "last_update_check": 0,
+    "last_run_version": None
 }
 
 def get_tasks_file_path() -> str:

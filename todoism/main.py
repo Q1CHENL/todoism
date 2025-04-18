@@ -1,4 +1,5 @@
 import time
+import json
 import curses
 
 import todoism.edit as ed
@@ -16,6 +17,29 @@ import todoism.search as srch
 import todoism.safe as sf
 import todoism.due as due 
 import todoism.update as up
+
+def first_run():
+    """Show welcome message if this is the first run of this version"""
+    # Get current version 
+    current_version = up.get_current_version()
+    settings_path = pref.get_settings_file_path()
+    try:
+        with open(settings_path, 'r') as f:
+            settings = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        settings = pref.default_settings.copy()
+    
+    last_version = settings.get('last_run_version', None)
+    is_first_run = last_version is None or current_version > last_version
+    
+    settings['last_run_version'] = current_version
+    try:
+        with open(settings_path, 'w') as f:
+            json.dump(settings, f, indent=4)
+    except Exception:
+        pass
+    
+    return is_first_run
 
 def _quit_search(stdscr, task_list):
     st.searching = False
@@ -166,6 +190,14 @@ def main(stdscr):
                     time.sleep(2)
                     break
         stdscr.timeout(500)
+    
+    if first_run():
+        pr.print_outer_frame(stdscr)
+        pr.print_msg(stdscr, msg.WELCOME_MSG)
+        while True:
+            key = stdscr.getch()
+            if key == kc.ENTER or key == curses.KEY_ENTER:
+                break
     
     while True:
         if not st.searching and old_cat_id != st.current_category_id:

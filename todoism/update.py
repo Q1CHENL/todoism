@@ -2,6 +2,19 @@ import json
 import time
 import todoism.preference as pref
 
+def get_current_version() -> str:
+    """
+    Get the current version of todoism.
+    Returns: current_version (str): Current version of todoism
+    """
+    import sys
+    if sys.version_info >= (3, 8):
+        import importlib.metadata
+        return importlib.metadata.version("todoism")
+    else:
+        import pkg_resources
+        return pkg_resources.get_distribution("todoism").version
+
 def check_for_updates() -> bool:
     """
     Check if a newer version of todoism is available on PyPI.
