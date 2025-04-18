@@ -3,6 +3,8 @@ import json
 import uuid
 from pathlib import Path
 
+import todoism.preference as pref
+
 test_tasks = [
     {
         "id": 1,
@@ -764,24 +766,23 @@ test_categories = [
     }
 ]
 
-test_settings = [
-    {
-        "date_format": "Y-M-D",
-        "selected_color": "purple",
-        "tag": True,
-        "strikethrough": True,
-        "sort_by_flagged": False,
-        "sort_by_done": False,
-        "bold_text": False,
-        "ctrl+left": 0,
-        "ctrl+right": 0,
-        "ctrl+shift+left": 0,
-        "ctrl+shift+right": 0,
-        "alt+left": 0,
-        "alt+right": 0,
-        "last_update_check": 0
-    }
-]
+test_settings ={
+    "date_format": "Y-M-D",
+    "selected_color": "purple",
+    "tag": True,
+    "strikethrough": True,
+    "sort_by_flagged": False,
+    "sort_by_done": False,
+    "bold_text": False,
+    "ctrl+left": 0,
+    "ctrl+right": 0,
+    "ctrl+shift+left": 0,
+    "ctrl+shift+right": 0,
+    "alt+left": 0,
+    "alt+right": 0,
+    "last_update_check": 0
+}
+
 
 # Ensure output directory exists
 out_dir = Path("test/.todoism")
@@ -791,12 +792,13 @@ out_dir.mkdir(exist_ok=True)
 files = {
     "tasks.json": test_tasks,
     "categories.json": test_categories,
-    "settings.json": test_settings,
+    "settings.json": pref.default_settings,
 }
 
 # Write files only if they don't exist
 for filename, data in files.items():
     path = out_dir / filename
     if not path.exists():
-        path.write_text(json.dumps(data, indent=4))
+        with open(path, 'w') as file:
+            json.dump(data, file, indent=4)
         os.chmod(path, 0o644)  # rw-r--r--
