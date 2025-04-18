@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "todoism"
-version = "1.21.8.post3"
+version = "1.21.9rc1"
 description = "A powerful yet easy-to-use todo TUI"
 authors = [
     { name = "Qichen Liu", email = "liuqichne@email.com" }
 ]
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 dependencies = []
 # Corrected classifiers format - must be an array of strings
 classifiers = [
