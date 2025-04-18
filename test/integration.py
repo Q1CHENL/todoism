@@ -126,13 +126,13 @@ def press_str(str, desc=None):
     time.sleep(KEY_DELAY)
 
 def press_keys(keys, desc=None):
+    """Press multiple keys simultaneously (as a hotkey/keyboard shortcut)"""
     if desc:
         print(desc)
     focus_window()
-    for key in keys:
-        pyautogui.press(key)
+    pyautogui.hotkey(*keys)
     time.sleep(KEY_DELAY)
-
+    
 def launch_todoism():
     cmd = find_terminal()
     print(f"🚀 Launching: {' '.join(cmd[1])}")
