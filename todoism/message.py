@@ -374,7 +374,7 @@ UPDATE_FAILURE_MSG = '''
 '''
 
 def keycode_summary():
-    """Constructs a message for the given keycode"""
+    """Constructs a message to show recorded keycodes"""
     import todoism.keycode as kc
     ctrl_left = "CTRL + LEFT: " + str(kc.CTRL_LEFT)
     ctrl_right = "CTRL + RIGHT: " + str(kc.CTRL_RIGHT)
