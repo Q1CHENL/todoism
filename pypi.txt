@@ -1,3 +1,0 @@
-python -m build
-pip install -e .
-twine upload dist/*
